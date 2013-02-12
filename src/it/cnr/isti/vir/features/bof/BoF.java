@@ -1,6 +1,6 @@
 package it.cnr.isti.vir.features.bof;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
@@ -89,7 +89,7 @@ public class BoF implements IFeature {
 				tRes.add(bag[i]);
 			}
 		}
-		bag = tRes.toNativeArray();
+		bag = tRes.toArray();
 	}
 	
 	public void removeByOccThreshold(int threshold) {
@@ -111,7 +111,7 @@ public class BoF implements IFeature {
 				}
 			}
 		}
-		bag = tRes.toNativeArray();
+		bag = tRes.toArray();
 	}
 	
 	public void reduceByFactor(int factor) {
@@ -133,7 +133,7 @@ public class BoF implements IFeature {
 				}
 			}
 		}
-		bag = tRes.toNativeArray();
+		bag = tRes.toArray();
 	}
 	
     public BoF(ByteBuffer in, LFWords fWords) throws IOException  {

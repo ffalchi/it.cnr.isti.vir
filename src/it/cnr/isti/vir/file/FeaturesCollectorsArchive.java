@@ -1,6 +1,6 @@
 package it.cnr.isti.vir.file;
 
-import gnu.trove.TLongArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.FeaturesCollectors;
 import it.cnr.isti.vir.features.IFeaturesCollector;
