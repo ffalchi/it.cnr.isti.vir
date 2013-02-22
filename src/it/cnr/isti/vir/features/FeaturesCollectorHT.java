@@ -24,7 +24,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features;
 
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -60,8 +60,8 @@ public class FeaturesCollectorHT implements IFeaturesCollector {
 		set = givenFColl.set;
 		for(Iterator<IFeature> it = set.values().iterator(); it.hasNext(); ) {
 			IFeature curr = it.next();
-			if ( curr instanceof AbstractLFGroup ) {
-				((AbstractLFGroup) curr).setLinkedFC(this);
+			if ( curr instanceof ALocalFeaturesGroup ) {
+				((ALocalFeaturesGroup) curr).setLinkedFC(this);
 			}
 		}
 	}

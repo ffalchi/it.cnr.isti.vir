@@ -59,6 +59,16 @@ public class RandomOperations {
 		return new Point2D.Double(r.nextDouble(), r.nextDouble());
 	}
 
+	public static double[][] getRandomDoubleMatrix(int s1, int s2) {
+		double[][] arr = new double[s1][s2];
+		for ( int i1=0; i1<arr.length; i1++) {
+			for ( int i2=0; i2<arr[0].length; i2++) {
+				arr[i1][i2]=r.nextDouble();
+			}
+		}
+		return arr;
+	}
+	
 	public static double[] getRandomDoubleArray(int size) {
 		double[] arr = new double[size];
 		for ( int i=0; i<arr.length; i++) {

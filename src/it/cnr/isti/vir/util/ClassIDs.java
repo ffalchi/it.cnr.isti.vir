@@ -24,9 +24,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
+import it.cnr.isti.vir.features.IFeature;
+
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.util.Hashtable;
 
 

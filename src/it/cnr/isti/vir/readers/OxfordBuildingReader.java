@@ -27,8 +27,9 @@ package it.cnr.isti.vir.readers;
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.localfeatures.BoFLF;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
-import it.cnr.isti.vir.id.IDString;
+import it.cnr.isti.vir.features.localfeatures.KeyPoint;
 import it.cnr.isti.vir.id.AbstractID;
+import it.cnr.isti.vir.id.IDString;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -114,8 +115,9 @@ public class OxfordBuildingReader implements IObjectsReader<FeaturesCollectorArr
 		    float area = (float) (2*Math.PI/Math.sqrt(4*a*c-b*b));
 		    
 		    float scale  = (float) Math.sqrt(area);
+		    KeyPoint kp = new KeyPoint(x, y, Float.NaN, scale);
 		    float[] xy = {x, y};
-			arr[i] = new BoFLF(bag, xy,  0.0F, scale, group);
+			arr[i] = new BoFLF(bag, kp, group);
 		}
 		group = new BoFLFGroup(arr, fc, null);
 		fc = new FeaturesCollectorArr( group, null, null );

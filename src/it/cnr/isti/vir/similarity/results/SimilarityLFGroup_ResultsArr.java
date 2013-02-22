@@ -27,8 +27,8 @@ package it.cnr.isti.vir.similarity.results;
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.PredictedLabel;
 import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
-import it.cnr.isti.vir.features.localfeatures.ILocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
 
 import java.io.DataOutputStream;
@@ -37,18 +37,18 @@ import java.util.Collection;
 import java.util.Iterator;
 
 // To use only with LFw removing
-public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<AbstractLFGroup> {
+public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<ALocalFeaturesGroup> {
 
-	protected final ObjectWithDistance<AbstractLFGroup>[] lfGroup;
+	protected final ObjectWithDistance<ALocalFeaturesGroup>[] lfGroup;
 //	protected final ClassLabel[] label;
 	protected int nObj;
-	protected AbstractLFGroup excludedGroup = null;
+	protected ALocalFeaturesGroup excludedGroup = null;
 	
-	public AbstractLFGroup getExcludedGroup() {
+	public ALocalFeaturesGroup getExcludedGroup() {
 		return excludedGroup;
 	}
 	
-	public void setExcludedGroup(AbstractLFGroup excludedGroup) {
+	public void setExcludedGroup(ALocalFeaturesGroup excludedGroup) {
 		this.excludedGroup = excludedGroup;
 	}
 	
@@ -59,13 +59,13 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<Abstract
 		int i=0;
 		for ( Iterator<ObjectWithDistance> it=res.iterator(); it.hasNext();) {
 			ObjectWithDistance curr = it.next();
-			lfGroup[i]=new ObjectWithDistance(((ILocalFeature)curr.obj).getLinkedGroup(),curr.dist);
+			lfGroup[i]=new ObjectWithDistance(((ALocalFeature)curr.obj).getLinkedGroup(),curr.dist);
 //			label[i]=lfGroup[i].obj.getLabel();			
 			i++;
 		}
 	}
 
-	private class SimilarityResultsIterator implements Iterator<ObjectWithDistance<AbstractLFGroup>>{
+	private class SimilarityResultsIterator implements Iterator<ObjectWithDistance<ALocalFeaturesGroup>>{
 
 		private int next = -1;
  
@@ -85,7 +85,7 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<Abstract
             return next < nObj;
         }
  
-        public final ObjectWithDistance<AbstractLFGroup> next(){
+        public final ObjectWithDistance<ALocalFeaturesGroup> next(){
             int curr = next;
             setNext();
             return lfGroup[curr];
@@ -98,13 +98,13 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<Abstract
 
 	@Override
 	public boolean equalResults(
-		ISimilarityResults<AbstractLFGroup> that) {
+		ISimilarityResults<ALocalFeaturesGroup> that) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public final ObjectWithDistance<AbstractLFGroup> getFirst() {
+	public final ObjectWithDistance<ALocalFeaturesGroup> getFirst() {
 		int first=0;
     	while ( first < nObj && lfGroup[first].obj==excludedGroup) {
     		first++;
@@ -119,13 +119,13 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<Abstract
 	}
 
 	@Override
-	public Iterator<ObjectWithDistance<AbstractLFGroup>> iterator() {
+	public Iterator<ObjectWithDistance<ALocalFeaturesGroup>> iterator() {
 		// TODO Auto-generated method stub
 		return new SimilarityResultsIterator();
 	}
 
 	@Override
-	public void setQuery(AbstractLFGroup object) {
+	public void setQuery(ALocalFeaturesGroup object) {
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<Abstract
 		// TODO Auto-generated method stub		
 	}  
 	
-	public void removeLFByGroup(AbstractLFGroup toRemoveGroup) {
+	public void removeLFByGroup(ALocalFeaturesGroup toRemoveGroup) {
 		// note that only the first (and hopefully the only) one is removed
 		int toRemove = -1;
 		for ( int i=0; i<nObj; i++) {
@@ -185,7 +185,7 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<Abstract
 	}
 
 	@Override
-	public AbstractLFGroup getQuery() {
+	public ALocalFeaturesGroup getQuery() {
 		// TODO Auto-generated method stub
 		return null;
 	}

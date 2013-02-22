@@ -24,7 +24,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.geom.AffineTransformation;
 import it.cnr.isti.vir.geom.Box;
 import it.cnr.isti.vir.geom.RSTTransformation;
@@ -58,11 +58,11 @@ public class LocalFeaturesMatches {
     	return matchesColl.get(i);
     }
     
-    public AbstractLFGroup getLFGroup() {
+    public ALocalFeaturesGroup getLFGroup() {
         return matchesColl.get(0).lf.getLinkedGroup();
     }
 
-    public AbstractLFGroup getMatchingLFGroup() {
+    public ALocalFeaturesGroup getMatchingLFGroup() {
         return matchesColl.get(0).lfMatching.getLinkedGroup();
     }
 
@@ -267,7 +267,7 @@ public class LocalFeaturesMatches {
             } else {
                 xy = tr.getTransformed(curr.getMatchingXY());
             }
-            AbstractLFGroup.overPrint_point(img, xy, color);
+            ALocalFeaturesGroup.overPrint_point(img, xy, color);
         }
         return img;
     }
@@ -282,7 +282,7 @@ public class LocalFeaturesMatches {
             } else {
                 xy = tr.getInvTransformed(curr.getXY());
             }
-            AbstractLFGroup.overPrint_point(img, xy, color);
+            ALocalFeaturesGroup.overPrint_point(img, xy, color);
         }
         return img;
     }

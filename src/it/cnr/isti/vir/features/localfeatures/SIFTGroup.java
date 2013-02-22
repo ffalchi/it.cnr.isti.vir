@@ -30,15 +30,19 @@ import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class SIFTGroup extends AbstractLFGroup<SIFT> {
+public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 
+	public static final byte version = 2;
+	
+	public final byte getSerVersion() {
+		return version;
+	}
+	
 	public SIFTGroup(SIFT[] arr, IFeaturesCollector fc) {
 		super(arr, fc);
 	}
@@ -51,79 +55,71 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		this(in, null);
 	}
 
-
-	public static final byte version = 1;
-
+	
 	public SIFTGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.get();
-		int size = in.getInt();
-		lfArr = new SIFT[size];
-		if (size == 0)
-			return;
+		if ( version >= 2 ) {
+			// VERSION 2
+			int nBytes = in.getInt();
+			int nLFs = in.getInt();
+			lfArr = new SIFT[nLFs];
+			for ( int i = 0; i < nLFs; i++ ) {
+				lfArr[i] = new SIFT(in, this);
+			}
+			
+		} else {		
+			// VERSION 0 and 1
+			int size = in.getInt();
+			lfArr = new SIFT[size];
+			if (size == 0)
+				return;
 
-		for (int i = 0; i < size; i++) {
-			lfArr[i] = new SIFT(in, this);
-		}
+			for (int i = 0; i < size; i++) {
+				lfArr[i] = SIFT.read_old(in, this);
+			}
 
-		if (version > 0) {
-			readEval(in);
+			if (version > 0) {
+				// VERSION 1
+				readEval(in);
+			}
 		}
+		
 	}
 
 	public SIFTGroup(DataInput in, IFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.readByte();
-		int size = in.readInt();
-		// lfArr = new SIFT[size];
-		// if ( size == 0 ) return;
-
-		lfArr = SIFT.getSIFT(in, size, this);
-
-		// for (int i=0; i<size; i++ ) {
-		// lfArr[i] = new SIFT(in, this);
-		// }
-		if (version > 0) {
-			readEval(in);
-		}
-	}
-
-	public boolean checkByteFormatConsistency() {
-		byte[] bytes = SIFT.getBytes(lfArr);
-		SIFT[] sift = SIFT.getSIFT(bytes, this);
-		for (int i = 0; i < lfArr.length; i++) {
-			if (!lfArr[i].equals(sift[i])) {
-				return false;
+		if ( version >= 2 ) {
+			// VERSION 2
+			int nBytes = in.readInt();
+			byte[] bytes = new byte[nBytes];
+			in.readFully(bytes);
+			ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
+			lfArr = new SIFT[bBuffer.getInt()];
+			for (int i = 0; i < lfArr.length; i++) {
+				this.lfArr[i] = new SIFT(bBuffer, this);
+			}
+		} else {
+			// VERSION 0 and 1
+			int size = in.readInt();
+	
+			lfArr = SIFT.getSIFT_old(in, size, this);
+	
+			if (version > 0) {
+				readEval(in);
 			}
 		}
-		return true;
 	}
-
-	public final void writeData(DataOutput out) throws IOException {
-		out.writeByte(version);
-		out.writeInt(lfArr.length);
-
-		// if ( !checkByteFormatConsistency() ) {
-		// System.err.println("MO' SON CAZZI!!!");
-		// }
-
-		// out.writeInt(FeaturesClassCollection.getClassID(list.getFirst().getClass()));
-		byte[] bytes = SIFT.getBytes(lfArr);
-		out.write(bytes);
-		// for (int i=0; i<lfArr.length; i++ ) {
-		// lfArr[i].writeData(out);
-		// }
-		writeEval(out);
-	}
-
+	
 	/*
+	 * For parsing text files.
 	 * Read keypoints from the given file pointer and return the list of
 	 * keypoints. The file format starts with 2 integers giving the total number
 	 * of keypoints and the size of descriptor vector for each keypoint
 	 * (currently assumed to be 128). Then each keypoint is specified by ...
 	 */
-	public SIFTGroup(BufferedReader br, IFeaturesCollector fc)
-			throws IOException {
+	public SIFTGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
 		super(fc);
 		String[] temp = br.readLine().split("(\\s)+");
 		// assert(temp.length == 2);
@@ -137,11 +133,6 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		}
 	}
 
-	// static final public LocalFeaturesGroup<SIFT> readKeys(BufferedReader br)
-	// throws IOException
-	// {
-	// return new SIFTGroup(br);
-	// }
 
 	public static final double getMinDistance(SIFTGroup lFGroup1,
 			SIFTGroup lFGroup2) {
@@ -150,16 +141,29 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 			SIFT s1 = lFGroup1.lfArr[i1];
 			for (int i2 = 0; i2 < lFGroup2.lfArr.length; i2++) {
 				SIFT s2 = lFGroup2.lfArr[i2];
-				double currDist = SIFT.getSquaredDistance(s1, s2);
+				double currDist = SIFT.getL2SquaredDistance(s1, s2);
 				if (currDist < min)
 					min = currDist;
 			}
 		}
-		return min; // TO DO!
+		return min;
 	}
+	
+	/*
+	public boolean checkByteFormatConsistency() {
+		byte[] bytes = SIFT.getBytes(lfArr);
+		SIFT[] sift = SIFT.getSIFT(bytes, this);
+		for (int i = 0; i < lfArr.length; i++) {
+			if (!lfArr[i].equals(sift[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+*/
 
-	static final public double getLoweFactor_avg(AbstractLFGroup<SIFT> sg1,
-			AbstractLFGroup<SIFT> sg2) {
+	static final public double getLoweFactor_avg(ALocalFeaturesGroup<SIFT> sg1,
+			ALocalFeaturesGroup<SIFT> sg2) {
 		if (sg2.size() < 2)
 			return 0;
 		double sum = 0;
@@ -171,7 +175,7 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		return (double) sum / sg1.size();
 	}
 
-	static final public double getLoweFactor(SIFT s1, AbstractLFGroup<SIFT> sg) {
+	static final public double getLoweFactor(SIFT s1, ALocalFeaturesGroup<SIFT> sg) {
 		double distsq1 = Integer.MAX_VALUE;
 		double distsq2 = Integer.MAX_VALUE;
 		double dsq = 0;
@@ -179,7 +183,7 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		SIFT[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFT.getSquaredDistance(s1, curr);
+			dsq = SIFT.getL2SquaredDistance(s1, curr);
 			if (dsq < distsq1) {
 				distsq2 = distsq1;
 				distsq1 = dsq;
@@ -193,13 +197,13 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		return Math.sqrt(distsq1 / distsq2);
 	}
 
-	static final public double getLowePercMatches(AbstractLFGroup<SIFT> sg1,
-			AbstractLFGroup<SIFT> sg2, double conf) {
+	static final public double getLowePercMatches(ALocalFeaturesGroup<SIFT> sg1,
+			ALocalFeaturesGroup<SIFT> sg2, double conf) {
 		return (double) getLoweNMatches(sg1, sg2, conf) / sg1.size();
 	}
 
-	static final public int getLoweNMatches(AbstractLFGroup<SIFT> sg1,
-			AbstractLFGroup<SIFT> sg2, double conf) {
+	static final public int getLoweNMatches(ALocalFeaturesGroup<SIFT> sg1,
+			ALocalFeaturesGroup<SIFT> sg2, double conf) {
 		if (sg2.size() < 2)
 			return 0;
 		int nMatches = 0;
@@ -229,11 +233,11 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 	// }
 
 	static final public LocalFeaturesMatches getLoweMatches(
-			AbstractLFGroup<SIFT> sg1, AbstractLFGroup<SIFT> sg2) {
+			ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2) {
 		return getLoweMatches(sg1, sg2, 0.8);
 	}
 	
-	static final public LocalFeaturesMatches getLoweMatches(AbstractLFGroup<SIFT> sg1, AbstractLFGroup<SIFT> sg2, double dRatioThr) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
@@ -247,7 +251,7 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		return matches;
 	}	
 	
-	static final public LocalFeaturesMatches getLoweMatches(AbstractLFGroup<SIFT> sg1, AbstractLFGroup<SIFT> sg2, double dRatioThr, final int maxLFDistSq) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr, final int maxLFDistSq) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
@@ -347,7 +351,7 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		return matches;
 	}
 */
-	static final public SIFT getLoweMatch(SIFT s1, AbstractLFGroup<SIFT> sg,
+	static final public SIFT getLoweMatch(SIFT s1, ALocalFeaturesGroup<SIFT> sg,
 			double conf, int maxFDsq) {
 		int distsq1 = Integer.MAX_VALUE;
 		int distsq2 = Integer.MAX_VALUE;
@@ -356,7 +360,7 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		SIFT[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFT.getSquaredDistance(s1, curr, distsq2);
+			dsq = SIFT.getL2SquaredDistance(s1, curr, distsq2);
 			if (dsq < 0)
 				continue;
 			if (dsq < distsq1) {
@@ -383,7 +387,7 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		return null;
 	}
 
-	static final public SIFT getLoweMatch(SIFT s1, AbstractLFGroup<SIFT> sg,
+	static final public SIFT getLoweMatch(SIFT s1, ALocalFeaturesGroup<SIFT> sg,
 			double conf) {
 		int distsq1 = Integer.MAX_VALUE;
 		int distsq2 = Integer.MAX_VALUE;
@@ -393,7 +397,7 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		SIFT[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFT.getSquaredDistance(s1, curr, distsq2);
+			dsq = SIFT.getL2SquaredDistance(s1, curr, distsq2);
 			if (dsq < 0)
 				continue;
 			if (dsq < distsq1) {
@@ -418,53 +422,15 @@ public class SIFTGroup extends AbstractLFGroup<SIFT> {
 		return null;
 	}
 
-	public final void filterScale(double scale) {
-
-		LinkedList<SIFT> okList = new LinkedList();
-		for (int i = 0; i < lfArr.length; i++) {
-			SIFT f = lfArr[i];
-			if (f.getScale() > scale)
-				okList.add(f);
-		}
-		System.out.println("Removing " + (lfArr.length - okList.size())
-				/ (double) lfArr.length + " of points.");
-		lfArr = new SIFT[okList.size()];
-		int i = 0;
-		for (Iterator<SIFT> it1 = okList.iterator(); it1.hasNext();) {
-			lfArr[i++] = it1.next();
-		}
-	}
 
 	@Override
 	public Class getLocalFeatureClass() {
 		return SIFT.class;
 	}
 
-	public float getMinSize() {
-		float minSize = Float.MAX_VALUE;
-		for (int i = 0; i < lfArr.length; i++) {
-			float curr = lfArr[i].data[SIFT.scaleIndex];
-			if (curr < minSize)
-				minSize = curr;
-		}
-		return minSize;
-	}
-
-	
-	public SIFTGroup getAboveSize(float minSize) {
-		ArrayList<SIFT> newArr = new ArrayList<SIFT>(lfArr.length);
-		for ( int i=0; i<lfArr.length; i++ ) {
-			if ( lfArr[i].data[SIFT.scaleIndex] >= minSize )
-				newArr.add(lfArr[i]);
-		}
-		SIFT[] nArr = new SIFT[newArr.size()];
-		SIFTGroup res = new SIFTGroup(newArr.toArray(nArr), linkedFC);
-		System.out.println("Was " + this.size() + " reduced to " + res.size() );
-		return res;
-	}
 
 	@Override
-	public AbstractLFGroup create(SIFT[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup create(SIFT[] arr, IFeaturesCollector fc) {
 		return new SIFTGroup( arr, fc);
 	}
 }

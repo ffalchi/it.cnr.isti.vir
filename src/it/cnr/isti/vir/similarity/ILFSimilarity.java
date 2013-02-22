@@ -24,11 +24,11 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 
 public interface ILFSimilarity<E> extends ISimilarity<E> {
 
 	public Class<E> getRequestedFeatureClass();
 	
-	public Class<AbstractLFGroup> getRequestedFeatureGroupClass();
+	public Class<ALocalFeaturesGroup> getRequestedFeatureGroupClass();
 }

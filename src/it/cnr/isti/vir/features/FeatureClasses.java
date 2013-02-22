@@ -26,12 +26,12 @@ package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.features.bof.BoF;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ORB;
+import it.cnr.isti.vir.features.localfeatures.ORBGroup;
 import it.cnr.isti.vir.features.localfeatures.RootSIFT;
 import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
-import it.cnr.isti.vir.features.localfeatures.SURF;
-import it.cnr.isti.vir.features.localfeatures.SURFGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 import it.cnr.isti.vir.features.metadata.GPSData;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
@@ -69,10 +69,10 @@ public class FeatureClasses {
 		RegionShape.class,
 		SIFT.class,
 		null, //ColorSIFT.class,
-		SURF.class,
+		null, //SURF.class,
 		SIFTGroup.class,
 		null, //ColorSIFTGroup.class,
-		SURFGroup.class,		
+		null, //SURFGroup.class,		
 		null, //BoF_LF.class,
 		null, //BoF_LF_bytes.class,
 		null, //BoF_LF_OriAndScale.class,
@@ -82,7 +82,9 @@ public class FeatureClasses {
 		RootSIFTGroup.class,
 		RootSIFT.class,
 		BoF.class,
-		VLAD.class
+		VLAD.class,
+		ORB.class,
+		ORBGroup.class 
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

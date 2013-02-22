@@ -138,7 +138,10 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 //	}
 
 	public String toString() {
-		return ""+ id;
+		String tStr = "id:"+ id + "\n";
+		tStr += cl.toString() + cs.toString() + sc.toString() + eh.toString() + ht.toString();
+		
+		return tStr;
 	}
 
 	@Override

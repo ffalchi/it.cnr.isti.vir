@@ -30,17 +30,13 @@ import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 
-public class SURFGroup extends AbstractLFGroup<SURF> {
+public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 	
-	public static final byte version = 2;	
+	public static final byte version = 3;	
 	
 	public SURFGroup(SURF[] arr, IFeaturesCollector fc) {
 		super(arr, fc );
@@ -53,49 +49,35 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 	public SURFGroup(DataInput in, IFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.readByte();
-		int size = in.readInt();
 		
-		lfArr = new SURF[size];
-		if ( size == 0 ) return;
-//		for (int i=0; i<size; i++ ) {
-//			lfArr[i]= new SURF(in, this);
-//		}
-		
-		int allSURFSize = SURF.dataSize * size;
-		byte[] byteArray = new byte[4*allSURFSize];
-		FloatBuffer inFloatBuffer = ByteBuffer.wrap(byteArray).asFloatBuffer();
-		in.readFully(byteArray);
-		for (int i=0; i<lfArr.length; i++ ) {
-			float[] tempData = new float[SURF.dataSize];
-			inFloatBuffer.get(tempData, 0, SURF.dataSize);
-			lfArr[i] = new SURF(tempData, this);
-		}
-		
-		
-		if ( version > 0 ) {
-			readEval(in);
+		if ( version >= 3 ) {
+			// VERSION 3
+			int nBytes = in.readInt();
+			byte[] bytes = new byte[nBytes];
+			in.readFully(bytes);
+			ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
+			lfArr = new SURF[bBuffer.getInt()];
+			for (int i = 0; i < lfArr.length; i++) {
+				this.lfArr[i] = new SURF(bBuffer, this);
+			}
+		} else {
+			// OLDS
+			int size = in.readInt();
+			
+			lfArr = new SURF[size];
+			if ( size == 0 ) return;
+			
+			for (int i=0; i<lfArr.length; i++ ) {
+				lfArr[i] = SURF.read_old(in, this);
+			}			
+			
+			if ( version > 0 ) {
+				readEval(in);
+			}
 		}
 		
 	}
 
-	public void writeData(DataOutput out) throws IOException {
-		out.writeByte(version);
-		out.writeInt(lfArr.length);
-		
-		int allSURFSize = SURF.dataSize * lfArr.length;
-		byte[] byteArray = new byte[allSURFSize*4];
-		FloatBuffer outFloatBuffer = ByteBuffer.wrap(byteArray).asFloatBuffer();
-		for (int i=0; i<lfArr.length; i++ ) {
-			outFloatBuffer.put(lfArr[i].getData(), 0, SURF.dataSize);
-		}
-		out.write(byteArray, 0, byteArray.length);
-
-//		//out.writeInt(FeaturesClassCollection.getClassID(list.getFirst().getClass()));
-//		for (int i=0; i<lfArr.length; i++ ) {
-//			lfArr[i].writeData(out);
-//		}
-		writeEval(out);
-	}
 	
 	public SURFGroup(IFeaturesCollector fc) {
 		super(fc);
@@ -104,17 +86,28 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 	public SURFGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.get();
-		int size = in.getInt();
-		lfArr = new SURF[size];
-		if ( size == 0 ) return;
-		
-		for ( int i=0; i<size; i++) {
-			lfArr[i] = new SURF(in, this);
+		if ( version >= 3) {
+			// VERSION 3
+			int nBytes = in.getInt();
+			int nLFs = in.getInt();
+			lfArr = new SURF[nLFs];
+			for ( int i = 0; i < nLFs; i++ ) {
+				lfArr[i] = new SURF(in, this);
+			}
+		} else {
+			int size = in.getInt();
+			lfArr = new SURF[size];
+			if ( size == 0 ) return;
+			
+			for ( int i=0; i<size; i++) {
+				lfArr[i] = new SURF(in, this);
+			}
+			
+			if ( version > 0 ) {
+				readEval(in);
+			}
 		}
 		
-		if ( version > 0 ) {
-			readEval(in);
-		}
 	}
 	
 	public SURFGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
@@ -131,11 +124,11 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 	    }
 	}
 
-	static final public double getLowePercMatches(AbstractLFGroup<SURF> sg1, AbstractLFGroup<SURF> sg2, double conf) {
+	static final public double getLowePercMatches(ALocalFeaturesGroup<SURF> sg1, ALocalFeaturesGroup<SURF> sg2, double conf) {
 		return (double) getLoweNMatches(sg1, sg2, conf)/sg1.size();
 	}
 	
-	static final public int getLoweNMatches(AbstractLFGroup<SURF> sg1, AbstractLFGroup<SURF> sg2, double conf) {
+	static final public int getLoweNMatches(ALocalFeaturesGroup<SURF> sg1, ALocalFeaturesGroup<SURF> sg2, double conf) {
 		if ( sg2.size() < 2 ) return 0;
 		int nMatches = 0;
 		SURF[] arr = sg1.lfArr;
@@ -146,7 +139,7 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 		return nMatches;
 	}
 	
-	static final public LocalFeaturesMatches getLoweMatches(AbstractLFGroup<SURF> sg1, AbstractLFGroup<SURF> sg2 ) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SURF> sg1, ALocalFeaturesGroup<SURF> sg2 ) {
 		return getLoweMatches(sg1, sg2, 0.8 );
 	}
 	
@@ -188,7 +181,7 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 //		return matches;
 //	}	
 	
-	static final public LocalFeaturesMatches getLoweMatches(AbstractLFGroup<SURF> sg1, AbstractLFGroup<SURF> sg2, double dRatioThr) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SURF> sg1, ALocalFeaturesGroup<SURF> sg2, double dRatioThr) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
@@ -202,7 +195,7 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 		return matches;
 	}	
 	
-	static final public double getLoweFactor_avg(AbstractLFGroup<SURF> sg1, AbstractLFGroup<SURF> sg2) {
+	static final public double getLoweFactor_avg(ALocalFeaturesGroup<SURF> sg1, ALocalFeaturesGroup<SURF> sg2) {
 		if ( sg2.size() < 2 ) return 0;
 		double sum = 0;
 		SURF[] arr = sg1.lfArr;
@@ -213,7 +206,7 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 		return sum /arr.length;
 	}
 
-	static final public double getLoweFactor(SURF s1, AbstractLFGroup<SURF> sg) {		
+	static final public double getLoweFactor(SURF s1, ALocalFeaturesGroup<SURF> sg) {		
 		double distsq1 = Double.MAX_VALUE;
 		double distsq2 = Double.MAX_VALUE;
 		double dsq = 0;	
@@ -234,7 +227,7 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 	    return Math.sqrt(distsq1/distsq2);	
 	}
 	
-	static final public SURF getSURFMatch(SURF s1, AbstractLFGroup<SURF> sg, double thr) {		
+	static final public SURF getSURFMatch(SURF s1, ALocalFeaturesGroup<SURF> sg, double thr) {		
 		double distsq1 = Double.MAX_VALUE;
 		double distsq2 = Double.MAX_VALUE;
 		double dsq = 0;	
@@ -274,22 +267,8 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 		return min; // TO DO!
 	}
 
-	public final void filterScale(double scale ) {
-		// remove all features below scale
-		LinkedList<SURF> okList = new LinkedList();
-		for (int i=0; i<lfArr.length; i++ ) {
-			SURF f = lfArr[i];
-			if ( f.getScale()>scale ) okList.add(f);
-		}
-		System.out.println("Removing " + (lfArr.length-okList.size()) / (double) lfArr.length + " of points." );
-		lfArr = new SURF[okList.size()];
-		int i=0;
-		for ( Iterator<SURF> it1 = okList.iterator(); it1.hasNext(); ) {
-			lfArr[i++] = it1.next();
-		}
-	}
 	
-	static final public double getLowePercMatches_w(AbstractLFGroup<SURF> sg1, AbstractLFGroup<SURF> sg2, double sqrConf) {
+	static final public double getLowePercMatches_w(ALocalFeaturesGroup<SURF> sg1, ALocalFeaturesGroup<SURF> sg2, double sqrConf) {
 		if ( sg2.size() < 2 ) return 0;
 		double wmatches = 0;
 		SURF[] arr = sg1.lfArr;
@@ -306,16 +285,6 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 	public Class getLocalFeatureClass() {
 		return SURF.class;
 	}
-	
-	public float getMinSize() {
-		float minSize = Float.MAX_VALUE;
-		for (int i = 0; i < lfArr.length; i++) {
-			float curr = lfArr[i].getScale();
-			if (curr < minSize)
-				minSize = curr;
-		}
-		return minSize;
-	}
 
 	
 	public SURFGroup getAboveSize(float minSize) {
@@ -330,7 +299,12 @@ public class SURFGroup extends AbstractLFGroup<SURF> {
 	}
 
 	@Override
-	public AbstractLFGroup create(SURF[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup create(SURF[] arr, IFeaturesCollector fc) {
 		return new SURFGroup( arr, fc);
+	}
+
+	@Override
+	public byte getSerVersion() {
+		return version;
 	}
 }

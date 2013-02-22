@@ -32,20 +32,27 @@ import it.cnr.isti.vir.util.RandomOperations;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
+public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 
-    public static final byte version = 0;
+    public static final byte version = 1;
     protected final LFWords fWords;
     protected double magnitude = -1.0;
     protected double magnitude_TFIDF = -1.0;
     protected double magnitude_IDF = -1.0;
     protected static final double log2 = Math.log(2.0);
+    
+
+	@Override
+	public byte getSerVersion() {
+		return version;
+	}
+    
+    
 	public BoFLFGroup(DataInput in) throws Exception {
 		this(in, null);
 	}
@@ -83,21 +90,60 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
 		
 		fWords = null;
 		byte version = in.readByte();
-		int size = in.readInt();
 
-//		if ( size == 0 ) return;
+		if ( version < 1 ) {
+			// VERSION 0
+			int size = in.readInt();
 		
-		lfArr = new BoFLF[size];
-		byte[] tArr = new byte[BoFLF.getByteSize() * size];
-		in.readFully(tArr);
-		ByteBuffer buffer = ByteBuffer.wrap(tArr);
-		for ( int i=0; i<size; i++ ) {
-			lfArr[i] = new BoFLF(buffer, this);
+			lfArr = new BoFLF[size];
+			byte[] tArr = new byte[20 * size];
+			in.readFully(tArr);
+			ByteBuffer buffer = ByteBuffer.wrap(tArr);
+			for ( int i=0; i<size; i++ ) {
+				lfArr[i] = BoFLF.read_old(buffer, this);
+			}
+			
+			readEval(in);
+		} else {
+			// NEW
+			int nBytes = in.readInt();
+			byte[] bytes = new byte[nBytes];
+			in.readFully(bytes);
+			ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
+			lfArr = new BoFLF[bBuffer.getInt()];
+			for (int i = 0; i < lfArr.length; i++) {
+				this.lfArr[i] = new BoFLF(bBuffer, this);
+			}
 		}
-		
-		readEval(in);
 	}
-    
+
+    public BoFLFGroup(ByteBuffer in, LFWords fWords, IFeaturesCollector fc) throws Exception {
+        super(fc);
+        this.fWords = fWords;
+        byte version = in.get();
+        		
+		if ( version < 1 ) {
+			// VERSION 0;
+	        int size = in.getInt();
+	        lfArr = new BoFLF[size];
+	//        if (size == 0) {
+	//            return;
+	//        }
+	
+	        for (int i = 0; i < size; i++) {
+	            lfArr[i] = BoFLF.read_old(in, this);
+	        }
+	
+	        readEval(in);
+		} else {
+			// NEW
+			int nBytes = in.getInt();
+			lfArr = new BoFLF[in.getInt()];
+			for (int i = 0; i < lfArr.length; i++) {
+				this.lfArr[i] = new BoFLF(in, this);
+			}
+		}
+    }
 	public BoFLFGroup(BoFLF[] arr, IFeaturesCollector fc, LFWords words ) throws Exception {
 		super(fc);
 		fWords = words;
@@ -117,32 +163,16 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
         this(in, null, null);
     }
 
-    public BoFLFGroup(ByteBuffer in, LFWords fWords, IFeaturesCollector fc) throws Exception {
-        super(fc);
-        this.fWords = fWords;
-        byte version = in.get();
-        int size = in.getInt();
-        lfArr = new BoFLF[size];
-//        if (size == 0) {
-//            return;
-//        }
 
-        for (int i = 0; i < size; i++) {
-            lfArr[i] = new BoFLF(in, this);
-        }
-
-        readEval(in);
-    }
-
-	public BoFLFGroup(AbstractLFGroup group, LFWords fWords) {
-		this( (ILocalFeature[]) group.getLocalFeatures(), fWords);
+	public BoFLFGroup(ALocalFeaturesGroup group, LFWords fWords) {
+		this( (ALocalFeature[]) group.getLocalFeatures(), fWords);
 	}
 	
-    public BoFLFGroup(ILocalFeature[] features, LFWords fWords) {
+    public BoFLFGroup(ALocalFeature[] features, LFWords fWords) {
         this(features, fWords, null);
     }
 
-    public BoFLFGroup(ILocalFeature[] features, LFWords fWords, IFeaturesCollector fc) {
+    public BoFLFGroup(ALocalFeature[] features, LFWords fWords, IFeaturesCollector fc) {
         super(fc);
         this.fWords = fWords;
         if ( features instanceof BoFLF[] ) {
@@ -153,9 +183,11 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
 	        for (int i = 0; i < temp.length; i++) {
 	            lfArr[i] = new BoFLF(
 	                    temp[i],
-	                    features[i].getXY(),
-	                    features[i].getOrientation(),
-	                    features[i].getScale(),
+	                    new KeyPoint(
+	                    	features[i].getXY(),
+	                    	features[i].getOrientation(),
+	                    	features[i].getScale()
+	                    ),
 	                    this);
 	        }
         }
@@ -281,7 +313,7 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
 	        }
         return matches;
     }
-
+/*
     @Override
     public void writeData(DataOutput out) throws IOException {
 		out.writeByte(version);
@@ -297,7 +329,7 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
         
         this.writeEval(out);
     }
-
+*/
 
 //    public final static double getSimilarity_cosine(BoFLFGroup g1, BoFLFGroup g2 ) {
 //
@@ -447,10 +479,6 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
         
         if ( g1.size() == 0 || g2.size() == 0 ) return 0;
         
-        /* REMOVED!!! */
-    	//double sizeRatio =  g1.size() / (float) g2.size();
-    	//if ( sizeRatio < 0.1 || sizeRatio > 10.0 ) return 0.0;
-        
         int i2 = 0;
         for (int i1 = 0; i1 < g1Arr.length && i2 < g2Arr.length; i1++) {
             int count1 = 1;
@@ -552,28 +580,6 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
                 i2++;
                 count2++;
             }
-
-            /*
-            if ( count2 != 0 ) {
-            	double a;
-            	double c;
-            	if ( idf != null ) {
-            		a = (double) count1 * idf[currBag] / idfSum1;
-            		c = (double) count2 * idf[currBag] / idfSum2;
-            	} else {
-            		a = (double) count1 / g1Arr.length;
-            		c = (double) count2 / g2Arr.length;
-            	}
-            	double ac = a+c;
-            	value += (
-            					a * Math.log(a) / Math.log(2.0)
-            					+
-            					c * Math.log(c) / Math.log(2.0)
-            			 ) -
-            			 ac * Math.log( ac/2.0) / Math.log(2.0)
-            			 + ac;
-            	
-            }*/
             
             if ( count2 != 0 ) {
             	double a;
@@ -602,26 +608,13 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
         double result = 2.0 - 2.0 * value;
         if ( result > 1.0 ) System.out.println("Value " + result);
         if ( result < 0.0 ) System.out.println("Value " + result);
-        	
-        	// return 2.0 * value - 1.0;
+
         return 2.0 - 2.0 * value;
     }	
 	
 	public static float getTF( int count, int size) {
 		return (float) count / size;
-		//return 1.0F + (float) Math.log((float) count);
 	}
-	
-	public float getMinSize() {
-		float minSize = Float.MAX_VALUE;
-		for (int i = 0; i < lfArr.length; i++) {
-			float curr = lfArr[i].getScale();
-			if (curr < minSize)
-				minSize = curr;
-		}
-		return minSize;
-	}
-
 	
 	public BoFLFGroup getAboveSize(float minSize) {
 		ArrayList<BoFLF> newArr = new ArrayList<BoFLF>(lfArr.length);
@@ -630,12 +623,11 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
 				newArr.add(lfArr[i]);
 		}
 		BoFLF[] nArr = new BoFLF[newArr.size()];
-		//System.out.println("Was " + lfArr.length + " reduced to " + nArr.length);
 		return new BoFLFGroup(newArr.toArray(nArr), null, linkedFC);
 	}
 
 	@Override
-	public AbstractLFGroup create(BoFLF[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup create(BoFLF[] arr, IFeaturesCollector fc) {
 		return new BoFLFGroup( arr, fWords, fc);
 	}
 	
@@ -690,64 +682,16 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
 		for ( int j=lfArr.length-count; j<lfArr.length; j++ ) {
 			eval[j] = count;
 		}	
-       
         
 		return getReduced_Eval(eval, factor);
 	}
-	
-//	public BoFLFGroup getReduceByTF(float factor ) {
-//		if ( lfArr.length <= 1 ) return this;
-//		// last lfArr is greatest word
-//		int[] tOcc = new int[lfArr[lfArr.length-1].bag+1];
-//		
-//		Arrays.fill(tOcc, 0);
-//		
-//		int last = -1;
-//    	int lastCount = 0;
-//    	// evaluating TFIDF
-//    	for (int i = 0; i < lfArr.length; i++) {
-//    		tOcc[lfArr[i].bag]++;
-//    	}
-//   	
-//    	int[] bag = new int[tOcc.length];
-//		for (int i=0; i<bag.length; i++){
-//			bag[i]=i;
-//		}
-//		
-//        //Bubble (biggest tfIDF first
-//        for (int i = 0; i < tOcc.length; i++) {
-//            for (int j = i; j < tOcc.length; j++) {
-//                if (tOcc[i] < tOcc[j]) {
-//                    int intTemp = bag[i];
-//                    bag[i] = bag[j];
-//                    bag[j] = intTemp;
-//
-//                    intTemp = tOcc[i];
-//                    tOcc[i] = tOcc[j];
-//                    tOcc[j] = intTemp;
-//                }
-//            }
-//        }
-//        // bag is now ordered with respect to tfIDF
-//        
-//        int targetSize = (int) Math.round(lfArr.length*factor);
-//        boolean[] bagTrueFalse = new boolean[tOcc.length];
-//        Arrays.fill(bagTrueFalse, Boolean.FALSE);
-//        int tempSize = 0;
-//        for( int i=0; i<tOcc.length && tempSize < targetSize; i++ ) {
-//        	tempSize += tOcc[i];
-//        	bagTrueFalse[bag[i]]=true;
-//        }
-//        
-//        return getReduceByBag(bagTrueFalse);
-//	}
-	
+		
 	public BoFLFGroup getReducedByScale(float factor ) {
 		if ( lfArr.length <= 1 ) return this;
 		
 		float[] eval = new float[lfArr.length];
 		for ( int j=0; j<lfArr.length; j++ ) {
-			eval[j] = lfArr[j].scale;
+			eval[j] = lfArr[j].getScale();
 		}	
         
 		return getReduced_Eval(eval, factor);
@@ -760,18 +704,18 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
 		Arrays.fill(eval, 0);
 		int lastBag = lfArr[0].bag;
 		int count = 1;
-		float scaleSum = lfArr[0].scale;
+		float scaleSum = lfArr[0].getScale();
 		for (int i = 1; i < lfArr.length; i++) {
 			if ( lfArr[i].bag == lastBag ) {
 				count ++;
-				scaleSum += lfArr[i].scale;
+				scaleSum += lfArr[i].getScale();
 			} else {
 				// assign count to evalutaions
 				for ( int j=i-count; j<i; j++ ) {
 					eval[j] = scaleSum;
 				}
 				count=1;
-				scaleSum = lfArr[i].scale;
+				scaleSum = lfArr[i].getScale();
 				lastBag = lfArr[i].bag;
 			}
 		}
@@ -862,147 +806,5 @@ public class BoFLFGroup extends AbstractLFGroup<BoFLF> {
         
 		return getReduced_Eval(eval, factor);
 	}
-	
-//	public BoFLFGroup getReduceByTFID(float factor, float[] idf) {
-//		float[] tfIDF = new float[idf.length];
-//		int[] bagCount = new int[idf.length];
-//		Arrays.fill(bagCount, 0);
-//		int last = -1;
-//    	int lastCount = 0;
-//    	// evaluating TFIDF
-//    	for (int i = 0; i < lfArr.length; i++) {
-//    		bagCount[lfArr[i].bag]++;
-//    		if ( lfArr[i].bag==last ) {
-//    			lastCount ++;
-//    		} else {
-//    		
-//    			if ( last > 0)
-//    				tfIDF[last]=(float) lastCount / lfArr.length * idf[last];
-//    			last = lfArr[i].bag;
-//    			lastCount = 1;
-//    		}
-//    	}
-//   	
-//    	int[] bag = new int[idf.length];
-//		for (int i=0; i<bag.length; i++){
-//			bag[i]=i;
-//		}
-//		
-//        //Bubble (biggest tfIDF first
-//        for (int i = 0; i < tfIDF.length; i++) {
-//            for (int j = i; j < tfIDF.length; j++) {
-//                if (tfIDF[i] < tfIDF[j]) {
-//                    int intTemp = bag[i];
-//                    bag[i] = bag[j];
-//                    bag[j] = intTemp;
-//
-//                    float floatTemp = tfIDF[i];
-//                    tfIDF[i] = tfIDF[j];
-//                    tfIDF[j] = floatTemp;
-//                }
-//            }
-//        }
-//        // bag is now ordered with respect to tfIDF
-//        
-//        int targetSize = (int) Math.round(lfArr.length*factor);
-//        boolean[] bagTrueFalse = new boolean[tfIDF.length];
-//        Arrays.fill(bagTrueFalse, Boolean.FALSE);
-//        int tempSize = 0;
-//        for( int i=0; i<tfIDF.length && tempSize < targetSize; i++ ) {
-//        	tempSize += bagCount[bag[i]];
-//        	bagTrueFalse[bag[i]]=true;
-//        }
-//        
-//        return getReduceByBag(bagTrueFalse);
-//	}
-    
-//	public final static double getSimilarity_cosineHough(BoFLFGroup g1, BoFLFGroup g2, float[] idf) {
-//        double num = 0;
-//
-//        BoFLF[] g1Arr = g1.lfArr;
-//        BoFLF[] g2Arr = g2.lfArr;
-//        
-//        TLongHashSet hashSet = new TLongHashSet();
-//        TLongIntHashMap hashCount1Map = new TLongIntHashMap();
-//        TLongIntHashMap hashCount2Map = new TLongIntHashMap();
-//        TLongDoubleHashMap hashMap = new TLongDoubleHashMap();
-//        
-//        int lastBag = -1;
-//        int i2 = 0;
-//        for (int i1 = 0; i1 < g1Arr.length && i2 < g2Arr.length; i1++) {
-//            int currBag = g1Arr[i1].bag;
-//            if ( lastBag != currBag) {
-//            	
-//            	for ( TLongIntIterator it = hashCount1Map.iterator(); it.hasNext(); ) {
-//            		it.advance();
-//            		long hash  = it.key();
-//            		int count1 = it.value();
-//            		int count2 = hashCount2Map.get(hash);
-//            		if ( count2 != 0 ) {
-//            			double tNum;
-//						// hash set was modified
-//		               	if ( idf != null ) {
-//							double tfidf1 = (double) count1 / g1Arr.length // TF
-//									* idf[currBag]; // IDF
-//		
-//							double tfidf2 = (double) count2 / g2Arr.length // TF
-//									* idf[currBag]; // IDF
-//		
-//							tNum = (double) tfidf1 * tfidf2;
-//						} else {
-//							tNum = (double) count1 * count2;
-//						}
-//		               	hashMap.adjustOrPutValue(hash, tNum, tNum);
-//            		} else {
-//            			System.err.println("Possible error!");
-//            		}
-//            	}              	
-//            	
-//            	//resetting counts
-//               	hashCount1Map.clear();  
-//               	hashCount2Map.clear();               	
-//            }
-//            
-//            // searching candidate i2
-//            while (g2Arr[i2].bag < currBag && i2 < g2Arr.length - 1) {
-//            	i2++;
-//            }
-//
-//            // to consider this i1 only once
-//            hashSet.clear();
-//            // co-occurences
-//            int ti2 = i2;
-//            while ( ti2 < g2Arr.length && g2Arr[ti2].bag == currBag ) {
-//                
-//    			int iOriDiff 	=  	LoweHoughTransform.getOriDiffBin(Trigonometry.getStdRadian(g2Arr[ti2].ori-g1Arr[i1].ori));
-//    			int iScaleRatio = 	LoweHoughTransform.getScaleRatioBin(g2Arr[ti2].scale/g1Arr[i1].scale);
-//
-//    			long hashCode = LoweHoughTransform.getHash(0, 0, iOriDiff, iScaleRatio);
-//
-//    			if ( hashSet.add(hashCode) ) {
-//    				hashCount1Map.adjustOrPutValue(hashCode, 1, 1);
-//    			}
-//    			
-//            	
-//            	ti2++;
-//            }
-//            
-//
-//        }
-//        
-//        double maxValue = 0;
-//        for ( TLongDoubleIterator it = hashMap.iterator(); it.hasNext(); ) {
-//        	it.advance();
-//        	if ( maxValue < it.value() ) {
-//        		maxValue = it.value();
-//        	}
-//        }
-//
-//        if ( idf != null )
-//        	return maxValue / ( g1.getMagnitude_TFIDF(idf) * g2.getMagnitude_TFIDF(idf)  ) ;
-//        
-//        return maxValue / ( g1.getMagnitude() * g2.getMagnitude()  ) ;
-//        
-//    }
 
 }

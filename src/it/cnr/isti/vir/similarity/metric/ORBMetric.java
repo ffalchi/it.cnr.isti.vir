@@ -27,26 +27,27 @@ package it.cnr.isti.vir.similarity.metric;
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.localfeatures.RootSIFT;
-import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
+import it.cnr.isti.vir.features.localfeatures.ORB;
+import it.cnr.isti.vir.features.localfeatures.SIFT;
+import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 
 import java.util.Collection;
 import java.util.Properties;
 
-public class RootSIFTMetric implements Metric<RootSIFT>, ILocalFeaturesMetric<RootSIFT>, IMeanEvaluator<RootSIFT> {
+public class ORBMetric implements Metric<ORB>, ILocalFeaturesMetric<ORB>, IMeanEvaluator<ORB> {
 
 	private static long distCount = 0;
-	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(RootSIFT.class);
+	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORB.class);
 	
 	public final long getDistCount() {
 		return distCount;
 	}
 	
-	public RootSIFTMetric(Properties properties) {
+	public ORBMetric(Properties properties) {
 		
 	}
 	
-	public RootSIFTMetric() {
+	public ORBMetric() {
 		
 	}
 	
@@ -57,7 +58,7 @@ public class RootSIFTMetric implements Metric<RootSIFT>, ILocalFeaturesMetric<Ro
 	
 	@Override
 	public final Class getRequestedFeatureClass() {
-		return RootSIFT.class;
+		return SIFT.class;
 	}
 	
 	public String toString() {
@@ -67,49 +68,33 @@ public class RootSIFTMetric implements Metric<RootSIFT>, ILocalFeaturesMetric<Ro
 	
 	@Override
 	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
-		return distance((RootSIFT) f1.getFeature(RootSIFT.class), (RootSIFT) f2.getFeature(RootSIFT.class));
+		return distance(f1.getFeature(ORB.class), f2.getFeature(ORB.class));
 	}
 	
 	@Override
 	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
-		return distance((RootSIFT) f1.getFeature(RootSIFT.class), (RootSIFT) f2.getFeature(RootSIFT.class), max);
+		return distance(f1.getFeature(ORB.class), f2.getFeature(ORB.class), max);
 	}
 	
 	@Override
-	public final double distance(RootSIFT f1, RootSIFT f2) {
-		return RootSIFT.getL2SQDistance_Norm( f1, f2 );	
+	public final double distance(ORB f1, ORB f2) {
+		return ORB.getDistance_Norm( f1, f2 );	
 	}
 	
 	@Override
-	public final double distance(RootSIFT f1, RootSIFT f2, double max) {
+	public final double distance(ORB f1, ORB f2, double max) {
 		distCount++;
-		return RootSIFT.getL2SQDistance_Norm( f1, f2, max);
+		return ORB.getDistance_Norm( f1, f2 ); // , max); !! TO DO
 	}
-//
-//	@Override
-//	public final double distance(IFeature f1, IFeature f2) {
-//		double dist = RootSIFT.getDistance_Norm(((RootSIFT) f1.getFeature(RootSIFT.class)), ((RootSIFT) f2.getFeature(RootSIFT.class)));		
-//		distCount++;
-//		
-//		return dist;
-//	}
-//	
-//	@Override
-//	public final double distance(IFeature f1, IFeature f2, double max) {
-//		double dist = RootSIFT.getDistance_Norm((RootSIFT) f1.getFeature(RootSIFT.class), (RootSIFT) f2.getFeature(RootSIFT.class), max);		
-//		distCount++;
-//		
-//		return dist;
-//	}
 	
 	@Override
-	public RootSIFT getMean(Collection<RootSIFT> coll) {
-		return RootSIFT.getMean(coll);
+	public ORB getMean(Collection<ORB> coll) {
+		return ORB.getMean(coll);
 	}
 	
 	@Override
 	public final Class getRequestedFeatureGroupClass() {
-		return RootSIFTGroup.class;
+		return SIFTGroup.class;
 	}
 	
 }

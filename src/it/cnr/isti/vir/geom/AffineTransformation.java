@@ -25,7 +25,7 @@
 package 
 it.cnr.isti.vir.geom;
 
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -410,7 +410,7 @@ public class AffineTransformation extends AbstractTransformation {
     }
 
     @Override
-    public AbstractTransformation getDeNormalized(AbstractLFGroup gr1, AbstractLFGroup gr2) {
+    public AbstractTransformation getDeNormalized(ALocalFeaturesGroup gr1, ALocalFeaturesGroup gr2) {
         double[] newValues = new double[6];
 
         float  scale1 = gr1.getNormScale();

@@ -24,7 +24,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
-public class IntByteArrayUtil {
+public class LongByteArrayUtil {
 	private static final int MASK = 0xff;
 
 	/**
@@ -32,40 +32,40 @@ public class IntByteArrayUtil {
 	 * @param test
 	 * @return
 	 */
-	public static final int byteArrayToInt(byte test[]) {
-		int bits = 0;
+	public static final long byteArrayToLong(byte test[]) {
+		long bits = 0;
 		int i = 0;
-		for (int shifter = 3; shifter >= 0; shifter--) {
-			bits |= ((int) test[i] & MASK) << (shifter * 4);
+		for (int shifter = 7; shifter >= 0; shifter--) {
+			bits |= ((long) test[i] & MASK) << (shifter * 4);
 			i++;
 		}
 
 		return bits;
 	}
 	
-	public static final int byteArrayToInt(byte byteArray[], int byteOffset) {
-		int bits = 0;
+	public static final long byteArrayToLong(byte byteArray[], int byteOffset) {
+		long bits = 0;
 		int i = 0;
 		for (int shifter = 3; shifter >= 0; shifter--) {
-			bits |= ((int) byteArray[i+byteOffset] & MASK) << (shifter * 8);
+			bits |= ((long) byteArray[i+byteOffset] & MASK) << (shifter * 8);
 			i++;
 		}
 
 		return bits;
 	}
 	
-	public static final int[] byteArrayToIntArray(byte byteArr[], int byteOffset, int n) {
-		int[] arr = new int[n];
+	public static final long[] byteArrayToLongArray(byte byteArr[], int byteOffset, int n) {
+		long[] arr = new long[n];
 		for ( int i=0; i<arr.length; i++) {
-			arr[i]=byteArrayToInt(byteArr, byteOffset+4*i);
+			arr[i]=byteArrayToLong(byteArr, byteOffset+4*i);
 		}
 		return arr;
 	}
 	
 	
-	public static final void intArrayToByteArray(int[] n, byte[] byteArray, int byteOffset) {
+	public static final void longArrayToByteArray(long[] n, byte[] byteArray, int byteOffset) {
 		for ( int i=0; i<n.length; i++) {
-			intToByteArray(n[i], byteArray, byteOffset+4*i );
+			longToByteArray(n[i], byteArray, byteOffset+4*i );
 		}
 		
 	}
@@ -75,20 +75,18 @@ public class IntByteArrayUtil {
 	 * @param param
 	 * @return
 	 */
-	public static final byte[] intToByteArray(int param) {
+	public static final byte[] longToByteArray(long param) {
 		byte[] result = new byte[4];
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 8; i++) {
 			result[i] = (byte) ((param >>> (3 - i) * 8) & MASK);
 		}
 		return result;
 	}
 	
-	public static final int intToByteArray(int param, byte[] byteArr, int byteOffset) {
-		int offSet = byteOffset;
-		for (int i = 0; i < 4; i++) {
-			byteArr[offSet++] = (byte) ((param >>> (3 - i) * 8) & MASK);
+	public static final void longToByteArray(long param, byte[] byteArr, int byteOffset) {
+		for (int i = 0; i < 8; i++) {
+			byteArr[i+byteOffset] = (byte) ((param >>> (3 - i) * 8) & MASK);
 		}
-		return offSet;
 	}
 
 	/**

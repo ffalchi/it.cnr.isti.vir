@@ -22,31 +22,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package it.cnr.isti.vir.features.localfeatures;
+package it.cnr.isti.vir.util;
 
-import it.cnr.isti.vir.classification.ILabeled;
-import it.cnr.isti.vir.features.IFeature;
-import java.awt.geom.Point2D;
+public class HammingDistance {
 
-public interface ILocalFeature extends IFeature, Comparable<IFeature>, ILabeled {
+	public static final int distance(long[] bits1, long[] bits2) {
+		int acc = 0;
+		for ( int i=0; i<bits1.length; i++)
+			acc+=Long.bitCount(bits1[i]^bits2[i]);
+		
+		return acc;
+	}
 	
-	public Class<AbstractLFGroup> getGroupClass();
-	
-	public AbstractLFGroup getLinkedGroup();
-	
-	public ILocalFeature getUnlinked(); 
-
-	public float getScale();
-
-    public float getNormScale();
-	
-	public float getOrientation();
-	
-//	public double getX();
-//	
-//	public double getY();
-	
-	public float[] getXY();
-
-    public float[] getNormXY();
+	public static final float distance_norm(long[] bits1, long[] bits2) {
+		return distance(bits1, bits2) / (64*bits1.length);
+	}
 }

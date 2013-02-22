@@ -29,7 +29,7 @@
 
 package it.cnr.isti.vir.geom;
 
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 import java.awt.image.BufferedImage;
 
@@ -41,7 +41,7 @@ public abstract class AbstractTransformation {
 
     public abstract AbstractTransformation getInverse();
 
-    public abstract AbstractTransformation getDeNormalized(AbstractLFGroup gr1, AbstractLFGroup gr2);
+    public abstract AbstractTransformation getDeNormalized(ALocalFeaturesGroup gr1, ALocalFeaturesGroup gr2);
     
     public abstract void getTransformed(float[] xy, float[] uv);
 

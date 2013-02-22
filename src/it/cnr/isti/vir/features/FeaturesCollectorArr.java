@@ -26,7 +26,7 @@ package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.LabelClasses;
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IHasID;
@@ -53,8 +53,8 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 		int size = 1;
 		feature = new IFeature[1];
 		feature[0]=f;
-		if ( feature[0] instanceof AbstractLFGroup ) {
-			((AbstractLFGroup) feature[0]).setLinkedFC(this);
+		if ( feature[0] instanceof ALocalFeaturesGroup ) {
+			((ALocalFeaturesGroup) feature[0]).setLinkedFC(this);
 		}
 	}
 	
@@ -67,8 +67,8 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 		for ( Iterator<IFeature> it=coll.iterator(); it.hasNext(); i++) {
 			IFeature curr = it.next();
 			feature[i]=curr;
-			if ( feature[i] instanceof AbstractLFGroup ) {
-				((AbstractLFGroup) feature[i]).setLinkedFC(this);
+			if ( feature[i] instanceof ALocalFeaturesGroup ) {
+				((ALocalFeaturesGroup) feature[i]).setLinkedFC(this);
 			}
 		}
 		
@@ -166,8 +166,8 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 			feature = temp;
 		}
 		
-		if ( f instanceof AbstractLFGroup ) {
-			((AbstractLFGroup) f).setLinkedFC(this);
+		if ( f instanceof ALocalFeaturesGroup ) {
+			((ALocalFeaturesGroup) f).setLinkedFC(this);
 		}
 	}
 

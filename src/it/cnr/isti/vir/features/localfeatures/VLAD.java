@@ -138,7 +138,7 @@ public class VLAD implements IFeature {
         return new VLAD(values);
     }
     
-	public static final VLAD getVLAD(AbstractLFGroup group, LFWords words) {
+	public static final VLAD getVLAD(ALocalFeaturesGroup group, LFWords words) {
 		if ( group instanceof SIFTGroup ) {
 			return getVLAD((SIFTGroup) group, words);
 		}

@@ -29,7 +29,7 @@
 
 package it.cnr.isti.vir.geom;
 
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import java.awt.image.BufferedImage;
 
 /**

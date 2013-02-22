@@ -25,12 +25,12 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.geom.AffineTransformation;
-import it.cnr.isti.vir.features.localfeatures.ILocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.geom.AbstractTransformation;
 
 public class LocalFeatureMatch {
-	public final ILocalFeature lf;
-	public final ILocalFeature lfMatching;
+	public final ALocalFeature lf;
+	public final ALocalFeature lfMatching;
 	public final float[] xy;
 	public final float[] matchingxy;
 	public final float[] nxy;
@@ -95,7 +95,7 @@ public class LocalFeatureMatch {
 		AffineTransformation.getInverseMapped( result, xy, scale, ori);
 	}
 	
-	public LocalFeatureMatch(ILocalFeature lf, ILocalFeature matchingLF, double weight, int index ) {		
+	public LocalFeatureMatch(ALocalFeature lf, ALocalFeature matchingLF, double weight, int index ) {		
 		super();
 		this.lf = lf;
 		this.lfMatching = matchingLF;
@@ -107,7 +107,7 @@ public class LocalFeatureMatch {
 		this.index = index;
 	}
 	
-	public LocalFeatureMatch(ILocalFeature lf, ILocalFeature matchingLF) {
+	public LocalFeatureMatch(ALocalFeature lf, ALocalFeature matchingLF) {
 		this(lf, matchingLF, 1.0, -1);
 	}
 

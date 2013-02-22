@@ -275,7 +275,7 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 
 	
 	public String toString() {
-		String str = "HomogeneousTexture";
+		String str = "HomogeneousTexture ";
 		if ( origData != null ) {
 			str += "\n  Average: " + Convertions.unsignedByteToInt(origData[0]);
 			str += "\n  StandardDeviation: " + Convertions.unsignedByteToInt(origData[2]);		
@@ -287,6 +287,18 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 			for (int i=0; i<30; i++ ){
 				str += " " + Convertions.unsignedByteToInt(origData[i+32]);
 			}		
+		} else {
+			str += " PRECOMPUTED";
+			str += "\n  Average: " + preComputed[0];
+			str += "\n  StandardDeviation: " + preComputed[2];		
+			str += "\n  Energy:";
+			for (int i=0; i<30; i++ ){
+				str += " " + preComputed[i+2];
+			}
+			str += "\n  EnergyDeviation:";
+			for (int i=0; i<30; i++ ){
+				str += " " + preComputed[i+32];
+			}	
 		}
 		return str + "\n";
 	}

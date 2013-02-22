@@ -237,11 +237,10 @@ public class KMeans<O> {
 			// Clear
 			for ( int i=0; i<clusters.length; i++) {
 				clusters[i].clear();
-			}
-			
-			
+			}		
 			
 			final int currlastNCentroidChanges = lastNCentroidChanges;
+			
 			// checking and assigning centroids to objects
 			for (int iObj = 0; iObj < objects.size(); iObj++) {
 				O obj = objects.get(iObj);
@@ -273,8 +272,7 @@ public class KMeans<O> {
 					for (int i = 0; i < centroids.length; i++) {
 						if (centroids[i] == null)
 							continue;
-						double dist = sim.distance(obj, centroids[i],
-								minDist);
+						double dist = sim.distance(obj, centroids[i], minDist);
 						if (dist > 0 && dist < minDist) {
 							minDist = dist;
 							nearest = i;

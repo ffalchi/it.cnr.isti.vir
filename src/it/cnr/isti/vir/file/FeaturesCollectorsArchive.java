@@ -105,9 +105,13 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 		return ids.get(i);
 	}
 
-	public FeaturesCollectorsArchive(File file,
-			FeatureClassCollector featuresClasses, Class idClass, Class fcClass)
-			throws Exception {
+	public FeaturesCollectorsArchive(
+			File file,
+			FeatureClassCollector featuresClasses,
+			Class<? extends AbstractID> idClass,
+			Class<?> fcClass)
+					throws Exception {
+		
 		if ( file.exists() && !file.delete() )
 			throw new Exception("Unable to delete file " + file.getAbsolutePath());
 		rndFile = new RandomAccessFile(file, "rw");
@@ -151,8 +155,14 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 		return c.getConstructor(ByteBuffer.class);
 	}
 
-	public void add(IFeaturesCollector fc) throws ArchiveException, IOException {
+	public synchronized void add(IFeaturesCollector fc) throws ArchiveException, IOException {
 
+		
+		int currPos = positions.size();
+		positions.add(rndFile.length());
+
+		rndFile.seek(rndFile.length());
+		
 		if (idClass != null) {
 			AbstractID id = ((IHasID) fc).getID();
 			if (!idClass.isInstance(id)) {
@@ -160,11 +170,11 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 						+ idClass + " requeste, " + id.getClass() + " found.");
 			}
 			ids.add(id);
+			
+			idPosMap.put(id, currPos);
 		}
 
-		positions.add(rndFile.length());
 
-		rndFile.seek(rndFile.length());
 
 		if (fcClass == null) {
 			FeaturesCollectors.writeData(rndFile, fc);

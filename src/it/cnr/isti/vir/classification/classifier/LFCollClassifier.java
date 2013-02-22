@@ -32,8 +32,8 @@ import it.cnr.isti.vir.classification.classifier.evaluation.TestDocumentSingleLa
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.features.bof.LFWords;
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
-import it.cnr.isti.vir.features.localfeatures.ILocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SURF;
 import it.cnr.isti.vir.geom.AffineTransformation;
@@ -68,9 +68,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
 
-import com.sun.org.apache.xpath.internal.functions.Function;
-
-public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
+public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier, ILFClassifier  {
 
 	private ILocalFeaturesMetric<LF> sim;
 	private ArrayList<LF> coll;
@@ -257,8 +255,8 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 			for ( Iterator<IFeaturesCollector_Labeled_HasID> itfc=givenColl.iterator(); itfc.hasNext(); ) {
 				IFeaturesCollector_Labeled_HasID fc = itfc.next();
 				//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-				AbstractLFGroup<LF> fg =
-						(AbstractLFGroup<LF>) fc.getFeature(sim.getRequestedFeatureGroupClass());
+				ALocalFeaturesGroup<LF> fg =
+						(ALocalFeaturesGroup<LF>) fc.getFeature(sim.getRequestedFeatureGroupClass());
 				for ( int i=0; i<fg.size(); i++) {
 					coll.add( (LF) fg.getFeature(i) );
 				}
@@ -314,7 +312,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 	private MultipleKNNPQueueID<LF> getkNNs(IFeaturesCollector fc) {
 		
 		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-		AbstractLFGroup<LF> fg = fc.getFeature(sim.getRequestedFeatureGroupClass());
+		ALocalFeaturesGroup<LF> fg = fc.getFeature(sim.getRequestedFeatureGroupClass());
 		final MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
 
 		final AbstractID fcID;
@@ -331,7 +329,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 					&& (
 							fc == curr
 							||
-							fcID.equals( ((ILocalFeature) curr).getLinkedGroup().getID() )
+							fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
 						)) {
 				continue;
 			}
@@ -376,10 +374,10 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 
 	// perform the classification only on the given collection
 	private MultipleKNNPQueueID<LF> getkNNs(IFeaturesCollector fc, Collection<IFeaturesCollector_Labeled_HasID> collection) {
-		Class<AbstractLFGroup> c = sim.getRequestedFeatureGroupClass();
+		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();
 		
 		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-		AbstractLFGroup<LF> fg = fc.getFeature(c);
+		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);
 		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
 		AbstractID fcID = null;
 		if ( IHasID.class.isInstance(fc) ) {
@@ -389,7 +387,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 		for ( Iterator<IFeaturesCollector_Labeled_HasID> itfc=collection.iterator(); itfc.hasNext(); ) {
 			IFeaturesCollector_Labeled_HasID currFC = itfc.next();
 			//AbstractLFGroup<LF> currFG = (AbstractLFGroup<LF>) currFC.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-			AbstractLFGroup<LF> currFG = fc.getFeature(c);
+			ALocalFeaturesGroup<LF> currFG = fc.getFeature(c);
 			for ( int i=0; i<currFG.size(); i++) {
 				LF curr = (LF) currFG.getFeature(i);
 				if ( 	notSameFCID
@@ -397,7 +395,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 						&&  (
 								fc == curr
 								||
-								fcID.equals( ((ILocalFeature) curr).getLinkedGroup().getID() )
+								fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
 							) ) {
 					//LEAVE ONE OUT ON ID
 					continue;
@@ -601,7 +599,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 //	}
 	
 	public final ISimilarityResults[] geomFilter( ISimilarityResults[] kNNs ) {
-		HashMap<AbstractLFGroup,LocalFeaturesMatches> hashMap = new HashMap();
+		HashMap<ALocalFeaturesGroup,LocalFeaturesMatches> hashMap = new HashMap();
 			
 		ILabeled[] absBest = new ILabeled[kNNs.length];
 		double[] absoluteFirstDist = new double[kNNs.length];
@@ -619,7 +617,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 		for (int i = 0; i < kNNs.length; i++)
 			pQueue[i] = new SimPQueueLowe2NN();
 		
-		AbstractLFGroup queryGroup = ((ILocalFeature) kNNs[0].getQuery()).getLinkedGroup();
+		ALocalFeaturesGroup queryGroup = ((ALocalFeature) kNNs[0].getQuery()).getLinkedGroup();
 		float[] bofIDF = queryGroup.getBofIDF();
 //		HashSet noMultiplePointHashSet = new HashSet();
 		for (int i = 0; i < kNNs.length; i++) {
@@ -631,7 +629,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 			
 			for ( Iterator<ObjectWithDistance> it = kNNs[i].iterator(); it.hasNext(); ) {
 				ObjectWithDistance curr = it.next();
-				ILocalFeature lf = (ILocalFeature) curr.getObj();
+				ALocalFeature lf = (ALocalFeature) curr.getObj();
 				double dist = curr.getDist();
 				AbstractLabel currLabel = lf.getLabel();
 				if ( currLabel != firstLabel ) {
@@ -641,13 +639,13 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 				}
 			}
 			
-			ILocalFeature qLF = (ILocalFeature) kNNs[i].getQuery();
+			ALocalFeature qLF = (ALocalFeature) kNNs[i].getQuery();
 						
 //			noMultiplePointHashSet.clear();
 			for ( Iterator<ObjectWithDistance> it = kNNs[i].iterator(); it.hasNext(); ) {
 				
 				ObjectWithDistance curr = it.next();
-				ILocalFeature lf = (ILocalFeature) curr.getObj();
+				ALocalFeature lf = (ALocalFeature) curr.getObj();
 				double dist = curr.getDist();
 				if ( !it.hasNext() ) {
 					absoluteLastDist[i] = dist;
@@ -658,7 +656,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 //				}
 //				double lfConf = 1.0 - ( dist / secondLabelDist );
 				
-				AbstractLFGroup currGroup = lf.getLinkedGroup();
+				ALocalFeaturesGroup currGroup = lf.getLinkedGroup();
 				
 				// to avoid multiple points from same group
 //				if ( !noMultiplePointHashSet.add(currGroup) ) continue;
@@ -802,11 +800,11 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 	
 	public final PredictedLabel[] getPredictedLabels_geom( ISimilarityResults[] kNNs ) {
 		
-		HashMap<AbstractLFGroup,LocalFeaturesMatches> hashMap = new HashMap();
+		HashMap<ALocalFeaturesGroup,LocalFeaturesMatches> hashMap = new HashMap();
 		
 		AbstractLabel[] labels = new AbstractLabel[kNNs.length];
 		
-		AbstractLFGroup queryGroup = ((ILocalFeature) kNNs[0].getQuery()).getLinkedGroup();
+		ALocalFeaturesGroup queryGroup = ((ALocalFeature) kNNs[0].getQuery()).getLinkedGroup();
 		float[] bofIDF = queryGroup.getBofIDF();
 //		if ( ((ILocalFeature) kNNs[0].getQuery()).getLinkedGroup().getID().equals(new IDString("2971367630"))) {
 //			System.err.println("FOUND!");
@@ -816,14 +814,14 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 		for (int i = 0; i < kNNs.length; i++) {
 			ObjectWithDistance first = kNNs[i].getFirst();
 			double firstDist = first.getDist();
-			AbstractLabel firstLabel = ((ILocalFeature) first.getObj()).getLabel();
+			AbstractLabel firstLabel = ((ALocalFeature) first.getObj()).getLabel();
 			labels[i] = firstLabel;
 			Double secondLabelDist = null;
 			
 			
 			for ( Iterator<ObjectWithDistance> it = kNNs[i].iterator(); it.hasNext(); ) {
 				ObjectWithDistance curr = it.next();
-				ILocalFeature lf = (ILocalFeature) curr.getObj();
+				ALocalFeature lf = (ALocalFeature) curr.getObj();
 				double dist = curr.getDist();
 				AbstractLabel currLabel = lf.getLabel();
 				if ( currLabel != firstLabel ) {
@@ -832,10 +830,10 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 				}
 			}
 			
-			ILocalFeature qLF = (ILocalFeature) kNNs[i].getQuery();
+			ALocalFeature qLF = (ALocalFeature) kNNs[i].getQuery();
 			for ( Iterator<ObjectWithDistance> it = kNNs[i].iterator(); it.hasNext(); ) {
 				ObjectWithDistance curr = it.next();
-				ILocalFeature lf = (ILocalFeature) curr.getObj();
+				ALocalFeature lf = (ALocalFeature) curr.getObj();
 				double dist = curr.getDist();
 				AbstractLabel currLabel = lf.getLabel();
 				if ( currLabel != firstLabel ) {
@@ -846,7 +844,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 				// TO DO !!!!
 //				if ( lfConf < lfConfThreshold ) continue;
 				
-				AbstractLFGroup currGroup = lf.getLinkedGroup();
+				ALocalFeaturesGroup currGroup = lf.getLinkedGroup();
 				
 				
 				double currConf = lfConf;
@@ -881,7 +879,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 				double secondLabelDist = 0;
 				for ( Iterator<ObjectWithDistance> it = kNNs[i].iterator(); it.hasNext(); ) {
 					ObjectWithDistance curr = it.next();
-					ILocalFeature lf = (ILocalFeature) curr.getObj();
+					ALocalFeature lf = (ALocalFeature) curr.getObj();
 					double dist = curr.getDist();
 					AbstractLabel currLabel = lf.getLabel();
 					if ( currLabel != labels[i] ) {
@@ -982,26 +980,26 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 	
 	
 	public final PredictedLabelWithSimilars classifyWithSimilars_sim(ISimilarityResults[] kNNs, double lfConfThreshold) {
-		HashMap<AbstractLFGroup,LocalFeaturesMatches> hashMap = new HashMap();
+		HashMap<ALocalFeaturesGroup,LocalFeaturesMatches> hashMap = new HashMap();
 		
 		//ArrayList<ObjectWithDistance> tRes = new ArrayList();
 		SimPQueueDMax pQueue = new SimPQueueDMax();
 		
-		AbstractLFGroup queryGroup = ((ILocalFeature) kNNs[0].getQuery()).getLinkedGroup();
+		ALocalFeaturesGroup queryGroup = ((ALocalFeature) kNNs[0].getQuery()).getLinkedGroup();
 //		float[] bofIDF = queryGroup.getBofIDF();
 
 		for (int i = 0; i < kNNs.length; i++) {
 			ObjectWithDistance first = kNNs[i].getFirst();
 			double firstDist = first.getDist();
-			AbstractLabel firstLabel = ((ILocalFeature) first.getObj()).getLabel();
-			ILocalFeature qLF = (ILocalFeature) kNNs[i].getQuery();
+			AbstractLabel firstLabel = ((ALocalFeature) first.getObj()).getLabel();
+			ALocalFeature qLF = (ALocalFeature) kNNs[i].getQuery();
 			for ( Iterator<ObjectWithDistance> it = kNNs[i].iterator(); it.hasNext(); ) {
 				ObjectWithDistance curr = it.next();
-				ILocalFeature lf = (ILocalFeature) curr.getObj();
+				ALocalFeature lf = (ALocalFeature) curr.getObj();
 				double dist = curr.getDist();
 				AbstractLabel currLabel = lf.getLabel();
 				
-				AbstractLFGroup currGroup = lf.getLinkedGroup();
+				ALocalFeaturesGroup currGroup = lf.getLinkedGroup();
 				
 //				double currConf = lfConf;
 //				if ( bofIDF != null ) currConf *= bofIDF[i];
@@ -1087,9 +1085,9 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 		HashMap<AbstractLabel, Double> hm = new HashMap<AbstractLabel, Double>();
 
 		// --------------- Searching similars ------------------------//
-		HashMap<AbstractLFGroup, Double> hmGroups = new HashMap<AbstractLFGroup, Double>();
+		HashMap<ALocalFeaturesGroup, Double> hmGroups = new HashMap<ALocalFeaturesGroup, Double>();
 		
-		AbstractLFGroup queryGroup = ((ILocalFeature) filteredkNN[0].getQuery()).getLinkedGroup();
+		ALocalFeaturesGroup queryGroup = ((ALocalFeature) filteredkNN[0].getQuery()).getLinkedGroup();
 		float[] idf = queryGroup.getBofIDF();
 		
 		// for each LF in the query we have ISimilarityResults
@@ -1122,7 +1120,7 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 			ObjectWithDistance first = filteredkNN[i].getFirst();
 			if ( first == null ) continue;
 			//////////////////// TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			AbstractLFGroup<LF> currGroup = ((ILocalFeature) first.getObj()).getLinkedGroup();
+			ALocalFeaturesGroup<LF> currGroup = ((ALocalFeature) first.getObj()).getLinkedGroup();
 			
 			// SIMILARS
 			value = hmGroups.get(currGroup);
@@ -1159,15 +1157,15 @@ public class LFCollClassifier<LF>  implements IClassifier, ILFClassifier  {
 		}
 
 		// searching nearest neighbors groups
-		Vector<ObjectWithDistance<AbstractLFGroup>> v = new Vector(hmGroups.size());
+		Vector<ObjectWithDistance<ALocalFeaturesGroup>> v = new Vector(hmGroups.size());
 		int i = 0;
-		for (Iterator<Entry<AbstractLFGroup, Double>> it = hmGroups.entrySet()
+		for (Iterator<Entry<ALocalFeaturesGroup, Double>> it = hmGroups.entrySet()
 				.iterator(); it.hasNext(); i++) {
-			Entry<AbstractLFGroup, Double> curr = it.next();
+			Entry<ALocalFeaturesGroup, Double> curr = it.next();
 			// filtering not best class
 			if (curr.getKey().getLabel().equals(best)) {
 				// as distance we use 1-curr.getValue()/kNNs.size() < 1
-				v.add(new ObjectWithDistance<AbstractLFGroup>(curr.getKey(), 1
+				v.add(new ObjectWithDistance<ALocalFeaturesGroup>(curr.getKey(), 1
 						- curr.getValue() / filteredkNN.length));
 			}
 		}

@@ -29,8 +29,8 @@ import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
-import it.cnr.isti.vir.features.localfeatures.ILocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
 import it.cnr.isti.vir.id.IDClasses;
@@ -51,13 +51,13 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 	protected final Collection<ObjectWithDistance<E>> coll;
 	protected E query;
 	
-	protected AbstractLFGroup excludedGroup = null;
+	protected ALocalFeaturesGroup excludedGroup = null;
 	
-	public AbstractLFGroup getExcludedGroup() {
+	public ALocalFeaturesGroup getExcludedGroup() {
 		return excludedGroup;
 	}
 
-	public void setExcludedGroup(AbstractLFGroup excludedGroup) {
+	public void setExcludedGroup(ALocalFeaturesGroup excludedGroup) {
 		this.excludedGroup = excludedGroup;
 	}
 
@@ -79,7 +79,7 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
         		return;
         	}
         	next = internalIterator.next();
-        	while ( ((ILocalFeature) ((ObjectWithDistance) next).getObj()).getLinkedGroup() == excludedGroup ) {
+        	while ( ((ALocalFeature) ((ObjectWithDistance) next).getObj()).getLinkedGroup() == excludedGroup ) {
         		if (!internalIterator.hasNext()) {
         			next = null;
         			return;
@@ -260,11 +260,11 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		return resIDs;
 	}
 
-	public SimilarityResults getRemovingLFByGroup(AbstractLFGroup toRemoveGroup) {
+	public SimilarityResults getRemovingLFByGroup(ALocalFeaturesGroup toRemoveGroup) {
 		SimilarityResults res = new SimilarityResults(this.size());
 		for (Iterator<ObjectWithDistance<E>> itThis = coll.iterator(); itThis.hasNext(); ) {
 			ObjectWithDistance<E> obj = itThis.next();
-			if ( ! (toRemoveGroup == ((ILocalFeature) obj.obj).getLinkedGroup()) ) {
+			if ( ! (toRemoveGroup == ((ALocalFeature) obj.obj).getLinkedGroup()) ) {
 				res.coll.add(obj);
 			}
 		}		

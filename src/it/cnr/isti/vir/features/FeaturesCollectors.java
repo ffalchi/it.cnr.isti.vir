@@ -38,7 +38,7 @@ import java.util.Hashtable;
 
 public class FeaturesCollectors {
 
-	static final Class<?>[] fccIDclass = {
+	static final Class[] fccIDclass = {
 		FeaturesCollectorHT.class,
 		FeaturesCollectorHTwithID.class,
 		FeaturesCollectorHTwithIDClassified.class,

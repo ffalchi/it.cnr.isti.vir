@@ -44,72 +44,77 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 
-public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID {
+public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements IFeature, ILabeled, IHasID {
 	
-	protected LF[] lfArr;
+	public LF[] lfArr;
 
 	public IFeaturesCollector linkedFC;
 	
 //	private Point2D.Double maxXY;
 //        private Point2D.Double minXY;
-        private float[][] box;
-        private float[] boxWidthHeight;
-        private float[] bofIDF;
-		private float[] meanXY;
-        private float   avgDistFromMean;
-        private static final float sqrt2 = (float) Math.sqrt(2.0);
+	private float[][] box;
+	private float[] boxWidthHeight;
+	private float[] bofIDF;
+	private float[] meanXY;
+	private float avgDistFromMean;
+	private static final float sqrt2 = (float) Math.sqrt(2.0);
 
-        public float[] getBofIDF() {
-			return bofIDF;
+	public abstract byte getSerVersion();
+	
+	public float[] getBofIDF() {
+		return bofIDF;
+	}
+
+	public void setBofIDF(float[] bofIDF) {
+		this.bofIDF = bofIDF;
+	}
+
+	public synchronized float[][] getBox() {
+		if (box == null) {
+			initBox();
 		}
+		return box;
+	}
 
-		public void setBofIDF(float[] bofIDF) {
-			this.bofIDF = bofIDF;
+	public void resetState() {
+		box = null;
+		boxWidthHeight = null;
+		bofIDF = null;
+		meanXY = null;
+		// avgDistFromMean
+	}
+
+	public float[] getMeanXY() {
+		if (meanXY == null)
+			initNorm();
+		return meanXY;
+	}
+
+	public float getNormScale() {
+		if (meanXY == null)
+			initNorm();
+		return sqrt2 / avgDistFromMean;
+	}
+
+	public int countInBox(float[][] box) {
+		int res = 0;
+		ALocalFeature[] arr = (ALocalFeature[]) lfArr;
+		for (int i = 0; i < lfArr.length; i++) {
+			if (Box.xyInBox(arr[i].getXY(), box)) {
+				res++;
+			}
 		}
-        
-        public synchronized float[][] getBox() {
-            if (box == null) {
-                initBox();
-            }
-            return box;
-        }
-        
-        public void resetState() {
-        	box = null;
-        	boxWidthHeight = null;
-        	bofIDF = null;
-        	meanXY = null;
-        	//avgDistFromMean
-        }
-
-        public float[] getMeanXY() {
-            if ( meanXY == null ) initNorm();
-            return meanXY;
-        }
-
-        public float getNormScale() {
-            if ( meanXY == null ) initNorm();
-            return sqrt2 / avgDistFromMean;
-        }
-
-        public int countInBox( float[][] box ) {
-            int res = 0;
-            ILocalFeature[] arr = (ILocalFeature[]) lfArr;
-            for ( int i=0; i<lfArr.length; i++ ) {
-                if ( Box.xyInBox(arr[i].getXY(), box )) {
-                    res++;
-                }
-            }
-            return res;
-        }
+		return res;
+	}
 
     public synchronized void initNorm() {
         if ( meanXY != null ) return;
         float sumX = 0;
         float sumY = 0;
-        ILocalFeature[] arr = (ILocalFeature[]) lfArr;
+        ALocalFeature[] arr = (ALocalFeature[]) lfArr;
         for (int i = 0; i < lfArr.length; i++) {
             float[] currXY = arr[i].getXY() ;
             sumX += currXY[0];
@@ -138,7 +143,7 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 		float minY = Float.MAX_VALUE;
 		float maxX = 0.0f;
 		float maxY = 0.0f;
-		ILocalFeature[] arr = (ILocalFeature[]) lfArr;
+		ALocalFeature[] arr = (ALocalFeature[]) lfArr;
 		for (int i = 0; i < lfArr.length; i++) {
 			float[] currXY = arr[i].getXY();
 
@@ -187,28 +192,26 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 //		return minXY;
 //	}
 
-        public final double getBoxDiagonal() {
-        	float[] wh = getBoxWidthHeight();
-            return Math.sqrt( wh[0] * wh[0] + wh[1] * wh[1]);
-        }
+	public final double getBoxDiagonal() {
+		float[] wh = getBoxWidthHeight();
+		return Math.sqrt(wh[0] * wh[0] + wh[1] * wh[1]);
+	}
 
-        public final float[] getBoxWidthHeight() {
-            if ( boxWidthHeight == null ) {
-                if ( box == null ) {
-                    initBox();
-                }
-                boxWidthHeight = new float[2];
-                boxWidthHeight[0] = Math.abs(box[1][0] - box[0][0]);
-                boxWidthHeight[1] = Math.abs(box[1][1] - box[0][1]);
-            }
-            return boxWidthHeight;
-        }
+	public final float[] getBoxWidthHeight() {
+		if (boxWidthHeight == null) {
+			if (box == null) {
+				initBox();
+			}
+			boxWidthHeight = new float[2];
+			boxWidthHeight[0] = Math.abs(box[1][0] - box[0][0]);
+			boxWidthHeight[1] = Math.abs(box[1][1] - box[0][1]);
+		}
+		return boxWidthHeight;
+	}
 
 	public abstract Class getLocalFeatureClass();
 	
 	static final public byte version = 0;
-	
-	public abstract void writeData(DataOutput out) throws IOException;
 	
 	protected ILFEval[] eval = null;
 	
@@ -245,18 +248,18 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 		this.eval = eval;
 	}
 
-	protected AbstractLFGroup(IFeaturesCollector fc) {
+	protected ALocalFeaturesGroup(IFeaturesCollector fc) {
 		this.linkedFC = fc;
 //		coll = new ArrayList<LF>(1);
 	}
 	
-	protected AbstractLFGroup(LF[] arr, IFeaturesCollector fc) {
+	protected ALocalFeaturesGroup(LF[] arr, IFeaturesCollector fc) {
 		lfArr = arr;
 		this.linkedFC = fc;
 	}
 	
-	public AbstractLFGroup(int initCapacity, IFeaturesCollector fc) {
-		lfArr = (LF[]) new ILocalFeature[initCapacity];
+	public ALocalFeaturesGroup(int initCapacity, IFeaturesCollector fc) {
+		lfArr = (LF[]) new ALocalFeature[initCapacity];
 		this.linkedFC = fc;
 	}
 
@@ -339,7 +342,7 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 	
 	public boolean equals(Object obj) {
 		if ( this == obj ) return true;
-		AbstractLFGroup<LF> givenF = (AbstractLFGroup<LF>) obj;
+		ALocalFeaturesGroup<LF> givenF = (ALocalFeaturesGroup<LF>) obj;
 		if ( this.lfArr.length != givenF.lfArr.length ) return false;
 		
 		for (int i=0; i<lfArr.length; i++) {
@@ -418,9 +421,9 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 
         public BufferedImage overPrint( BufferedImage img, int color ) {
 		double sum = 0;
-                ILocalFeature[] arr = (ILocalFeature[]) lfArr;
+                ALocalFeature[] arr = (ALocalFeature[]) lfArr;
 		for ( int i=0; i<arr.length; i++ ) {
-			ILocalFeature curr = arr[i];
+			ALocalFeature curr = arr[i];
 			float[] xy = null;
 			xy = curr.getXY();
 			overPrint_point(img, xy, color);
@@ -428,9 +431,17 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 		return img;
 	}
 
-    abstract public float getMinSize();
+	public final float getMinSize() {
+		float minSize = Float.MAX_VALUE;
+		for (int i = 0; i < lfArr.length; i++) {
+			float curr = lfArr[i].getScale();
+			if (curr < minSize)
+				minSize = curr;
+		}
+		return minSize;
+	}
         
-    public AbstractLFGroup getReducedRandom(float redFactor) {
+    public final ALocalFeaturesGroup getReducedRandom(float redFactor) {
     	if ( lfArr == null || lfArr.length == 0 )
     		return create ( lfArr, linkedFC);
 		ArrayList tRes = new ArrayList<LF>(lfArr.length);
@@ -444,20 +455,16 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 		return create(newArr, linkedFC );
 	}
     
-    public abstract AbstractLFGroup create(LF[] arr, IFeaturesCollector fc);
+    public abstract ALocalFeaturesGroup create(LF[] arr, IFeaturesCollector fc);
     
-	public AbstractLFGroup getReducedMinSizeByFactor(float lsMinSizeFactor) {
+	public ALocalFeaturesGroup getReducedMinSizeByFactor(float lsMinSizeFactor) throws Exception {
 		float minSize = getMinSize();
 		return this.getAboveSize( minSize * lsMinSizeFactor);
 	}
-	
-	public abstract  AbstractLFGroup getAboveSize(float minSize);
-
-
 	public ArrayList getLF( float xMin, float yMin, float xMax, float yMax ) {
 		ArrayList<LF> list = new ArrayList(lfArr.length);
 		for (int i=0; i<lfArr.length; i++) {
-			ILocalFeature curr = (ILocalFeature) lfArr[i];
+			ALocalFeature curr = (ALocalFeature) lfArr[i];
 			float[] xy = curr.getXY();
 			if ( 	xy[0] >= xMin && xy[0] <= xMax &&
 					xy[1] >= yMin && xy[1] <= yMax ) {
@@ -467,6 +474,68 @@ public abstract class AbstractLFGroup<LF> implements IFeature, ILabeled, IHasID 
 		
 		return list;
 	}
+		
+	public LF[] getLFAboveSize(float minSize) {
+		ArrayList<LF> newArr = new ArrayList<LF>(lfArr.length);
+		for ( int i=0; i<lfArr.length; i++ ) {
+			if ( lfArr[i].getScale() >= minSize )
+				newArr.add(lfArr[i]);
+		}
+		
+		return (LF[]) newArr.toArray();
+	}
+	
+	public ALocalFeaturesGroup<LF> getAboveSize(float minSize) throws Exception {
+		Class<? extends ALocalFeaturesGroup> c = this.getClass();
+		Class<? extends ALocalFeature> cLF = getLocalFeatureClass();
+		
+		ALocalFeaturesGroup<LF> res =
+				c.getConstructor(Array.newInstance(cLF, 0).getClass(), IFeaturesCollector.class)
+				.newInstance(getLFAboveSize(minSize), linkedFC);
+		System.out.println("Was " + this.size() + " reduced to " + res.size() );
+		return res;
+	}
 
+	public final void writeData(DataOutput out) throws IOException {
+		out.writeByte(this.getSerVersion());
+		
+		byte[][] bytes = new byte[lfArr.length][];
+		for ( int i=0; i<lfArr.length; i++ ) {
+			bytes[i] = lfArr[i].getBytes();
+		}
+		int size = 0;
+		for ( byte[] b : bytes ) {
+			size += b.length;
+		}
+		
+		// bytes length
+		out.writeInt(size + 4);
+		// number of LFs
+		out.writeInt(lfArr.length);
+		
+		for ( byte[] b : bytes ) {
+			out.write(b);
+		}
+		
+	}
+	
+	public final void filterScale(double scale) {
+
+		if ( lfArr == null ) return;
+		LinkedList<LF> okList = new LinkedList();
+		for (int i = 0; i < lfArr.length; i++) {
+			LF f = lfArr[i];
+			if (f.getScale() > scale)
+				okList.add(f);
+		}
+		System.out.println("Removing " + (lfArr.length - okList.size())
+				/ (double) lfArr.length + " of points.");
+		lfArr = (LF[]) Array.newInstance(this.lfArr[0].getClass(), okList.size());
+		int i = 0;
+		for (Iterator<LF> it1 = okList.iterator(); it1.hasNext();) {
+			lfArr[i++] = it1.next();
+		}
+	}
+	
 	
 }

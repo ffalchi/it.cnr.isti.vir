@@ -30,7 +30,7 @@
 package it.cnr.isti.vir.geom;
 
 import Jama.EigenvalueDecomposition;
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.util.RandomOperations;
 import java.awt.image.BufferedImage;
 
@@ -83,7 +83,7 @@ public class HomographyTransformation extends AbstractTransformation {
      *
      */
 
-    public final HomographyTransformation getDeNormalized( AbstractLFGroup gr1, AbstractLFGroup gr2 ) {
+    public final HomographyTransformation getDeNormalized( ALocalFeaturesGroup gr1, ALocalFeaturesGroup gr2 ) {
         double[] newValues = new double[9];
 
         float  scale1 = gr1.getNormScale();

@@ -27,8 +27,8 @@ package it.cnr.isti.vir.features.bof;
 import gnu.trove.list.array.TIntArrayList;
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.localfeatures.AbstractLFGroup;
-import it.cnr.isti.vir.features.localfeatures.ILocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.util.IntByteArrayUtil;
 import it.cnr.isti.vir.util.RandomOperations;
 
@@ -91,14 +91,14 @@ public class BoF implements IFeature {
     }
 	
 	public BoF(IFeaturesCollector fcc, LFWords fWords) {
-		this( (AbstractLFGroup) fcc.getFeature(fWords.getLocalFeaturesGroupClass()), fWords);
+		this( (ALocalFeaturesGroup) fcc.getFeature(fWords.getLocalFeaturesGroupClass()), fWords);
 	}
 	
-	public BoF(AbstractLFGroup group, LFWords fWords) {
-		this( (ILocalFeature[]) group.getLocalFeatures(), fWords);
+	public BoF(ALocalFeaturesGroup group, LFWords fWords) {
+		this( (ALocalFeature[]) group.getLocalFeatures(), fWords);
 	}
 	
-	public BoF(ILocalFeature[] features, LFWords fWords) {
+	public BoF(ALocalFeature[] features, LFWords fWords) {
 		this.fWords = fWords;
 		bag = fWords.getBags(features);
 		//bag = fWords.getWeightedBags(features,  1);
