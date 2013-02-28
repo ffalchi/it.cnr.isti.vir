@@ -26,6 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.L1;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -51,11 +52,15 @@ public final class ColorStructure implements IFeature, java.io.Serializable {
 	 * Should be readed using 
 	 * (int) byte[i]
 	 */
-	byte[] values;	
+	public final byte[] values;	
 	
 	static final int nOfValues = 64;	
 	
 	static final byte version = 1;
+	
+	public ColorStructure(byte[] values) {
+		this.values = values;
+	}
 	
 	public ColorStructure(DataInput str) throws IOException {
 		byte version = str.readByte();
@@ -86,43 +91,34 @@ public final class ColorStructure implements IFeature, java.io.Serializable {
 	}
 	
 	public ColorStructure(XMLStreamReader xmlr) throws XMLStreamException, MPEG7VDFormatException {
-		parse(xmlr);		
+		byte[] tValues = null;
+		for (int event = xmlr.next(); event != XMLStreamConstants.END_DOCUMENT; event = xmlr.next()) {
+			switch (event) {
+			case XMLStreamConstants.START_ELEMENT:
+				if (xmlr.getLocalName().equals("Values")) {
+					tValues = Convertions.stringToUnsignedByteArray(xmlr
+							.getElementText());
+				}
+				break;
+			case XMLStreamConstants.END_ELEMENT:
+				if (xmlr.getLocalName().equals("VisualDescriptor")) {
+					values = tValues;
+					return;
+				}
+				break;
+			} // end switch
+		} // end while	
+		values = tValues;
 	}
 
 	public static final double mpeg7XMDistance(ColorStructure f1, ColorStructure f2) {
-		
-		byte[] values1 = f1.values;
-		byte[] values2 = f2.values;
- 		
-		int sum = 0;
-		
-		assert (values1.length==values2.length);
-		for ( int i=0; i<values1.length; i++ ) {
-			sum += Math.abs( 	values1[i] - values2[i]); // for the difference we do not need convertion
-			//sum += Math.abs( 	Convertions.unsignedByteToInt(values1[i]) - Convertions.unsignedByteToInt(values2[i] ));
-		}				
-		return sum; /// 255.0;
+		return L1.get(f1.values, f2.values);
 	}
-
+/*
 	public void parse(XMLStreamReader xmlr) throws XMLStreamException, MPEG7VDFormatException {
-		for (int event = xmlr.next();  
-	    	event != XMLStreamConstants.END_DOCUMENT;
-	    	event = xmlr.next()) {
-	    	switch (event) {
-	        	case XMLStreamConstants.START_ELEMENT:
-	            	if (xmlr.getLocalName().equals("Values") ) { 
-	            		values = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );
-	            	}
-	            	break;
-	            case XMLStreamConstants.END_ELEMENT:
-	            	if (xmlr.getLocalName().equals("VisualDescriptor") ) { 
-	            		return;
-	            	}
-	            	break;
-	    	} // end switch
-	    } // end while
+
 	}
-	
+	*/
 //	protected void parseValues( XMLStreamReader xmlr ) throws XMLStreamException, MPEG7VDFormatException  {
 //		for (int event = xmlr.next();  
 //	    	event != XMLStreamConstants.END_DOCUMENT;

@@ -96,9 +96,6 @@ public class IDClasses  {
 	}
 	
 	public static final AbstractID readData(DataInput in ) throws IOException {
-		
-
-		
 		int idInt = in.readByte();
 		
 		if ( idInt == -1 ) return null;
@@ -126,8 +123,12 @@ public class IDClasses  {
 	}
 
 	public static final void writeData(AbstractID id, DataOutput out) throws IOException {
-		out.writeByte( getClassID(id.getClass()) );		
-		id.writeData(out);
+		if ( id == null ) {
+			out.writeByte( (byte)  -1 );
+		} else {
+			out.writeByte( getClassID(id.getClass()) );		
+			id.writeData(out);
+		}
 	}
 	
 	public static Class<? extends AbstractID> readClass(DataInput in) throws IOException {

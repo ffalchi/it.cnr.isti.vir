@@ -85,6 +85,7 @@ public class IDInteger extends AbstractID {
 	}
 	
 	public final boolean equals(Object obj) {
+		if ( obj== null ) return false;
 		return this.id == ((IDInteger) obj).id;
 	}
 	

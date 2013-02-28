@@ -24,16 +24,22 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.metric;
 
+import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
 import it.cnr.isti.vir.features.mpeg7.vd.HomogeneousTexture;
 import it.cnr.isti.vir.features.mpeg7.vd.ScalableColor;
+import it.cnr.isti.vir.util.Mean;
 
-public class SAPIRMetric implements Metric<IFeaturesCollector> {
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Properties;
+
+public class SAPIRMetric implements Metric<IFeaturesCollector>, IMeanEvaluator<SAPIRObject> {
 	
 	private static long distCount = 0;
 	public static final FeatureClassCollector reqFeatures = new FeatureClassCollector(
@@ -62,6 +68,10 @@ public class SAPIRMetric implements Metric<IFeaturesCollector> {
 	@Override
 	public FeatureClassCollector getRequestedFeaturesClasses() {		
 		return reqFeatures;
+	}
+	
+	public SAPIRMetric(Properties prop) {
+		
 	}
 	
 /*	public final double distance(Image img1, Image img2) {
@@ -102,5 +112,41 @@ public class SAPIRMetric implements Metric<IFeaturesCollector> {
 	
 	public String toString() {
 		return this.getClass().toString();
+	}
+	
+	@Override
+	public SAPIRObject getMean(Collection<SAPIRObject> coll) {
+		int size = coll.size();
+		
+		if ( coll.size() == 0 ) return null;
+		
+		// ColorLayout
+		ColorLayout firstCL = coll.iterator().next().cl;
+		int yACCoeff_n = firstCL.getYACCoeff_n();
+		int cbACCoeff_n = firstCL.getCBACCoeff_n();
+		int crACCoeff_n  = firstCL.getCRACCoeff_n();
+		
+		byte[][] clVArr = new byte[size][];
+		byte[][] csVArr = new byte[size][];
+		short[][] scVArr = new short[size][];
+		float[][] ehVArr = new float[size][];
+		float[][] htVArr = new float[size][];
+		int i=0;
+		for ( Iterator<SAPIRObject> it = coll.iterator(); it.hasNext(); ) {
+			SAPIRObject curr = it.next();
+			clVArr[i] = curr.cl.getByteArray();
+			csVArr[i] = curr.cs.values;
+			scVArr[i] = curr.sc.coeff;
+			ehVArr[i] = curr.eh.totHistogram;
+			htVArr[i] = curr.ht.preComputed;
+			i++;
+		}
+		ColorLayout clMean = new ColorLayout(Mean.getMean(clVArr), yACCoeff_n, cbACCoeff_n, crACCoeff_n);
+		ScalableColor scMean = new ScalableColor(Mean.getMean(scVArr));		
+		EdgeHistogram ehMean = new EdgeHistogram(Mean.getMean(ehVArr));		
+		ColorStructure csMean = new ColorStructure(Mean.getMean(csVArr));		
+		HomogeneousTexture htMean = new HomogeneousTexture(Mean.getMean(htVArr));	
+		
+		return new SAPIRObject(clMean, csMean, scMean, ehMean, htMean, null);
 	}
 }

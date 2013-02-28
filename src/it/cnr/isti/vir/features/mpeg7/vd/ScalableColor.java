@@ -26,6 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.L1;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -53,9 +54,13 @@ public class ScalableColor implements IFeature, java.io.Serializable {
 	 */
 	
 	static final int nOfCoeff = 64;
-	final short[] coeff;
+	public final short[] coeff;
 	
 	static final byte version = 0;
+	
+	public ScalableColor(short[] coeff) {
+		this.coeff = coeff;
+	}
 	
 	public ScalableColor(DataInput str) throws IOException {
 		byte version = str.readByte();
@@ -133,15 +138,7 @@ public class ScalableColor implements IFeature, java.io.Serializable {
 
 	
 	public static final double mpeg7XMDistance(ScalableColor f1, ScalableColor f2) {
-		short[] coeff1 = f1.coeff;
-		short[] coeff2 = f2.coeff;
-		int sum = 0;
-		assert(coeff1.length == coeff2.length);
-		for ( int i=0; i<coeff1.length; i++ ) {
-			sum += Math.abs( coeff1[i] - coeff2[i] );
-		}
-				
-		return sum;
+		return L1.get(f1.coeff, f2.coeff);
 	}
 
 	public String toString() {

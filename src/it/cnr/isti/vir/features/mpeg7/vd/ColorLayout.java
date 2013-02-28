@@ -66,6 +66,66 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 				
 				};
 
+	public int getYACCoeff_n() {
+		return yACCoeff.length;
+	}
+	
+	public int getCBACCoeff_n() {
+		return cbACCoeff.length;
+	}
+	
+	public int getCRACCoeff_n() {
+		return crACCoeff.length;
+	}
+	
+	public ColorLayout(byte yDCCoeff, byte cbDCCoeff, byte crDCCoeff, byte[] yACCoeff, byte[] cbACCoeff, byte[] crACCoeff) {
+		super();
+		this.yDCCoeff = yDCCoeff;
+		this.cbDCCoeff = cbDCCoeff;
+		this.crDCCoeff = crDCCoeff;
+		this.yACCoeff = yACCoeff;
+		this.cbACCoeff = cbACCoeff;
+		this.crACCoeff = crACCoeff;
+	}
+	
+	public ColorLayout(byte[] values, int yACCoeff_n, int cbACCoeff_n, int crACCoeff_n) {
+		int i=0; 
+		this.yDCCoeff = values[i++];
+		this.cbDCCoeff = values[i++];
+		this.crDCCoeff = values[i++];
+		this.yACCoeff = new byte[yACCoeff_n];
+		System.arraycopy(values, i, yACCoeff, 0, yACCoeff_n);	
+		i+=yACCoeff_n;
+		
+		this.cbACCoeff = new byte[cbACCoeff_n];
+		System.arraycopy(values, i, cbACCoeff, 0, cbACCoeff_n);	
+		i+=cbACCoeff_n;
+		
+		this.crACCoeff = new byte[crACCoeff_n];
+		System.arraycopy(values, i, crACCoeff, 0, crACCoeff_n);	
+		i+=crACCoeff_n;
+	}
+	
+	public byte[] getByteArray() {
+		int size = 3 + yACCoeff.length + cbACCoeff.length + crACCoeff.length;
+		byte[] res = new byte[size];
+		int i=0; 
+		res[i++] = yDCCoeff;
+		res[i++] = cbDCCoeff;
+		res[i++] = crDCCoeff;
+		
+		System.arraycopy(yACCoeff, 0, res, i, yACCoeff.length);
+		i+=yACCoeff.length;
+		
+		System.arraycopy(cbACCoeff, 0, res, i, cbACCoeff.length);
+		i+=cbACCoeff.length;
+		
+		System.arraycopy(crACCoeff, 0, res, i, crACCoeff.length);
+		i+=crACCoeff.length;
+		
+		return res;		
+	}
+
 	public ColorLayout(ByteBuffer src) throws IOException {
 		double version = src.get();
 		yDCCoeff = src.get();
@@ -151,7 +211,7 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 		str.writeByte((byte) crACCoeff.length);
 		for (int i=0; i<crACCoeff.length; i++) {
 			str.writeByte(crACCoeff[i]);
-		}	
+		}
 	}
 	
 	
@@ -251,27 +311,11 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 	}
 	
 	public final static double mpeg7XMDistance(ColorLayout d1, ColorLayout d2) {
-		
-//		ColorLayout d1 = (ColorLayout) featureInterface;
-//		ColorLayout d2 = (ColorLayout) featureInterface2;
-		
+		// Weighted Euclidean L2
 		int sum[] = new int[3];
 		int diff;
 		int NY1, NY2, NC1, NC2, NY, NC;
 		int j;
-
-
-		/*
-		 * int m_weight[3][64]; m_weight[0][0]=3;
-		 * m_weight[0][1]=m_weight[0][2]=3; m_weight[1][0]=2;
-		 * m_weight[1][1]=m_weight[1][2]=2; m_weight[2][0]=4;
-		 * m_weight[2][1]=m_weight[2][2]=2;
-		 * 
-		 * //m_weight[0][0]=2; m_weight[0][1]=m_weight[0][2]=2;
-		 * //m_weight[1][0]=2; m_weight[1][1]=m_weight[1][2]=1;
-		 * //m_weight[2][0]=4; m_weight[2][1]=m_weight[2][2]=2; for(int i=0; i<3;
-		 * i++){ for(int j=3; j<64; j++) m_weight[i][j]=1; }
-		 */
 
 		NY1 = d1.yACCoeff.length;
 		NY2 = d2.yACCoeff.length;
@@ -303,8 +347,7 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 			sum[2] += (m_weight[2][j + 1] * diff * diff);
 		}
 
-		return Math.sqrt(sum[0] * 1.0) + Math.sqrt(sum[1] * 1.0)
-				+ Math.sqrt(sum[2] * 1.0);
+		return Math.sqrt((double) sum[0]) + Math.sqrt((double) sum[1])	+ Math.sqrt((double) sum[2]);
 	} /* D_Distances_ColorLayoutD */	
 	
 	@Override

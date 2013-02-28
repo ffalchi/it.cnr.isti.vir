@@ -26,6 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.L1;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -58,7 +59,7 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 	final byte[] binCounts;
 	
 	// extended version
-	final float[] totHistogram;
+	public final float[] totHistogram;
 	
 	static final byte version = 0;
 	
@@ -81,6 +82,11 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 				if ( binCounts[i] != given.binCounts[i] ) return false;
 		
 		return true;
+	}
+	
+	public EdgeHistogram(float[] totHistogram ) {
+		this.totHistogram = totHistogram;
+		binCounts = null;
 	}
 	
 	public EdgeHistogram(ByteBuffer str) throws IOException {
@@ -206,18 +212,19 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 	}
 	
 	public static final double mpeg7XMDistance_TotalH(float[] tH1, float[] tH2) {
-			int	i;
-			double	dist, dTemp;
-			
-			dist = 0.0;
-			for(i=0; i < 80+70; i++){
-			  // Global(5)+Semi_Global(65)
-			  dTemp= (tH1[i] - tH2[i]);
-			  if (dTemp < 0.0) dTemp = -dTemp;
-			  dist += dTemp;
-			}
-
-			return dist;
+		return L1.get(tH1,  tH2);
+//			int	i;
+//			double	dist, dTemp;
+//			
+//			dist = 0.0;
+//			for(i=0; i < 80+70; i++){
+//			  // Global(5)+Semi_Global(65)
+//			  dTemp= (tH1[i] - tH2[i]);
+//			  if (dTemp < 0.0) dTemp = -dTemp;
+//			  dist += dTemp;
+//			}
+//
+//			return dist;
 	}
 /*	
 	public final double mpeg7XMDistancebins(EdgeHistogram givenD) {
@@ -277,9 +284,14 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 		
 		EdgeHistogram vd = (EdgeHistogram) givenVD;
 
-		for (int i=0; i<binCounts.length; i++ ){
-			if ( binCounts[i] != vd.binCounts[i] ) return false;
-		}
+		if ( binCounts != null )
+			for (int i=0; i<binCounts.length; i++ ){
+				if ( binCounts[i] != vd.binCounts[i] ) return false;
+			}
+		else
+			for (int i=0; i<totHistogram.length; i++ ){
+				if ( totHistogram[i] != vd.totHistogram[i] ) return false;
+			}			
 
 
 		return true;
@@ -447,6 +459,6 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 //	public final IFeatureCollector getFeature(Class featureClass) {
 //		if ( featureClass.equals(this.getClass()) ) return this;
 //		return null;
-//	}
-	
+	// }
+
 }

@@ -174,8 +174,6 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			idPosMap.put(id, currPos);
 		}
 
-
-
 		if (fcClass == null) {
 			FeaturesCollectors.writeData(rndFile, fc);
 		} else {
@@ -586,6 +584,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			featuresClasses = new FeatureClassCollector(rndFile);
 			idClass = IDClasses.readClass(rndFile);
 
+			// OFFSETE & ID FILES 
 			if (!offsetFile.exists() || !idFile.exists()
 					|| file.lastModified() > offsetFile.lastModified()
 					|| file.lastModified() > idFile.lastModified()) {
@@ -599,6 +598,8 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 				else if (file.lastModified() > idFile.lastModified())
 					System.out.println("IDs file file out of date will be delete and rebuilt");
 				
+				
+				// Reading all
 				System.out.print("Analysing binary file... ");
 				positions = new TLongArrayList();
 				ids = new ArrayList();
@@ -617,7 +618,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 
 					ids.add(((IHasID) fc).getID());
 					
-					System.out.println(positions.size());
+					if ( positions.size() % 1000 == 0 ) System.out.println(positions.size());
 				}
 				System.out.println("done");
 
@@ -667,8 +668,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 					idPosMap = new HashMap(2 * size);
 
 					System.out.print("Reading IDs... ");
-					ids = new ArrayList(Arrays.asList(IDClasses.readArray(
-							idInput, size, idClass)));
+					ids = new ArrayList(Arrays.asList(IDClasses.readArray(idInput, size, idClass)));
 					System.out.println("done");
 
 					System.out.print("Creating IDs HashTable... ");
@@ -691,15 +691,14 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 		} else {
 
 			// VERSION 1
-
 			fcClass = null;
 			fcClassConstructor = null;
 			fcClassConstructor_NIO = null;
 			// old IO
 			long indexOffSet = rndFile.readLong();
 
-			featuresClasses = new FeatureClassCollector(rndFile); // FeaturesCollectors.getClass(
-																	// file.readInt()
+			featuresClasses = new FeatureClassCollector(rndFile); 	// FeaturesCollectors.getClass(
+																	//	file.readInt()
 																	// );
 			// featureCollectorConstructor =
 			// featuresCollectorClass.getConstructor(DataInput.class);
@@ -712,8 +711,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			int size = rndFile.readInt();
 			System.out.println("--> The archive contains " + size);
 			System.out.println("--> Features Collector Class: " + fcClass);
-			System.out.println("--> Features to consider are: "
-					+ featuresClasses);
+			System.out.println("--> Features to consider are: " + featuresClasses);
 
 			// Reading offsets
 			long[] tempPositions = new long[size];
@@ -758,6 +756,10 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 	}
 
 	public void createIndexFiles() throws IOException {
+		createIndexFiles(offsetFile, idFile, positions, ids);
+	}
+	
+	public static void createIndexFiles(File offsetFile, File idFile, TLongArrayList positions, ArrayList<AbstractID> ids) throws IOException {
 
 		offsetFile.delete();
 		idFile.delete();

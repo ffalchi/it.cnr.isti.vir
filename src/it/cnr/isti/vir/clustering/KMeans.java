@@ -24,6 +24,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.clustering;
 
+import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.similarity.ILFSimilarity;
 import it.cnr.isti.vir.similarity.ISimilarity;
@@ -53,10 +54,22 @@ public class KMeans<O> {
 	
 	private int[] centroidChangedIndexes;
 	private boolean[] centroidChanged;
+	private boolean[] clusterChanged;
 	
 	private static final int eqCentroidsChange_Max = 100;
 	
 	private double distRedThr = 0.9999;
+	
+	
+	public KMeans(ArrayList<O> objects, ISimilarity<O> sim) {
+		
+		this.objects = objects;
+		this.meanEval = (IMeanEvaluator<O>) sim;
+		this.sim = sim;
+		randomOrdering();
+		
+	}
+	
 	
 	public double getDistRedThr() {
 		return distRedThr;
@@ -72,15 +85,7 @@ public class KMeans<O> {
 		this.meanEval = (IMeanEvaluator<O>) sim;
 		this.sim = sim;
 	}
-	
-	public KMeans(ArrayList<O> objects, ISimilarity<O> sim) {
-		
-		this.objects = objects;
-		this.meanEval = (IMeanEvaluator<O>) sim;
-		this.sim = sim;
-		randomOrdering();
-		
-	}
+
 	
 	public final void randomOrdering() {
 		// InitCentroids
@@ -113,6 +118,8 @@ public class KMeans<O> {
 		
 		final double[] dFromNNCentroid = new double[objects.size()];
 		Arrays.fill(dFromNNCentroid, Double.MAX_VALUE);
+		
+		
 		
 		// For parallel
 //		final int nObjPerThread = (int) Math.ceil( objects.size() / ParallelOptions.nThreads);
@@ -212,6 +219,7 @@ public class KMeans<O> {
 			clusters[i]=new ArrayList();
 		}
 		
+		clusterChanged = new boolean[centroids.length];
 		assignedCentroid = new int[objects.size()];
 		centroidDistance = new double[objects.size()];
 		
@@ -226,13 +234,22 @@ public class KMeans<O> {
 		for (int iterations=0; nCentroidsChanges>0; iterations++ ){
 			
 			if ( tempWordsOutFile != null ) {
-				LFWords words = new LFWords(getCentroids(true), (ILFSimilarity) sim);
-				DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
-				words.writeData(out);				
-				out.close();
+				if ( sim instanceof ILFSimilarity) {
+					LFWords words = new LFWords(getCentroids(true), (ILFSimilarity) sim);
+					DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
+					words.writeData(out);				
+					out.close();
+				} else {
+					Centroids centroids = new Centroids((IFeature[]) getCentroids(true));
+					DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
+					centroids.writeData(out);				
+					out.close();
+				}
 			}
 			
 			double newDistortion = 0.0;
+			
+			Arrays.fill(clusterChanged, false);
 			
 			// Clear
 			for ( int i=0; i<clusters.length; i++) {
@@ -241,6 +258,8 @@ public class KMeans<O> {
 			
 			final int currlastNCentroidChanges = lastNCentroidChanges;
 			
+			
+			
 			// checking and assigning centroids to objects
 			for (int iObj = 0; iObj < objects.size(); iObj++) {
 				O obj = objects.get(iObj);
@@ -248,25 +267,45 @@ public class KMeans<O> {
 				if (currlastNCentroidChanges != centroids.length
 						&& centroidChanged[assignedCentroid[iObj]] == false) {
 					// assigned centroid has not changed
+					double minDist = centroidDistance[iObj];
+					int nearest = assignedCentroid[iObj];
+					
 					for (int iChanged = 0; iChanged < centroidChangedIndexes.length
 							&& centroidChangedIndexes[iChanged] > 0; iChanged++) {
 						int currI = centroidChangedIndexes[iChanged];
 						if (centroids[currI] == null)
 							continue;
-						// Searching nearest centroid (between changed)
+						
+						// Searching nearest centroid (only between changed)
 						double dist = sim.distance(obj,
 								centroids[currI],
-								centroidDistance[iObj]);
-						if (dist > 0 && dist < centroidDistance[iObj]) {
+								minDist);
+						
+						if (dist > 0 && dist < minDist) {
+							minDist = dist;
+							nearest = currI;
+						} 
+						
+						/*if (dist > 0 && dist < centroidDistance[iObj]) {
 							// assign object to centroid
 							centroidDistance[iObj] = dist;
+							// clusters assignedCentroid[iObj] & currI will be affected
 							assignedCentroid[iObj] = currI;
-						}
+						}*/
+					}
+					
+					if ( nearest != assignedCentroid[iObj] ) {
+						// clusters assignedCentroid[iObj] & nearest will be affected
+						clusterChanged[assignedCentroid[iObj]]  = true;
+						clusterChanged[nearest]  = true;
+						
+						centroidDistance[iObj] = minDist;
+						assignedCentroid[iObj] = nearest;
 					}
 
-
 				} else {
-					// old centroid changed. Searching new one
+					
+					// old centroid changed. Searching new one between all
 					double minDist = Double.MAX_VALUE;
 					int nearest = -1;
 					for (int i = 0; i < centroids.length; i++) {
@@ -276,8 +315,12 @@ public class KMeans<O> {
 						if (dist > 0 && dist < minDist) {
 							minDist = dist;
 							nearest = i;
-						}
+						} 
 					}
+					// clusters assignedCentroid[iObj] & nearest will be affected
+					clusterChanged[assignedCentroid[iObj]]  = true;
+					clusterChanged[nearest]  = true;
+					
 					// Assign to nearest
 					centroidDistance[iObj] = minDist;
 					assignedCentroid[iObj] = nearest;
@@ -406,7 +449,8 @@ public class KMeans<O> {
 			}
 			
 			// centroids changed?
-			if ( !centroids[i].equals(newCentroid) ) {
+			//if ( !centroids[i].equals(newCentroid) ) {
+			if ( clusterChanged[i] ) {
 				centroids[i] = newCentroid;
 				centroidChangedIndexes[changesCount]= i;
 				changesCount++;

@@ -34,6 +34,7 @@ import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 import it.cnr.isti.vir.features.metadata.GPSData;
+import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 import it.cnr.isti.vir.features.mpeg7.vd.DominantColor;
@@ -84,7 +85,8 @@ public class FeatureClasses {
 		BoF.class,
 		VLAD.class,
 		ORB.class,
-		ORBGroup.class 
+		ORBGroup.class,
+		SAPIRObject.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

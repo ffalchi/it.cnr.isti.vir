@@ -33,7 +33,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> implements IFeature, Comparable<ALocalFeature<LFGroup>>, ILabeled {
+public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> implements Cloneable, IFeature, Comparable<ALocalFeature<LFGroup>>, ILabeled {
 	
 	protected KeyPoint kp = null; 
 	protected LFGroup linkedGroup = null;
@@ -101,6 +101,23 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> impleme
 	public LFGroup getLinkedGroup() {
 		return linkedGroup;
 	}
+		
+	public ALocalFeature unlink() {
+		linkedGroup = null;
+		return this;
+	}
+	
+	public ALocalFeature getUnlinked() {
+		return this.clone().unlink();
+	}
+		
+	public ALocalFeature clone() {
+		try {
+			return (ALocalFeature) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	public final float getScale() {
 		return kp.getScale();
@@ -152,6 +169,7 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> impleme
 		if (obj.getClass() != getClass()) return false;
 		return 0 == this.compareTo((ALocalFeature<LFGroup>) obj);
 	}
+
 	
 	//public abstract byte[] getBytes();
 	

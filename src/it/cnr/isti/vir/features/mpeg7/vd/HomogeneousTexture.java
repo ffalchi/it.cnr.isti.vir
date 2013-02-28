@@ -51,9 +51,14 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 
 	private final byte[] origData;
 
-	private final float[] preComputed; 
+	public final float[] preComputed; 
 	
 	static final byte version = 2;
+	
+	public HomogeneousTexture(float[] preComputed) {
+		origData = null;
+		this.preComputed = preComputed;
+	}
 	
 	public boolean equals(Object obj) {
 		if ( this == obj ) return true;
@@ -468,20 +473,24 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 		}
 
 		else
-		{	//default option is NULL ==> if (option == NULL)
-		  for(int n=0;n<RadialDivision;n++)
-		    for(int m=0;m<AngularDivision;m++) {
-		    	distance+=(wm[n]*Math.abs(fRefFeature[n*AngularDivision+m+2]-fQueryFeature[n*AngularDivision+m+2]))
-				+ 1*((wd[n]*Math.abs(fRefFeature[n*AngularDivision+m+30+2]-fQueryFeature[n*AngularDivision+m+30+2])));
-				
-				//distance+=(wm[n]*Math.abs(fRefFeature[n*AngularDivision+m+2]-fQueryFeature[n*AngularDivision+m+2]));
-				//if ( useEnergyDeviation ) distance += ((wd[n]*Math.abs(fRefFeature[n*AngularDivision+m+30+2]-fQueryFeature[n*AngularDivision+m+30+2])));
-			}			
-		  return distance;
-		  /////////////////////////////
+		{
+		  return mpeg7XMDistance(fQueryFeature, fRefFeature);
 		}
 	};
-
+	
+	
+	public static final double mpeg7XMDistance( float[] fQueryFeature, float[]  fRefFeature ) {
+		double distance = 0.0;
+		//default option is NULL ==> if (option == NULL)
+		for(int n=0;n<RadialDivision;n++)
+			for(int m=0;m<AngularDivision;m++) {
+		    	distance +=
+		    			wm[n] *	Math.abs(fRefFeature[n*AngularDivision+m+2]-fQueryFeature[n*AngularDivision+m+2])
+		    			+
+		    			wd[n] *	Math.abs(fRefFeature[n*AngularDivision+m+30+2]-fQueryFeature[n*AngularDivision+m+30+2]);
+			}			
+		return distance;
+	}
 	static final double dcmin=0.0, dcmax=255.0;
 	static final double stdmin=1.309462,stdmax=109.476530;
 

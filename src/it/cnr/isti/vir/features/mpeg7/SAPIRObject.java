@@ -24,6 +24,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7;
 
+import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.FeaturesCollectorException;
 import it.cnr.isti.vir.features.IFeature;
@@ -33,10 +34,11 @@ import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
 import it.cnr.isti.vir.features.mpeg7.vd.HomogeneousTexture;
 import it.cnr.isti.vir.features.mpeg7.vd.ScalableColor;
+import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.id.IHasID;
-import it.cnr.isti.vir.id.AbstractID;
+import it.cnr.isti.vir.util.Mean;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -44,6 +46,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 public class SAPIRObject implements IFeaturesCollector, IHasID {
 	
@@ -54,11 +57,11 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 			EdgeHistogram.class,
 			HomogeneousTexture.class );	
 	
-	private final ColorLayout cl;
-	private final ColorStructure cs;
-	private final ScalableColor sc;
-	private final EdgeHistogram eh;
-	private final HomogeneousTexture ht;
+	public final ColorLayout cl;
+	public final ColorStructure cs;
+	public final ScalableColor sc;
+	public final EdgeHistogram eh;
+	public final HomogeneousTexture ht;
 	
 	private static final byte version = 0;
 	
@@ -69,6 +72,19 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 //	public SAPIRObject(FeaturesCollection f) {
 //		super(f);
 //	}
+	
+	public static FeatureClassCollector getFCClasses() {
+		return fcc;
+	}
+	
+	public SAPIRObject( ColorLayout cl, ColorStructure cs, ScalableColor sc, EdgeHistogram eh, HomogeneousTexture ht, AbstractID id) {
+		this.cl = cl;
+		this.cs = cs;
+		this.sc = sc;
+		this.eh = eh;
+		this.ht = ht;
+		this.id = id;
+	}
 	
 	public SAPIRObject( IFeaturesCollector f) throws FeaturesCollectorException {
 		cl = (ColorLayout) f.getFeature(ColorLayout.class);
@@ -123,7 +139,8 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 	
 	public SAPIRObject(ByteBuffer in) throws IOException {
 		byte version = in.get();
-		id = IDClasses.readData(in);
+		id = IDClasses.readData(in);	
+		
 //		id = new IDString(in);
 		cl = new ColorLayout(in);
 		cs = new ColorStructure(in);
@@ -146,7 +163,8 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 
 	@Override
 	public IFeature getFeature(Class featureClass) {
-		if ( featureClass.equals(ColorLayout.class)) return cl;
+		if ( featureClass.equals(SAPIRObject.class)) return this;
+		else if ( featureClass.equals(ColorLayout.class)) return cl;
 		else if ( featureClass.equals(ColorStructure.class)) return cs;
 		else if ( featureClass.equals(ScalableColor.class)) return sc;
 		else if ( featureClass.equals(EdgeHistogram.class)) return eh;
@@ -173,6 +191,7 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 
 	@Override
 	public int compareTo(IHasID that) {
+		// ID must be unique
 		return id.compareTo(((SAPIRObject) that).id);
 	}
 	
@@ -180,7 +199,7 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 		if ( this == obj ) return true;
 		SAPIRObject that = (SAPIRObject) obj;
 		
-		if ( !this.id.equals(that.id) ) return false;
+		if ( (this.id != null) && !this.id.equals(that.id) ) return false;
 		if ( !this.cl.equals(that.cl) ) return false;
 		if ( !this.cs.equals(that.cs) ) return false;
 		if ( !this.sc.equals(that.sc) ) return false;
@@ -239,6 +258,10 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 		if ( ht != null ) tempHash = 31 * tempHash + ht.hashCode() ;	
 		return tempHash;
 	}
+
+
+
+
 	
 
 }
