@@ -31,7 +31,7 @@ import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
 import it.cnr.isti.vir.features.mpeg7.vd.HomogeneousTexture;
 import it.cnr.isti.vir.features.mpeg7.vd.ScalableColor;
 
-public class ScalableColorMetric  implements Metric<ScalableColor> {
+public class ScalableColorMetric  implements IMetric<ScalableColor> {
 	
 	private static long distCount = 0;
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ScalableColor.class);

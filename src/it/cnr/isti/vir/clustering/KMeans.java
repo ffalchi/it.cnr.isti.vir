@@ -25,9 +25,12 @@
 package it.cnr.isti.vir.clustering;
 
 import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.similarity.ILFSimilarity;
 import it.cnr.isti.vir.similarity.ISimilarity;
+import it.cnr.isti.vir.util.Log;
+import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.RandomOperations;
 
 import java.io.DataOutputStream;
@@ -35,18 +38,21 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 
-public class KMeans<O> {
+public class KMeans<O extends IFeature> {
 
 	private final IMeanEvaluator<O> meanEval;
 	private final ISimilarity<O> sim;
-	private final ArrayList<O> objects;
+	private final O[] objects;
+	private final Class<? extends O> objectsClass;
 	
-	private double[] centroidDistance;
+	private float[] centroidDistance;
 	private int[] assignedCentroid;
 	
 	private O[] centroids;
@@ -60,10 +66,27 @@ public class KMeans<O> {
 	
 	private double distRedThr = 0.9999;
 	
+	private boolean isMedoid = false;
+	
+	double currDistortion = Double.MAX_VALUE;
+	
+	public double getDistortion() {
+		return currDistortion;
+	}
+	
+	public boolean getIsMedoid() {
+		return isMedoid;
+	}
+	
+	public void setIsMedoid(boolean isMedoid) {
+		this.isMedoid = isMedoid;
+	}
 	
 	public KMeans(ArrayList<O> objects, ISimilarity<O> sim) {
 		
-		this.objects = objects;
+		this.objects = (O[]) Array.newInstance(objects.get(0).getClass(), objects.size());
+		objects.toArray(this.objects);
+		objectsClass = (Class<? extends O>) this.objects[0].getClass();
 		this.meanEval = (IMeanEvaluator<O>) sim;
 		this.sim = sim;
 		randomOrdering();
@@ -79,9 +102,10 @@ public class KMeans<O> {
 		this.distRedThr = distRedThr;
 	}
 
-	public KMeans(ArrayList<O> objects, O[] initCentroids, ISimilarity<O> sim) {
+	public KMeans(O[] objects, O[] initCentroids, ISimilarity<O> sim) {
 		this.centroids = initCentroids;
 		this.objects = objects;
+		objectsClass = (Class<? extends O>) this.objects[0].getClass();
 		this.meanEval = (IMeanEvaluator<O>) sim;
 		this.sim = sim;
 	}
@@ -90,43 +114,71 @@ public class KMeans<O> {
 	public final void randomOrdering() {
 		// InitCentroids
 		System.out.print("Random reordering data ... ");
-		RandomOperations.reorderArrayList(objects);
+		RandomOperations.reorderArray(objects);
 		System.out.println(" done.");
 	}
 	
 	public final void randomInitCentroids(int k) {
 
 		HashSet<Integer> selected = new HashSet<Integer>();
-		O[] initCentroids = (O[]) Array.newInstance(objects.iterator().next().getClass(), k);		
+		O[] initCentroids = (O[]) Array.newInstance(objects[0].getClass(), k);		
 		for ( int i=0; i<initCentroids.length; i++ ) {
 			int rnd = -1;
 			do {
-				rnd = RandomOperations.getInt(0, objects.size());
+				rnd = RandomOperations.getInt(0, objects.length);
 			} while ( selected.contains(rnd));
 			selected.add(rnd);
-			initCentroids[i]= (O) objects.get(rnd);
+			initCentroids[i]= (O) objects[rnd];
 		}
 		centroids = (O[]) initCentroids;
 	}
 	
-	public final void kMeansPP(int k) {
+
+	class KMeanpp implements Runnable {
+		private final int from;
+		private final int to;
+		private final O lastCentroid;
+		private final float[] dFromNNCentroid;
+		private final float[] dFromNNCentroidSQR;
+
+		KMeanpp(O lastCentroid, int from, int to, float[] dFromNNCentroid, float[] dFromNNCentroidSQR) {
+			this.from = from;
+			this.to = to;
+			this.lastCentroid = lastCentroid;
+			this.dFromNNCentroid = dFromNNCentroid;
+			this.dFromNNCentroidSQR = dFromNNCentroidSQR;
+		}
+
+		@Override
+		public void run() {
+			// each query is processed on an independent thread
+			for (int iO = from; iO<=to; iO++) {
+				O curr = objects[iO];
+
+				float dist = (float) sim.distance(curr, lastCentroid, dFromNNCentroid[iO] );
+				if ( dist >= 0 && dist < dFromNNCentroid[iO]) {
+					dFromNNCentroid[iO]=dist;
+					dFromNNCentroidSQR[iO]=dist*dist;
+				}		
+
+			}
+		}
+	}
+	
+	
+	public final void kMeansPP(int k) throws InterruptedException {
+		
+		RandomOperations.setSeed(System.currentTimeMillis());
+		
 		System.out.print("Performing k-means++:\n   ");
-		O[] initCentroids = (O[]) Array.newInstance(objects.iterator().next().getClass(), k);	
+		O[] initCentroids = (O[]) Array.newInstance(objects[0].getClass(), k);	
 		
 		// first centroid is taken randomly
-		initCentroids[0]= (O) objects.get( RandomOperations.getInt(0, objects.size()) );
+		initCentroids[0]= (O) objects[RandomOperations.getInt(0, objects.length)];
 		
-		final double[] dFromNNCentroid = new double[objects.size()];
-		Arrays.fill(dFromNNCentroid, Double.MAX_VALUE);
-		
-		
-		
-		// For parallel
-//		final int nObjPerThread = (int) Math.ceil( objects.size() / ParallelOptions.nThreads);
-//		ArrayList<Integer> arrList = new ArrayList(objects.size());
-//		for (int iO = 0; iO<objects.size(); iO+=nObjPerThread) {
-//			arrList.add(iO);
-//		}
+		final float[] dFromNNCentroid = new float[objects.length];
+		final float[] dFromNNCentroidSQR = new float[objects.length];
+		Arrays.fill(dFromNNCentroid, Float.MAX_VALUE);
 		
 		for ( int i=1; i<initCentroids.length; i++ ) {
 			if ( i%10 == 0 ) System.out.print(" "+i);
@@ -134,15 +186,39 @@ public class KMeans<O> {
 			
 //			if ( false ) { //serial
 				// for each object 
-				for (int iO = 0; iO<objects.size(); iO++) {
-					O curr = objects.get(iO);
+			
+			if ( ParallelOptions.nThreads <= 1) {
+				for (int iO = 0; iO<objects.length; iO++) {
+					O curr = objects[iO];
 	
-					double dist = sim.distance(curr, initCentroids[i-1], dFromNNCentroid[iO] );
-					if ( dist > 0 && dist < dFromNNCentroid[iO]) {
-						dFromNNCentroid[iO]=dist;
+					float dist = (float) sim.distance(curr, initCentroids[i-1], dFromNNCentroid[iO] );
+					if ( dist >= 0 && dist < dFromNNCentroid[iO]) {
+						dFromNNCentroid[iO]= dist;	
+						dFromNNCentroidSQR[iO] = dist*dist;
 					}		
 	
 				}
+				
+			} else {
+				
+				// kNNQueues are performed in parallels
+				final int nObjsPerThread = (int) Math.ceil((double) objects.length / ParallelOptions.nThreads);
+				final int nThread = (int) Math.ceil((double) objects.length / nObjsPerThread);
+				int ti = 0;
+		        Thread[] thread = new Thread[nThread];
+		        for ( int from=0; from<objects.length; from+=nObjsPerThread) {
+		        	int to = from+nObjsPerThread-1;
+		        	if ( to >= objects.length ) to = objects.length-1;
+		        	thread[ti] = new Thread( new KMeanpp(initCentroids[i-1], from, to, dFromNNCentroid, dFromNNCentroidSQR) ) ;
+		        	thread[ti].start();
+		        	ti++;
+		        }
+		        
+		        for ( ti=0; ti<thread.length; ti++ ) {
+					thread[ti].join();
+		        }
+			}
+				
 //			} else {
 //				final O currCentr = initCentroids[i-1];
 //				
@@ -164,24 +240,39 @@ public class KMeans<O> {
 //			}
 			
 			double sqSum = 0;
-			for (int iO = 0; iO<objects.size(); iO++) {
+			for (int iO = 0; iO<objects.length; iO++) {
 				//new centroid will be choosen with squared distance probability
-				sqSum+=dFromNNCentroid[iO]*dFromNNCentroid[iO];
+				sqSum+=dFromNNCentroidSQR[iO];
 			}
 		
+			
+			
 			// selecting next centroid random weighted squared distance
 			double rnd = RandomOperations.getDouble(sqSum);
-			double tempSum = dFromNNCentroid[0];
+			double tempSum = 0;
 			int selected = 0;
-			for ( selected=1; tempSum < rnd; selected++ ) {
-				double currValue = dFromNNCentroid[selected];
-				tempSum += currValue*currValue;
+			for ( selected=0; true; selected++ ) {				
+				tempSum += dFromNNCentroidSQR[selected];
+				if ( tempSum >= rnd ) break;
 			}
-			initCentroids[i]=objects.get(selected);
+			initCentroids[i]=objects[selected];
 			
 		}	
 		System.out.println( " " + initCentroids.length + "." );
 		centroids = initCentroids;
+	}
+	
+	
+	public int getNNotNullCentroids() {
+
+		int count =0;
+		for ( int i=0; i<centroids.length; i++ ) {
+			if ( centroids[i] != null ) {
+				count++;
+			}
+		}
+
+		return count;
 	}
 	
 	public O[] getCentroids(boolean notNulls ) {
@@ -200,74 +291,26 @@ public class KMeans<O> {
 		return centroids;
 	}
 	
-	public O[] runAlgorithm(File tempWordsOutFile) throws IOException {
-		System.out.println("Performing k-Means.");
-		
-		int nCentroidsChanges = centroids.length;
-		int lastNCentroidChanges = centroids.length;
-		int count = 0; 
-		double currDistortion = Double.MAX_VALUE;
-		long lastTimeMillis = System.currentTimeMillis();
-		System.out.println(
-				"\tnIter"	+
-				"\tchanges"	+			
-				"\tdRed" +	
-				"\tsecs" );		
-		
-		clusters = new ArrayList[centroids.length];
-		for ( int i=0; i<clusters.length; i++) {
-			clusters[i]=new ArrayList();
-		}
-		
-		clusterChanged = new boolean[centroids.length];
-		assignedCentroid = new int[objects.size()];
-		centroidDistance = new double[objects.size()];
-		
-		
-		// For parallel
-//		ArrayList<Integer> arrList = new ArrayList(objects.size());
-//		final int nObjPerThread = (int) Math.ceil( objects.size() / ParallelOptions.nThreads);
-//		for (int iO = 0; iO<objects.size(); iO+=nObjPerThread) {
-//			arrList.add(iO);
-//		}
-		
-		for (int iterations=0; nCentroidsChanges>0; iterations++ ){
-			
-			if ( tempWordsOutFile != null ) {
-				if ( sim instanceof ILFSimilarity) {
-					LFWords words = new LFWords(getCentroids(true), (ILFSimilarity) sim);
-					DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
-					words.writeData(out);				
-					out.close();
-				} else {
-					Centroids centroids = new Centroids((IFeature[]) getCentroids(true));
-					DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
-					centroids.writeData(out);				
-					out.close();
-				}
-			}
-			
-			double newDistortion = 0.0;
-			
-			Arrays.fill(clusterChanged, false);
-			
-			// Clear
-			for ( int i=0; i<clusters.length; i++) {
-				clusters[i].clear();
-			}		
-			
-			final int currlastNCentroidChanges = lastNCentroidChanges;
-			
-			
-			
-			// checking and assigning centroids to objects
-			for (int iObj = 0; iObj < objects.size(); iObj++) {
-				O obj = objects.get(iObj);
+	// For assigning
+	class KMeanAss implements Runnable {
+		private final int from;
+		private final int to;
+		private final int currlastNCentroidChanges;
 
-				if (currlastNCentroidChanges != centroids.length
-						&& centroidChanged[assignedCentroid[iObj]] == false) {
+		KMeanAss(int currlastNCentroidChanges, int from, int to) {
+			this.from = from;
+			this.to = to;
+			this.currlastNCentroidChanges = currlastNCentroidChanges;
+		}
+
+		@Override
+		public void run() {
+			for (int iObj = from; iObj <= to; iObj++) {
+				O obj = objects[iObj];
+
+				if (currlastNCentroidChanges != centroids.length && centroidChanged[assignedCentroid[iObj]] == false) {
 					// assigned centroid has not changed
-					double minDist = centroidDistance[iObj];
+					float minDist = centroidDistance[iObj];
 					int nearest = assignedCentroid[iObj];
 					
 					for (int iChanged = 0; iChanged < centroidChangedIndexes.length
@@ -277,11 +320,11 @@ public class KMeans<O> {
 							continue;
 						
 						// Searching nearest centroid (only between changed)
-						double dist = sim.distance(obj,
+						float dist = (float) sim.distance(obj,
 								centroids[currI],
 								minDist);
 						
-						if (dist > 0 && dist < minDist) {
+						if (dist >= 0 && dist < minDist) {
 							minDist = dist;
 							nearest = currI;
 						} 
@@ -306,13 +349,13 @@ public class KMeans<O> {
 				} else {
 					
 					// old centroid changed. Searching new one between all
-					double minDist = Double.MAX_VALUE;
+					float minDist = Float.MAX_VALUE;
 					int nearest = -1;
 					for (int i = 0; i < centroids.length; i++) {
 						if (centroids[i] == null)
 							continue;
-						double dist = sim.distance(obj, centroids[i], minDist);
-						if (dist > 0 && dist < minDist) {
+						float dist = (float) sim.distance(obj, centroids[i], minDist);
+						if (dist >= 0 && dist < minDist) {
 							minDist = dist;
 							nearest = i;
 						} 
@@ -327,87 +370,180 @@ public class KMeans<O> {
 
 				}
 			}
+		}
+	}
+	
+	public O[] runAlgorithm(File tempWordsOutFile) throws IOException, InterruptedException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		System.out.println("Performing k-Means.");
+		
+		int nCentroidsChanges = centroids.length;
+		int lastNCentroidChanges = centroids.length;
+		int count = 0; 
+		
+		long lastTimeMillis = System.currentTimeMillis();
+		System.out.println(
+				"\tnIter"	+
+				"\tc"+
+				"\tchg"+			
+				"\tdist" +		
+				"\t\t\tdRed" +	
+				"\t\t\tsecs" );		
+		
+		clusters = new ArrayList[centroids.length];
+		for ( int i=0; i<clusters.length; i++) {
+			clusters[i]=new ArrayList();
+		}
+		
+		clusterChanged = new boolean[centroids.length];
+		assignedCentroid = new int[objects.length];
+		centroidDistance = new float[objects.length];
+		
+		for (int iterations=0; nCentroidsChanges>0; iterations++ ){
 			
+			Arrays.fill(clusterChanged, false);
 			
-			// PARALLEL with Conja
-			/*
-			final int currlastNCentroidChanges = lastNCentroidChanges;
-			// Parallel
-			Parallel.forEach(arrList, new Function<Integer, Void>() {
-				public Void apply(Integer p) {
-					int max = p + nObjPerThread;
-					if (max > objects.size())
-						max = objects.size();
-
-					// checking and assigning centroids to objects
-					for (int iObj = p; iObj < max; iObj++) {
-						O obj = objects.get(iObj);
-
-						if (currlastNCentroidChanges != centroids.length
-								&& centroidChanged[assignedCentroid[iObj]] == false) {
-							// assigned centroid has not changed
-							for (int iChanged = 0; iChanged < centroidChangedIndexes.length
-									&& centroidChangedIndexes[iChanged] > 0; iChanged++) {
-								int currI = centroidChangedIndexes[iChanged];
-								if (centroids[currI] == null)
-									continue;
-								// Searching nearest centroid (between changed)
-								double dist = sim.distance(obj,
-										centroids[currI],
-										centroidDistance[iObj]);
-								if (dist > 0 && dist < centroidDistance[iObj]) {
-									// assign object to centroid
-									centroidDistance[iObj] = dist;
-									assignedCentroid[iObj] = currI;
-								}
-							}
-
-
-						} else {
-							// old centroid changed. Searching new one
-							double minDist = Double.MAX_VALUE;
-							int nearest = -1;
-							for (int i = 0; i < centroids.length; i++) {
-								if (centroids[i] == null)
-									continue;
-								double dist = sim.distance(obj, centroids[i],
-										minDist);
-								if (dist > 0 && dist < minDist) {
-									minDist = dist;
-									nearest = i;
-								}
-							}
-							// Assign to nearest
+			// Clear
+			for ( int i=0; i<clusters.length; i++) {
+				clusters[i].clear();
+			}		
+			
+			final int currlastNCentroidChanges = lastNCentroidChanges;		
+			
+			if ( ParallelOptions.nThreads <= 1 ) {
+			
+				// checking and assigning centroids to objects
+				for (int iObj = 0; iObj < objects.length; iObj++) {
+					O obj = objects[iObj];
+	
+					if (currlastNCentroidChanges != centroids.length && centroidChanged[assignedCentroid[iObj]] == false) {
+						// assigned centroid has not changed
+						float minDist = centroidDistance[iObj];
+						int nearest = assignedCentroid[iObj];
+						
+						for (int iChanged = 0; iChanged < centroidChangedIndexes.length
+								&& centroidChangedIndexes[iChanged] > 0; iChanged++) {
+							int currI = centroidChangedIndexes[iChanged];
+							if (centroids[currI] == null)
+								continue;
+							
+							// Searching nearest centroid (only between changed)
+							float dist = (float) sim.distance(obj,
+									centroids[currI],
+									minDist);
+							
+							if (dist >= 0 && dist < minDist) {
+								minDist = dist;
+								nearest = currI;
+							} 
+							
+							/*if (dist > 0 && dist < centroidDistance[iObj]) {
+								// assign object to centroid
+								centroidDistance[iObj] = dist;
+								// clusters assignedCentroid[iObj] & currI will be affected
+								assignedCentroid[iObj] = currI;
+							}*/
+						}
+						
+						if ( nearest != assignedCentroid[iObj] ) {
+							// clusters assignedCentroid[iObj] & nearest will be affected
+							clusterChanged[assignedCentroid[iObj]]  = true;
+							clusterChanged[nearest]  = true;
+							
 							centroidDistance[iObj] = minDist;
 							assignedCentroid[iObj] = nearest;
-
 						}
+	
+					} else {
+						
+						// old centroid changed. Searching new one between all
+						float minDist = Float.MAX_VALUE;
+						int nearest = -1;
+						for (int i = 0; i < centroids.length; i++) {
+							if (centroids[i] == null)
+								continue;
+							float dist = (float) sim.distance(obj, centroids[i], minDist);
+							if (dist >= 0 && dist < minDist) {
+								minDist = dist;
+								nearest = i;
+							} 
+						}
+						// clusters assignedCentroid[iObj] & nearest will be affected
+						clusterChanged[assignedCentroid[iObj]]  = true;
+						clusterChanged[nearest]  = true;
+						
+						// Assign to nearest
+						centroidDistance[iObj] = minDist;
+						assignedCentroid[iObj] = nearest;
+	
 					}
-					return null;
 				}
-			});*/
-			
-			for (int iObj = 0; iObj<objects.size(); iObj++) {
-				clusters[assignedCentroid[iObj]].add(objects.get(iObj));
-				newDistortion+= centroidDistance[iObj]*centroidDistance[iObj];
+			} else {
+				// kNNQueues are performed in parallels
+				final int nObjsPerThread = (int) Math.ceil((double) objects.length / ParallelOptions.nThreads);
+				final int nThread = (int) Math.ceil((double) objects.length / nObjsPerThread);
+				int ti = 0;
+		        Thread[] thread = new Thread[nThread];
+		        for ( int from=0; from<objects.length; from+=nObjsPerThread) {
+		        	int to = from+nObjsPerThread-1;
+		        	if ( to >= objects.length ) to = objects.length-1;
+		        	thread[ti] = new Thread( new KMeanAss(currlastNCentroidChanges, from, to) ) ;
+		        	thread[ti].start();
+		        	ti++;
+		        }
+		        
+		        for ( ti=0; ti<thread.length; ti++ ) {
+					thread[ti].join();
+		        }
 			}
 			
+			
+			double newDistortion = 0.0;
+			
+			// each object is assigned to a cluster and distortion incremented
+			for (int iObj = 0; iObj<objects.length; iObj++) {
+				clusters[assignedCentroid[iObj]].add(objects[iObj]);
+				newDistortion+= centroidDistance[iObj]*centroidDistance[iObj];
+			}
+			newDistortion /= objects.length;
 
-			lastNCentroidChanges = nCentroidsChanges;
-			nCentroidsChanges = evaluateCentroids();
+
 			
 			System.out.println(
 					"\t" + iterations +
+					"\t" + getNNotNullCentroids() + 	
 					"\t" + nCentroidsChanges +
-					"\t" + newDistortion/currDistortion +
+					"\t" + newDistortion +
+					"\t" + (1.0-newDistortion/currDistortion) +
 					"\t" + (System.currentTimeMillis()-lastTimeMillis)/1000);
 			
 			lastTimeMillis = System.currentTimeMillis();
-			if ( (newDistortion<Double.MAX_VALUE) && ((double) newDistortion / (double) currDistortion) >= distRedThr) {
+			if ( (newDistortion<Double.MAX_VALUE) && (1.0 - newDistortion / currDistortion) < distRedThr) {
+				Log.info("Distortion reduction was less than threashold " + distRedThr );
 				break;
 			}
 			
+			
+			lastNCentroidChanges = nCentroidsChanges;
+			nCentroidsChanges = evaluateCentroids();			
 			currDistortion = newDistortion;
+			
+			if ( nCentroidsChanges == 0 ) {
+				Log.info("Centroids did not change on last step.");
+			}
+
+			if ( tempWordsOutFile != null ) {
+				if ( sim instanceof ILFSimilarity) {
+					LFWords words = new LFWords(getCentroids(true), (ILFSimilarity) sim);
+					DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
+					words.writeData(out);				
+					out.close();
+				} else {
+					Centroids centroids = new Centroids((IFeature[]) getCentroids(true));
+					DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
+					centroids.writeData(out);				
+					out.close();
+				}
+			}
 			
 //			if ( lastCentroidChanges == centroidsChanges ) count++;
 //			else count = 0;
@@ -420,28 +556,72 @@ public class KMeans<O> {
 
 			
 		}
-		System.out.println();
 		
+		System.out.println();
+		/*
+		if ( centroids[0] instanceof IHasID ) {
+			for ( int i=0; i<centroids.length; i++ ) {
+				Log.info(((IHasID) centroids[i]).getID().toString());
+			}
+		}
+		*/
 		return centroids;
 		
 	}
 	
+	public O getMedoid(Collection<O> cluster) {
+		double minSum = Double.MAX_VALUE;
+		O best = null;
+		for (Iterator<O> it1 = cluster.iterator(); it1.hasNext(); ) {
+			O candidate = it1.next();
+			double candidateSum = 0;
+			for (Iterator<O> it2 = cluster.iterator(); it2.hasNext(); ) {
+				O curr = it2.next();
+				candidateSum += sim.distance(candidate, curr);
+				if ( candidateSum > minSum ) break;
+			}
+			if ( candidateSum < minSum ) {
+				best = candidate;
+				minSum = candidateSum;
+			}
+		}
+		return best;
+		
+	}
 	
-	public int evaluateCentroids() {
+	public int evaluateCentroids() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		int changesCount = 0;
+		
 		if ( centroidChangedIndexes == null ) {
 			centroidChangedIndexes = new int[centroids.length];
 		} 
 		if ( centroidChanged == null ) {
 			centroidChanged = new boolean[centroids.length];
 		} 
+		
+		// iterating on centroids
 		for ( int i=0; i<centroids.length; i++) {
-			if ( centroids[i] == null ) {
+			
+			// if old centroids is null it is kept null
+			if ( centroids[i] == null || !clusterChanged[i] ) {
 				centroidChanged[i]= false;
 				continue;
 			}
-			O newCentroid = meanEval.getMean(clusters[i]);
+			
+			O newCentroid = null;
+			if ( isMedoid == true ) {
+				newCentroid = getMedoid(clusters[i]);
+			} else {
+				newCentroid = meanEval.getMean(clusters[i]);
+				
+				if ( newCentroid != null && IFeaturesCollector.class.isAssignableFrom(objectsClass)) {
+					newCentroid = objectsClass.getConstructor(IFeature.class).newInstance(newCentroid);
+				}
+				
+			}
+			
 			if ( newCentroid == null ) {
+				// previous was not null
 				centroids[i] = newCentroid;
 				centroidChanged[i]= true;
 				changesCount++;
@@ -449,8 +629,7 @@ public class KMeans<O> {
 			}
 			
 			// centroids changed?
-			//if ( !centroids[i].equals(newCentroid) ) {
-			if ( clusterChanged[i] ) {
+			if ( !centroids[i].equals(newCentroid) ) {
 				centroids[i] = newCentroid;
 				centroidChangedIndexes[changesCount]= i;
 				changesCount++;

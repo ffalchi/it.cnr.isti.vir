@@ -50,6 +50,15 @@ public class RandomOperations {
 		return r.nextInt(max - min + 1) + min;
 	}
 	
+
+	public static int[] getInts(int min, int max, int n) {
+		int[] ints = new int[n];
+		for ( int i=0; i<ints.length; i++) {
+			ints[i] = getInt(min, max);
+		}
+		return ints;
+	}
+	
 	public static final boolean trueORfalse(double yesRate) {
 		double value = r.nextDouble(); // random value between 0 and 1.0
 		return value <= yesRate;
@@ -192,6 +201,7 @@ public class RandomOperations {
 		
 		return orderedList;
 	}
+
 	
 	public static final ArrayList<Integer> getRandomOrderedIntegers(int maxValue) {
 		ArrayList<Integer> list = new ArrayList<Integer>(maxValue);
@@ -244,5 +254,6 @@ public class RandomOperations {
 			list.add(tempArr[i]);
 		}
 	}
+
 	
 }

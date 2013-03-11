@@ -26,75 +26,90 @@ package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.localfeatures.ORB;
-import it.cnr.isti.vir.features.localfeatures.SIFT;
-import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
+import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
+import it.cnr.isti.vir.util.Mean;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Properties;
 
-public class ORBMetric implements IMetric<ORB>, ILocalFeaturesMetric<ORB>, IMeanEvaluator<ORB> {
-
+public class SAPIRFeatureMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<SAPIRFeature> {
+	
 	private static long distCount = 0;
-	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORB.class);
+	public static final FeatureClassCollector reqFeatures = new FeatureClassCollector(
+			SAPIRFeature.class );
 	
 	public final long getDistCount() {
 		return distCount;
 	}
 	
-	public ORBMetric(Properties properties) {
-		
-	}
-	
-	public ORBMetric() {
-		
-	}
-	
+
 	@Override
 	public FeatureClassCollector getRequestedFeaturesClasses() {		
 		return reqFeatures;
 	}
 	
+	public SAPIRFeatureMetric() {
+		
+	}
+	
+	public SAPIRFeatureMetric(Properties prop) {
+		
+	}
+	
 	@Override
-	public final Class getRequestedFeatureClass() {
-		return SIFT.class;
+	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+		return distance(f1.getFeature(SAPIRFeature.class), f2.getFeature(SAPIRFeature.class));
+	}
+	
+	@Override
+	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+		return distance(f1.getFeature(SAPIRFeature.class), f2.getFeature(SAPIRFeature.class), max);
+	}	
+
+	
+	public final double distance(SAPIRFeature f1, SAPIRFeature f2 ) {
+	
+		return distance(f1,f2, Double.MAX_VALUE);
+	}
+	
+	
+	public final double distance(SAPIRFeature f1, SAPIRFeature f2, double max ) {
+		distCount++;
+			
+		return SAPIRFeature.mpeg7XMDistance((SAPIRFeature) f1, (SAPIRFeature) f2);
 	}
 	
 	public String toString() {
 		return this.getClass().toString();
 	}
 
-	
-	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
-		return distance(f1.getFeature(ORB.class), f2.getFeature(ORB.class));
+
+	public SAPIRFeature getMean(Collection coll) {
+		int size = coll.size();
+		
+		if ( coll.size() == 0 ) return null;
+		
+		float[][] v = new float[size][];
+		int i=0;
+		if ( coll.iterator().next() instanceof IFeaturesCollector ) {
+			for ( Iterator<IFeaturesCollector> it = coll.iterator(); it.hasNext(); ) {
+				SAPIRFeature curr = it.next().getFeature(SAPIRFeature.class);
+				v[i++] = curr.l1Values;
+			}
+			float[] vMean = Mean.getMean(v);
+			return new SAPIRFeature(vMean);
+		} else {
+			for ( Iterator it = coll.iterator(); it.hasNext(); ) {
+				SAPIRFeature curr = (SAPIRFeature) it.next();
+				v[i++] = curr.l1Values;
+			}
+			float[] vMean = Mean.getMean(v);
+			return new SAPIRFeature(vMean);
+		}
+		
 	}
-	
-	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
-		return distance(f1.getFeature(ORB.class), f2.getFeature(ORB.class), max);
-	}
-	
-	@Override
-	public final double distance(ORB f1, ORB f2) {
-		return ORB.getDistance_Norm( f1, f2 );	
-	}
-	
-	@Override
-	public final double distance(ORB f1, ORB f2, double max) {
-		distCount++;
-		return ORB.getDistance_Norm( f1, f2 ); // , max); !! TO DO
-	}
-	
-	@Override
-	public ORB getMean(Collection<ORB> coll) {
-		return ORB.getMean(coll);
-	}
-	
-	@Override
-	public final Class getRequestedFeatureGroupClass() {
-		return SIFTGroup.class;
-	}
-	
+
 }

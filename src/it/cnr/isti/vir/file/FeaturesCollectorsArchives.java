@@ -28,9 +28,13 @@ import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
-import it.cnr.isti.vir.similarity.results.ISimilarityResults;
+import it.cnr.isti.vir.similarity.results.SimilarityResults;
+import it.cnr.isti.vir.util.Log;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -68,17 +72,24 @@ public class FeaturesCollectorsArchives {
 	}
 	
 	public FeaturesCollectorsArchives(File[] archiveFiles) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		this(archiveFiles, true);
+	}
+	public FeaturesCollectorsArchives(File[] archiveFiles, boolean readIDs) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		archive = new FeaturesCollectorsArchive[archiveFiles.length];
 		archiveStartIndex = new int[archiveFiles.length];
 		size = 0;
 		for ( int i=0; i<archive.length; i++) {			
 			archiveStartIndex[i] = size;
-			archive[i] = new FeaturesCollectorsArchive(archiveFiles[i]);
+			archive[i] = new FeaturesCollectorsArchive(archiveFiles[i], readIDs);
 			size += archive[i].size();
 		}		
 	}
 	
 	public FeaturesCollectorsArchives(File archiveFile) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		this(archiveFile, true);
+	}
+	
+	public FeaturesCollectorsArchives(File archiveFile, boolean readIDs) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		if ( archiveFile.isDirectory() ) {
 			File[] archiveFiles = archiveFile.listFiles(filter);
 			
@@ -87,13 +98,13 @@ public class FeaturesCollectorsArchives {
 			size = 0;
 			for ( int i=0; i<archive.length; i++) {			
 				archiveStartIndex[i] = size;
-				archive[i] = new FeaturesCollectorsArchive(archiveFiles[i]);
+				archive[i] = new FeaturesCollectorsArchive(archiveFiles[i], readIDs);
 				size += archive[i].size();
 			}
 			
 		} else {
 			archive = new FeaturesCollectorsArchive[1];
-			archive[0] = new FeaturesCollectorsArchive(archiveFile);
+			archive[0] = new FeaturesCollectorsArchive(archiveFile, readIDs);
 			archiveStartIndex = new int[1];
 			archiveStartIndex[0]=0;
 			size += archive[0].size();
@@ -146,27 +157,29 @@ public class FeaturesCollectorsArchives {
 		return res;
 	}
 
-	public synchronized ISimilarityResults[] getKNN(IFeaturesCollector[] qObj, int k,
-			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
-			NoSuchMethodException, IllegalArgumentException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException {
-			
-			SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
-			for (int i = 0; i < kNNQueue.length; i++) {
-				kNNQueue[i] = new SimPQueueArr(k);
-			}
+	public synchronized SimilarityResults[] getKNN(IFeaturesCollector[] qObj,
+			int k, final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException {
 
-			for ( int i=0; i<archive.length; i++) { 
-				archive[i].getKNN(qObj, kNNQueue, sim, onlyID);
-			}
-
-			ISimilarityResults[] res = new ISimilarityResults[kNNQueue.length];
-			for (int i = 0; i < kNNQueue.length; i++) {
-				res[i] = kNNQueue[i].getResults();
-			}
-
-			return res;
+		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
+		for (int i = 0; i < kNNQueue.length; i++) {
+			kNNQueue[i] = new SimPQueueArr(k);
 		}
+
+		for (int i = 0; i < archive.length; i++) {
+			Log.info_verbose("... searching in archive " + archive[i].getfile());
+			archive[i].getKNN(qObj, kNNQueue, sim, onlyID);
+		}
+
+		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
+		for (int i = 0; i < kNNQueue.length; i++) {
+			res[i] = kNNQueue[i].getResults();
+		}
+
+		return res;
+	}
+
 	
 }

@@ -33,7 +33,7 @@ import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
 import java.util.Collection;
 import java.util.Properties;
 
-public class RootSIFTMetric implements Metric<RootSIFT>, ILocalFeaturesMetric<RootSIFT>, IMeanEvaluator<RootSIFT> {
+public class RootSIFTMetric implements IMetric<RootSIFT>, ILocalFeaturesMetric<RootSIFT>, IMeanEvaluator<RootSIFT> {
 
 	private static long distCount = 0;
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(RootSIFT.class);

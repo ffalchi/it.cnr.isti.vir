@@ -30,7 +30,7 @@ import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 
-public class ColorLayoutMetric  implements Metric<ColorLayout> {
+public class ColorLayoutMetric  implements IMetric<ColorLayout> {
 	
 	
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ColorLayout.class);

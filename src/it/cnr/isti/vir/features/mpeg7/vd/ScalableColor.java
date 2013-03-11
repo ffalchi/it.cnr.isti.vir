@@ -25,7 +25,7 @@
 package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 import it.cnr.isti.vir.util.L1;
 
 import java.io.DataInput;
@@ -72,7 +72,6 @@ public class ScalableColor implements IFeature, java.io.Serializable {
 		byte version = in.get();
 		coeff = new short[in.get()];
 		for (int i=0; i<coeff.length; i++) coeff[i] = in.getShort();
-		//in.asShortBuffer().get(coeff);
 	}
 	
 	public void writeData(DataOutput str) throws IOException {
@@ -91,7 +90,7 @@ public class ScalableColor implements IFeature, java.io.Serializable {
 	    	switch (event) {
 	        	case XMLStreamConstants.START_ELEMENT:
 	            	if (xmlr.getLocalName().equals("Coeff") ) { 
-	            		temp = Convertions.stringToShortArray( xmlr.getElementText() );
+	            		temp = Conversions.stringToShortArray( xmlr.getElementText() );
 	            	}
 	            	break;
 	            case XMLStreamConstants.END_ELEMENT:

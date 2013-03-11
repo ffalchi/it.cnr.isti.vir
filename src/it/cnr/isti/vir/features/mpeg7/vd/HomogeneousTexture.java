@@ -26,7 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -188,26 +188,26 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 		        	case XMLStreamConstants.START_ELEMENT:
 		        		String temp = "Average";
 		            	if (xmlr.getLocalName().equals(temp) ) { 
-		            		average_temp = Convertions.stringToUnsignedByte( xmlr.getElementText() );
+		            		average_temp = Conversions.stringToUnsignedByte( xmlr.getElementText() );
 		            		averageInit = true;
 		            		//average = parseByteInTag(xmlr, temp);
 		            	} else {
 		            		temp = "StandardDeviation";
 			            	if (xmlr.getLocalName().equals(temp) ) { 
-			            		standardDeviation_temp = Convertions.stringToUnsignedByte( xmlr.getElementText() );
+			            		standardDeviation_temp = Conversions.stringToUnsignedByte( xmlr.getElementText() );
 			            		//standardDeviation = parseByteInTag(xmlr, temp);
 			            		standardDeviationInit = true;
 			            	} else {
 			            		temp = "Energy";
 				            	if (xmlr.getLocalName().equals(temp) ) { 
-				            		energy_temp = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );
+				            		energy_temp = Conversions.stringToUnsignedByteArray( xmlr.getElementText() );
 				            		if ( energy_temp.length != 30 ) throw new MPEG7VDFormatException("Error parsing HomogeneousTexture");
 				            		//energy = parseBytesInTag(xmlr, temp, 30);	            		
 				            	} else {
 				            		temp = "EnergyDeviation";
 					            	if (xmlr.getLocalName().equals(temp) ) { 
 					            		//energyDeviation = parseBytesInTag(xmlr, temp, 30);
-					            		energyDeviation_temp = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );
+					            		energyDeviation_temp = Conversions.stringToUnsignedByteArray( xmlr.getElementText() );
 					            		if ( energyDeviation_temp.length != 30 ) throw new MPEG7VDFormatException("Error parsing HomogeneousTexture");
 					            	}
 				            	}
@@ -282,15 +282,15 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 	public String toString() {
 		String str = "HomogeneousTexture ";
 		if ( origData != null ) {
-			str += "\n  Average: " + Convertions.unsignedByteToInt(origData[0]);
-			str += "\n  StandardDeviation: " + Convertions.unsignedByteToInt(origData[2]);		
+			str += "\n  Average: " + Conversions.unsignedByteToInt(origData[0]);
+			str += "\n  StandardDeviation: " + Conversions.unsignedByteToInt(origData[2]);		
 			str += "\n  Energy:";
 			for (int i=0; i<30; i++ ){
-				str += " " + Convertions.unsignedByteToInt(origData[i+2]);
+				str += " " + Conversions.unsignedByteToInt(origData[i+2]);
 			}
 			str += "\n  EnergyDeviation:";
 			for (int i=0; i<30; i++ ){
-				str += " " + Convertions.unsignedByteToInt(origData[i+32]);
+				str += " " + Conversions.unsignedByteToInt(origData[i+32]);
 			}		
 		} else {
 			str += " PRECOMPUTED";
@@ -350,7 +350,7 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 	{
 		int RefFeature[] = new int[orig.length];
 		float fRefFeature[] = new float[orig.length];
-		for (int i=0; i< orig.length; i++) RefFeature[i] = Convertions.unsignedByteToInt(orig[i]);
+		for (int i=0; i< orig.length; i++) RefFeature[i] = Conversions.unsignedByteToInt(orig[i]);
 
 		HT_dequantization(RefFeature, fRefFeature);
 		HT_Normalization(fRefFeature);
@@ -474,7 +474,7 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 
 		else
 		{
-		  return mpeg7XMDistance(fQueryFeature, fRefFeature);
+		  return distance+mpeg7XMDistance(fQueryFeature, fRefFeature);
 		}
 	};
 	
@@ -491,6 +491,27 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 			}			
 		return distance;
 	}
+	
+	public final int putMPEG7XMDistance_L1Values(float[] dest, int offSet) {
+		
+		float[] pre1 = preComputed;
+		
+		if ( pre1== null) pre1=getPreComputed(origData);
+		int i=offSet;
+		
+		dest[i++] = (float) (wdc*pre1[0]);
+		dest[i++] = (float) (wstd*pre1[1]);
+		
+		for(int n=0;n<RadialDivision;n++) {
+			for(int m=0;m<AngularDivision;m++) {
+				dest[i++] = (float) wm[n] * pre1[n*AngularDivision+m+2];
+				dest[i++] = (float) wd[n] * pre1[n*AngularDivision+m+30+2];
+			}
+		}
+		
+		return i;
+	}
+	
 	static final double dcmin=0.0, dcmax=255.0;
 	static final double stdmin=1.309462,stdmax=109.476530;
 
@@ -608,9 +629,9 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 	protected static final int Nview			= 180	;	// Num of view
 	protected static final int NUMofFEATURE		= 62	;
 	protected static final int Quant_level		= 255	;
-	protected static final int RadialDivision  	= 5		;
+	public static final int RadialDivision  	= 5		;
 	protected static final int RadialDivision2 	= 3		;
-	protected static final int AngularDivision 	= 6 	;
+	public static final int AngularDivision 	= 6 	;
 
 	protected static final double wm[]={0.42,1.00,1.00,0.08,1.00};
 	protected static final double wd[]={0.32,1.00,1.00,1.00,1.00};

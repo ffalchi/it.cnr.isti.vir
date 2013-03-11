@@ -26,7 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 
 import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -253,17 +253,17 @@ public final class LireColorLayout implements IFeature, java.io.Serializable {
 		
 		str += "\n  YCoeff:";
 		for (int i=0; i<YCoeff.length; i++ ){
-			str += " " + Convertions.unsignedByteToInt(YCoeff[i]);
+			str += " " + Conversions.unsignedByteToInt(YCoeff[i]);
 		}
 		
 		str += "\n  CbCoeff:";
 		for (int i=0; i<CbCoeff.length; i++ ){
-			str += " " + Convertions.unsignedByteToInt(CbCoeff[i]);
+			str += " " + Conversions.unsignedByteToInt(CbCoeff[i]);
 		}
 		
 		str += "\n  CrCoeff:";
 		for (int i=0; i<CrCoeff.length; i++ ){
-			str += " " + Convertions.unsignedByteToInt(CrCoeff[i]);
+			str += " " + Conversions.unsignedByteToInt(CrCoeff[i]);
 		}		
 				
 		return str + "\n";

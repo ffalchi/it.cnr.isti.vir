@@ -48,13 +48,13 @@ public  class Mean {
 		double[] tempVec = new double[dim];
 		for ( int i=0; i<n; i++ ) {
 			for ( int iD=0; iD<dim; iD++) {
-					tempVec[iD] += data[i][iD];
+				tempVec[iD] += data[i][iD];
 			}
 		}
 		
 		float[] newVec = new float[dim];
 		for ( int iD=0; iD<dim; iD++) {
-			newVec[iD] = Math.round( tempVec[iD] / n );
+			newVec[iD] = (float) tempVec[iD] / n;
 		}
 				
 		return newVec;
@@ -72,10 +72,23 @@ public  class Mean {
 		}
 
 		for ( int iD=0; iD<dim; iD++) {
-			tempVec[iD] = Math.round( tempVec[iD] / n );
+			tempVec[iD] = tempVec[iD] / n;
 		}
 				
 		return tempVec;
+	}
+	
+	
+	public static final double getAvg(float[][] intDist) {
+		double avg = 0;
+		int count = 0;
+		for ( int i=1; i<intDist.length; i++ ) {
+			for ( int j=0; j<intDist[i].length; j++ ) {
+				avg += intDist[i][j];
+			}
+			count += intDist[i].length;
+		}
+		return avg / count;
 	}
 	
 }

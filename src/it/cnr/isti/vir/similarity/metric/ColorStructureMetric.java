@@ -30,7 +30,7 @@ import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 
-public class ColorStructureMetric  implements Metric<ColorStructure> {
+public class ColorStructureMetric  implements IMetric<ColorStructure> {
 	
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ColorStructure.class);
 	private static long distCount = 0;

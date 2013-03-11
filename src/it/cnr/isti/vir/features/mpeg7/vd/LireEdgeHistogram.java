@@ -25,7 +25,7 @@
 package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -149,9 +149,9 @@ public final class LireEdgeHistogram implements IFeature, java.io.Serializable {
 	        	case XMLStreamConstants.START_ELEMENT:
 	            	if (xmlr.getLocalName().equals("EdgeHistogram") ) { 
 	            		if ( useTotalHistogram ) {
-	            			totHistogram_temp = expandBins( Convertions.stringToUnsignedByteArray(xmlr.getElementText() ) );
+	            			totHistogram_temp = expandBins( Conversions.stringToUnsignedByteArray(xmlr.getElementText() ) );
 	            		} else {
-	            			binCounts_temp = Convertions.stringToUnsignedByteArray(xmlr.getElementText() );
+	            			binCounts_temp = Conversions.stringToUnsignedByteArray(xmlr.getElementText() );
 	            		}
 	            		if (	( totHistogram_temp == null && binCounts_temp == null ) ||
 	            				( totHistogram_temp == null && binCounts_temp.length != 80 ) ||
@@ -257,7 +257,7 @@ public final class LireEdgeHistogram implements IFeature, java.io.Serializable {
 		if ( binCounts != null ) {
 			str += "  BinCounts:";
 			for (int i=0; i<binCounts.length; i++ ){
-				str += " " + Convertions.unsignedByteToInt(binCounts[i]);
+				str += " " + Conversions.unsignedByteToInt(binCounts[i]);
 			}
 		} else if ( totHistogram != null ) {
 			str += "  totalHistogram:";
@@ -368,7 +368,7 @@ public final class LireEdgeHistogram implements IFeature, java.io.Serializable {
 		
 		//memcpy( TotalHistogram + 5, LocalHistogramOnly, 80*sizeof(double) );
 		for (int l=0; l<80; l++) {
-			tH[l+5] = (float) quantTable[l%5][Convertions.unsignedByteToInt(bins[l])];
+			tH[l+5] = (float) quantTable[l%5][Conversions.unsignedByteToInt(bins[l])];
 		}
 		
 		

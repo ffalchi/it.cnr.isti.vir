@@ -65,6 +65,11 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 	
 	private static final byte version = 0;
 	
+	
+	/* L1 Values
+	150 EH
+	
+	*/
 	private final AbstractID id;
 	
 	private String thmbUrl;
@@ -72,6 +77,8 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 //	public SAPIRObject(FeaturesCollection f) {
 //		super(f);
 //	}
+	
+	
 	
 	public static FeatureClassCollector getFCClasses() {
 		return fcc;

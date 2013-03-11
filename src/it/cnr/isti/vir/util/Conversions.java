@@ -24,7 +24,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
-public final class Convertions {
+public final class Conversions {
 	
 	protected static final String[] getNumbers(String str) {
 		return str.split("\\s+");
@@ -82,7 +82,6 @@ public final class Convertions {
 	
 	public static final int unsignedByteToInt(byte b) {
 		return b+128;
-		//return (int) (b & 0xFF);
 	}	
 
 	public static final int[] unsignedByteArrayToIntArray(byte[] b) {

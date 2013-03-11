@@ -30,7 +30,7 @@ import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
 
-public class EdgeHistogramMetric implements Metric<EdgeHistogram> {
+public class EdgeHistogramMetric implements IMetric<EdgeHistogram> {
 	private static long distCount = 0;
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(EdgeHistogram.class);
 	

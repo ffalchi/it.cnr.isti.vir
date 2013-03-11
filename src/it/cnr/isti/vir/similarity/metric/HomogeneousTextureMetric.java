@@ -30,7 +30,7 @@ import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
 import it.cnr.isti.vir.features.mpeg7.vd.HomogeneousTexture;
 
-public class HomogeneousTextureMetric implements Metric<HomogeneousTexture> {
+public class HomogeneousTextureMetric implements IMetric<HomogeneousTexture> {
 	
 	private static long distCount = 0;
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(HomogeneousTexture.class);

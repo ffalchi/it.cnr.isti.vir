@@ -26,7 +26,6 @@ package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
-import it.cnr.isti.vir.features.FeaturesCollectorHT;
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.evaluation.ILFEval;
@@ -335,11 +334,11 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		return null;
 	}*/
 
-	
+	/*
 	public int compareTo(IFeaturesCollector obj) {
 		return hashCode()-((FeaturesCollectorHT)obj).hashCode();
 	}
-	
+	*/
 	public boolean equals(Object obj) {
 		if ( this == obj ) return true;
 		ALocalFeaturesGroup<LF> givenF = (ALocalFeaturesGroup<LF>) obj;
@@ -388,12 +387,21 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		return ((IHasID) linkedFC).getID();
 	}
 	
+	
 	@Override
 	public int compareTo(IHasID arg0) {
-		return getID().compareTo( arg0.getID() );
+		if ( this == arg0 ) return 0;
+		AbstractID thisID = this.getID();
+		if ( thisID != arg0.getID() ) {
+			if ( thisID == null ) return -1;
+			if ( arg0.getID() == null ) return 1;
+			int tComp = thisID.compareTo( arg0.getID());	
+			if ( tComp != 0 ) return tComp;
+		}
+		return 0;
 	}
 
-        public final static void overPrint_point( BufferedImage img, float[] xy, int color ) {
+    public final static void overPrint_point( BufferedImage img, float[] xy, int color ) {
 		int x = (int) Math.round(xy[0]);
 		int y = (int) Math.round(xy[1]);
 		if ( x == -1 ) x = 0;

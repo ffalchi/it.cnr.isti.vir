@@ -25,7 +25,7 @@
 package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 import it.cnr.isti.vir.util.L1;
 
 import java.io.DataInput;
@@ -155,9 +155,9 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 	        	case XMLStreamConstants.START_ELEMENT:
 	            	if (xmlr.getLocalName().equals("BinCounts") ) { 
 	            		if ( useTotalHistogram ) {
-	            			totHistogram_temp = expandBins( Convertions.stringToUnsignedByteArray(xmlr.getElementText() ) );
+	            			totHistogram_temp = expandBins( Conversions.stringToUnsignedByteArray(xmlr.getElementText() ) );
 	            		} else {
-	            			binCounts_temp = Convertions.stringToUnsignedByteArray(xmlr.getElementText() );
+	            			binCounts_temp = Conversions.stringToUnsignedByteArray(xmlr.getElementText() );
 	            		}
 	            	}
 	            	break;
@@ -211,20 +211,13 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 		return mpeg7XMDistance_TotalH(t1, t2);
 	}
 	
+	public final float[] getTotalH() {
+		if ( totHistogram != null ) return totHistogram;
+		return expandBins(binCounts);
+	}
+	
 	public static final double mpeg7XMDistance_TotalH(float[] tH1, float[] tH2) {
 		return L1.get(tH1,  tH2);
-//			int	i;
-//			double	dist, dTemp;
-//			
-//			dist = 0.0;
-//			for(i=0; i < 80+70; i++){
-//			  // Global(5)+Semi_Global(65)
-//			  dTemp= (tH1[i] - tH2[i]);
-//			  if (dTemp < 0.0) dTemp = -dTemp;
-//			  dist += dTemp;
-//			}
-//
-//			return dist;
 	}
 /*	
 	public final double mpeg7XMDistancebins(EdgeHistogram givenD) {
@@ -267,7 +260,7 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 		if ( binCounts != null ) {
 			str += "  BinCounts:";
 			for (int i=0; i<binCounts.length; i++ ){
-				str += " " + Convertions.unsignedByteToInt(binCounts[i]);
+				str += " " + Conversions.unsignedByteToInt(binCounts[i]);
 			}
 		} else if ( totHistogram != null ) {
 			str += "  totalHistogram:";
@@ -383,7 +376,7 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 		
 		//memcpy( TotalHistogram + 5, LocalHistogramOnly, 80*sizeof(double) );
 		for (int l=0; l<80; l++) {
-			tH[l+5] = (float) quantTable[l%5][Convertions.unsignedByteToInt(bins[l])];
+			tH[l+5] = (float) quantTable[l%5][Conversions.unsignedByteToInt(bins[l])];
 		}
 		
 		
@@ -450,8 +443,8 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 					   +tH[5+45+j%5]
 					   +tH[5+50+j%5])/4.0);
 		}
-		//	 Make Semi-Global Histogram end
 		
+		//	 Make Semi-Global Histogram end		
 		return tH;
 	} /* EHD_Make_Global_SemiGlobal */
 	

@@ -43,7 +43,8 @@ public class FeaturesCollectors {
 		FeaturesCollectorHTwithID.class,
 		FeaturesCollectorHTwithIDClassified.class,
 		SAPIRObject.class,
-		FeaturesCollectorArr.class };
+		FeaturesCollectorArr.class,
+		FeatureCollector.class};
 	
 	static final Hashtable<Class<?>, Integer> idclassFCCHT = ClassIDs.getClassIDsHT(fccIDclass);
 	static final Constructor<?>[] constructors 	= ClassIDs.getConstructors(fccIDclass, DataInput.class);
@@ -56,7 +57,7 @@ public class FeaturesCollectors {
 	
 	public static final Integer getClassID(Class featureClass) {
 		Integer id = idclassFCCHT.get(featureClass);
-		if ( id == null ) System.err.println("FeatureCollector class " + featureClass.getName() + "not found");
+		if ( id == null ) System.err.println("FeatureCollector class " + featureClass.getName() + " not found");
 		return id;
 	}
 	

@@ -28,6 +28,7 @@ import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
+import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
@@ -39,7 +40,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class SAPIRMetric implements Metric<IFeaturesCollector>, IMeanEvaluator<SAPIRObject> {
+public class SAPIRMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<SAPIRObject> {
 	
 	private static long distCount = 0;
 	public static final FeatureClassCollector reqFeatures = new FeatureClassCollector(
@@ -70,6 +71,10 @@ public class SAPIRMetric implements Metric<IFeaturesCollector>, IMeanEvaluator<S
 		return reqFeatures;
 	}
 	
+	public SAPIRMetric() {
+		
+	}
+	
 	public SAPIRMetric(Properties prop) {
 		
 	}
@@ -82,7 +87,7 @@ public class SAPIRMetric implements Metric<IFeaturesCollector>, IMeanEvaluator<S
 	
 		return distance(f1,f2, Double.MAX_VALUE);
 	}
-	
+
 	
 	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
 		distCount++;
@@ -107,6 +112,11 @@ public class SAPIRMetric implements Metric<IFeaturesCollector>, IMeanEvaluator<S
 		//HT
 		dist += wSAPIR[3] * HomogeneousTexture.mpeg7XMDistance( (HomogeneousTexture) f1.getFeature(HomogeneousTexture.class), (HomogeneousTexture) f2.getFeature(HomogeneousTexture.class), htOption );
 				
+		
+//		double tDist = SAPIRFeature.mpeg7XMDistance(new SAPIRFeature((SAPIRObject) f1), new SAPIRFeature((SAPIRObject) f2));
+		
+//		if ( Math.abs(tDist-dist)/dist > 0.001 ) System.err.println("SON CAZZI! " + tDist + " " + dist);
+		
 		return dist;
 	}
 	
@@ -149,4 +159,6 @@ public class SAPIRMetric implements Metric<IFeaturesCollector>, IMeanEvaluator<S
 		
 		return new SAPIRObject(clMean, csMean, scMean, ehMean, htMean, null);
 	}
+	
+	
 }

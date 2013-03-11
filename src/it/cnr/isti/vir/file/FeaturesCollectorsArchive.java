@@ -32,8 +32,10 @@ import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
+import it.cnr.isti.vir.similarity.metric.IMetric;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
+import it.cnr.isti.vir.util.Log;
 import it.cnr.isti.vir.util.ParallelOptions;
 
 import java.io.BufferedInputStream;
@@ -104,12 +106,17 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 	public final AbstractID getID(int i) {
 		return ids.get(i);
 	}
+	
+
+	public FeaturesCollectorsArchive getSameType(File file) throws Exception {
+		return new FeaturesCollectorsArchive(file, featuresClasses, idClass, fcClass);
+	}
 
 	public FeaturesCollectorsArchive(
 			File file,
 			FeatureClassCollector featuresClasses,
 			Class<? extends AbstractID> idClass,
-			Class<?> fcClass)
+			Class<? extends IFeaturesCollector> fcClass)
 					throws Exception {
 		
 		if ( file.exists() && !file.delete() )
@@ -199,7 +206,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			InvocationTargetException {
 		DataInputStream in = new DataInputStream(new BufferedInputStream(
 				new FileInputStream(f)));
-		ArrayList<IFeaturesCollector> arr = new ArrayList(ids.size());
+		ArrayList<IFeaturesCollector> arr = new ArrayList(size());
 
 		if (in.readLong() != fileID) {
 			System.err
@@ -248,7 +255,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 		return getKNN(qObj, k, sim, false);
 	}
 	
-	
+	// For kNN searching
 	class Temp implements Runnable {
 		private final int from;
 		private final int to;
@@ -355,8 +362,9 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 					
 					// kNNQueues are performed in parallels
 					final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / ParallelOptions.nThreads);
+					final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
 					int ti = 0;
-			        Thread[] thread = new Thread[ParallelOptions.nThreads];
+			        Thread[] thread = new Thread[nThread];
 			        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
 			        	int to = from+nQueriesPerThread-1;
 			        	if ( to >= qObj.length ) to =qObj.length-1;
@@ -365,7 +373,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			        	ti++;
 			        }
 			        
-			        for ( ti=0; ti<ParallelOptions.nThreads; ti++ ) {
+			        for ( ti=0; ti<thread.length; ti++ ) {
 			        	try {
 							thread[ti].join();
 						} catch (InterruptedException e) {
@@ -554,8 +562,16 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 	public FeaturesCollectorsArchive(String fileName ) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
 		this(new File(fileName));
 	}
+
+	public FeaturesCollectorsArchive(File file ) throws IOException,
+			SecurityException, NoSuchMethodException, IllegalArgumentException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException {
+		this(file, true);
+
+	}
 	
-	public FeaturesCollectorsArchive(File file) throws IOException,
+	public FeaturesCollectorsArchive(File file, boolean readIDs) throws IOException,
 			SecurityException, NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException {
@@ -632,6 +648,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 				// for ( int i=0; i<positions.size(); i++ ) {
 				// idOffsetMap.put(ids.get(i), positions.get(i));
 				// }
+
 				idPosMap = new HashMap(2 * positions.size());
 				for (int i = 0; i < positions.size(); i++) {
 					idPosMap.put(ids.get(i), i);
@@ -642,8 +659,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			} else {
 
 				// READING INDEX FILE
-				RandomAccessFile inOffset = new RandomAccessFile(offsetFile,
-						"r");
+				RandomAccessFile inOffset = new RandomAccessFile(offsetFile,"r");
 				// RandomAccessFile inId = new RandomAccessFile( idFile, "r" );
 
 				int size = (int) (inOffset.length() / 8);
@@ -653,31 +669,34 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 				// Reading offsets
 				long[] tempPositions = new long[size];
 				byte[] byteArray = new byte[size * 8];
-				LongBuffer inLongBuffer = ByteBuffer.wrap(byteArray)
-						.asLongBuffer();
+				LongBuffer inLongBuffer = ByteBuffer.wrap(byteArray).asLongBuffer();
 				inOffset.readFully(byteArray);
 				inLongBuffer.get(tempPositions, 0, size);
 				positions = new TLongArrayList(tempPositions);
 
-				DataInputStream idInput = new DataInputStream(
-						new BufferedInputStream(new FileInputStream(idFile)));
+				DataInputStream idInput = new DataInputStream(new BufferedInputStream(new FileInputStream(idFile)));
 
 				// Reading ids
 				if (idClass != null) {
-					// idOffsetMap = new HashMap(2*size);
-					idPosMap = new HashMap(2 * size);
-
-					System.out.print("Reading IDs... ");
-					ids = new ArrayList(Arrays.asList(IDClasses.readArray(idInput, size, idClass)));
-					System.out.println("done");
-
-					System.out.print("Creating IDs HashTable... ");
-					size = positions.size();
-					for (int i = 0; i < size; i++) {
-						// idOffsetMap.put(ids.get(i), positions.get(i));
-						idPosMap.put(ids.get(i), i);
+					if ( readIDs ) {
+						// idOffsetMap = new HashMap(2*size);
+						idPosMap = new HashMap(2 * size);
+	
+						System.out.print("Reading IDs... ");
+						ids = new ArrayList(Arrays.asList(IDClasses.readArray(idInput, size, idClass)));
+						System.out.println("done");
+	
+						System.out.print("Creating IDs HashTable... ");
+						size = positions.size();
+						for (int i = 0; i < size; i++) {
+							// idOffsetMap.put(ids.get(i), positions.get(i));
+							idPosMap.put(ids.get(i), i);
+						}
+						System.out.println("done");
+					} else {
+						ids = null;
+						idPosMap = null;
 					}
-					System.out.println("done");
 				} else {
 					System.out.println("--> The archive does not contains IDs");
 					// no IDs
@@ -904,5 +923,102 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			return null;
 		}
 	}
+	
+	
+	// For kNN searching
+	class InterDistances implements Runnable {
+		private final int i1;
+		private final IFeaturesCollector[] objs;
+		private final ISimilarity sim;
+		private final double[][] d;
+		
+		InterDistances(IFeaturesCollector[] objs, ISimilarity sim, double[][] d, int i1 ) {
+			this.i1 = i1;
+			this.objs = objs;
+			this.sim = sim; 
+			this.d = d;
+		}
 
+		@Override
+		public void run() {
+			IFeaturesCollector obj1 = objs[i1];
+			int di2=0;
+			for ( int i2=i1; i2<objs.length; i2++) {
+				d[i1][di2++] = sim.distance(obj1, objs[i2]);
+			}
+		}
+	}
+	
+	public synchronized void writeInterdistances(File outFile, final IMetric sim ) throws IOException, ArchiveException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		
+		int size = size();
+		long sizeSqr = (long) size*size;
+		int nThread = ParallelOptions.nThreads;
+		Log.info_verbose("N of distances to evaluate: " + sizeSqr);
+		Log.info_verbose("Outfile final size: " + sizeSqr*8 / 1024 /1024+ " MegaBytes.");
+		
+		IFeaturesCollector[] obj = new IFeaturesCollector[size];
+		Log.info("Reading all objects");
+		this.getAll().toArray(obj);
+		Log.info("Reading all objects DONE");
+		
+		Log.info("Allocating memory for distances");
+		double[][] dists = new double[size][]; 
+		for ( int i=0; i<dists.length; i++) {
+			dists[i] = new double[size-i];
+		}
+		Log.info("Allocating memory for distances done");
+		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)));
+		
+		long start = System.currentTimeMillis();
+		
+		Thread[] thread = new Thread[nThread];
+		for ( int i1=0; i1<size; ) {
+			int oldi1 = i1;
+			for ( int ti=0; ti<nThread && i1<size; ti++ ) {
+				thread[ti] = new Thread( new InterDistances(obj, sim, dists, i1++) ) ;
+				thread[ti].start();
+			}
+	        
+	        for ( int ti=0; ti<thread.length && thread[ti] != null; ti++ ) {
+	        	try {
+					thread[ti].join();
+					thread[ti] = null;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+	        }
+	       
+	        // saving output
+	        for ( int ii1=oldi1; ii1<i1; ii1++ ) {	        	
+	        	//  the first part of the row is taken for symmetry
+	        	for ( int i2=0; i2<ii1; i2++) {
+	        		out.writeDouble(dists[i2][ii1-i2]);
+	        	}
+	        	// second part of the row
+	        	for ( int i2=ii1; i2<size; i2++) {
+	        		out.writeDouble(dists[ii1][i2-ii1]);
+	        	}
+	        }
+			
+	        double avgTime = (double) (System.currentTimeMillis() - start) / ( i1 * size) ;
+			Log.info_verbose((i1)*size + " done. Extimated time to finish: " + (avgTime*(size-i1)*size)/1000/60+ " min");
+		}		
+		out.close();
+		/*
+		System.out.println("Testing:");
+		RandomAccessFile rnd = new RandomAccessFile(outFile, "r");
+		for (int i=0; i<100000; i++) {
+			int i1 = RandomOperations.getInt(0, size-1);
+			int i2 = RandomOperations.getInt(0, size-1);
+			rnd.seek((long) (i1*size+i2)*8);
+			double saved = rnd.readDouble();
+			double actual = sim.distance(get(i1), get(i2));
+			if ( saved != actual) {
+				System.err.println("Saved distance (" + saved+") and actual (" + actual+")+ diffear");
+			}
+		}
+		System.out.println("Testing ended");*/
+		
+	}
 }

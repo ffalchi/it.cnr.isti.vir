@@ -66,7 +66,7 @@ public class SimPQueueArr<O> extends SimilarityPQueue<O> {
 	}
 
 	@Override
-	public ISimilarityResults getResults() {
+	public SimilarityResults getResults() {
 		Arrays.sort(arr);
 		return new SimilarityResults(arr);
 	}

@@ -25,7 +25,7 @@
 package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 import it.cnr.isti.vir.util.L1;
 
 import java.io.DataInput;
@@ -65,15 +65,13 @@ public final class ColorStructure implements IFeature, java.io.Serializable {
 	public ColorStructure(DataInput str) throws IOException {
 		byte version = str.readByte();
 		values = new byte[str.readByte()];
-		if ( version < 1 ) for (int i=0; i<values.length; i++) values[i] = (byte) (((int) str.readByte()) -128);
-		else for (int i=0; i<values.length; i++) values[i] = str.readByte();
+		for (int i=0; i<values.length; i++) values[i] = str.readByte();
 	}
 	
 	public ColorStructure(ByteBuffer src) throws IOException {
 		byte version = src.get();
 		values = new byte[src.get()];
-		if ( version < 1 ) for (int i=0; i<values.length; i++) values[i] = (byte) (((int) src.get()) -128);
-		else for (int i=0; i<values.length; i++) values[i] = src.get();
+		for (int i=0; i<values.length; i++) values[i] = src.get();
 	}
 	
 	public void writeData(DataOutput str) throws IOException {
@@ -96,7 +94,7 @@ public final class ColorStructure implements IFeature, java.io.Serializable {
 			switch (event) {
 			case XMLStreamConstants.START_ELEMENT:
 				if (xmlr.getLocalName().equals("Values")) {
-					tValues = Convertions.stringToUnsignedByteArray(xmlr
+					tValues = Conversions.stringToUnsignedByteArray(xmlr
 							.getElementText());
 				}
 				break;
@@ -151,7 +149,7 @@ public final class ColorStructure implements IFeature, java.io.Serializable {
 		String str = "ColorStructure";
 		str += "  Values:";
 		for (int i=0; i<values.length; i++ ){
-			str += " " + Convertions.unsignedByteToInt(values[i]);
+			str += " " + Conversions.unsignedByteToInt(values[i]);
 		}
 		return str + "\n";
 	}
@@ -187,7 +185,6 @@ public final class ColorStructure implements IFeature, java.io.Serializable {
 		for (int i=0; i<values.length; i++ ){
 			if ( values[i] != vd.values[i] ) return false;
 		}
-
 
 		return true;
 	}

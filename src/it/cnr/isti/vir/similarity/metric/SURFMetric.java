@@ -33,7 +33,7 @@ import it.cnr.isti.vir.features.localfeatures.SURFGroup;
 import java.util.Collection;
 import java.util.Properties;
 
-public class SURFMetric implements Metric<SURF>, ILocalFeaturesMetric<SURF>, IMeanEvaluator<SURF> {
+public class SURFMetric implements IMetric<SURF>, ILocalFeaturesMetric<SURF>, IMeanEvaluator<SURF> {
 
 	private static long distCount = 0;
 	private static final Class reqFeature = SURF.class;

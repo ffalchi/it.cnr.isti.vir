@@ -29,14 +29,14 @@ import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
-import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
+import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.id.IHasID;
-import it.cnr.isti.vir.id.AbstractID;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Locale;
 
 public class SimilarityResults<E> implements ISimilarityResults<E> {
 
@@ -316,6 +317,43 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		}
 		
 		return tStr + "</tr>";
+	}
+	
+	public String getHtmlTableRow_Images_Cophir(String preFix, String postFix, Integer height) {
+		return getHtmlTableRow_Images_Cophir(preFix, postFix, height, Integer.MAX_VALUE);
+	}
+	
+	public String getHtmlTableRow_Images_Cophir(String preFix, String postFix, Integer height, Integer k) {
+		String tStr = "<tr>\n";
+		if ( height == null) height = 100;
+		String idPath = getCoPhIRIDPath(((IHasID)query).getID());
+		// Query
+		tStr += "<td>"+ ((IHasID)query).getID()+ "<br>" + "<img src=\"" + preFix + idPath + postFix + "\" height=\""+height+"\"></td>";
+		
+		int count = 0;
+		// Results
+		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext() && count < k; ) {
+			ObjectWithDistance<E> curr = itThis.next();
+			AbstractID id = ((IHasID)curr.obj).getID();
+			idPath = getCoPhIRIDPath(id);
+			tStr += "<td>" + String.format(Locale.ENGLISH, "%.9f", curr.dist) + "<br>" +  "<img src=\"" + preFix + idPath + postFix + "\" title=\""+((IHasID)curr.obj).getID() + " d ";
+			tStr += String.format("%.3f", curr.dist);
+			tStr += "\" height=\""+height+"\"></td>";
+			count++;
+		}
+		
+		return tStr + "</tr>";
+	}
+	
+	public static String getCoPhIRIDPath(AbstractID id) {
+		int idInt = ((IDInteger) id).id;
+		String idStr = String.format("%09d", idInt);
+		if ( idInt <= 999999999 ) {			
+			return idStr.substring(0, 3) + "/" + idStr.substring(3, 6) + "/" + idStr;
+		} else {
+			return idStr.substring(0, 4) + "/" + idStr.substring(4, 7) + "/" + idStr;
+		}
+		
 	}
 
 

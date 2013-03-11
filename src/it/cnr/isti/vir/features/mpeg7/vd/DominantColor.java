@@ -26,7 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -77,7 +77,7 @@ public final class DominantColor implements IFeature {
 		}
 		*/
 		public int getIndex(int i) {
-			return Convertions.unsignedByteToInt(index[i]);
+			return Conversions.unsignedByteToInt(index[i]);
 		}
 		
 		public boolean equals(Value givenValue) {
@@ -154,10 +154,10 @@ public final class DominantColor implements IFeature {
 		    	switch (event) {
 		        	case XMLStreamConstants.START_ELEMENT:
 		            	if (xmlr.getLocalName().equals("ColorVariance") ) { 
-		            		colorVariance = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );
+		            		colorVariance = Conversions.stringToUnsignedByteArray( xmlr.getElementText() );
 		            	} else {
 		            		if (xmlr.getLocalName().equals("Index") ) { 
-		            			index = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );
+		            			index = Conversions.stringToUnsignedByteArray( xmlr.getElementText() );
 		            		} else {
 			            		if (xmlr.getLocalName().equals("Percentage") ) { 
 			            			percentage = (byte) Integer.parseInt( xmlr.getElementText() );

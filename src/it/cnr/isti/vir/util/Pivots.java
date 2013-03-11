@@ -30,23 +30,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 public class Pivots {
-	
-	public static final double getTrMatrixAvg(double[][] intDist) {
-		double avg = 0;
-		// i=0 is not useful
-		
-		if ( intDist == null ) return -1;
-		int count = 0;
-		for ( int i=1; i<intDist.length; i++ ) {
-			double temp = 0;
-			for ( int j=0; j<intDist[i].length; j++ ) {
-				temp = intDist[i][j];
-				avg += temp;
-			}
-			count += intDist[i].length;
-		}
-		return avg / (double) count;
-	}
+
 	
 	public static final Collection<Integer> reordering(Integer triesMax, Integer nObjects, float[][] intDist ) {
 		return reordering( triesMax, nObjects, intDist, intDist.length);

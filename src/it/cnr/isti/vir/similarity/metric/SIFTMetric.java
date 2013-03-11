@@ -33,7 +33,7 @@ import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 import java.util.Collection;
 import java.util.Properties;
 
-public class SIFTMetric implements Metric<SIFT>, ILocalFeaturesMetric<SIFT>, IMeanEvaluator<SIFT> {
+public class SIFTMetric implements IMetric<SIFT>, ILocalFeaturesMetric<SIFT>, IMeanEvaluator<SIFT> {
 
 	private static long distCount = 0;
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(SIFT.class);

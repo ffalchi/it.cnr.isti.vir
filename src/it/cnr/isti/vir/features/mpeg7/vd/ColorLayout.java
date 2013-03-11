@@ -26,7 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 
 import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -65,7 +65,19 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 						1, 1, 1, 1, 1, 1, 1, 1 }
 				
 				};
-
+	
+	static float[][] m_weight_sqrt;
+	
+	static {
+		m_weight_sqrt = new float[3][];
+		for ( int i=0; i<m_weight.length; i++) {
+			m_weight_sqrt[i] = new float[m_weight[i].length];
+			for ( int j=0; j<m_weight[i].length; j++) {
+				m_weight_sqrt[i][j] = (float) Math.sqrt(m_weight[i][j] );
+			}
+		}
+	}
+	
 	public int getYACCoeff_n() {
 		return yACCoeff.length;
 	}
@@ -243,17 +255,17 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 			            	} else {
 			            		temp = "YACCoeff5";
 				            	if (xmlr.getLocalName().equals( temp ) ) { 
-				            		yACCoeff_temp = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );
+				            		yACCoeff_temp = Conversions.stringToUnsignedByteArray( xmlr.getElementText() );
 				            		if ( yACCoeff_temp.length != 5 ) throw new MPEG7VDFormatException("Error parsing ColorLayout");
 				            	} else {
 				            		temp = "CbACCoeff2";
 					            	if (xmlr.getLocalName().equals( temp ) ) { 
-					            		cbACCoeff_temp = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );		            		
+					            		cbACCoeff_temp = Conversions.stringToUnsignedByteArray( xmlr.getElementText() );		            		
 					            		if ( cbACCoeff_temp.length != 2 ) throw new MPEG7VDFormatException("Error parsing ColorLayout");
 					            	} else {
 					            		temp = "CrACCoeff2";
 						            	if (xmlr.getLocalName().equals( temp ) ) { 
-						            		crACCoeff_temp = Convertions.stringToUnsignedByteArray( xmlr.getElementText() );		            		
+						            		crACCoeff_temp = Conversions.stringToUnsignedByteArray( xmlr.getElementText() );		            		
 						            		if ( crACCoeff_temp.length != 2 ) throw new MPEG7VDFormatException("Error parsing ColorLayout");
 						            	}
 					            	}
@@ -309,6 +321,65 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 		
 		return tempHashCode;
 	}
+
+	
+public final int putMPEG7XMDistanceL2Values(float[] values, int offset) {
+		
+		int NY = yACCoeff.length;
+		int NC = cbACCoeff.length;
+
+		int i1=offset;
+	
+		values[i1++] = m_weight_sqrt[0][0] * yDCCoeff;
+		for (int j = 0; j < NY; j++) {
+			values[i1++] = m_weight_sqrt[0][j + 1] * yACCoeff[j];
+		}
+		
+		//values[i1] = new float[NC+1];
+		values[i1++] = m_weight_sqrt[1][0] * cbDCCoeff;
+		for (int j = 0; j < NC; j++) {
+			values[i1++] = m_weight_sqrt[1][j + 1] * cbACCoeff[j]; 
+		}
+
+		//values[i1] = new float[NC+1];
+		values[i1++] = m_weight_sqrt[2][0] * crDCCoeff;
+		for (int j = 0; j < NC; j++) {
+			values[i1++] = m_weight_sqrt[2][j + 1] * crACCoeff[j]; 
+		}
+		return i1;
+	}
+	
+	public final int putMPEG7XMDistanceL2Values(float[][] values, int offset) {
+		
+		int NY = yACCoeff.length;
+		int NC = cbACCoeff.length;
+
+		int i1=offset;
+		//values[i1] = new float[NY+1];
+		int i2=0;		
+		values[i1][i2++] = m_weight_sqrt[0][0] * yDCCoeff;
+		for (int j = 0; j < NY; j++) {
+			values[i1][i2++] = m_weight_sqrt[0][j + 1] * yACCoeff[j];
+		}
+		
+		i1++;
+		i2=0;
+		//values[i1] = new float[NC+1];
+		values[i1][i2++] = m_weight_sqrt[1][0] * cbDCCoeff;
+		for (int j = 0; j < NC; j++) {
+			values[i1][i2++] = m_weight_sqrt[1][j + 1] * cbACCoeff[j]; 
+		}
+
+		i1++;
+		i2=0;
+		//values[i1] = new float[NC+1];
+		values[i1][i2++] = m_weight_sqrt[2][0] * crDCCoeff;
+		for (int j = 0; j < NC; j++) {
+			values[i1][i2++] = m_weight_sqrt[2][j + 1] * crACCoeff[j]; 
+		}
+		i1++;
+		return i1;
+	}
 	
 	public final static double mpeg7XMDistance(ColorLayout d1, ColorLayout d2) {
 		// Weighted Euclidean L2
@@ -347,7 +418,7 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 			sum[2] += (m_weight[2][j + 1] * diff * diff);
 		}
 
-		return Math.sqrt((double) sum[0]) + Math.sqrt((double) sum[1])	+ Math.sqrt((double) sum[2]);
+		return Math.sqrt((float) sum[0]) + Math.sqrt((float) sum[1])	+ Math.sqrt((float) sum[2]);
 	} /* D_Distances_ColorLayoutD */	
 	
 	@Override
@@ -355,23 +426,23 @@ public final class ColorLayout implements IFeature, java.io.Serializable {
 		
 		String str = "ColorLayout";
 		
-		str += "\n  YDCCoeff: " + Convertions.unsignedByteToInt(yDCCoeff);
-		str += "\n  CbDCCoeff: " + Convertions.unsignedByteToInt(cbDCCoeff);
-		str += "\n  CrDCCoeff: " + Convertions.unsignedByteToInt(crDCCoeff);		
+		str += "\n  YDCCoeff: " + Conversions.unsignedByteToInt(yDCCoeff);
+		str += "\n  CbDCCoeff: " + Conversions.unsignedByteToInt(cbDCCoeff);
+		str += "\n  CrDCCoeff: " + Conversions.unsignedByteToInt(crDCCoeff);		
 		
 		str += "\n  YACCoeff:";
 		for (int i=0; i<yACCoeff.length; i++ ){
-			str += " " + Convertions.unsignedByteToInt(yACCoeff[i]);
+			str += " " + Conversions.unsignedByteToInt(yACCoeff[i]);
 		}
 		
 		str += "\n  CbACCoeff:";
 		for (int i=0; i<cbACCoeff.length; i++ ){
-			str += " " + Convertions.unsignedByteToInt(cbACCoeff[i]);
+			str += " " + Conversions.unsignedByteToInt(cbACCoeff[i]);
 		}
 		
 		str += "\n  CrACCoeff:";
 		for (int i=0; i<crACCoeff.length; i++ ){
-			str += " " + Convertions.unsignedByteToInt(crACCoeff[i]);
+			str += " " + Conversions.unsignedByteToInt(crACCoeff[i]);
 		}		
 				
 	

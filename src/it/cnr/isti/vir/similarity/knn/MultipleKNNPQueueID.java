@@ -26,7 +26,7 @@ package it.cnr.isti.vir.similarity.knn;
 
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.similarity.metric.Metric;
+import it.cnr.isti.vir.similarity.metric.IMetric;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.pqueues.SimilarityPQueue;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
@@ -43,7 +43,7 @@ public class MultipleKNNPQueueID<F>  {
 	private KNNPQueue<F>[] knn;
 	private IFeature[] qObj;
 	private double[][] intDist;
-	private final Metric<F> comp;
+	private final IMetric<F> comp;
 	private final Integer k;
 	private final boolean storeID;
 	private final boolean distET;
@@ -92,7 +92,7 @@ public class MultipleKNNPQueueID<F>  {
 	
 	public MultipleKNNPQueueID(	Collection queryColl,
 			Integer k,
-								Metric comp,
+								IMetric comp,
 								boolean useInterDistances,
 								IQueriesOrdering ordering,
 								Integer nRecents
@@ -104,7 +104,7 @@ public class MultipleKNNPQueueID<F>  {
 	
 	public MultipleKNNPQueueID(	Collection queryColl,
 								Integer k,
-								Metric comp,
+								IMetric comp,
 								Class pQueueClass
 								) {
 		
@@ -122,7 +122,7 @@ public class MultipleKNNPQueueID<F>  {
 	
 	public MultipleKNNPQueueID(	Collection queryColl,
 								Integer k,
-								Metric comp,
+								IMetric comp,
 								boolean useInterDistances,
 								IQueriesOrdering ordering,
 								Integer nRecents,
@@ -158,20 +158,9 @@ public class MultipleKNNPQueueID<F>  {
 		
 		//init reordering
 		if ( intDist!=null && ordering != null ) {
-			long startTime = System.currentTimeMillis();;
-			if ( !silent ) {
-				System.out.print(ordering.getClass());
-				System.out.println("Avg inter-dist before ordering: " + Pivots.getTrMatrixAvg(intDist));
-				startTime = System.currentTimeMillis();
-			}
 			reorder( ordering.getOrder(intDist));
-			if ( !silent ) {
-				System.out.println("Avg inter-dist after ordering: " + Pivots.getTrMatrixAvg(intDist));	
-				System.out.print(" done in " + (System.currentTimeMillis()-startTime) + " milliSec\n");
-			}
 		}
 		
-		//			
 				
 		knn = new KNNPQueue[qObj.length];
 		for ( int i=0; i<knn.length; i++ ) {

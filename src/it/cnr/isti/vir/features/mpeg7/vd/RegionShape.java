@@ -26,7 +26,7 @@ package it.cnr.isti.vir.features.mpeg7.vd;
 
 import it.cnr.isti.vir.features.IFeature;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.util.Convertions;
+import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -57,7 +57,7 @@ public class RegionShape implements IFeature {
 		    	switch (event) {
 		        	case XMLStreamConstants.START_ELEMENT:
 		            	if (xmlr.getLocalName().equals("MagnitudeOfART") ) { 
-		            		magnitudeOfART_temp = Convertions.stringToByteArray(xmlr.getElementText());
+		            		magnitudeOfART_temp = Conversions.stringToByteArray(xmlr.getElementText());
 		            	}
 		            	break;
 		            case XMLStreamConstants.END_ELEMENT:
