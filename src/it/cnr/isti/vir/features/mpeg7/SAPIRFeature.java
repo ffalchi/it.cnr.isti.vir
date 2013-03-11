@@ -140,7 +140,7 @@ public class SAPIRFeature implements IFeature {
 		
 		int i;
 	    for ( i = 0; i < clStart; i++) {
-	    	dist += Math.abs(o1.l1Values[i] - o2.l1Values[i]);
+	    	dist += Math.abs( (double) o1.l1Values[i] - o2.l1Values[i]);
 	    }		
 			
 	    double acc = 0;
@@ -172,7 +172,7 @@ public class SAPIRFeature implements IFeature {
 				
 		int i;
 	    for ( i = 0; i < clStart; i++) {
-	    	dist += Math.abs(o1.l1Values[i] - o2.l1Values[i]);
+	    	dist += Math.abs( (double)  o1.l1Values[i] - o2.l1Values[i]);
 	    }		
 	    
 	    if ( dist > maxDistance ) return -dist;
@@ -182,8 +182,7 @@ public class SAPIRFeature implements IFeature {
 	    	double diff = o1.l1Values[i] - o2.l1Values[i];
 	    	acc += diff * diff;
 	    }
-	    dist += Math.sqrt(acc);
-	    
+	    dist += Math.sqrt(acc);	    
 	    if ( dist > maxDistance ) return -dist;
 	    
 	    acc = 0;
@@ -191,8 +190,7 @@ public class SAPIRFeature implements IFeature {
 	    	double diff = o1.l1Values[i] - o2.l1Values[i];
 	    	acc += diff * diff;
 	    }
-	    dist += Math.sqrt(acc);
-	    
+	    dist += Math.sqrt(acc);	    
 	    if ( dist > maxDistance ) return -dist;
 	    
 	    acc = 0;

@@ -28,17 +28,17 @@ public class L2 {
 	}
 
 	
-	public static float getSquared(float[]f1, float[]f2) {
-		float acc = 0;
+	public static double getSquared(float[]f1, float[]f2) {
+		double acc = 0;
 		for ( int j=0; j<f1.length; j++) {
-			float diff = f1[j] - f2[j];
+			double diff = f1[j] - f2[j];
 			acc += diff * diff;
 		}
 		return acc; 
 	}
 	
-	public static float get(float[][] f1, float[][] f2) {
-		float dist = 0;
+	public static double get(float[][] f1, float[][] f2) {
+		double dist = 0;
 		
 		for ( int i=0; i<f1.length; i++) {
 			dist += get(f1[i], f2[i]);
