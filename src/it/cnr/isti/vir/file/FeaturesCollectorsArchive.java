@@ -2,25 +2,12 @@
  * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
  * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 package it.cnr.isti.vir.file;
 
@@ -199,6 +186,13 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 	public final File getfile() {
 		return f;
 	}
+	
+	public final IFeaturesCollector[] getAllArray() throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+		ArrayList<IFeaturesCollector> tRes = getAll();
+		IFeaturesCollector[] res = new IFeaturesCollector[tRes.size()];
+		tRes.toArray(res);
+		return res;
+	}
 
 	public final ArrayList<IFeaturesCollector> getAll() throws IOException,
 			SecurityException, NoSuchMethodException, IllegalArgumentException,
@@ -256,7 +250,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 	}
 	
 	// For kNN searching
-	class Temp implements Runnable {
+	class kNNThread implements Runnable {
 		private final int from;
 		private final int to;
 		private final IFeaturesCollector[] objs;
@@ -265,7 +259,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 		private final ISimilarity sim;
 		private final IFeaturesCollector[] q;
 
-		Temp(IFeaturesCollector[] q, ISimilarity sim, SimPQueueArr[] knn, int from, int to, IFeaturesCollector[]  objs, boolean onlyID) {
+		kNNThread(IFeaturesCollector[] q, ISimilarity sim, SimPQueueArr[] knn, int from, int to, IFeaturesCollector[]  objs, boolean onlyID) {
 			this.from = from;
 			this.to = to;
 			this.objs = objs;
@@ -290,6 +284,116 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 					}
 				}
 			}
+		}
+	}
+	
+	// For kNN multiple sim searching
+	class kNNThread_multiSim implements Runnable {
+		private final int from;
+		private final int to;
+		private final IFeaturesCollector[] objs;
+		private final SimPQueueArr[][] knn;
+		private final boolean onlyID;
+		private final ISimilarity[] sim;
+		private final IFeaturesCollector[] q;
+
+		kNNThread_multiSim(IFeaturesCollector[] q, ISimilarity[] sim, SimPQueueArr[][] knn, int from, int to, IFeaturesCollector[]  objs, boolean onlyID) {
+			this.from = from;
+			this.to = to;
+			this.objs = objs;
+			this.knn = knn;
+			this.onlyID = onlyID;
+			this.sim = sim; 
+			this.q = q;
+		}
+
+		@Override
+		public void run() {
+			// each query is processed on an independent thread
+			for (int iQ = from; iQ<=to; iQ++) {
+				//System.out.println(iQ);
+				for ( IFeaturesCollector obj : objs ) {
+					for ( int iS=0; iS<sim.length;iS++) {
+						double dist = sim[iS].distance(q[iQ], obj, knn[iS][iQ].excDistance );
+						if ( dist >= 0) {
+							if ( onlyID)
+								knn[iS][iQ].offer(((IHasID) obj).getID(), dist);
+							else 
+								knn[iS][iQ].offer(obj, dist);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	
+	public synchronized void getKNNs(IFeaturesCollector[] qObj, SimPQueueArr[][] kNNQueue, final ISimilarity[] sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		DataInputStream in = new DataInputStream(new BufferedInputStream(
+				new FileInputStream(f)));
+		
+		if (in.readLong() != fileID) {
+			// System.err.println("The file does not appear to be a FeatureArchive");
+		}
+
+		int fileVersion = in.readInt();
+		
+		final int nObj = positions.size();
+		
+		if (fileVersion > 1) {
+			Class fcClass = FeaturesCollectors.readClass(in);
+			Constructor fcClassConstructor = getFCConstructor(fcClass);
+			new FeatureClassCollector(in);
+			IDClasses.readClass(in);
+
+			boolean parallel = true;
+
+			final int parallelBatchSize = 100000;
+			
+			
+			// iterates through multiple batches
+			for (int iObj = 0; iObj < nObj; iObj+=parallelBatchSize ) {
+				int batchSize = parallelBatchSize;
+				if ( iObj + parallelBatchSize > nObj ) batchSize = nObj-iObj;
+				IFeaturesCollector[] objects = new IFeaturesCollector[batchSize];
+				
+				// reading objects in batch
+				for ( int i=0; i<objects.length; i++  ) {
+					IFeaturesCollector fc = null;
+					if (fcClassConstructor == null) {
+						fc = FeaturesCollectors.readData(in);
+					} else {
+						fc = (IFeaturesCollector) fcClassConstructor.newInstance(in);
+					}
+					objects[i] = fc;
+				}
+				
+				// kNNQueues are performed in parallels
+				final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue[0].length / ParallelOptions.nThreads);
+				final int nThread = (int) Math.ceil((double) kNNQueue[0].length / nQueriesPerThread);
+				int ti = 0;
+		        Thread[] thread = new Thread[nThread];
+		        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
+		        	int to = from+nQueriesPerThread-1;
+		        	if ( to >= qObj.length ) to =qObj.length-1;
+		        	thread[ti] = new Thread( new kNNThread_multiSim(qObj, sim, kNNQueue, from,to,objects, onlyID) ) ;
+		        	thread[ti].start();
+		        	ti++;
+		        }
+		        
+		        for ( ti=0; ti<thread.length; ti++ ) {
+		        	try {
+						thread[ti].join();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		        }
+				
+				Log.info((iObj+parallelBatchSize) + "/" + nObj);
+			}
+				
 		}
 	}
 	
@@ -340,7 +444,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 				}				
 			
 			} else {
-				final int parallelBatchSize = 1000;
+				final int parallelBatchSize = 100000;
 				
 				
 				// iterates through multiple batches
@@ -368,7 +472,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
 			        	int to = from+nQueriesPerThread-1;
 			        	if ( to >= qObj.length ) to =qObj.length-1;
-			        	thread[ti] = new Thread( new Temp(qObj, sim, kNNQueue, from,to,objects, onlyID) ) ;
+			        	thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, from,to,objects, onlyID) ) ;
 			        	thread[ti].start();
 			        	ti++;
 			        }
@@ -382,92 +486,10 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 						}
 			        }
 					
-					
+					Log.info((iObj+parallelBatchSize) + "/" + nObj);
 				}
 				
-/*
-				final int parallelBatchSize = 100;
-				final IFeaturesCollector[] obj = new IFeaturesCollector[parallelBatchSize];
-				for (int iObj = 0; iObj < nObj; iObj+=parallelBatchSize ) {
-					
-					// reading objects in batch
-					for ( int i=0; i<parallelBatchSize && iObj+i<nObj; i++ ) {
-						IFeaturesCollector fc = null;
-						if (fcClassConstructor == null) {
-							fc = FeaturesCollectors.readData(in);
-						} else {
-							fc = (IFeaturesCollector) fcClassConstructor.newInstance(in);
-						}
-						obj[i] = fc;
-					}
-					
-					// kNNQueues are performed in parallels
-					final int nQueriesPerThread = (int) Math.ceil(kNNQueue.length / ParallelOptions.nThreads);
-					// final int nObjPerThread = kNNQueue.length;
-					ArrayList<Integer> arrList = new ArrayList(kNNQueue.length);
-					for (int iO = 0; iO < kNNQueue.length; iO += nQueriesPerThread) {
-						arrList.add(iO);
-					}
-					
-					final SimPQueueArr[] kNNs = kNNQueue;
-					final IFeaturesCollector[] q = qObj;
-					final int fiObj = iObj;
-					Parallel.forEach(arrList, new Function<Integer, Void>() {
-						public Void apply(Integer i) {
-							int max = i + nQueriesPerThread;
-							if (max > kNNs.length) max = kNNs.length;
-							
-							// each query is processed on an independent thread
-							for (int iQ = i; iQ<max; iQ++) {
-								//System.out.println(iQ);
-								for ( int iO=0; iO<parallelBatchSize && fiObj+iO<nObj; iO++ ) {
-								
-									
-//									if ( iQ == 0 && ((IHasID) obj[iO]).getID().toString().equals("146401") ) {
-//										System.out.println(iQ + " 146401");
-//									}
-									
-									double dist = sim.distance(q[iQ], obj[iO], kNNs[iQ].excDistance );
-									if ( dist < 0 ) continue;
-									if ( onlyID)
-										kNNs[iQ].offer(((IHasID) obj[iO]).getID(), dist);
-									else 
-										kNNs[iQ].offer(obj[iO], dist);									
-								}
-							}
-
-							return null;
-						}
-					});
-					
-					if ( (iObj+1) % 100 == 0 ) {
-						System.out.println( (iObj+1) + " of " + nObj + " processed.");
-					}
-					
-
-				}
-				*/
 			}
-		} else {
-			// old IO
-			// long indexOffSet = in.readLong();
-			//
-			// FeatureClassCollector featuresClasses = new
-			// FeatureClassCollector(in); //FeaturesCollectors.getClass(
-			// file.readInt() );
-			// Class idClass = IDClasses.readClass(in);
-			//
-			// RandomAccessFile rndFile = new RandomAccessFile( file, "rw" );
-			// rndFile.seek(indexOffSet);
-			// int size = rndFile.readInt();
-			// arr = new ArrayList(size);
-			//
-			// System.out.println("--> The archive contains " + size);
-			//
-			//
-			// for ( int i=0; i<size; i++) {
-			// arr.add( FeaturesCollectors.readData(in));
-			// }
 		}
 	}
 	
@@ -562,6 +584,10 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 	public FeaturesCollectorsArchive(String fileName ) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
 		this(new File(fileName));
 	}
+	
+	public FeaturesCollectorsArchive(String fileName, boolean readIDs ) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+		this(new File(fileName), readIDs);
+	}
 
 	public FeaturesCollectorsArchive(File file ) throws IOException,
 			SecurityException, NoSuchMethodException, IllegalArgumentException,
@@ -634,7 +660,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 
 					ids.add(((IHasID) fc).getID());
 					
-					if ( positions.size() % 1000 == 0 ) System.out.println(positions.size());
+					if ( positions.size() % 10000 == 0 ) System.out.println(positions.size());
 				}
 				System.out.println("done");
 
@@ -746,7 +772,8 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 				idPosMap = new HashMap(2 * size);
 
 				System.out.print("Reading IDs... ");
-				ids = new ArrayList(Arrays.asList(IDClasses.readArray(rndFile, size, idClass)));
+				DataInputStream idInput = new DataInputStream(new BufferedInputStream(new FileInputStream(idFile)));
+				ids = new ArrayList(Arrays.asList(IDClasses.readArray(idInput, size, idClass)));
 				System.out.println("done");
 
 				System.out.print("Creating IDs HashTable... ");
@@ -835,7 +862,7 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 */
 	public synchronized IFeaturesCollector get(int i) throws ArchiveException {
 		try {
-			// System.out.println("i: " + i + ", offset: " + positions.get(i));
+			//System.out.println("i: " + i + ", offset: " + positions.get(i));
 			rndFile.seek(positions.get(i));
 
 			byte[] arr = null;
@@ -922,6 +949,17 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public AbstractID[] getIDs() throws IOException {
+		if ( ids != null ) {
+			AbstractID[] res = new AbstractID[ids.size()];
+			ids.toArray(res);
+			return res;
+		}
+		DataInputStream idInput = new DataInputStream(new BufferedInputStream(new FileInputStream(idFile)));
+		return IDClasses.readArray(idInput, size(), idClass);
+		
 	}
 	
 	

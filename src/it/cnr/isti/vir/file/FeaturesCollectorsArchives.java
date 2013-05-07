@@ -2,39 +2,24 @@
  * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
  * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 package it.cnr.isti.vir.file;
 
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.id.AbstractID;
+import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.Log;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -44,7 +29,7 @@ public class FeaturesCollectorsArchives {
 
 	private FeaturesCollectorsArchive[] archive;
 	
-	FilenameFilter filter = new FilenameFilter() {
+	static public FilenameFilter filter = new FilenameFilter() {
 	    public boolean accept(File dir, String name) {
 	        return name.endsWith(".dat");
 	    }
@@ -52,6 +37,22 @@ public class FeaturesCollectorsArchives {
 	
 	int size;
 	int[] archiveStartIndex;
+	
+	
+	public FeaturesCollectorsArchives(String archiveDirName, boolean readIDs) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		this(new File(archiveDirName), readIDs);
+	}
+
+	public FeaturesCollectorsArchives(FeaturesCollectorsArchive archiveFiles) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		this.archive = new FeaturesCollectorsArchive[1];
+		archive[0] = archiveFiles;
+		archiveStartIndex = new int[archive.length];
+		size = 0;
+		for ( int i=0; i<archive.length; i++) {			
+			archiveStartIndex[i] = size;
+			size += archive[i].size();
+		}	
+	}
 	
 	public FeaturesCollectorsArchives( FeaturesCollectorsArchive[] archive ) {
 		this.archive=archive;
@@ -70,6 +71,7 @@ public class FeaturesCollectorsArchives {
 	public FeaturesCollectorsArchive getArchive(int i) {
 		return archive[i];
 	}
+	
 	
 	public FeaturesCollectorsArchives(File[] archiveFiles) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		this(archiveFiles, true);
@@ -157,6 +159,21 @@ public class FeaturesCollectorsArchives {
 		return res;
 	}
 
+	public int[] getIntIDs() throws IOException {
+		int[] res = new int[size()];
+		int iRes = 0;
+		Log.info("Getting integer ids");
+		for (int i = 0; i < archive.length; i++) {
+			
+			AbstractID[] ids = archive[i].getIDs();
+			for ( int iID=0; iID<ids.length; iID++) {
+				res[iRes++] = ((IDInteger) ids[iID]).id;
+			}
+			Log.info(iRes + "/" + size());
+		}
+		return res;
+	}
+	
 	public synchronized SimilarityResults[] getKNN(IFeaturesCollector[] qObj,
 			int k, final ISimilarity sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException,
@@ -176,6 +193,34 @@ public class FeaturesCollectorsArchives {
 		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
 			res[i] = kNNQueue[i].getResults();
+		}
+
+		return res;
+	}
+	
+	public synchronized SimilarityResults[][] getKNN_multiSim(IFeaturesCollector[] qObj,
+			int k, final ISimilarity[] sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException {
+
+		SimPQueueArr[][] kNNQueue = new SimPQueueArr[sim.length][qObj.length];
+		for (int iS = 0; iS < sim.length; iS++) {
+			for (int i = 0; i < qObj.length; i++) {
+				kNNQueue[iS][i] = new SimPQueueArr(k);
+			}
+		}
+
+		for (int i = 0; i < archive.length; i++) {
+			Log.info_verbose("... searching in archive " + archive[i].getfile());
+			archive[i].getKNNs(qObj, kNNQueue, sim, onlyID);
+		}
+
+		SimilarityResults[][] res = new SimilarityResults[sim.length][qObj.length];
+		for (int iS = 0; iS < sim.length; iS++) {			
+			for (int i = 0; i < qObj.length; i++) {
+				res[iS][i] = kNNQueue[iS][i].getResults();
+			}
 		}
 
 		return res;

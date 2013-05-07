@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7;
 
 import it.cnr.isti.vir.features.IFeature;
@@ -14,6 +25,7 @@ public class SAPIRFeature implements IFeature {
 	byte version = 0;
 		
 	public float[] l1Values = new float[l1ValuesLength];
+	public static final int float2intFactor = 100000000;
 	//private float[][] l2Values = new float[3][];
 	
 	//private static final int l2ValuesSize0 = 3;
@@ -124,7 +136,6 @@ public class SAPIRFeature implements IFeature {
 		for ( int i=0; i<l1Values.length; i++) {
 			l1Values[i] = in.readFloat();
 		}
-
 	}
 	
 	public SAPIRFeature(ByteBuffer in) throws IOException {
@@ -132,17 +143,17 @@ public class SAPIRFeature implements IFeature {
 		for ( int i=0; i<l1Values.length; i++) {
 			l1Values[i] = in.getFloat();
 		}
-		
 	}
 	
+
 	public static double mpeg7XMDistance(SAPIRFeature o1, SAPIRFeature o2) {
 		double dist = 0;
 		
-		int i;
-	    for ( i = 0; i < clStart; i++) {
+		int i = 0;
+	    for ( ; i < clStart; i++) {
 	    	dist += Math.abs( (double) o1.l1Values[i] - o2.l1Values[i]);
 	    }		
-			
+		
 	    double acc = 0;
 	    for ( ; i < clStart + 6; i++) {
 	    	double diff = o1.l1Values[i] - o2.l1Values[i];
@@ -171,10 +182,9 @@ public class SAPIRFeature implements IFeature {
 		double dist = 0;
 				
 		int i;
-	    for ( i = 0; i < clStart; i++) {
+	    for ( i = 0; i < clStart && dist <= maxDistance; i++) {
 	    	dist += Math.abs( (double)  o1.l1Values[i] - o2.l1Values[i]);
 	    }		
-	    
 	    if ( dist > maxDistance ) return -dist;
 	    
 	    double acc = 0;

@@ -2,36 +2,29 @@
  * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
  * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
 public class RandomOperations {
 	final static Random r = new Random(23);
+	
+	public static final void setRandomSeed()
+	{
+		r.setSeed(System.currentTimeMillis());
+	}
 	
 	public static final void setSeed(long seed)
 	{
@@ -46,18 +39,16 @@ public class RandomOperations {
 		return max*r.nextFloat();
 	}
 	
+	/**
+	 * @param min inclusive min int
+	 * @param max inclusive max int
+	 * @return
+	 */
 	public static final int getInt(int min, int max) {
 		return r.nextInt(max - min + 1) + min;
 	}
 	
 
-	public static int[] getInts(int min, int max, int n) {
-		int[] ints = new int[n];
-		for ( int i=0; i<ints.length; i++) {
-			ints[i] = getInt(min, max);
-		}
-		return ints;
-	}
 	
 	public static final boolean trueORfalse(double yesRate) {
 		double value = r.nextDouble(); // random value between 0 and 1.0
@@ -78,7 +69,29 @@ public class RandomOperations {
 		return arr;
 	}
 	
-	public static double[] getRandomDoubleArray(int size) {
+	public static int[] getRandomIntArray(int size, int min, int max) {
+		int[] arr = new int[size];
+		for ( int i=0; i<arr.length; i++) {
+			arr[i]=getInt(min, max);
+		}
+		return arr;
+	}
+	
+	public static int[] getDistinctIntArray(int size, int min, int max) {
+		HashSet<Integer> hSet = new HashSet(2*size);
+		int[] arr = new int[size];
+		for ( int i=0; i<arr.length; i++) {
+			int temp =getInt(min, max);
+			while(hSet.contains(temp)) {
+				temp =getInt(min, max);
+			}
+			arr[i] = temp;
+			hSet.add(temp);
+		}
+		return arr;
+	}
+	
+	public static double[] getDoubleArray(int size) {
 		double[] arr = new double[size];
 		for ( int i=0; i<arr.length; i++) {
 			arr[i]=r.nextDouble();
@@ -86,7 +99,7 @@ public class RandomOperations {
 		return arr;
 	}
 	
-	public static float[] getRandomFloatArray(int size) {
+	public static float[] getFloatArray(int size) {
 		float[] arr = new float[size];
 		for ( int i=0; i<arr.length; i++) {
 			arr[i]=r.nextFloat();
@@ -94,7 +107,7 @@ public class RandomOperations {
 		return arr;
 	}
 	
-	public static final void reorderArray(Object[] arr) {
+	public static final void shuffle(Object[] arr) {
 		//--- Shuffle by exchanging each element randomly
 		for (int i=0; i<arr.length; i++) {
 		    int randomPosition = r.nextInt(arr.length);
@@ -104,7 +117,17 @@ public class RandomOperations {
 		}
 	}
 	
-	public static final void reorderArrays(Object[] arr1, Object[] arr2) {
+	public static final void shuffle(int[] arr) {
+		//--- Shuffle by exchanging each element randomly
+		for (int i=0; i<arr.length; i++) {
+		    int randomPosition = r.nextInt(arr.length);
+		    int temp = arr[i];
+		    arr[i] = arr[randomPosition];
+		    arr[randomPosition] = temp;
+		}
+	}
+	
+	public static final void shuffle(Object[] arr1, Object[] arr2) {
 		//--- Shuffle by exchanging each element randomly
 		for (int i=0; i<arr1.length; i++) {
 		    int randomPosition = r.nextInt(arr1.length);
@@ -117,7 +140,7 @@ public class RandomOperations {
 		}
 	}
 	
-	public static final void reorderArrays(Object[] arr1, int[] arr2) {
+	public static final void shuffle(Object[] arr1, int[] arr2) {
 		//--- Shuffle by exchanging each element randomly
 		for (int i=0; i<arr1.length; i++) {
 		    int randomPosition = r.nextInt(arr1.length);
@@ -130,7 +153,7 @@ public class RandomOperations {
 		}
 	}
 	
-	public static final void reorderArrays(Object[] arr1, float[] arr2) {
+	public static final void shuffle(Object[] arr1, float[] arr2) {
 		//--- Shuffle by exchanging each element randomly
 		for (int i=0; i<arr1.length; i++) {
 		    int randomPosition = r.nextInt(arr1.length);
@@ -143,7 +166,7 @@ public class RandomOperations {
 		}
 	}
 	
-	public static final void reorderArrayList(ArrayList arr) {
+	public static final void shuffle(ArrayList arr) {
 		//--- Shuffle by exchanging each element randomly
 		int size = arr.size();
 		for (int i=0; i<size; i++) {
@@ -185,6 +208,10 @@ public class RandomOperations {
 		
 	}
 	
+	/**
+	 * @param maxValue	[not included]
+	 * @return
+	 */
 	public static final int[] getRandomOrderedInts(int maxValue) {
 		ArrayList<Integer> list = new ArrayList<Integer>(maxValue);
 		for ( int i=0; i<maxValue; i++ ) {
@@ -246,7 +273,7 @@ public class RandomOperations {
 			tempArr[i] = it.next();
 		}
 		
-		reorderArray(tempArr);
+		shuffle(tempArr);
 		
 		while (list.size() > 0 ) list.remove();
 		
@@ -254,6 +281,7 @@ public class RandomOperations {
 			list.add(tempArr[i]);
 		}
 	}
+
 
 	
 }

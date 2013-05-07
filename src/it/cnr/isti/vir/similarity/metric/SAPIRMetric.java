@@ -2,33 +2,20 @@
  * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
  * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
 import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
+import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
@@ -49,8 +36,7 @@ public class SAPIRMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<
 			ScalableColor.class,
 			EdgeHistogram.class,
 			HomogeneousTexture.class );
-	
-	protected static final int htOption = HomogeneousTexture.N_OPTION;
+
 	
 	public final long getDistCount() {
 		return distCount;
@@ -89,14 +75,11 @@ public class SAPIRMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<
 	}
 
 	
+
 	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
 		distCount++;
 		double dist = 0;
 
-		//EH
-		dist += wSAPIR[2] * EdgeHistogram.mpeg7XMDistance( (EdgeHistogram) f1.getFeature(EdgeHistogram.class), (EdgeHistogram) f2.getFeature(EdgeHistogram.class) );
-		if ( dist > max ) return -dist;
-		
 		//CS
 		dist += wSAPIR[1] * ColorStructure.mpeg7XMDistance( (ColorStructure) f1.getFeature(ColorStructure.class), (ColorStructure) f2.getFeature(ColorStructure.class) );
 		if ( dist > max ) return -dist;		
@@ -108,10 +91,13 @@ public class SAPIRMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<
 		//CL
 		dist += wSAPIR[0] * ColorLayout.mpeg7XMDistance( (ColorLayout) f1.getFeature(ColorLayout.class), (ColorLayout) f2.getFeature(ColorLayout.class) );
 		if ( dist > max ) return -dist;	
-		
-		//HT
-		dist += wSAPIR[3] * HomogeneousTexture.mpeg7XMDistance( (HomogeneousTexture) f1.getFeature(HomogeneousTexture.class), (HomogeneousTexture) f2.getFeature(HomogeneousTexture.class), htOption );
 				
+		//EH
+		dist += wSAPIR[2] * EdgeHistogram.mpeg7XMDistance( (EdgeHistogram) f1.getFeature(EdgeHistogram.class), (EdgeHistogram) f2.getFeature(EdgeHistogram.class) );
+		if ( dist > max ) return -dist;	
+
+		//HT
+		dist += wSAPIR[3] * HomogeneousTexture.mpeg7XMDistance_NOption( ((HomogeneousTexture) f1.getFeature(HomogeneousTexture.class)).preComputed, ((HomogeneousTexture) f2.getFeature(HomogeneousTexture.class)).preComputed );
 		
 //		double tDist = SAPIRFeature.mpeg7XMDistance(new SAPIRFeature((SAPIRObject) f1), new SAPIRFeature((SAPIRObject) f2));
 		

@@ -2,32 +2,19 @@
  * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
  * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
  * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.knn;
 
 import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
-import it.cnr.isti.vir.similarity.pqueues.SimilarityPQueue;
+import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.util.ParallelOptions;
 
@@ -39,17 +26,17 @@ public class KNNPQueue<F> {
 	
 	static boolean parallel = false;
 
-	protected final SimilarityPQueue pQueue;
+	protected final AbstractSimPQueue pQueue;
 	protected final ISimilarity sim;
 	public final F query;
 	protected final boolean storeID;
 	public double excDistance = Double.MAX_VALUE;
 	
-	public KNNPQueue(SimilarityPQueue pQueue, ISimilarity sim, F query) {
+	public KNNPQueue(AbstractSimPQueue pQueue, ISimilarity sim, F query) {
 		this(pQueue,sim,query,false);
 	}
 	
-	public KNNPQueue(SimilarityPQueue pQueue, ISimilarity sim, F query, boolean storeID) {
+	public KNNPQueue(AbstractSimPQueue pQueue, ISimilarity sim, F query, boolean storeID) {
 		this.pQueue = pQueue;
 		this.sim = sim;
 		this.query = query;
@@ -95,12 +82,72 @@ public class KNNPQueue<F> {
 
 	}
 	
-	static class Temp implements Runnable {
+	static class OfferAllArray implements Runnable {
+        private final int from;
+        private final int to;
+        private final Object[] arrColl;
+        private final KNNPQueue knn;
+        OfferAllArray(KNNPQueue knn, int from, int to, Object[] arrColl) {
+            this.from = from;
+            this.to = to;
+            this.arrColl = arrColl;
+            this.knn = knn;
+        }
+        
+        @Override
+        public void run() {
+            for (int i = from; i <= to; i++) {
+            	knn.offer( arrColl[i]);
+            }
+        }                
+    }
+	
+	
+	public final synchronized void offerAll(F[] coll) {
+		
+		if ( parallel ) {
+			int threadN = ParallelOptions.nThreads;
+	        int t;
+	        if ( coll.length % threadN == 0 ) {
+	        	t = coll.length / threadN;       
+	        } else {
+	        	t = coll.length / (threadN-1);  
+	        }
+	        int ti = 0;
+	        Thread[] thread = new Thread[threadN];
+	        for ( int from=0; from<coll.length; from+=t) {
+	        	int to = from+t-1;
+	        	if ( to >= coll.length ) to = coll.length-1;
+	        	thread[ti] = new Thread( new OfferAllArray(this, from,to,coll) ) ;
+	        	thread[ti].start();
+	        	ti++;
+	        }
+	        
+	        for ( ti=0; ti<threadN; ti++ ) {
+	        	try {
+					thread[ti].join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+	        }
+		}
+		else
+		{
+			for (int i = 0; i < coll.length; i++) {
+				offer( coll[i]);
+			}
+		}
+	}
+	
+	
+	static class OfferAllColl implements Runnable {
         private final int from;
         private final int to;
         private final ArrayList arrColl;
         private final KNNPQueue knn;
-        Temp(KNNPQueue knn, int from, int to, ArrayList arrColl) {
+        
+        OfferAllColl(KNNPQueue knn, int from, int to, ArrayList arrColl) {
             this.from = from;
             this.to = to;
             this.arrColl = arrColl;
@@ -114,7 +161,6 @@ public class KNNPQueue<F> {
             }
         }                
     }
-	
 	
 	public final synchronized void offerAll(ArrayList<F> coll) {
 		
@@ -131,7 +177,7 @@ public class KNNPQueue<F> {
 	        for ( int from=0; from<coll.size(); from+=t) {
 	        	int to = from+t-1;
 	        	if ( to >= coll.size() ) to = coll.size()-1;
-	        	thread[ti] = new Thread( new Temp(this, from,to,coll) ) ;
+	        	thread[ti] = new Thread( new OfferAllColl(this, from,to,coll) ) ;
 	        	thread[ti].start();
 	        	ti++;
 	        }
