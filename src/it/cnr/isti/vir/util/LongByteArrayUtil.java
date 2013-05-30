@@ -11,6 +11,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
+
 public class LongByteArrayUtil {
 	private static final int MASK = 0xff;
 
@@ -19,42 +22,30 @@ public class LongByteArrayUtil {
 	 * @param test
 	 * @return
 	 */
-	public static final long byteArrayToLong(byte test[]) {
-		long bits = 0;
-		int i = 0;
-		for (int shifter = 7; shifter >= 0; shifter--) {
-			bits |= ((long) test[i] & MASK) << (shifter * 4);
-			i++;
-		}
-
-		return bits;
+	public static final long byteArrayToLong(byte byteArray[]) {
+		return ByteBuffer.wrap(byteArray).asLongBuffer().get();
 	}
 	
 	public static final long byteArrayToLong(byte byteArray[], int byteOffset) {
-		long bits = 0;
-		int i = 0;
-		for (int shifter = 3; shifter >= 0; shifter--) {
-			bits |= ((long) byteArray[i+byteOffset] & MASK) << (shifter * 8);
-			i++;
-		}
-
-		return bits;
+		return ByteBuffer.wrap(byteArray, byteOffset, 8).asLongBuffer().get();
 	}
 	
 	public static final long[] byteArrayToLongArray(byte byteArr[], int byteOffset, int n) {
-		long[] arr = new long[n];
-		for ( int i=0; i<arr.length; i++) {
-			arr[i]=byteArrayToLong(byteArr, byteOffset+4*i);
-		}
-		return arr;
+		LongBuffer buffer = ByteBuffer.wrap(byteArr, byteOffset, 8*n).asLongBuffer();
+		long[] res = new long[n];
+		buffer.get(res);
+		return res;
 	}
 	
 	
-	public static final void longArrayToByteArray(long[] n, byte[] byteArray, int byteOffset) {
-		for ( int i=0; i<n.length; i++) {
-			longToByteArray(n[i], byteArray, byteOffset+4*i );
-		}
-		
+	/**
+	 * @param data			long array
+	 * @param byteArray		dest byte array
+	 * @param byteOffset	
+	 */
+	public static final void longArrayToByteArray(long[] data, byte[] byteArr, int byteOffset) {
+		LongBuffer buffer = ByteBuffer.wrap(byteArr, byteOffset, 8*data.length).asLongBuffer();
+		buffer.put(data);		
 	}
 
 	/**
@@ -64,16 +55,12 @@ public class LongByteArrayUtil {
 	 */
 	public static final byte[] longToByteArray(long param) {
 		byte[] result = new byte[4];
-		for (int i = 0; i < 8; i++) {
-			result[i] = (byte) ((param >>> (3 - i) * 8) & MASK);
-		}
+		ByteBuffer.wrap(result).asLongBuffer().put(param);
 		return result;
 	}
 	
 	public static final void longToByteArray(long param, byte[] byteArr, int byteOffset) {
-		for (int i = 0; i < 8; i++) {
-			byteArr[i+byteOffset] = (byte) ((param >>> (3 - i) * 8) & MASK);
-		}
+		ByteBuffer.wrap(byteArr, byteOffset, 8).asLongBuffer().put(param);
 	}
 
 	/**

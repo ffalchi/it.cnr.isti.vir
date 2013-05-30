@@ -13,7 +13,9 @@ package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.features.IFeaturesCollector;
 
+import java.io.BufferedReader;
 import java.io.DataInput;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class ORBGroup extends ALocalFeaturesGroup<ORB> {
@@ -70,5 +72,57 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	public byte getSerVersion() {
 		return version;
 	}
-
+	
+	public ORBGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
+		super(fc);
+		String[] temp = br.readLine().split("(\\s)+");
+		
+		int n = Integer.parseInt(temp[0]);
+		int len = Integer.parseInt(temp[1]);
+		
+		lfArr = new ORB[n];
+	    for (int i = 0; i < n; i++) {
+	    	lfArr[i] = new ORB(br, this);
+	    }
+	}
+	
+	public String toString() {
+		String tStr = "ORBGroup of " + this.size() + " ORBs\n";
+		for ( ORB o : lfArr ) {
+			tStr += o.toString();
+		}
+		return tStr;
+		
+	}
+	
+	static final public double getRangePercMatches(
+			ALocalFeaturesGroup<ORB> sg1,
+			ALocalFeaturesGroup<ORB> sg2,
+			int range) {
+		
+		int count = 0;
+		for (ORB f: sg1.lfArr) {
+			if ( hasMatchBelowRadius(f, sg2, range)) {
+				count++;
+			}
+		}
+		
+		return count/sg1.size();
+	}
+	
+	/**
+	 * @param s1	ORB query feature
+	 * @param sg	Group of ORB
+	 * @param range  Range
+	 * @return	true if it exists at least one match below or equal the range
+	 */
+	static final public boolean hasMatchBelowRadius(ORB s1, ALocalFeaturesGroup<ORB> sg, int range) {
+		for (ORB f:sg.lfArr) {
+			if ( s1.getDistance(s1, f) <= range) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

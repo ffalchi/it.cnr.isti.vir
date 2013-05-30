@@ -199,21 +199,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 		
 	}
 
-    /*
-	public BoFLFGroup(BoF_LF_OriAndScale f) {
-		super(null);
-		
-		int[] bag = f.getBagIndexes();
-		float[] ori = f.getOri();
-		float[] scale = f.getScale();
-		lfArr = new BoFLF[bag.length];
-		for(int i=0; i<bag.length; i++) {
-			float[] xy = {0.0F, 0.0F};
-			lfArr[i] = new BoFLF(bag[i], xy, ori[i], scale[i], this);
-		}
-		fWords = f.getWords();
-		Arrays.sort(lfArr);
-	}*/
+
 
 	@Override
     public Class getLocalFeatureClass() {

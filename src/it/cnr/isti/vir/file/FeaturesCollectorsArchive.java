@@ -99,6 +99,13 @@ public class FeaturesCollectorsArchive implements Iterable<IFeaturesCollector> {
 		return new FeaturesCollectorsArchive(file, featuresClasses, idClass, fcClass);
 	}
 
+	/**
+	 * @param file	File for the new archive
+	 * @param featuresClasses Features
+	 * @param idClass Class for the IDs
+	 * @param fcClass Class for the Features Collection
+	 * @throws Exception
+	 */
 	public FeaturesCollectorsArchive(
 			File file,
 			FeatureClassCollector featuresClasses,

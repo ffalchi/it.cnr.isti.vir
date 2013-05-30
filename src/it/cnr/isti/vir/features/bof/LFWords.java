@@ -466,17 +466,17 @@ public class LFWords<F> {
 	// return new BagOfWords(getHistogram(features), this);
 	// }
 
-	/*
-	public final byte[] getWeightedOccHistogram_byte(F[] features) {
-		double[] temp = getWeightedOccurences(features);
 
-		byte[] res = new byte[temp.length];
-		for (int i = 0; i < temp.length; i++) {
-			res[i] = (byte) (Math.round(temp[i] * 255) - 128);
-		}
-		return res;
-	}
-*/
+//	public final byte[] getWeightedOccHistogram_byte(F[] features) {
+//		double[] temp = getWeightedOccurences(features);
+//
+//		byte[] res = new byte[temp.length];
+//		for (int i = 0; i < temp.length; i++) {
+//			res[i] = (byte) (Math.round(temp[i] * 255) - 128);
+//		}
+//		return res;
+//	}
+
 	
 	public final byte[] getOccHistogram_byte(F[] features) {
 		int[] temp = getOccurences(features);
@@ -1251,26 +1251,26 @@ public class LFWords<F> {
 		}
 	}*/
 
-	/*
-	public final double[] getWeightedOccurences(F[] features) {
-		double[] hist = new double[size];
-		double scaleSum = 0;
-		for (int i1 = 0; i1 < features.length; i1++) {
-			double currScale = ((ILocalFeature) features[i1]).getScale();
-			scaleSum += currScale;
-			// System.out.print("\t"+currScale);
-
-			// adding
-			hist[getNNIndex(features[i1])] += currScale;
-		}
-		// System.out.println("\n");
-
-		// Normalization
-		for (int i = 0; i < hist.length; i++) {
-			hist[i] = hist[i] / scaleSum;
-		}
-		return hist;
-	}*/
+	
+//	public final double[] getWeightedOccurences(F[] features) {
+//		double[] hist = new double[size];
+//		double scaleSum = 0;
+//		for (int i1 = 0; i1 < features.length; i1++) {
+//			double currScale = ((ILocalFeature) features[i1]).getScale();
+//			scaleSum += currScale;
+//			// System.out.print("\t"+currScale);
+//
+//			// adding
+//			hist[getNNIndex(features[i1])] += currScale;
+//		}
+//		// System.out.println("\n");
+//
+//		// Normalization
+//		for (int i = 0; i < hist.length; i++) {
+//			hist[i] = hist[i] / scaleSum;
+//		}
+//		return hist;
+//	}
 
 	public void assignEvaluation(long[] given) {
 		eval = new float[given.length];

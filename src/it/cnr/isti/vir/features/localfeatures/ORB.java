@@ -14,8 +14,8 @@ package it.cnr.isti.vir.features.localfeatures;
 import it.cnr.isti.vir.util.HammingDistance;
 import it.cnr.isti.vir.util.LongByteArrayUtil;
 
+import java.io.BufferedReader;
 import java.io.DataInput;
-import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collection;
@@ -23,9 +23,9 @@ import java.util.Iterator;
 
 public class ORB extends ALocalFeature<ORBGroup> {
 
-	static final int vLen = 8;
+	static final int vLen = 4;
 	
-	// 256 bits in 8x8 bytes
+	// 512 bits in 8x8 bytes
 	private long[] data;
 	
 	public ORB(KeyPoint kp, long[] data, ORBGroup linkedGroup) {
@@ -41,7 +41,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		return vLen*8;
 	}
 	
-	public int putBytes(byte[] bArr, int bArrI) {
+	public final int putBytes(byte[] bArr, int bArrI) {
 		LongByteArrayUtil.longArrayToByteArray(data, bArr, bArrI);
 		return bArrI + vLen*8;
 	}
@@ -121,6 +121,10 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		return HammingDistance.distance_norm(o1.data, o2.data);
 	}
 	
+	public static int getDistance(ORB o1, ORB o2) {
+		return HammingDistance.distance(o1.data, o2.data);
+	}
+	
 	@Override
 	public int compareTo(ALocalFeature<ORBGroup> given) {
 		if ( this == given ) return 0;
@@ -140,6 +144,41 @@ public class ORB extends ALocalFeature<ORBGroup> {
 	@Override
 	public Class<ORBGroup> getGroupClass() {
 		return ORBGroup.class;
+	}
+	
+	public ORB(BufferedReader br, ORBGroup group) throws IOException
+	{
+		linkedGroup = group;
+		
+		
+		String[] metadata = br.readLine().split("(\\s)+");
+		float x = Float.parseFloat(metadata[0]);
+		float y = Float.parseFloat(metadata[1]);
+		float ori = Float.parseFloat(metadata[2]);
+		float scale = Float.parseFloat(metadata[3]);
+		//float y = Float.parseFloat(metadata[4]);
+		kp = new KeyPoint(x,y,ori,scale);
+		
+		// Load the interest points in Mikolajczyk's format
+		
+//		assert(temp.length == ivecLength+6);
+		
+		String[] bytes = br.readLine().split("(\\s)+");
+		byte[] bytesValues = new byte[32];
+		for ( int i=0; i<32; i++) {
+			bytesValues[i] = (byte) Integer.parseInt(bytes[i]);
+		}
+		data = new long[4];
+		ByteBuffer.wrap(bytesValues).asLongBuffer().get(data);
+	}
+	
+	public String toString() {
+		String tStr = kp.toString();
+		for ( long value : data ) {
+			tStr += " " + value;
+		}
+		tStr += "\n";
+		return tStr;
 	}
 
 }

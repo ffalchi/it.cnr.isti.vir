@@ -19,8 +19,6 @@ import java.io.BufferedReader;
 import java.io.DataInput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 
 public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
@@ -43,6 +41,15 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		this(in, null);
 	}
 
+	public RootSIFTGroup(SIFTGroup siftGroup, IFeaturesCollector fc  ) {
+		super(null);
+		int size = siftGroup.lfArr.length;
+		SIFT[] siftArr = siftGroup.lfArr;
+		lfArr = new RootSIFT[siftArr.length];
+		for ( int i=0; i<size; i++) {
+			lfArr[i] = new RootSIFT(siftArr[i], this);
+		}
+	}
 	
 	public RootSIFTGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
 		super(fc);
@@ -158,19 +165,19 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		return Math.sqrt(distsq1 / distsq2);
 	}
 
-	static final public double getLowePercMatches(ALocalFeaturesGroup<SIFT> sg1,
-			ALocalFeaturesGroup<SIFT> sg2, double conf) {
+	static final public double getLowePercMatches(ALocalFeaturesGroup<RootSIFT> sg1,
+			ALocalFeaturesGroup<RootSIFT> sg2, double conf) {
 		return (double) getLoweNMatches(sg1, sg2, conf) / sg1.size();
 	}
 
-	static final public int getLoweNMatches(ALocalFeaturesGroup<SIFT> sg1,
-			ALocalFeaturesGroup<SIFT> sg2, double conf) {
+	static final public int getLoweNMatches(ALocalFeaturesGroup<RootSIFT> sg1,
+			ALocalFeaturesGroup<RootSIFT> sg2, double conf) {
 		if (sg2.size() < 2)
 			return 0;
 		int nMatches = 0;
-		SIFT[] arr = sg1.lfArr;
+		RootSIFT[] arr = sg1.lfArr;
 		for (int i = 0; i < arr.length; i++) {
-			if (SIFTGroup.getLoweMatch(arr[i], sg2, conf) != null)
+			if (RootSIFTGroup.getLoweMatch(arr[i], sg2, conf) != null)
 				nMatches++;
 		}
 
@@ -194,17 +201,17 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 	// }
 
 	static final public LocalFeaturesMatches getLoweMatches(
-			ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2) {
+			ALocalFeaturesGroup<RootSIFT> sg1, ALocalFeaturesGroup<RootSIFT> sg2) {
 		return getLoweMatches(sg1, sg2, 0.8);
 	}
 	
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<RootSIFT> sg1, ALocalFeaturesGroup<RootSIFT> sg2, double dRatioThr) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
-		SIFT[] arr = sg1.lfArr;
+		RootSIFT[] arr = sg1.lfArr;
 		for (int i=0; i<arr.length; i++ ) {
-			SIFT match = SIFTGroup.getLoweMatch(arr[i], sg2, dRatioThr );
+			RootSIFT match = RootSIFTGroup.getLoweMatch(arr[i], sg2, dRatioThr );
 			if ( match != null)
 				matches.add( new LocalFeatureMatch( arr[i], match ) );
 		}
@@ -212,13 +219,13 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		return matches;
 	}	
 	
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr, final int maxLFDistSq) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<RootSIFT> sg1, ALocalFeaturesGroup<RootSIFT> sg2, double dRatioThr, final int maxLFDistSq) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
-		SIFT[] arr = sg1.lfArr;
+		RootSIFT[] arr = sg1.lfArr;
 		for (int i=0; i<arr.length; i++ ) {
-			SIFT match = SIFTGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
+			RootSIFT match = RootSIFTGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
 			if ( match != null)
 				matches.add( new LocalFeatureMatch( arr[i], match ) );
 		}
@@ -312,16 +319,16 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		return matches;
 	}
 */
-	static final public SIFT getLoweMatch(SIFT s1, ALocalFeaturesGroup<SIFT> sg,
+	static final public RootSIFT getLoweMatch(RootSIFT s1, ALocalFeaturesGroup<RootSIFT> sg,
 			double conf, int maxFDsq) {
 		int distsq1 = Integer.MAX_VALUE;
 		int distsq2 = Integer.MAX_VALUE;
 		int dsq = 0;
-		SIFT curr, best = null;
-		SIFT[] arr = sg.lfArr;
+		RootSIFT curr, best = null;
+		RootSIFT[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFT.getL2SquaredDistance(s1, curr, distsq2);
+			dsq = RootSIFT.getL2SQDistance(s1, curr, distsq2);
 			if (dsq < 0)
 				continue;
 			if (dsq < distsq1) {
@@ -348,17 +355,17 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		return null;
 	}
 
-	static final public SIFT getLoweMatch(SIFT s1, ALocalFeaturesGroup<SIFT> sg,
+	static final public RootSIFT getLoweMatch(RootSIFT s1, ALocalFeaturesGroup<RootSIFT> sg,
 			double conf) {
 		int distsq1 = Integer.MAX_VALUE;
 		int distsq2 = Integer.MAX_VALUE;
 		int dsq = 0;
-		SIFT curr, best = null;
+		RootSIFT curr, best = null;
 
-		SIFT[] arr = sg.lfArr;
+		RootSIFT[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFT.getL2SquaredDistance(s1, curr, distsq2);
+			dsq = RootSIFT.getL2SQDistance(s1, curr, distsq2);
 			if (dsq < 0)
 				continue;
 			if (dsq < distsq1) {

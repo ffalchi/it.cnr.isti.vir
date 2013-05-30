@@ -20,8 +20,19 @@ import java.nio.ByteBuffer;
 
 public class KeyPoint {
 
+	/**
+	 * pixel coordinates
+	 */
 	private final float[] xy;
-	private final float scale;
+	
+	/**
+	 * size of the region
+	 */
+	private final float size;
+	
+	/**
+	 * Orientation in radians
+	 */
 	private final float ori;
 	
 	private float[] normxy; 
@@ -31,7 +42,7 @@ public class KeyPoint {
 	}
 
 	public final float getScale() {
-		return scale;
+		return size;
 	}
 
 	public final float getOri() {
@@ -45,13 +56,13 @@ public class KeyPoint {
 		xy[0] = x;
 		xy[1] = y;
 		this.ori = ori;
-		this.scale = scale;
+		this.size = scale;
 	}
 	
 	public KeyPoint(float[] xy, float ori, float scale) {
 		this.xy = xy;
 		this.ori = ori;
-		this.scale = scale;
+		this.size = scale;
 	}
 	
 	
@@ -61,7 +72,7 @@ public class KeyPoint {
 		xy[0] = in.readFloat();
 		xy[1] = in.readFloat();
 		ori = in.readFloat();
-		scale = in.readFloat();
+		size = in.readFloat();
 	}
 	
 	public KeyPoint(ByteBuffer in) {
@@ -70,7 +81,7 @@ public class KeyPoint {
 		xy[0] = in.getFloat();
 		xy[1] = in.getFloat();
 		ori = in.getFloat();
-		scale = in.getFloat();
+		size = in.getFloat();
 	}
 	
 	public void writeData(DataOutput out) throws IOException {
@@ -85,7 +96,7 @@ public class KeyPoint {
 		int bArrI = bytesOffset;
 		bArrI = FloatByteArrayUtil.floatArrayToByteArray(xy, bArr, bArrI);
 		bArrI = FloatByteArrayUtil.floatToByteArray(ori, bArr, bArrI);
-		bArrI = FloatByteArrayUtil.floatToByteArray(scale, bArr, bArrI);
+		bArrI = FloatByteArrayUtil.floatToByteArray(size, bArr, bArrI);
 		return bArrI;
 	}
 
@@ -112,9 +123,10 @@ public class KeyPoint {
 	
 	public int compareTo( KeyPoint given) {
 		if ( this == given ) return 0;
-		// this results in reverse order when sorting (from grater to smaller)
+		
 		int tComp = 0;
-		if ( (tComp = Float.compare(given.scale, scale))  != 0 ) return tComp;
+		// this results in reverse order when sorting (from grater to smaller)
+		if ( (tComp = Float.compare(given.size, size))  != 0 ) return tComp;
 		if ( (tComp = Float.compare(xy[0], given.xy[0] )) != 0 ) return tComp;
 		if ( (tComp = Float.compare(xy[1], given.xy[1] )) != 0 ) return tComp;
 		if ( (tComp = Float.compare(ori, given.ori ))     != 0 ) return tComp;
@@ -145,7 +157,7 @@ public class KeyPoint {
 	}*/
 	
 	public String toString() {
-		return "{[" + xy[0] + ", " + xy[1] + "], " + ori + ", " + scale + "}";
+		return "{[" + xy[0] + ", " + xy[1] + "], " + ori + ", " + size + "}";
 	}
 	
 }

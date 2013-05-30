@@ -31,6 +31,14 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
 	
 	public Class getGroupClass() { return RootSIFTGroup.class; };
 	
+	public RootSIFT(SIFT sift, RootSIFTGroup givenLinkedGroup) {
+		linkedGroup = givenLinkedGroup;
+		values = new byte[128];
+
+	    for ( int i=0; i<values.length; i++ )
+	    	values[i] = sift.values[i];
+	}	
+	
 	public RootSIFT(DataInput str ) throws IOException {
 		this(str, null);
 	}
@@ -149,7 +157,6 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
 	public static final int getL2SQDistance(RootSIFT s1, RootSIFT s2) {
 		return L2.getSquared(s1.values, s2.values);
 	}
-	
 
 	public static final int getL2SQDistance(RootSIFT s1, RootSIFT s2, int maxDist ) {
 		return L2.getSquared(s1.values, s2.values, maxDist);
