@@ -38,7 +38,7 @@ public class IntByteArrayUtil {
 	public static final int[] get(byte byteArr[], int byteOffset, int n) {
 		int[] arr = new int[n];
 		for ( int i=0; i<arr.length; i++) {
-			arr[i]=get(byteArr, byteOffset+4*i);
+			arr[i]=get(byteArr, byteOffset+(Integer.SIZE/Byte.SIZE)*i);
 		}
 		return arr;
 	}

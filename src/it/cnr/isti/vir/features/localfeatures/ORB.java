@@ -90,7 +90,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		
 		if ( coll.size() == 0 ) return null;
 		
-		int[] bitSum = new int[VLENGTH*64];
+		int[] bitSum = new int[VLENGTH*Long.SIZE];
 		
 		for ( Iterator<ORB> it = coll.iterator(); it.hasNext(); ) {
 			long[] currVec = it.next().data;
@@ -98,8 +98,9 @@ public class ORB extends ALocalFeature<ORBGroup> {
 			for ( int iLong=0; iLong<currVec.length; iLong++ ) {
 				// for each bit
 				long mask = 1; 
-				for ( int i=0; i<63; i++) {
-					bitSum[iBitSum++] += currVec[i] & mask;
+				for ( int i=0; i<64; i++) {
+					if ( (currVec[iLong] & mask) != 0 ) bitSum[iBitSum]++;
+					iBitSum++;
 					mask = mask << 1;
 				}
 			}
@@ -108,8 +109,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		long[] newValues = new long[VLENGTH];
 		
 		int threshold = coll.size() / 2;
-		int iLong = 0;
-		int iBit = 0;
+		long oneLong = 1;
 		for ( int i=0; i<bitSum.length; i++ ) {
 			if ( bitSum[i] > threshold
 					||
@@ -117,15 +117,9 @@ public class ORB extends ALocalFeature<ORBGroup> {
 				 	&&
 				 	RandomOperations.getBoolean() )
 				 	) {
-				newValues[iLong] = newValues[iLong] & (1 << iBit );
+				newValues[i/64] ^= (oneLong << i%64 );
 			}
-			
-			if ( iBit == 63 ) {
-				iLong++;
-				iBit = 0;
-			} else {
-				iBit++;
-			}
+
 		}
 		return new ORB( null, newValues );
 	}
@@ -155,6 +149,8 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		return 0;
 	}
 
+
+
 	@Override
 	public Class<ORBGroup> getGroupClass() {
 		return ORBGroup.class;
@@ -174,6 +170,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		tStr += "\n";
 		return tStr;
 	}
+
 
 
 }

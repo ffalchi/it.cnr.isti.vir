@@ -33,7 +33,7 @@ public class FloatByteArrayUtil {
 	public static final float[] get(byte byteArr[], int byteOffset, int nFloats) {
 		float[] arr = new float[nFloats];
 		for ( int i=0; i<arr.length; i++) {
-			arr[i]=get(byteArr, byteOffset+8*i);
+			arr[i]=get(byteArr, byteOffset+(Float.SIZE/Byte.SIZE)*i);
 		}
 		return arr;
 	}

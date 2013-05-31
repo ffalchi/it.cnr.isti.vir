@@ -1,5 +1,7 @@
 package it.cnr.isti.vir.features.localfeatures;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -25,7 +27,7 @@ public class ORBGroupTest {
 		ORBGroup g = new ORBGroup(f);
 		byte[] bytes = g.getBytes();		
 		ORBGroup g2 = new ORBGroup(ByteBuffer.wrap(bytes));
-		assert(g.equals(g2));
+		assertTrue(g.equals(g2));
 
 	}
 

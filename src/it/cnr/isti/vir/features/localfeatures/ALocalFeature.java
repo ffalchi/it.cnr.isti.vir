@@ -15,10 +15,8 @@ import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.features.AbstractFeature;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -149,12 +147,16 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 	public abstract Class<LFGroup> getGroupClass();
 	
 
-	@Override
-	public int compareTo(ALocalFeature<LFGroup> o) {
-		if ( this == o ) return 0;
-		if ( kp == null ) return 1;
-		return kp.compareTo(o.kp);
-	}
+	//public abstract int dataCompare(ALocalFeature<LFGroup> o);
+	
+//	@Override
+//	public int compareTo(ALocalFeature<LFGroup> o) {
+//		if ( this == o ) return 0;
+//		if ( kp == null ) return 1;
+//		int kpComp = kp.compareTo(o.kp);
+//		if ( kpComp != 0 ) return kpComp;
+//		return dataCompare(o);
+//	}
 	
 	@Override
 	public final boolean equals(Object obj) {

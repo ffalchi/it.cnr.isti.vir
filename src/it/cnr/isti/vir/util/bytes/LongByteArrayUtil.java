@@ -23,14 +23,14 @@ public class LongByteArrayUtil {
 	 */
 	public static final long get(byte encodedValue[], int byteOffset) {
 	    int index = byteOffset;
-	    long value = encodedValue[index++] << Byte.SIZE * 7;
-	    value ^= (encodedValue[index++] & 0xFF) << Byte.SIZE * 6;
-	    value ^= (encodedValue[index++] & 0xFF) << Byte.SIZE * 5;
-	    value ^= (encodedValue[index++] & 0xFF) << Byte.SIZE * 4;
-	    value ^= (encodedValue[index++] & 0xFF) << Byte.SIZE * 3;
-	    value ^= (encodedValue[index++] & 0xFF) << Byte.SIZE * 2;
-	    value ^= (encodedValue[index++] & 0xFF) << Byte.SIZE * 1;
-	    value ^= (encodedValue[index++] & 0xFF);
+	    long value = (long) encodedValue[index++] << Byte.SIZE * 7;
+	    value ^= (long) (encodedValue[index++] & 0xFF) << Byte.SIZE * 6;
+	    value ^= (long) (encodedValue[index++] & 0xFF) << Byte.SIZE * 5;
+	    value ^= (long) (encodedValue[index++] & 0xFF) << Byte.SIZE * 4;
+	    value ^= (long) (encodedValue[index++] & 0xFF) << Byte.SIZE * 3;
+	    value ^= (long) (encodedValue[index++] & 0xFF) << Byte.SIZE * 2;
+	    value ^= (long) (encodedValue[index++] & 0xFF) << Byte.SIZE * 1;
+	    value ^= (long) (encodedValue[index++] & 0xFF);
 	    return value;
 	}
 	

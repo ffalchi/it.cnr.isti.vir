@@ -1,5 +1,6 @@
 package it.cnr.isti.vir.util;
 
+import static org.junit.Assert.*;
 import it.cnr.isti.vir.util.bytes.LongByteArrayUtil;
 
 import java.util.Arrays;
@@ -23,7 +24,7 @@ public class LongByteArrayUtilTest {
     		LongByteArrayUtil.convToBytes(value, bytes, rndOffset);
     		long decodedValue = LongByteArrayUtil.get(bytes, rndOffset);
     		
-    		assert(decodedValue != value);
+    		assertTrue(decodedValue == value);
     	}
     }
 	
@@ -46,7 +47,7 @@ public class LongByteArrayUtilTest {
     		LongByteArrayUtil.convToBytes(value, bytes, rndOffset);
     		long[] decodedValue = LongByteArrayUtil.get(bytes, rndOffset, rndArrLength);
     		
-    		assert(Arrays.equals(decodedValue,value));
+    		assertTrue(Arrays.equals(decodedValue,value));
     	}
     }
 

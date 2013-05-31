@@ -1,5 +1,6 @@
 package it.cnr.isti.vir.util;
 
+import static org.junit.Assert.assertTrue;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 
 import java.util.Arrays;
@@ -15,7 +16,7 @@ public class FloatByteArrayUtilTest {
 	static final int MAX_OFFSET = 100;
 	
 	@Test
-    public void testInt() {
+    public void test() {
     	for ( int i=0; i<nRndTests; i++) {
     		float value = rnd.nextFloat();
     		int rndOffset = rnd.nextInt(MAX_OFFSET);
@@ -23,12 +24,12 @@ public class FloatByteArrayUtilTest {
     		FloatByteArrayUtil.convToBytes(value, bytes, rndOffset);
     		float decodedValue = FloatByteArrayUtil.get(bytes, rndOffset);
     		
-    		assert(decodedValue != value);
+    		assertTrue(decodedValue == value);
     	}
     }
 	
 	@Test
-    public void testIntArr() {
+    public void testArr() {
     	for ( int i=0; i<nRndTests; i++) {
     		
     		// Random Values
@@ -46,7 +47,7 @@ public class FloatByteArrayUtilTest {
     		FloatByteArrayUtil.convToBytes(value, bytes, rndOffset);
     		float[] decodedValue = FloatByteArrayUtil.get(bytes, rndOffset, rndArrLength);
     		
-    		assert(Arrays.equals(decodedValue,value));
+    		assertTrue(Arrays.equals(decodedValue,value));
     	}
     }
 
