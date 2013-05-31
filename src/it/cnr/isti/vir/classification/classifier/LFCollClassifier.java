@@ -16,8 +16,8 @@ import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.classification.PredictedLabel;
 import it.cnr.isti.vir.classification.PredictedLabelWithSimilars;
 import it.cnr.isti.vir.classification.classifier.evaluation.TestDocumentSingleLabeled;
-import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
@@ -206,7 +206,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	
 
 	public LFCollClassifier(ILocalFeaturesMetric<LF> sim,
-							Collection<IFeaturesCollector_Labeled_HasID> givenColl,
+							Collection<AbstractFeaturesCollector_Labeled_HasID> givenColl,
 							AbstractKNNClassifier lfClassifier,
 							Class simPQueueClass,
 							boolean weightedSum ) {
@@ -214,7 +214,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 	public LFCollClassifier(ILocalFeaturesMetric<LF> sim,
-							Collection<IFeaturesCollector_Labeled_HasID> givenColl,
+							Collection<AbstractFeaturesCollector_Labeled_HasID> givenColl,
 							AbstractKNNClassifier lfClassifier,
 							Class simPQueueClass,
 							Integer k,
@@ -223,7 +223,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 	public LFCollClassifier(ILocalFeaturesMetric<LF> sim, 
-							Collection<IFeaturesCollector_Labeled_HasID> givenColl,
+							Collection<AbstractFeaturesCollector_Labeled_HasID> givenColl,
 							Double lfConfThr,
 							AbstractKNNClassifier lfClassifier,
 							Class simPQueueClass,
@@ -239,8 +239,8 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		this.simPQueueClass = simPQueueClass;
 		
 		if ( givenColl != null )
-			for ( Iterator<IFeaturesCollector_Labeled_HasID> itfc=givenColl.iterator(); itfc.hasNext(); ) {
-				IFeaturesCollector_Labeled_HasID fc = itfc.next();
+			for ( Iterator<AbstractFeaturesCollector_Labeled_HasID> itfc=givenColl.iterator(); itfc.hasNext(); ) {
+				AbstractFeaturesCollector_Labeled_HasID fc = itfc.next();
 				//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
 				ALocalFeaturesGroup<LF> fg =
 						(ALocalFeaturesGroup<LF>) fc.getFeature(sim.getRequestedFeatureGroupClass());
@@ -254,7 +254,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 	@Override
-	public PredictedLabel classify(IFeaturesCollector fc) {
+	public PredictedLabel classify(AbstractFeaturesCollector fc) {
 		if ( lfConfThr != null)
 			return classify(fc, lfConfThr);
 		return classify(fc, this.getDefaultLFConfThr());
@@ -262,7 +262,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	
 	
 	@Override
-	public PredictedLabelWithSimilars classifyWithSimilars(IFeaturesCollector fc) throws ClassifierException {
+	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc) throws ClassifierException {
 		if ( lfConfThr != null)
 			return classifyWithSimilars(fc, lfConfThr);
 		return classifyWithSimilars(fc, this.getDefaultLFConfThr());
@@ -296,7 +296,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //	}
 	
 	// Parallel
-	private MultipleKNNPQueueID<LF> getkNNs(IFeaturesCollector fc) {
+	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc) {
 		
 		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
 		ALocalFeaturesGroup<LF> fg = fc.getFeature(sim.getRequestedFeatureGroupClass());
@@ -314,8 +314,6 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 			if ( 	notSameFCID
 					&& fcID != null
 					&& (
-							fc == curr
-							||
 							fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
 						)) {
 				continue;
@@ -360,7 +358,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	
 
 	// perform the classification only on the given collection
-	private MultipleKNNPQueueID<LF> getkNNs(IFeaturesCollector fc, Collection<IFeaturesCollector_Labeled_HasID> collection) {
+	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) {
 		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();
 		
 		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
@@ -371,8 +369,8 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 			fcID = ((IHasID) fc).getID();
 		}
 //		kNNs.offer(coll); tried to speed up did not much
-		for ( Iterator<IFeaturesCollector_Labeled_HasID> itfc=collection.iterator(); itfc.hasNext(); ) {
-			IFeaturesCollector_Labeled_HasID currFC = itfc.next();
+		for ( Iterator<AbstractFeaturesCollector_Labeled_HasID> itfc=collection.iterator(); itfc.hasNext(); ) {
+			AbstractFeaturesCollector_Labeled_HasID currFC = itfc.next();
 			//AbstractLFGroup<LF> currFG = (AbstractLFGroup<LF>) currFC.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
 			ALocalFeaturesGroup<LF> currFG = fc.getFeature(c);
 			for ( int i=0; i<currFG.size(); i++) {
@@ -380,8 +378,6 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 				if ( 	notSameFCID
 						&& fcID != null
 						&&  (
-								fc == curr
-								||
 								fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
 							) ) {
 					//LEAVE ONE OUT ON ID
@@ -395,37 +391,37 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 
 	
 	@Override
-	public PredictedLabel classify(IFeaturesCollector fc, Double lfConfThreshold) {
+	public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold) {
 		return classify(getkNNs(fc), lfConfThreshold);
 	}
 	
-	private PredictedLabelWithSimilars classifyWithSimilars(IFeaturesCollector fc, Double lfConfThreshold) {
+	private PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Double lfConfThreshold) {
 		return classifyWithSimilars(getkNNs(fc), lfConfThreshold);
 	}
 	
 	@Override
-	public PredictedLabel[] classify(IFeaturesCollector fc, double[] lfConfThreshold) {
+	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold) {
 		return classify(getkNNs(fc), lfConfThreshold);
 	}
 
-	public PredictedLabel classify(IFeaturesCollector fc, Collection training) {
+	public PredictedLabel classify(AbstractFeaturesCollector fc, Collection training) {
 		return classify(getkNNs(fc, training), lfConfThr);
 	}
 	
-	public PredictedLabelWithSimilars classifyWithSimilars(IFeaturesCollector fc, Collection training) {
+	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Collection training) {
 		return classifyWithSimilars(getkNNs(fc, training), lfConfThr);
 	}
 	
-	public PredictedLabel classify(IFeaturesCollector fc, Double lfConfThreshold, Collection training) {
+	public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold, Collection training) {
 		return classify(getkNNs(fc, training), lfConfThreshold);
 	}
 	
-	public PredictedLabel[] classify(IFeaturesCollector fc, double[] lfConfThreshold, Collection training) {
+	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold, Collection training) {
 		return classify(getkNNs(fc, training), lfConfThreshold);
 	}
 	
 	public PredictedLabelWithSimilars[] classifyWithSimilars(
-			IFeaturesCollector fc, double[] lfConfThreshold,
+			AbstractFeaturesCollector fc, double[] lfConfThreshold,
 			Collection training) {
 		return classifyWithSimilars(getkNNs(fc, training), lfConfThreshold);
 	}
@@ -1283,8 +1279,8 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		LinkedList<TestDocumentSingleLabeled> testList = new LinkedList<TestDocumentSingleLabeled>();
 		long start = System.currentTimeMillis();
 		int count = 0;
-		for(Iterator<IFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
-			IFeaturesCollector_Labeled_HasID curr = it.next();
+		for(Iterator<AbstractFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
+			AbstractFeaturesCollector_Labeled_HasID curr = it.next();
 			count++;
 			System.out.print( 	count + " of " + testDocuments.size() + "\t" + curr.getID() );
 			long startTime = System.currentTimeMillis();
@@ -1316,8 +1312,8 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		int count=0;
 		long start = System.currentTimeMillis();
 		int correct = 0;
-		for(Iterator<IFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
-			IFeaturesCollector_Labeled_HasID curr = it.next();
+		for(Iterator<AbstractFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
+			AbstractFeaturesCollector_Labeled_HasID curr = it.next();
 			count++;
 			System.out.print( count + " of " + testDocuments.size() + "\t" + curr.getID() + "\t" );
 			long startTime = System.currentTimeMillis();
@@ -1363,7 +1359,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 	@Override
-	public LinkedList<TestDocumentSingleLabeled> classify(Collection<IFeaturesCollector_Labeled_HasID> testDocuments) {
+	public LinkedList<TestDocumentSingleLabeled> classify(Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments) {
 		return classify(testDocuments, (Double) null);
 	}
 

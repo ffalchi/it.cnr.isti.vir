@@ -19,16 +19,15 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Hashtable;
 
 public class FeaturesCollectors {
 
 	static final Class[] fccIDclass = {
-		FeaturesCollectorHT.class,
-		FeaturesCollectorHTwithID.class,
-		FeaturesCollectorHTwithIDClassified.class,
+		null, // removed FeaturesCollectorHT.class,
+		null, // removed FeaturesCollectorHTwithID.class,
+		null, // removed FeaturesCollectorHTwithIDClassified.class,
 		SAPIRObject.class,
 		FeaturesCollectorArr.class,
 		FeatureCollector.class};
@@ -48,19 +47,19 @@ public class FeaturesCollectors {
 		return id;
 	}
 	
-	public static final IFeaturesCollector readData(DataInput in ) throws IOException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public static final AbstractFeaturesCollector readData(DataInput in ) throws IOException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		int fccID = in.readInt();
 	
-		return (IFeaturesCollector) constructors[fccID].newInstance(in); 
+		return (AbstractFeaturesCollector) constructors[fccID].newInstance(in); 
 	}
 
-	public static final IFeaturesCollector readData(ByteBuffer buf ) throws IOException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public static final AbstractFeaturesCollector readData(ByteBuffer buf ) throws IOException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		int fccID = buf.getInt();
 		
-		return (IFeaturesCollector) constructorsNIO[fccID].newInstance(buf); 
+		return (AbstractFeaturesCollector) constructorsNIO[fccID].newInstance(buf); 
 	}
 	
-	public static final void writeData( DataOutput out, IFeaturesCollector fc) throws IOException {
+	public static final void writeData( DataOutput out, AbstractFeaturesCollector fc) throws IOException {
 		out.writeInt( getClassID(fc.getClass()) );
 		fc.writeData(out);
 	}

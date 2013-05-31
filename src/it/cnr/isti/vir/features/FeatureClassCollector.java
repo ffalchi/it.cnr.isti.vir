@@ -80,14 +80,14 @@ public class FeatureClassCollector implements Cloneable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public final boolean areIn( IFeaturesCollector f ) throws FeaturesCollectorException {
+	public final boolean areIn( AbstractFeaturesCollector f ) throws FeaturesCollectorException {
 		for (Iterator<Class> it = hSet.iterator(); it.hasNext(); ) {
 			if ( !f.contains(it.next() ) ) return false;
 		}
 		return true;
 	}
 	
-	public final Collection<Class> missingIn( IFeaturesCollector f ) throws FeaturesCollectorException {
+	public final Collection<Class> missingIn( AbstractFeaturesCollector f ) throws FeaturesCollectorException {
 		ArrayList<Class> list = new ArrayList(10);
 		for (Iterator<Class> it = hSet.iterator(); it.hasNext(); ) {
 			Class curr = it.next();
@@ -99,7 +99,7 @@ public class FeatureClassCollector implements Cloneable {
 	} 
 	
 	@SuppressWarnings("unchecked")
-	public final boolean areIn( FeaturesSubCollecotr f ) {
+	public final boolean areIn( FeaturesSubCollector f ) {
 		for (int i=0; i<f.size(); i++ ) {
 			for (Iterator<Class> it = hSet.iterator(); it.hasNext(); ) {
 				if ( !f.get(i).contains(it.next()) ) return false;

@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 
@@ -41,12 +41,12 @@ public class VLADSimilarity implements ISimilarity<VLAD> {
 	}
 
 	@Override
-	public double distance(IFeaturesCollector f1, IFeaturesCollector f2) {
+	public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2) {
 		return distance((VLAD) f1.getFeature(VLAD.class), (VLAD) f2.getFeature(VLAD.class));
 	}
 
 	@Override
-	public double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max) {
+	public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max) {
 		return distance((VLAD) f1.getFeature(VLAD.class), (VLAD) f2.getFeature(VLAD.class), max);
 	}
 

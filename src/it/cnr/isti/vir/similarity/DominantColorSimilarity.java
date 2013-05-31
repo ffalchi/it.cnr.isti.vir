@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.vd.DominantColor;
 
 public class DominantColorSimilarity   implements ISimilarity<DominantColor> {
@@ -33,12 +33,12 @@ public class DominantColorSimilarity   implements ISimilarity<DominantColor> {
 	
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance((DominantColor) f1.getFeature(DominantColor.class), (DominantColor) f2.getFeature(DominantColor.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance((DominantColor) f1.getFeature(DominantColor.class), (DominantColor) f2.getFeature(DominantColor.class), max);
 	}
 	

@@ -11,8 +11,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.util.HammingDistance;
-import it.cnr.isti.vir.util.LongByteArrayUtil;
+import it.cnr.isti.vir.distance.Hamming;
+import it.cnr.isti.vir.util.RandomOperations;
+import it.cnr.isti.vir.util.bytes.LongByteArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
@@ -23,64 +24,73 @@ import java.util.Iterator;
 
 public class ORB extends ALocalFeature<ORBGroup> {
 
-	static final int vLen = 4;
-	
-	// 512 bits in 8x8 bytes
-	private long[] data;
-	
-	public ORB(KeyPoint kp, long[] data, ORBGroup linkedGroup) {
-		this.kp = kp;
-		this.linkedGroup = linkedGroup;
-	}
-	
-	public ORB(KeyPoint kp, long[] data) {
-		this(kp, data, null);
-	}
+	static final int VLENGTH = 4;
+	static final int BYTES_LENGTH = VLENGTH * Long.SIZE / Byte.SIZE;
+
 	
 	public final int getDataByteSize() {
-		return vLen*8;
+		return BYTES_LENGTH;
+	}
+	
+	// 512 bits in 8x8 bytes
+	private final long[] data;
+	
+	public ORB(KeyPoint kp, long[] data) {
+		this.kp = kp;
+		this.data = data;
 	}
 	
 	public final int putBytes(byte[] bArr, int bArrI) {
-		LongByteArrayUtil.longArrayToByteArray(data, bArr, bArrI);
-		return bArrI + vLen*8;
+		return LongByteArrayUtil.convToBytes(data, bArr, bArrI);
 	}
-	
-	public ORB(ByteBuffer src, ORBGroup group ) throws IOException {
-		this.linkedGroup = group;
-		byte kpExists = src.get();
-		if ( kpExists != -1 ) {
-			kp = new KeyPoint(src);
-		}
-		data = new long[vLen];
-		for ( int i=0; i<vLen; i++ ) {
-			data[i] = src.getLong();
-		}
-	}
-
-	public ORB(DataInput str, ORBGroup group) throws IOException {
 		
-		linkedGroup = group;
-		
-		byte kpExists = str.readByte();
-		if ( kpExists != -1 ) {
-			new KeyPoint(str);
-		}		
-		
-		data = new long[vLen];
-		for ( int i=0; i<vLen; i++ ) {
+	public ORB(DataInput str) throws IOException {
+		super(str);
+		data = new long[VLENGTH];
+		for ( int i=0; i<VLENGTH; i++ ) {
 			data[i] = str.readLong();
 		}
 
 	}
-
+	
+	public ORB(ByteBuffer src ) throws IOException {
+		super(src);
+		data = new long[VLENGTH];
+		for ( int i=0; i<VLENGTH; i++ ) {
+			data[i] = src.getLong();
+		}
+	}
+	
+	
+	public ORB(BufferedReader br ) throws IOException
+	{
+		String[] metadata = br.readLine().split("(\\s)+");
+		float x = Float.parseFloat(metadata[0]);
+		float y = Float.parseFloat(metadata[1]);
+		float ori = Float.parseFloat(metadata[2]);
+		float scale = Float.parseFloat(metadata[3]);
+		//float y = Float.parseFloat(metadata[4]);
+		kp = new KeyPoint(x,y,ori,scale);
+		
+		// Load the interest points in Mikolajczyk's format
+		
+//		assert(temp.length == ivecLength+6);
+		
+		String[] bytes = br.readLine().split("(\\s)+");
+		byte[] bytesValues = new byte[32];
+		for ( int i=0; i<32; i++) {
+			bytesValues[i] = (byte) Integer.parseInt(bytes[i]);
+		}
+		data = new long[4];
+		ByteBuffer.wrap(bytesValues).asLongBuffer().get(data);
+	}
 
 
 	public static ORB getMean(Collection<ORB> coll) {
 		
 		if ( coll.size() == 0 ) return null;
 		
-		int[] bitSum = new int[vLen*64];
+		int[] bitSum = new int[VLENGTH*64];
 		
 		for ( Iterator<ORB> it = coll.iterator(); it.hasNext(); ) {
 			long[] currVec = it.next().data;
@@ -95,16 +105,20 @@ public class ORB extends ALocalFeature<ORBGroup> {
 			}
 		}
 		
-		long[] newValues = new long[vLen];
+		long[] newValues = new long[VLENGTH];
 		
 		int threshold = coll.size() / 2;
 		int iLong = 0;
 		int iBit = 0;
 		for ( int i=0; i<bitSum.length; i++ ) {
-			long zeroOne = 0;
-			if ( bitSum[i] > threshold ) zeroOne = 1;
-			
-			newValues[iLong] = (newValues[iLong] << 1) & zeroOne;
+			if ( bitSum[i] > threshold
+					||
+				 (	bitSum[i] == threshold
+				 	&&
+				 	RandomOperations.getBoolean() )
+				 	) {
+				newValues[iLong] = newValues[iLong] & (1 << iBit );
+			}
 			
 			if ( iBit == 63 ) {
 				iLong++;
@@ -118,11 +132,11 @@ public class ORB extends ALocalFeature<ORBGroup> {
 	
 		
 	public static float getDistance_Norm(ORB o1, ORB o2) {
-		return HammingDistance.distance_norm(o1.data, o2.data);
+		return Hamming.distance_norm(o1.data, o2.data);
 	}
 	
 	public static int getDistance(ORB o1, ORB o2) {
-		return HammingDistance.distance(o1.data, o2.data);
+		return Hamming.distance(o1.data, o2.data);
 	}
 	
 	@Override
@@ -145,40 +159,21 @@ public class ORB extends ALocalFeature<ORBGroup> {
 	public Class<ORBGroup> getGroupClass() {
 		return ORBGroup.class;
 	}
-	
-	public ORB(BufferedReader br, ORBGroup group) throws IOException
-	{
-		linkedGroup = group;
-		
-		
-		String[] metadata = br.readLine().split("(\\s)+");
-		float x = Float.parseFloat(metadata[0]);
-		float y = Float.parseFloat(metadata[1]);
-		float ori = Float.parseFloat(metadata[2]);
-		float scale = Float.parseFloat(metadata[3]);
-		//float y = Float.parseFloat(metadata[4]);
-		kp = new KeyPoint(x,y,ori,scale);
-		
-		// Load the interest points in Mikolajczyk's format
-		
-//		assert(temp.length == ivecLength+6);
-		
-		String[] bytes = br.readLine().split("(\\s)+");
-		byte[] bytesValues = new byte[32];
-		for ( int i=0; i<32; i++) {
-			bytesValues[i] = (byte) Integer.parseInt(bytes[i]);
-		}
-		data = new long[4];
-		ByteBuffer.wrap(bytesValues).asLongBuffer().get(data);
-	}
+
 	
 	public String toString() {
-		String tStr = kp.toString();
+		String tStr = "";
+		if ( kp != null ) {
+			tStr += kp.toString();
+		} else {
+			tStr += "{null}";
+		}
 		for ( long value : data ) {
 			tStr += " " + value;
 		}
 		tStr += "\n";
 		return tStr;
 	}
+
 
 }

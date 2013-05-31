@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.file;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.similarity.ISimilarity;
@@ -113,10 +113,10 @@ public class FeaturesCollectorsArchives {
 		}
 	}
 
-	public final IFeaturesCollector get(AbstractID id) throws ArchiveException {
+	public final AbstractFeaturesCollector get(AbstractID id) throws ArchiveException {
 		// TODO
 		for ( int i=0; i<archive.length; i++) {
-			IFeaturesCollector temp = archive[i].get(id);
+			AbstractFeaturesCollector temp = archive[i].get(id);
 			if ( temp != null ) return temp;
 		}
 		throw new ArchiveException( "ID " + id + " not found in current FeaturesCollectorArchives.");
@@ -140,7 +140,7 @@ public class FeaturesCollectorsArchives {
 		return archive[temp].getID(index-archiveStartIndex[temp]);
 	}
 
-	public final IFeaturesCollector get(int index) throws ArchiveException {
+	public final AbstractFeaturesCollector get(int index) throws ArchiveException {
 		int temp = getArchiveIndex(index);
 		return archive[temp].get(index-archiveStartIndex[temp]);
 	}
@@ -151,8 +151,8 @@ public class FeaturesCollectorsArchives {
 		}
 	}
 	
-	public final ArrayList<IFeaturesCollector> getAll( )  throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-		ArrayList<IFeaturesCollector> res = new ArrayList(size);
+	public final ArrayList<AbstractFeaturesCollector> getAll( )  throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		ArrayList<AbstractFeaturesCollector> res = new ArrayList(size);
 		for ( int i=0; i<archive.length; i++) {
 			res.addAll( archive[i].getAll() );
 		}
@@ -174,7 +174,7 @@ public class FeaturesCollectorsArchives {
 		return res;
 	}
 	
-	public synchronized SimilarityResults[] getKNN(IFeaturesCollector[] qObj,
+	public synchronized SimilarityResults[] getKNN(AbstractFeaturesCollector[] qObj,
 			int k, final ISimilarity sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, InstantiationException,
@@ -198,7 +198,7 @@ public class FeaturesCollectorsArchives {
 		return res;
 	}
 	
-	public synchronized SimilarityResults[][] getKNN_multiSim(IFeaturesCollector[] qObj,
+	public synchronized SimilarityResults[][] getKNN_multiSim(AbstractFeaturesCollector[] qObj,
 			int k, final ISimilarity[] sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, InstantiationException,

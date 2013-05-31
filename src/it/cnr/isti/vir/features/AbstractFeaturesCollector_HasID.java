@@ -11,11 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features;
 
-import java.io.DataOutput;
-import java.io.IOException;
+import it.cnr.isti.vir.id.IHasID;
 
-public interface IFeature {
-
-	public void writeData(DataOutput out) throws IOException;
+public abstract class AbstractFeaturesCollector_HasID extends AbstractFeaturesCollector implements IHasID  {
 
 }

@@ -11,14 +11,14 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.metadata;
 
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.AbstractFeature;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class GPSData implements IFeature {
+public class GPSData extends AbstractFeature {
 	
 	private final float longitude;
 	private final float latitude;

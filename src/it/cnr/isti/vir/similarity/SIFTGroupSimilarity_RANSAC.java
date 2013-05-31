@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 import it.cnr.isti.vir.geom.AffineTransformation;
 import it.cnr.isti.vir.geom.HomographyTransformation;
@@ -108,12 +108,12 @@ public class SIFTGroupSimilarity_RANSAC extends IGroupSimilarity<SIFTGroup> {
 	}
 
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance((SIFTGroup) f1.getFeature(SIFTGroup.class), (SIFTGroup) f2.getFeature(SIFTGroup.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance((SIFTGroup) f1.getFeature(SIFTGroup.class), (SIFTGroup) f2.getFeature(SIFTGroup.class));
 	}
 	

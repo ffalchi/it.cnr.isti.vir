@@ -13,7 +13,7 @@ package it.cnr.isti.vir.similarity.results;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.PredictedLabel;
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
@@ -165,7 +165,7 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<ALocalFe
 	}
 
 	@Override
-	public Collection<IFeaturesCollector_Labeled_HasID> getFCs(
+	public Collection<AbstractFeaturesCollector_Labeled_HasID> getFCs(
 			FeaturesCollectorsArchives archives) {
 		// TODO Auto-generated method stub
 		return null;

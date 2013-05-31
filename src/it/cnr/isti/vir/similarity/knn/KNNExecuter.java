@@ -11,13 +11,13 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.knn;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 
 
 public interface KNNExecuter {
 	
-	public ISimilarityResults getKNNResults(IFeaturesCollector qObj, int k) throws Exception;
+	public ISimilarityResults getKNNResults(AbstractFeaturesCollector qObj, int k) throws Exception;
 	
 	//public SimilarityResultsInterface<ID> getKNNResultsIDs(FeaturesCollectionInterface qObj, int k);
 	

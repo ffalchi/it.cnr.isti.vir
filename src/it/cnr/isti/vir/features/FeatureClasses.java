@@ -36,6 +36,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -47,7 +48,7 @@ public class FeatureClasses {
 		null, //FeaturesCollectorHT.class,
 		null, //FeaturesCollectorHTwithID.class,
 		null, //FeaturesCollectorHTwithIDClassified.class,
-		FeaturesSubCollecotr.class,
+		FeaturesSubCollector.class,
 		FeaturesSubRegions.class,		
 		ScalableColor.class,
 		ColorStructure.class,
@@ -81,12 +82,12 @@ public class FeatureClasses {
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);
 	static final Constructor<?>[] constructors  = ClassIDs.getConstructors(idsFeatures, DataInput.class);
-	static final Constructor<?>[] constructors2 = ClassIDs.getConstructors(idsFeatures, DataInput.class, IFeaturesCollector.class);
+//	static final Constructor<?>[] constructors2 = ClassIDs.getConstructors(idsFeatures, DataInput.class, IFeaturesCollector.class);
 	static final Constructor<?>[] constructors_NIO  = ClassIDs.getConstructors(idsFeatures, ByteBuffer.class);
-	static final Constructor<?>[] constructors2_NIO = ClassIDs.getConstructors(idsFeatures, ByteBuffer.class, IFeaturesCollector.class);
+//	static final Constructor<?>[] constructors2_NIO = ClassIDs.getConstructors(idsFeatures, ByteBuffer.class, IFeaturesCollector.class);
 	
 
-	public static final void writeData(DataOutput out, IFeature fc ) throws IOException {
+	public static final void writeData(DataOutput out, AbstractFeature fc ) throws IOException {
 		out.writeByte(getClassID(fc.getClass()));
 		fc.writeData(out);
 	}
@@ -116,39 +117,55 @@ public class FeatureClasses {
 	
 	
 	
-	public static final IFeature readData(DataInput in ) throws IOException {
-		return readData(in, null);
-	}
-	
-	public static final IFeature readData(ByteBuffer in, IFeaturesCollector fc ) throws IOException {
-		byte id = in.get();
-
-		try {
-			if ( constructors2_NIO[id] != null )
-				return (IFeature) constructors2_NIO[id].newInstance(in, fc);
-			if ( constructors_NIO[id] != null )
-				return (IFeature) constructors_NIO[id].newInstance(in);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-			return null;
-		}
-		return null;
-		
-	}
-	
-	public static final IFeature readData(DataInput in, IFeaturesCollector fc ) throws IOException {
+	public static final AbstractFeature readData(DataInput in ) throws IOException {
 		byte id = in.readByte();
-
 		try {
-			if ( constructors2[id] != null )
-				return (IFeature) constructors2[id].newInstance(in, fc);
-			if ( constructors[id] != null )
-				return (IFeature) constructors[id].newInstance(in);
-		} catch (Exception e2) {
-			e2.printStackTrace();
-			return null;
+			return (AbstractFeature) constructors[id].newInstance(in);
+		} catch (InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			throw new IOException(e);
 		}
-		return null;
-		
 	}
+	
+	public static final AbstractFeature readData(ByteBuffer in) throws IOException {
+		byte id = in.get();
+		try {
+			return (AbstractFeature) constructors_NIO[id].newInstance(in);
+		} catch (InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			throw new IOException(e);
+		}
+	}
+	
+//	public static final IFeature readData(ByteBuffer in, IFeaturesCollector fc ) throws IOException {
+//		byte id = in.get();
+//
+//		try {
+//			if ( constructors2_NIO[id] != null )
+//				return (IFeature) constructors2_NIO[id].newInstance(in, fc);
+//			if ( constructors_NIO[id] != null )
+//				return (IFeature) constructors_NIO[id].newInstance(in);
+//		} catch (Exception e2) {
+//			e2.printStackTrace();
+//			return null;
+//		}
+//		return null;
+//		
+//	}
+//	
+//	public static final IFeature readData(DataInput in, IFeaturesCollector fc ) throws IOException {
+//		byte id = in.readByte();
+//
+//		try {
+//			if ( constructors2[id] != null )
+//				return (IFeature) constructors2[id].newInstance(in, fc);
+//			if ( constructors[id] != null )
+//				return (IFeature) constructors[id].newInstance(in);
+//		} catch (Exception e2) {
+//			e2.printStackTrace();
+//			return null;
+//		}
+//		return null;
+//		
+//	}
 }

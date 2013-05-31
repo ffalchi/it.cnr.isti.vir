@@ -13,8 +13,8 @@ package it.cnr.isti.vir.features.mpeg7;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.FeaturesCollectorException;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.vd.LireColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.LireEdgeHistogram;
 import it.cnr.isti.vir.features.mpeg7.vd.LireScalableColor;
@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class LireObject implements IFeaturesCollector, IHasID {
+public class LireObject extends AbstractFeaturesCollector implements IHasID {
 	
 	protected final static FeatureClassCollector fcc = new FeatureClassCollector(
 			LireColorLayout.class,
@@ -51,7 +51,7 @@ public class LireObject implements IFeaturesCollector, IHasID {
 //		super(f);
 //	}
 	
-	public LireObject( IFeaturesCollector f) throws FeaturesCollectorException {
+	public LireObject( AbstractFeaturesCollector f) throws FeaturesCollectorException {
 		cl = (LireColorLayout) f.getFeature(LireColorLayout.class);
 		sc = (LireScalableColor) f.getFeature(LireScalableColor.class);
 		eh = (LireEdgeHistogram) f.getFeature(LireEdgeHistogram.class);
@@ -70,7 +70,7 @@ public class LireObject implements IFeaturesCollector, IHasID {
 		}
 	}
 
-	public LireObject(Integer id, IFeaturesCollector f) throws FeaturesCollectorException {
+	public LireObject(Integer id, AbstractFeaturesCollector f) throws FeaturesCollectorException {
 		cl = (LireColorLayout) f.getFeature(LireColorLayout.class);
 		sc = (LireScalableColor) f.getFeature(LireScalableColor.class);
 		eh = (LireEdgeHistogram) f.getFeature(LireEdgeHistogram.class);
@@ -114,7 +114,7 @@ public class LireObject implements IFeaturesCollector, IHasID {
 	}
 
 	@Override
-	public IFeature getFeature(Class featureClass) {
+	public AbstractFeature getFeature(Class featureClass) {
 		if ( featureClass.equals(LireColorLayout.class)) return cl;
 		else if ( featureClass.equals(LireScalableColor.class)) return sc;
 		else if ( featureClass.equals(LireEdgeHistogram.class)) return eh;
@@ -161,7 +161,7 @@ public class LireObject implements IFeaturesCollector, IHasID {
 	}
 
 	@Override
-	public void add(IFeature f) throws FeaturesCollectorException {
+	public void add(AbstractFeature f) throws FeaturesCollectorException {
 		throw new FeaturesCollectorException("Method not imlpemented.");		
 	}
 
@@ -172,7 +172,7 @@ public class LireObject implements IFeaturesCollector, IHasID {
 	}
 
 	@Override
-	public Collection<IFeature> getFeatures() {
+	public Collection<AbstractFeature> getFeatures() {
 		// TODO Auto-generated method stub
 		ArrayList list = new ArrayList(5);
 		list.add(cl);

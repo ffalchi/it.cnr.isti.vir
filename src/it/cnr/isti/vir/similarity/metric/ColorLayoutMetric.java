@@ -12,8 +12,8 @@
 package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 
@@ -39,12 +39,12 @@ public class ColorLayoutMetric  implements IMetric<ColorLayout> {
 	}*/
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance((ColorLayout) f1.getFeature(ColorLayout.class), (ColorLayout) f2.getFeature(ColorLayout.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance((ColorLayout) f1.getFeature(ColorLayout.class), (ColorLayout) f2.getFeature(ColorLayout.class), max);
 	}
 	

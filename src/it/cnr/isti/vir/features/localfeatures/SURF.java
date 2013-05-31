@@ -11,8 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.util.FloatByteArrayUtil;
+import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
@@ -59,12 +58,11 @@ public class SURF extends ALocalFeature<SURFGroup> {
 
 	public final float getStrength() { return data[strengthi]; };
 	
-	public SURF(float[] data, byte laplace, float strength, KeyPoint kp, SURFGroup group ) {
+	public SURF(float[] data, byte laplace, float strength, KeyPoint kp ) {
 		this.data = data;
 		this.laplace = laplace;
 		this.strength = strength;
 		this.kp = kp;
-		this.linkedGroup = group;
 	}
 	
 
@@ -76,32 +74,24 @@ public class SURF extends ALocalFeature<SURFGroup> {
 	@Override
 	public int putBytes(byte[] byteArray, int bArrI) {
 		int offSet = bArrI;
-		offSet = FloatByteArrayUtil.floatArrayToByteArray(data, byteArray, offSet);
+		offSet = FloatByteArrayUtil.convToBytes(data, byteArray, offSet);
 		byteArray[bArrI++] = laplace;
-		offSet = FloatByteArrayUtil.floatToByteArray(strength, byteArray, offSet);
+		offSet = FloatByteArrayUtil.convToBytes(strength, byteArray, offSet);
 		return offSet;
 	}
 	
 	public SURF(DataInput str ) throws IOException {
-		this(str, null);
-	}
-	
-	public SURF(DataInput str, SURFGroup group ) throws IOException {
-		super(str, group);
+		super(str);
 		
 		byte[] tBytes = new byte[iVecLength*4];		
 		str.readFully(tBytes);
-		data = FloatByteArrayUtil.byteArrayToFloatArray(tBytes, 0, iVecLength);
+		data = FloatByteArrayUtil.get(tBytes, 0, iVecLength);
 		laplace = str.readByte();
 		strength = str.readFloat();
 	}
 	
-	public SURF(ByteBuffer str ) throws IOException {
-		this(str, null);
-	}
-	
-	public SURF(ByteBuffer in, SURFGroup group) throws IOException {
-		super(in, group);
+	public SURF(ByteBuffer in ) throws IOException {
+		super(in);
 		
 		data = new float[iVecLength];
 		for ( int i=0; i<iVecLength; i++) {
@@ -111,7 +101,7 @@ public class SURF extends ALocalFeature<SURFGroup> {
 		strength = in.getFloat();
 	}
 	
-	public static SURF read_old(ByteBuffer str, SURFGroup group) throws IOException {
+	public static SURF read_old(ByteBuffer str) throws IOException {
 		
 		float x = str.getFloat();
 		float y = str.getFloat();
@@ -127,10 +117,10 @@ public class SURF extends ALocalFeature<SURFGroup> {
 			data[i] = str.getFloat();
 		}
 		
-		return new SURF(data, laplace, strength, kp, group);
+		return new SURF(data, laplace, strength, kp );
 	}
 	
-	public static SURF read_old(DataInput str, SURFGroup group) throws IOException {
+	public static SURF read_old(DataInput str) throws IOException {
 
 		float x = str.readFloat();
 		float y = str.readFloat();
@@ -148,7 +138,7 @@ public class SURF extends ALocalFeature<SURFGroup> {
 		KeyPoint kp = new KeyPoint(x,y,ori,scale);
         //xy = new float[] { data[0], data[1] };
 		
-		return new SURF(data, laplace, strength, kp, group);
+		return new SURF(data, laplace, strength, kp);
 	}
 
     
@@ -288,7 +278,7 @@ public class SURF extends ALocalFeature<SURFGroup> {
 		if ( laplaceTemp > 0 ) tempVec[laplacei] = 1;
 		else tempVec[laplacei] = -1;
 		
-		return new SURF(tempVec, (byte) laplaceTemp, Float.MIN_VALUE, null, null);
+		return new SURF(tempVec, (byte) laplaceTemp, Float.MIN_VALUE, null);
 		
 	}
 	

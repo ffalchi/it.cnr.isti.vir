@@ -26,33 +26,48 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
+public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasID {
 
 	public AbstractID id;
 	
 	public AbstractLabel cl;
 	
-	private IFeature[] feature;
+	private AbstractFeature[] feature;
 
-	public FeaturesCollectorArr(IFeature f, AbstractID id, AbstractLabel cl) {
+	public FeaturesCollectorArr() {
+		id = null;
+		cl = null;
+		feature = null;
+	}
+	
+	
+	public FeaturesCollectorArr(AbstractFeature f) {
+		this(f, null, null);
+	}
+	
+	public FeaturesCollectorArr(AbstractFeature f, AbstractID id) {
+		this(f, id, null);
+	}
+	
+	public FeaturesCollectorArr(AbstractFeature f, AbstractID id, AbstractLabel cl) {
 		this.id=id;
 		this.cl=cl;
 		int size = 1;
-		feature = new IFeature[1];
+		feature = new AbstractFeature[1];
 		feature[0]=f;
 		if ( feature[0] instanceof ALocalFeaturesGroup ) {
 			((ALocalFeaturesGroup) feature[0]).setLinkedFC(this);
 		}
 	}
 	
-	public FeaturesCollectorArr(Collection<IFeature> coll, AbstractID id, AbstractLabel cl) {
+	public FeaturesCollectorArr(Collection<AbstractFeature> coll, AbstractID id, AbstractLabel cl) {
 		this.id=id;
 		this.cl=cl;
 		int size = coll.size();
-		feature = new IFeature[size];
+		feature = new AbstractFeature[size];
 		int i = 0;
-		for ( Iterator<IFeature> it=coll.iterator(); it.hasNext(); i++) {
-			IFeature curr = it.next();
+		for ( Iterator<AbstractFeature> it=coll.iterator(); it.hasNext(); i++) {
+			AbstractFeature curr = it.next();
 			feature[i]=curr;
 			if ( feature[i] instanceof ALocalFeaturesGroup ) {
 				((ALocalFeaturesGroup) feature[i]).setLinkedFC(this);
@@ -65,15 +80,10 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 		id = IDClasses.readData(src);
 		cl = LabelClasses.readData(src);
 		int size = src.get();
-		feature = new IFeature[size];
+		feature = new AbstractFeature[size];
 		for ( int i=0; i<feature.length; i++) {
-			feature[i] = FeatureClasses.readData(src, this);
-//			if ( feature[i] instanceof LocalFeaturesGroup ) {
-//				((LocalFeaturesGroup) feature[i]).setLinkedFC(this);
-////			}
-//			if ( feature[i] == null) {
-//				System.err.println("Null Feature read.");
-//			}
+			feature[i] = FeatureClasses.readData(src);
+			feature[i].setLinkedFC(this);
 		}
 	}
 	
@@ -81,15 +91,10 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 		id = IDClasses.readData(in);
 		cl = LabelClasses.readData(in);
 		int size = in.readByte();
-		feature = new IFeature[size];
+		feature = new AbstractFeature[size];
 		for ( int i=0; i<feature.length; i++) {
-			feature[i] = FeatureClasses.readData(in, this);
-//			if ( feature[i] instanceof LocalFeaturesGroup ) {
-//				((LocalFeaturesGroup) feature[i]).setLinkedFC(this);
-////			}
-//			if ( feature[i] == null) {
-//				System.err.println("Null Feature read.");
-//			}
+			feature[i] = FeatureClasses.readData(in);
+			feature[i].setLinkedFC(this);
 		}
 	}
 		
@@ -122,7 +127,7 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 	}
 
 	@Override
-	public IFeature getFeature(Class featureClass) {
+	public AbstractFeature getFeature(Class featureClass) {
 		for ( int i=0; i<feature.length; i++) {
 			if ( feature[i] == null ) {
 				System.err.println("Feature null!!!!");
@@ -136,15 +141,15 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 	}
 
 	@Override
-	public void add(IFeature f) {
+	public void add(AbstractFeature f) {
 			
 		if ( feature == null ) {
-			feature = new IFeature[1];
+			feature = new AbstractFeature[1];
 			feature[0] = f;
 		} else {
 			
 			int size = feature.length+1;
-			IFeature[] temp = new IFeature[size];
+			AbstractFeature[] temp = new AbstractFeature[size];
 			for (int i=0; i<feature.length; i++) {
 				temp[i]=feature[i];
 			}
@@ -166,7 +171,7 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 			return;
 		}
 		int size = featuresClasses.size();
-		IFeature[] temp = new IFeature[size];
+		AbstractFeature[] temp = new AbstractFeature[size];
 		int count = 0;
 		for ( int i=0; i<feature.length; i++) {
 			if ( featuresClasses.contains(feature[i].getClass())) {
@@ -179,7 +184,7 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 		feature = temp;
 	}
 	
-	public boolean substitute( IFeature f ) {
+	public boolean substitute( AbstractFeature f ) {
 		Class c = f.getClass();
 		for ( int i=0; i<feature.length; i++) {
 			if ( feature[i].getClass().equals(c)) {
@@ -198,7 +203,7 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 			}
 		}
 		if ( cIndex <0 ) return;
-		IFeature[] newArr = new IFeature[feature.length-1];
+		AbstractFeature[] newArr = new AbstractFeature[feature.length-1];
 		int j=0;
 		for ( int i=0; i<feature.length; i++) {
 			if ( i == cIndex) continue;
@@ -209,7 +214,7 @@ public class FeaturesCollectorArr implements IFeaturesCollector_Labeled_HasID {
 	}
 
 	@Override
-	public Collection<IFeature> getFeatures() {
+	public Collection<AbstractFeature> getFeatures() {
 		return Arrays.asList(feature);
 	}
 

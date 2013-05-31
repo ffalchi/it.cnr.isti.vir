@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import java.util.Random;
 
 public class RandomOperations {
-	final static Random r = new Random(23);
+	final static Random r = new Random(System.currentTimeMillis());
 	
 	public static final void setRandomSeed()
 	{
@@ -35,6 +35,15 @@ public class RandomOperations {
 		return max*r.nextDouble();
 	}
 	
+	public static final float getFloat() {
+		return r.nextFloat();
+	}
+	
+	/**
+	 * Randomly generates a positive float
+	 * @param max
+	 * @return		a positive float
+	 */
 	public static final float getFloat(float max) {
 		return max*r.nextFloat();
 	}
@@ -48,7 +57,13 @@ public class RandomOperations {
 		return r.nextInt(max - min + 1) + min;
 	}
 	
-
+	/**
+	 * @param max inclusive max int
+	 * @return
+	 */
+	public static final int getInt( int max) {
+		return r.nextInt(max);
+	}
 	
 	public static final boolean trueORfalse(double yesRate) {
 		double value = r.nextDouble(); // random value between 0 and 1.0
@@ -280,6 +295,22 @@ public class RandomOperations {
 		for ( i=0; i<tempArr.length; i++ ) {
 			list.add(tempArr[i]);
 		}
+	}
+
+	public static float getFloat(float min, float max) {
+		return getFloat(max-min)+min;
+	}
+
+	public static long[] getRandomLongArray(int vlength) {
+		long[] res = new long[vlength];
+		for ( int i=0; i<vlength; i++) {
+			res[i] = r.nextLong();
+		}
+		return res;
+	}
+
+	public static boolean getBoolean() {
+		return r.nextBoolean();
 	}
 
 

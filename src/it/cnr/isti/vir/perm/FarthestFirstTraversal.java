@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.perm;
 
 import it.cnr.isti.vir.clustering.Centroids;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
 import it.cnr.isti.vir.id.IHasID;
@@ -54,7 +54,7 @@ public class FarthestFirstTraversal {
 		FeaturesCollectorsArchives archives = new FeaturesCollectorsArchives(archivesFileName, false);
 		SAPIRMetric sim = new SAPIRMetric(); 
 		Log.info(archives.size() + " were found.");
-		IFeaturesCollector[] res = select(sim, archives, nMaxObj, nTries, nCandidatesCycles);
+		AbstractFeaturesCollector[] res = select(sim, archives, nMaxObj, nTries, nCandidatesCycles);
 		
 		double minInterDist = SimilarityUtil.getMinInterDistance(res, sim);
 
@@ -67,16 +67,16 @@ public class FarthestFirstTraversal {
 	public static class SubsetBest implements Runnable {
 
 		ISimilarity sim;
-		IFeaturesCollector[] obj;
+		AbstractFeaturesCollector[] obj;
 		int from;
 		int to;
-		IFeaturesCollector[] ro;
+		AbstractFeaturesCollector[] ro;
 		int nRO;
 		
 		public double maxMinDist=Double.MIN_VALUE;
 		public int bestCandidate=-1;
 		
-		public SubsetBest(ISimilarity sim, IFeaturesCollector[] obj, int from, int to, IFeaturesCollector[] ro, int nRO) {
+		public SubsetBest(ISimilarity sim, AbstractFeaturesCollector[] obj, int from, int to, AbstractFeaturesCollector[] ro, int nRO) {
 			this.sim = sim;
 			this.obj = obj;
 			this.ro = ro;
@@ -89,7 +89,7 @@ public class FarthestFirstTraversal {
 		@Override
 		public void run() {
 			for( int i=from; i<to; i++) {
-				IFeaturesCollector candidate = obj[i];
+				AbstractFeaturesCollector candidate = obj[i];
 				double minDist = Double.MAX_VALUE;
 				for ( int iRO=0; iRO<nRO; iRO++) {
 					double currDist = sim.distance(candidate, ro[iRO], minDist);
@@ -105,8 +105,8 @@ public class FarthestFirstTraversal {
 
 	}
 	
-	public static IFeaturesCollector[] select(ISimilarity sim, FeaturesCollectorsArchives archives, int nMaxObj, int maxNTries, int nCandidatesCycles) throws ArchiveException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
-		IFeaturesCollector[] res = new IFeaturesCollector[nMaxObj];
+	public static AbstractFeaturesCollector[] select(ISimilarity sim, FeaturesCollectorsArchives archives, int nMaxObj, int maxNTries, int nCandidatesCycles) throws ArchiveException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[nMaxObj];
 		
 		
 		
@@ -118,7 +118,7 @@ public class FarthestFirstTraversal {
 	
 
 		
-		IFeaturesCollector[] candidates = new IFeaturesCollector[nObjPerCycle];
+		AbstractFeaturesCollector[] candidates = new AbstractFeaturesCollector[nObjPerCycle];
 		if ( nObjPerCycle == archives.size()) {
 			Log.info("Reading all objects");
 			archives.getAll().toArray(candidates);

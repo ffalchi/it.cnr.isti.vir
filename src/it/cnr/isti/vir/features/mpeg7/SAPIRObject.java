@@ -11,11 +11,10 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7;
 
-import it.cnr.isti.vir.clustering.IMeanEvaluator;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.FeaturesCollectorException;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
@@ -25,7 +24,6 @@ import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.id.IHasID;
-import it.cnr.isti.vir.util.Mean;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -33,9 +31,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
-public class SAPIRObject implements IFeaturesCollector, IHasID {
+public class SAPIRObject extends AbstractFeaturesCollector implements IHasID {
 	
 	protected final static FeatureClassCollector fcc = new FeatureClassCollector(
 			ColorLayout.class,
@@ -80,7 +77,7 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 		this.id = id;
 	}
 	
-	public SAPIRObject( IFeaturesCollector f) throws FeaturesCollectorException {
+	public SAPIRObject( AbstractFeaturesCollector f) throws FeaturesCollectorException {
 		cl = (ColorLayout) f.getFeature(ColorLayout.class);
 		cs = (ColorStructure) f.getFeature(ColorStructure.class);
 		sc = (ScalableColor) f.getFeature(ScalableColor.class);
@@ -100,7 +97,7 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 		}
 	}
 
-	public SAPIRObject(Integer id, IFeaturesCollector f) throws FeaturesCollectorException {
+	public SAPIRObject(Integer id, AbstractFeaturesCollector f) throws FeaturesCollectorException {
 		cl = (ColorLayout) f.getFeature(ColorLayout.class);
 		cs = (ColorStructure) f.getFeature(ColorStructure.class);
 		sc = (ScalableColor) f.getFeature(ScalableColor.class);
@@ -156,7 +153,7 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 	}
 
 	@Override
-	public IFeature getFeature(Class featureClass) {
+	public AbstractFeature getFeature(Class featureClass) {
 		if ( featureClass.equals(SAPIRObject.class)) return this;
 		else if ( featureClass.equals(ColorLayout.class)) return cl;
 		else if ( featureClass.equals(ColorStructure.class)) return cs;
@@ -211,7 +208,7 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 	}
 
 	@Override
-	public void add(IFeature f) throws FeaturesCollectorException {
+	public void add(AbstractFeature f) throws FeaturesCollectorException {
 		throw new FeaturesCollectorException("Method not imlpemented.");		
 	}
 
@@ -222,7 +219,7 @@ public class SAPIRObject implements IFeaturesCollector, IHasID {
 	}
 
 	@Override
-	public Collection<IFeature> getFeatures() {
+	public Collection<AbstractFeature> getFeatures() {
 		// TODO Auto-generated method stub
 		ArrayList list = new ArrayList(5);
 		list.add(cl);

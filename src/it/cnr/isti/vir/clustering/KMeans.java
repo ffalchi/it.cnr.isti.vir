@@ -11,8 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.clustering;
 
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.similarity.ILFSimilarity;
 import it.cnr.isti.vir.similarity.ISimilarity;
@@ -32,7 +32,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class KMeans<O extends IFeature> {
+public class KMeans<O extends AbstractFeature> {
 
 	private final IMeanEvaluator<O> meanEval;
 	private final ISimilarity<O> sim;
@@ -525,7 +525,7 @@ public class KMeans<O extends IFeature> {
 					words.writeData(out);				
 					out.close();
 				} else {
-					Centroids centroids = new Centroids((IFeature[]) getCentroids(true));
+					Centroids centroids = new Centroids((AbstractFeature[]) getCentroids(true));
 					DataOutputStream out = new DataOutputStream(new FileOutputStream(tempWordsOutFile + "_" + iterations + ".dat"));
 					centroids.writeData(out);				
 					out.close();
@@ -601,8 +601,8 @@ public class KMeans<O extends IFeature> {
 			} else {
 				newCentroid = meanEval.getMean(clusters[i]);
 				
-				if ( newCentroid != null && IFeaturesCollector.class.isAssignableFrom(objectsClass)) {
-					newCentroid = objectsClass.getConstructor(IFeature.class).newInstance(newCentroid);
+				if ( newCentroid != null && AbstractFeaturesCollector.class.isAssignableFrom(objectsClass)) {
+					newCentroid = objectsClass.getConstructor(AbstractFeature.class).newInstance(newCentroid);
 				}
 				
 			}

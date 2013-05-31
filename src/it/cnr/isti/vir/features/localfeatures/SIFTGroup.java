@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 
@@ -19,8 +19,6 @@ import java.io.BufferedReader;
 import java.io.DataInput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 
@@ -30,11 +28,11 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 		return version;
 	}
 	
-	public SIFTGroup(SIFT[] arr, IFeaturesCollector fc) {
+	public SIFTGroup(SIFT[] arr, AbstractFeaturesCollector fc) {
 		super(arr, fc);
 	}
 
-	public SIFTGroup(IFeaturesCollector fc) {
+	public SIFTGroup(AbstractFeaturesCollector fc) {
 		super(fc);
 	}
 
@@ -43,8 +41,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 	}
 
 	
-	public SIFTGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
-		super(fc);
+	public SIFTGroup(ByteBuffer in) throws Exception {
 		byte version = in.get();
 		if ( version >= 2 ) {
 			// VERSION 2
@@ -52,7 +49,8 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 			int nLFs = in.getInt();
 			lfArr = new SIFT[nLFs];
 			for ( int i = 0; i < nLFs; i++ ) {
-				lfArr[i] = new SIFT(in, this);
+				lfArr[i] = new SIFT(in);
+				lfArr[i].setLinkedGroup(this);
 			}
 			
 		} else {		
@@ -63,7 +61,8 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 				return;
 
 			for (int i = 0; i < size; i++) {
-				lfArr[i] = SIFT.read_old(in, this);
+				lfArr[i] = SIFT.read_old(in);
+				lfArr[i].setLinkedGroup(this);
 			}
 
 			if (version > 0) {
@@ -74,7 +73,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 		
 	}
 
-	public SIFTGroup(DataInput in, IFeaturesCollector fc) throws Exception {
+	public SIFTGroup(DataInput in, AbstractFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.readByte();
 		if ( version >= 2 ) {
@@ -85,7 +84,8 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 			ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
 			lfArr = new SIFT[bBuffer.getInt()];
 			for (int i = 0; i < lfArr.length; i++) {
-				this.lfArr[i] = new SIFT(bBuffer, this);
+				this.lfArr[i] = new SIFT(bBuffer);
+				lfArr[i].setLinkedGroup(this);
 			}
 		} else {
 			// VERSION 0 and 1
@@ -106,7 +106,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 	 * of keypoints and the size of descriptor vector for each keypoint
 	 * (currently assumed to be 128). Then each keypoint is specified by ...
 	 */
-	public SIFTGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
+	public SIFTGroup(BufferedReader br, AbstractFeaturesCollector fc) throws IOException {
 		super(fc);
 		String[] temp = br.readLine().split("(\\s)+");
 		// assert(temp.length == 2);
@@ -116,7 +116,8 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 
 		this.lfArr = new SIFT[n];
 		for (int i = 0; i < n; i++) {
-			this.lfArr[i] = new SIFT(br, this);
+			this.lfArr[i] = new SIFT(br);
+			lfArr[i].setLinkedGroup(this);
 		}
 	}
 
@@ -417,7 +418,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 
 
 	@Override
-	public ALocalFeaturesGroup create(SIFT[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup create(SIFT[] arr, AbstractFeaturesCollector fc) {
 		return new SIFTGroup( arr, fc);
 	}
 }

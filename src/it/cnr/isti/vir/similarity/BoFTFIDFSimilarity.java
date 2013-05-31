@@ -17,7 +17,7 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
 
 import java.util.Properties;
@@ -98,11 +98,11 @@ public class BoFTFIDFSimilarity implements ISimilarity<BoFLFGroup>, IRequiresIDF
         return distance(f1, f2);
     }
 
-    public double distance(IFeaturesCollector f1, IFeaturesCollector f2) {
+    public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2) {
         return distance((BoFLFGroup) f1.getFeature(BoFLFGroup.class), (BoFLFGroup) f2.getFeature(BoFLFGroup.class));
     }
 
-    public double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max) {
+    public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max) {
         return distance((BoFLFGroup) f1.getFeature(BoFLFGroup.class), (BoFLFGroup) f2.getFeature(BoFLFGroup.class));
     }
 

@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 
@@ -29,11 +29,11 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		return version;
 	}
 	
-	public RootSIFTGroup(RootSIFT[] arr, IFeaturesCollector fc) {
+	public RootSIFTGroup(RootSIFT[] arr, AbstractFeaturesCollector fc) {
 		super(arr, fc);
 	}
 
-	public RootSIFTGroup(IFeaturesCollector fc) {
+	public RootSIFTGroup(AbstractFeaturesCollector fc) {
 		super(fc);
 	}
 
@@ -41,8 +41,7 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		this(in, null);
 	}
 
-	public RootSIFTGroup(SIFTGroup siftGroup, IFeaturesCollector fc  ) {
-		super(null);
+	public RootSIFTGroup(SIFTGroup siftGroup, AbstractFeaturesCollector fc  ) {
 		int size = siftGroup.lfArr.length;
 		SIFT[] siftArr = siftGroup.lfArr;
 		lfArr = new RootSIFT[siftArr.length];
@@ -51,21 +50,21 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		}
 	}
 	
-	public RootSIFTGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
-		super(fc);
+	public RootSIFTGroup(ByteBuffer in) throws Exception {
 		byte version = in.get();
 
 		int nBytes = in.getInt();
 		int nLFs = in.getInt();
 		lfArr = new RootSIFT[nLFs];
 		for ( int i = 0; i < nLFs; i++ ) {
-			lfArr[i] = new RootSIFT(in, this);
+			lfArr[i] = new RootSIFT(in);
+			lfArr[i].setLinkedGroup(this);
 		}
 
 		
 	}
 
-	public RootSIFTGroup(DataInput in, IFeaturesCollector fc) throws Exception {
+	public RootSIFTGroup(DataInput in, AbstractFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.readByte();
 
@@ -75,7 +74,8 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
 		lfArr = new RootSIFT[bBuffer.getInt()];
 		for (int i = 0; i < lfArr.length; i++) {
-			this.lfArr[i] = new RootSIFT(bBuffer, this);
+			this.lfArr[i] = new RootSIFT(bBuffer);
+			lfArr[i].setLinkedGroup(this);
 		}
 		
 	}
@@ -87,7 +87,7 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 	 * of keypoints and the size of descriptor vector for each keypoint
 	 * (currently assumed to be 128). Then each keypoint is specified by ...
 	 */
-	public RootSIFTGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
+	public RootSIFTGroup(BufferedReader br, AbstractFeaturesCollector fc) throws IOException {
 		super(fc);
 		String[] temp = br.readLine().split("(\\s)+");
 		// assert(temp.length == 2);
@@ -399,7 +399,7 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 
 
 	@Override
-	public ALocalFeaturesGroup create(RootSIFT[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup create(RootSIFT[] arr, AbstractFeaturesCollector fc) {
 		return new RootSIFTGroup( arr, fc);
 	}
 }

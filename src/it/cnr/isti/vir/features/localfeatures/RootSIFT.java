@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.util.L2;
+import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.util.Mean;
 
 import java.io.BufferedReader;
@@ -40,22 +40,14 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
 	}	
 	
 	public RootSIFT(DataInput str ) throws IOException {
-		this(str, null);
-	}
-		
-	public RootSIFT(DataInput str, RootSIFTGroup group) throws IOException {
-		super(str, group);
+		super(str);
 
 		values = new byte[vLen];
 		str.readFully(values);
 	}
 	
 	public RootSIFT(ByteBuffer src ) throws IOException {
-		this(src, null);
-	}
-	
-	public RootSIFT(ByteBuffer src, RootSIFTGroup group ) throws IOException {
-		super(src, group);
+		super(src);
 
 		values = new byte[vLen];
 		src.get(values);
@@ -129,7 +121,7 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
 	}
 	
 	public RootSIFT(BufferedReader br, RootSIFTGroup group) throws IOException {
-		SIFT sift = new SIFT(br,null);			    
+		SIFT sift = new SIFT(br);			    
 		this.kp = sift.kp;
 		this.linkedGroup = group;
 		this.values = getRootSIFTValues(sift.values);

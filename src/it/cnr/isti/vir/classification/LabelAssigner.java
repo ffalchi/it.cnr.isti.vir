@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.classification;
 
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.readers.IDClassReader;
 
@@ -35,7 +35,7 @@ public class LabelAssigner {
 	 * @return
 	 * @throws IOException
 	 */
-	public static final LinkedList<IFeaturesCollector_Labeled_HasID> assignStringClass_IDString(Collection<IFeaturesCollector_Labeled_HasID> objects, File file)
+	public static final LinkedList<AbstractFeaturesCollector_Labeled_HasID> assignStringClass_IDString(Collection<AbstractFeaturesCollector_Labeled_HasID> objects, File file)
 			throws IOException {
 
 		return assignStringClass(objects, IDClassReader.readIDStringString(file));
@@ -47,17 +47,17 @@ public class LabelAssigner {
 	 * @return
 	 * @throws IOException
 	 */
-	public static final LinkedList<IFeaturesCollector_Labeled_HasID> assignStringClass_IDLong(Collection<IFeaturesCollector_Labeled_HasID> objects, File file)
+	public static final LinkedList<AbstractFeaturesCollector_Labeled_HasID> assignStringClass_IDLong(Collection<AbstractFeaturesCollector_Labeled_HasID> objects, File file)
 			throws IOException {
 
 		return assignStringClass(objects, IDClassReader.readLongString(file));
 	}
 
-	public static final LinkedList<IFeaturesCollector_Labeled_HasID> assignStringClass(Collection<IFeaturesCollector_Labeled_HasID> objects, HashMap<AbstractID, AbstractLabel> idClass) {
-		LinkedList<IFeaturesCollector_Labeled_HasID> list = new LinkedList<IFeaturesCollector_Labeled_HasID>();
-		for (Iterator<IFeaturesCollector_Labeled_HasID> it = objects.iterator(); it
+	public static final LinkedList<AbstractFeaturesCollector_Labeled_HasID> assignStringClass(Collection<AbstractFeaturesCollector_Labeled_HasID> objects, HashMap<AbstractID, AbstractLabel> idClass) {
+		LinkedList<AbstractFeaturesCollector_Labeled_HasID> list = new LinkedList<AbstractFeaturesCollector_Labeled_HasID>();
+		for (Iterator<AbstractFeaturesCollector_Labeled_HasID> it = objects.iterator(); it
 				.hasNext();) {
-			IFeaturesCollector_Labeled_HasID currObj = it.next();
+			AbstractFeaturesCollector_Labeled_HasID currObj = it.next();
 			AbstractLabel cLabel = (AbstractLabel) idClass.get(currObj.getID());
 
 			if (cLabel == null && !idClass.containsKey(currObj.getID()))

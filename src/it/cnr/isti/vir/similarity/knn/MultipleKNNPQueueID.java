@@ -11,8 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.knn;
 
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.metric.IMetric;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
@@ -28,7 +28,7 @@ import java.util.Iterator;
 public class MultipleKNNPQueueID<F>  {
 	
 	private KNNPQueue<F>[] knn;
-	private IFeature[] qObj;
+	private AbstractFeature[] qObj;
 	private double[][] intDist;
 	private final IMetric<F> comp;
 	private final Integer k;
@@ -120,7 +120,7 @@ public class MultipleKNNPQueueID<F>  {
 		
 		this.storeID = storeID;
 		int size = queryColl.size();
-		qObj = new IFeature[size];
+		qObj = new AbstractFeature[size];
 		this.comp = comp;
 		this.k = k;
 		this.silent = silent;
@@ -133,7 +133,7 @@ public class MultipleKNNPQueueID<F>  {
 		
 		int count=0;
 		for (Iterator<F> it = queryColl.iterator(); it.hasNext();) {
-			qObj[count++] = (IFeature) it.next();
+			qObj[count++] = (AbstractFeature) it.next();
 		}
 		
 		if ( useInterDistances == true ) {

@@ -20,8 +20,7 @@ import it.cnr.isti.vir.classification.classifier.IClassifier;
 import it.cnr.isti.vir.classification.classifier.ILFClassifier;
 import it.cnr.isti.vir.classification.classifier.KNNClassifierDistWeighted;
 import it.cnr.isti.vir.classification.classifier.LFCollClassifier;
-import it.cnr.isti.vir.features.FeaturesCollectorHTwithIDClassified;
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 
 import java.util.Arrays;
@@ -43,12 +42,12 @@ public class SingleLabelEvaluator {
 	 * @throws ClassifierException
 	 */
 	public static ConfusionMatrix getConfusionMatrix(
-			Collection<IFeaturesCollector_Labeled_HasID> testDocuments,
+			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments,
 			IClassifier classifier ) throws ClassifierException
 	{
 		HashSet<AbstractLabel> temp = new HashSet();
 		
-		for ( Iterator<IFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
+		for ( Iterator<AbstractFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
 			temp.add( it.next().getLabel() );			
 		}
 		
@@ -58,7 +57,7 @@ public class SingleLabelEvaluator {
 	
 	// this is for LF classifier
 	public static ConfusionMatrix getConfusionMatrix(
-			Collection<IFeaturesCollector_Labeled_HasID> testDocuments,
+			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments,
 			IClassifier classifier,
 			Collection<AbstractLabel> labelColl ) throws ClassifierException
 	{
@@ -168,7 +167,7 @@ public class SingleLabelEvaluator {
 
 	// this is for LF classifier
 	public static ConfusionMatrix[][] getConfusionMatrix(
-			Collection<IFeaturesCollector_Labeled_HasID> testDocuments,
+			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments,
 			ILFClassifier classifier,
 			Collection<AbstractLabel> labelColl,
 			double[] confThrImg,
@@ -192,7 +191,7 @@ public class SingleLabelEvaluator {
 	}
 	
 	public static ConfusionMatrix[] getConfusionMatrix(
-			Collection<FeaturesCollectorHTwithIDClassified> testDocuments,
+			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments,
 			AbstractKNNClassifier classifier,
 			int[] ks,
 			Collection<AbstractLabel> labelColl,
@@ -205,8 +204,8 @@ public class SingleLabelEvaluator {
 			testList[i]= new LinkedList<TestDocumentSingleLabeled>();
 		}
 		
-		for(Iterator<FeaturesCollectorHTwithIDClassified> it = testDocuments.iterator(); it.hasNext(); ) {
-			FeaturesCollectorHTwithIDClassified curr = it.next();
+		for(Iterator<AbstractFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
+			AbstractFeaturesCollector_Labeled_HasID curr = it.next();
 			PredictedLabel[] labels = classifier.classify(curr, ks);
 			
 			for (int i=0; i<ks.length; i++ ) {
@@ -244,9 +243,9 @@ public class SingleLabelEvaluator {
 		int correctCount =0;
 		 
 		System.out.println("Online results for k=1");
-		for(Iterator<IFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
+		for(Iterator<AbstractFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
 			
-			IFeaturesCollector_Labeled_HasID curr = it.next();
+			AbstractFeaturesCollector_Labeled_HasID curr = it.next();
 			PredictedLabel[] pr = classifier.classify(curr, ks);
 			
 			// searching correct

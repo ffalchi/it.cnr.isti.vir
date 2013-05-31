@@ -16,8 +16,8 @@ import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.classification.PredictedLabel;
 import it.cnr.isti.vir.classification.PredictedLabelWithSimilars;
 import it.cnr.isti.vir.classification.classifier.evaluation.TestDocumentSingleLabeled;
-import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
 import it.cnr.isti.vir.similarity.knn.KNNExecuter;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
@@ -50,10 +50,10 @@ public class LFCollClassifier_Sim implements IClassifier {
 	
 	@Override
 	public PredictedLabelWithSimilars classifyWithSimilars(
-			IFeaturesCollector obj) throws ClassifierException {
+			AbstractFeaturesCollector obj) throws ClassifierException {
 		try {
 			ISimilarityResults tRes = knnIndex.getKNNResults(obj, (int) Math.ceil(k*internalKFactor ) );
-			Collection<IFeaturesCollector_Labeled_HasID> res = tRes.getFCs(archives);
+			Collection<AbstractFeaturesCollector_Labeled_HasID> res = tRes.getFCs(archives);
 			return classifier.classifyWithSimilars(obj, res);
 		} catch (Exception e ) {
 			return null;
@@ -61,10 +61,10 @@ public class LFCollClassifier_Sim implements IClassifier {
 	}
 	
 	@Override
-	public PredictedLabel classify(IFeaturesCollector obj) throws ClassifierException {
+	public PredictedLabel classify(AbstractFeaturesCollector obj) throws ClassifierException {
 		try {
 			ISimilarityResults tRes = knnIndex.getKNNResults(obj, (int) Math.ceil(k*internalKFactor ) );
-			Collection<IFeaturesCollector_Labeled_HasID> res = tRes.getFCs(archives);
+			Collection<AbstractFeaturesCollector_Labeled_HasID> res = tRes.getFCs(archives);
 			return classifier.classify(obj, res);
 		} catch (Exception e ) {
 			return null;
@@ -89,14 +89,14 @@ public class LFCollClassifier_Sim implements IClassifier {
 
 	@Override
 	public Collection<TestDocumentSingleLabeled> classify(
-			Collection<IFeaturesCollector_Labeled_HasID> testDocuments)
+			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments)
 			throws ClassifierException {
 		
 		LinkedList<TestDocumentSingleLabeled> testList = new LinkedList<TestDocumentSingleLabeled>();
 		long start = System.currentTimeMillis();
 		int count = 0;
-		for(Iterator<IFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
-			IFeaturesCollector_Labeled_HasID curr = it.next();
+		for(Iterator<AbstractFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
+			AbstractFeaturesCollector_Labeled_HasID curr = it.next();
 			count++;
 			System.out.print( 	count + " of " + testDocuments.size() + "\t" + curr.getID() );
 			long startTime = System.currentTimeMillis();
@@ -105,7 +105,7 @@ public class LFCollClassifier_Sim implements IClassifier {
 				ISimilarityResults tRes = knnIndex.getKNNResults(curr, (int) Math.ceil(k*internalKFactor ) );
 				PredictedLabel pr = null;
 				if ( checkMultipleLabels(tRes) ) {
-					Collection<IFeaturesCollector_Labeled_HasID> res = tRes.getFCs(archives);
+					Collection<AbstractFeaturesCollector_Labeled_HasID> res = tRes.getFCs(archives);
 					pr = classifier.classify(curr, res );					
 				} else {
 					pr = new PredictedLabel( ((ILabeled) ((ObjectWithDistance) tRes.iterator().next()).getObj()).getLabel(), 1.0);

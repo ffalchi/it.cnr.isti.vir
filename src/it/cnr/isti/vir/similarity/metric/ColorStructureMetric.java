@@ -12,8 +12,8 @@
 package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 
@@ -38,12 +38,12 @@ public class ColorStructureMetric  implements IMetric<ColorStructure> {
 	}*/
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance((ColorStructure) f1.getFeature(ColorStructure.class), (ColorStructure) f2.getFeature(ColorStructure.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance((ColorStructure) f1.getFeature(ColorStructure.class), (ColorStructure) f2.getFeature(ColorStructure.class), max);
 	}
 	

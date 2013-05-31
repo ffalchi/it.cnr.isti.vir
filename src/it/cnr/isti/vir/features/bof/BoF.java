@@ -12,19 +12,19 @@
 package it.cnr.isti.vir.features.bof;
 
 import gnu.trove.list.array.TIntArrayList;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
-import it.cnr.isti.vir.util.IntByteArrayUtil;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.util.RandomOperations;
+import it.cnr.isti.vir.util.bytes.IntByteArrayUtil;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class BoF implements IFeature {
+public class BoF extends AbstractFeature {
 
     protected double magnitude = -1.0;
     protected double magnitude_TFIDF = -1.0;
@@ -77,7 +77,7 @@ public class BoF implements IFeature {
     	return count;
     }
 	
-	public BoF(IFeaturesCollector fcc, LFWords fWords) {
+	public BoF(AbstractFeaturesCollector fcc, LFWords fWords) {
 		this( (ALocalFeaturesGroup) fcc.getFeature(fWords.getLocalFeaturesGroupClass()), fWords);
 	}
 	
@@ -189,7 +189,7 @@ public class BoF implements IFeature {
 		in.readFully(byteArr);
 		int offset = 0;
 		
-		bag =IntByteArrayUtil.byteArrayToIntArray(byteArr, offset, size);
+		bag =IntByteArrayUtil.get(byteArr, offset, size);
 		offset += 4*size;
 		/*
 		ori = FloatByteArrayUtil.byteArrayToFloatArray(byteArr, offset, size);

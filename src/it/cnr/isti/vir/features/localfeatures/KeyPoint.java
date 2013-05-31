@@ -11,7 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.util.FloatByteArrayUtil;
+import it.cnr.isti.vir.util.RandomOperations;
+import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -49,7 +50,7 @@ public class KeyPoint {
 		return ori;
 	}
 	
-	static final public int byteSize = 4*4 ;
+	static final public int BYTE_SIZE = 4*4 ;
 	
 	public KeyPoint(float x, float y, float ori, float scale ) {
 		xy = new float[2];
@@ -84,28 +85,38 @@ public class KeyPoint {
 		size = in.getFloat();
 	}
 	
+	public static KeyPoint getRandom() {
+		float x = RandomOperations.getFloat(Float.MAX_VALUE);
+		float y = RandomOperations.getFloat(Float.MAX_VALUE);
+		float ori = RandomOperations.getFloat((float) -Math.PI, (float) Math.PI);
+		float size = RandomOperations.getFloat(Float.MAX_VALUE);
+		return new KeyPoint(x,y,ori,size);
+	}
+	
 	public void writeData(DataOutput out) throws IOException {
-		byte[] res = new byte[byteSize];
+		byte[] res = new byte[BYTE_SIZE];
 		
 		putBytes(res, 0);
 		
 		out.write(res);
 	}
 	
+
+	public final int getByteSize() {
+		return BYTE_SIZE;
+	}
+	
 	public int putBytes(byte[] bArr, int bytesOffset) {
 		int bArrI = bytesOffset;
-		bArrI = FloatByteArrayUtil.floatArrayToByteArray(xy, bArr, bArrI);
-		bArrI = FloatByteArrayUtil.floatToByteArray(ori, bArr, bArrI);
-		bArrI = FloatByteArrayUtil.floatToByteArray(size, bArr, bArrI);
+		bArrI = FloatByteArrayUtil.convToBytes(xy, bArr, bArrI);
+		bArrI = FloatByteArrayUtil.convToBytes(ori, bArr, bArrI);
+		bArrI = FloatByteArrayUtil.convToBytes(size, bArr, bArrI);
 		return bArrI;
 	}
 
-	public int getByteSize() {
-		return byteSize;
-	}
 
 	public static int getSize(KeyPoint kp) {
-		return byteSize;
+		return BYTE_SIZE;
 	}
 	
 	public synchronized float[] getNormXY(ALocalFeaturesGroup linkedGroup) {
@@ -142,20 +153,7 @@ public class KeyPoint {
 		return 0 == this.compareTo((KeyPoint) obj);
 	}
 	
-	/*
-	public boolean equals(Object obj) {
-        if (obj == null) return false;
-        if (obj == this) return true;
-        if (obj.getClass() != getClass()) return false;
-		KeyPoint kp = (KeyPoint) obj;
-		
-		if ( this.xy[0] != kp.xy[0] ) return false;
-		if ( this.xy[1] != kp.xy[1] ) return false;
-		if ( this.ori != kp.ori ) return false;
-		if ( this.scale != kp.scale ) return false;
-		return true;		
-	}*/
-	
+
 	public String toString() {
 		return "{[" + xy[0] + ", " + xy[1] + "], " + ori + ", " + size + "}";
 	}

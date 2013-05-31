@@ -13,14 +13,16 @@ package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.AbstractFeature;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> implements Cloneable, IFeature, Comparable<ALocalFeature<LFGroup>>, ILabeled {
+public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends AbstractFeature implements Cloneable, Comparable<ALocalFeature<LFGroup>>, ILabeled {
 	
 	protected KeyPoint kp = null; 
 	protected LFGroup linkedGroup = null;
@@ -29,45 +31,44 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> impleme
 	
 	public abstract int putBytes(byte[] byteArr, int offset);
 	
-	public byte[] getBytes() {
-		int byteSize = getDataByteSize() + 1;
+	public final byte[] getBytes() {
+		int byteSize = 1;
+		byteSize += getDataByteSize();
 		if ( kp != null ) {
 			byteSize += kp.getByteSize();
 		}
+		
 		byte[] bytes = new byte[byteSize];
 		int bArrI = 0;
-		if ( kp == null )
+		if ( kp == null ) {
 			bytes[bArrI++] = -1;
-		else 
+		} else { 
 			bytes[bArrI++] = 1;
-		bArrI = kp.putBytes(bytes, bArrI);
+			bArrI = kp.putBytes(bytes, bArrI);
+		}
+		
 		bArrI = putBytes(bytes, bArrI);
 	
 		return bytes;
 	}
 	
-	public ALocalFeature(DataInput str ) throws IOException {
-		byte kpExists = str.readByte();
-		if ( kpExists != -1 ) {
-			new KeyPoint(str);
+	public ALocalFeature(DataInput src ) throws IOException {
+		byte kpExists = src.readByte();
+		if ( kpExists == +1 ) {
+			kp = new KeyPoint(src);
+		} else if ( kpExists != -1 ) {
+			throw new IOException("Error in VIR binary format.");
 		}
-	}
-	
-	public ALocalFeature(DataInput str, LFGroup group) throws IOException {
-		this(str);
-		this.linkedGroup = group;
 	}
 	
 	public ALocalFeature(ByteBuffer src ) throws IOException {
 		byte kpExists = src.get();
-		if ( kpExists != -1 ) {
+		
+		if ( kpExists == +1 ) {
 			kp = new KeyPoint(src);
+		} else if ( kpExists != -1 ) {
+			throw new IOException("Error in VIR binary format.");
 		}
-	}
-	
-	public ALocalFeature(ByteBuffer src, LFGroup group ) throws IOException {
-		this(src);
-		this.linkedGroup = group;		
 	}
 	
 	public ALocalFeature() {};
@@ -87,6 +88,10 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> impleme
 	
 	public LFGroup getLinkedGroup() {
 		return linkedGroup;
+	}
+	
+	public void setLinkedGroup(LFGroup linkedGroup) {
+		this.linkedGroup = linkedGroup;
 	}
 		
 	public ALocalFeature unlink() {
@@ -136,6 +141,8 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> impleme
 	public final void writeData(DataOutput str) throws IOException {
 		str.write(getBytes());
 	}
+	
+
 	
 	
 	

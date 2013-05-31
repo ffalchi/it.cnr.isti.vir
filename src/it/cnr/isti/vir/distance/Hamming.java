@@ -9,26 +9,21 @@
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package it.cnr.isti.vir.features;
+package it.cnr.isti.vir.distance;
 
-import java.util.Collection;
+public class Hamming {
 
-public interface IFeaturesCollector extends IFeature {
-
-	<T extends IFeature> T getFeature(Class<T> featureClass);
+	public static final int distance(long[] bits1, long[] bits2) {
+		int acc = 0;
+		for ( int i=0; i<bits1.length; i++) {
+			acc+=Long.bitCount(bits1[i]^bits2[i]);
+		}		
+		return acc;
+	}
 	
-	//public IFeature getFeature( Class featureClass );
-
-//	public FeatureInterface[] getAllFeatures();
-//	
-//	public void addAll( FeaturesCollectionInterface givenFC );
+	public static final float distance_norm(long[] bits1, long[] bits2) {
+		return distance(bits1, bits2) / (64*bits1.length);
+	}
 	
-	public void add( IFeature f ) throws FeaturesCollectorException ;
 
-	public void discardAllBut(FeatureClassCollector featuresClasses) throws FeaturesCollectorException;
-
-	public Collection<IFeature> getFeatures();
-	
-	public boolean contains(Class<IFeature> c) throws FeaturesCollectorException;
-	
 }

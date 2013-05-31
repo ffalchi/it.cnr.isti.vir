@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.results;
 
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
 
@@ -38,6 +38,6 @@ public interface ISimilarityResults<E>  {
 	
 	public ObjectWithDistance<E> getFirst();
 	
-	public Collection<IFeaturesCollector_Labeled_HasID> getFCs(FeaturesCollectorsArchives archive) throws ArchiveException;
+	public Collection<AbstractFeaturesCollector_Labeled_HasID> getFCs(FeaturesCollectorsArchives archive) throws ArchiveException;
 	
 }

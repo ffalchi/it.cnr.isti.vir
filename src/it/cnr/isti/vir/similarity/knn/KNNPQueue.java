@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.knn;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
@@ -44,7 +44,7 @@ public class KNNPQueue<F> {
 	}
 	
 	public final boolean offer(F obj) {
-		double tDistance = sim.distance((IFeaturesCollector) query, (IFeaturesCollector) obj, pQueue.excDistance);
+		double tDistance = sim.distance((AbstractFeaturesCollector) query, (AbstractFeaturesCollector) obj, pQueue.excDistance);
 		if ( tDistance >=0 && tDistance <= pQueue.excDistance )	{
 			offer(obj, tDistance);
 		}

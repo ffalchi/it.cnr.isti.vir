@@ -11,8 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.bof.LFWords;
 
 import java.io.DataInput;
@@ -20,9 +20,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class VLAD implements IFeature {
+public class VLAD extends AbstractFeature {
  
-	public IFeaturesCollector linkedFC;
+	public AbstractFeaturesCollector linkedFC;
 	float[] values;
 	
 	public int size() {
@@ -46,7 +46,7 @@ public class VLAD implements IFeature {
         this(in, null);
     }
 	
-	public VLAD(ByteBuffer in, IFeaturesCollector fc ) throws Exception {
+	public VLAD(ByteBuffer in, AbstractFeaturesCollector fc ) throws Exception {
 		int size = in.getInt();
 		values = new float[size];
 		for ( int i=0; i<values.length; i++ ) {
@@ -62,7 +62,7 @@ public class VLAD implements IFeature {
 	public VLAD(DataInput in ) throws Exception {
 		this(in, null);
 	}
-	public VLAD(DataInput in, IFeaturesCollector fc ) throws Exception {
+	public VLAD(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
 		
 		int size = in.readInt();
 

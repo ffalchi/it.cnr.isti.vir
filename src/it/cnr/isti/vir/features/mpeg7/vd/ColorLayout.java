@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.features.mpeg7.vd;
 
 
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
@@ -24,9 +24,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public final class ColorLayout implements IFeature, java.io.Serializable {
-
-	private static final long serialVersionUID = 1L;	
+public final class ColorLayout extends AbstractFeature {
 	
 	final byte yDCCoeff;
 	final byte cbDCCoeff;
@@ -436,7 +434,7 @@ public final int putMPEG7XMDistanceL2Values(float[] values, int offset) {
 		return str + "\n";
 	}
 
-	public boolean equals(IFeature givenVD) {
+	public boolean equals(AbstractFeature givenVD) {
 		
 		if ( this.getClass() != givenVD.getClass() ) return false;
 		

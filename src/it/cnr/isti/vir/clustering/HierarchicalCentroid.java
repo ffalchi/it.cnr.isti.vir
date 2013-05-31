@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.clustering;
 
 import it.cnr.isti.vir.features.FeatureClasses;
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.AbstractFeature;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -61,7 +61,7 @@ public class HierarchicalCentroid<O> {
 			out.writeByte(rawVersion);
 			FeatureClasses.getClassID(centroid.getClass());
 		}
-		((IFeature) centroid).writeData(out);
+		((AbstractFeature) centroid).writeData(out);
 		out.write(children.length);
 		for (HierarchicalCentroid<O> child : children) {
 			child.writeData(out);

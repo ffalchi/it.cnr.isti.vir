@@ -11,9 +11,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.bof;
 
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClasses;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.BoFLF;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
@@ -76,7 +76,7 @@ public class LFWords<F> {
 		float[] res = new float[size];
 		int[] t = new int[size];
 		for (Iterator it = coll.iterator(); it.hasNext(); ) {
-			IFeaturesCollector curr = (IFeaturesCollector) it.next();
+			AbstractFeaturesCollector curr = (AbstractFeaturesCollector) it.next();
 			BoFLFGroup currBoFGroup = (BoFLFGroup) curr.getFeature(BoFLFGroup.class);
 			if ( currBoFGroup != null ) {
 	//			currBoF.orderByBags();
@@ -90,7 +90,7 @@ public class LFWords<F> {
 					last = currBag ;
 				}
 			} else {
-				BoF currBof = (BoF) curr.getFeature(BoF.class);
+				BoF currBof = curr.getFeature(BoF.class);
 				int[] bags  = currBof.bag;
 				int last = -1;
 				for (int ib = 0; ib < bags.length; ib++) {
@@ -127,7 +127,7 @@ public class LFWords<F> {
 		int[] t = new int[n];
 		for (int iA=0; iA<archives.size(); iA++ ) {
 //			System.out.println(iA + " " + archives.getID(iA));
-			IFeaturesCollector curr = archives.get(iA);
+			AbstractFeaturesCollector curr = archives.get(iA);
 			BoFLFGroup currBoF = (BoFLFGroup) curr.getFeature(BoFLFGroup.class);
 //			currBoF.orderByBags();
 			BoFLF[] arr = currBoF.getLocalFeatures();
@@ -416,12 +416,12 @@ public class LFWords<F> {
 		
 		int temp = 0;
 		while ( fArr[temp] == null ) temp++;
-		out.writeInt(FeatureClasses.getClassID(((IFeature) fArr[temp]).getClass()));
+		out.writeInt(FeatureClasses.getClassID(((AbstractFeature) fArr[temp]).getClass()));
 		out.writeInt(hashCode());
 
 		out.writeInt(size);
 		for (int i = 0; i < size; i++) {
-			((IFeature) fArr[i]).writeData(out);
+			((AbstractFeature) fArr[i]).writeData(out);
 		}
 
 		if (eval != null) {

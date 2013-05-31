@@ -13,8 +13,8 @@ package it.cnr.isti.vir.clustering;
 
 import it.cnr.isti.vir.features.FeatureClasses;
 import it.cnr.isti.vir.features.FeaturesCollectors;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.id.IHasID;
 
 import java.io.BufferedInputStream;
@@ -34,21 +34,21 @@ import java.lang.reflect.Constructor;
 public class Centroids {
 
 	private byte version = 1;
-	private IFeature[] centroids;
+	private AbstractFeature[] centroids;
 	private String metaData = "";
 	
-	public Centroids(IFeature[] centroids, String metadata) {
+	public Centroids(AbstractFeature[] centroids, String metadata) {
 		this.centroids = centroids;
 		if ( metadata != null ) {
 			this.metaData = metadata;
 		}
 	}
 	
-	public Centroids(IFeature[] centroids) {
+	public Centroids(AbstractFeature[] centroids) {
 		this (centroids, null);
 	}
 	
-	public IFeature[] getCentroids() {
+	public AbstractFeature[] getCentroids() {
 		return centroids;
 	}
 	
@@ -61,7 +61,7 @@ public class Centroids {
 	public void writeData(DataOutput out) throws IOException {
 		out.writeByte(version);
 		Class c = centroids[0].getClass();
-		if ( centroids[0] instanceof IFeaturesCollector ) {
+		if ( centroids[0] instanceof AbstractFeaturesCollector ) {
 			out.writeBoolean(true);
 			out.writeByte(FeaturesCollectors.getClassID(c));
 		} else {
@@ -70,7 +70,7 @@ public class Centroids {
 		}
 		out.writeInt(centroids.length);
 		out.writeUTF(metaData);
-		for ( IFeature f : centroids) {
+		for ( AbstractFeature f : centroids) {
 			f.writeData(out);
 		}
 	}
@@ -82,16 +82,16 @@ public class Centroids {
 		if ( version > 0 ) {
 			readingFC = in.readBoolean();
 		}
-		Class<IFeature> c = null;
+		Class<AbstractFeature> c = null;
 		if ( readingFC ) {
 			c = FeaturesCollectors.getClass(in.readByte());
 		} else {
 			c = FeatureClasses.getClass(in.readByte());
 		}
-		Constructor<IFeature> constructor = c.getConstructor(DataInput.class);
+		Constructor<AbstractFeature> constructor = c.getConstructor(DataInput.class);
 		int size = in.readInt();
 		String metaData = in.readUTF();
-		IFeature[] centroids = (IFeature[]) Array.newInstance(c, size);
+		AbstractFeature[] centroids = (AbstractFeature[]) Array.newInstance(c, size);
 		
 		for (int i = 0; i < centroids.length; i++) {
 			centroids[i] = constructor.newInstance(in);

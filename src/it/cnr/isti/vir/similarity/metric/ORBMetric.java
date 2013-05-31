@@ -13,7 +13,7 @@ package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.ORB;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
@@ -54,12 +54,12 @@ public class ORBMetric implements IMetric<ORB>, ILocalFeaturesMetric<ORB>, IMean
 
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance(f1.getFeature(ORB.class), f2.getFeature(ORB.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance(f1.getFeature(ORB.class), f2.getFeature(ORB.class), max);
 	}
 	

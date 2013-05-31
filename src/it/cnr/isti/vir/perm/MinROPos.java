@@ -12,8 +12,8 @@
 package it.cnr.isti.vir.perm;
 
 import it.cnr.isti.vir.clustering.Centroids;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.Permutation;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.id.IHasID;
@@ -58,21 +58,21 @@ public class MinROPos {
 		
 		FeaturesCollectorsArchive archive = new FeaturesCollectorsArchive(archiveFileName);
 		SAPIRMetric sim = new SAPIRMetric(); 
-		IFeaturesCollector[] data = archive.getAllArray();
+		AbstractFeaturesCollector[] data = archive.getAllArray();
 		Log.info(data.length + " objects were read.");
-		IFeaturesCollector[] res = order(sim, permSim, data, initNRO, ki);
+		AbstractFeaturesCollector[] res = order(sim, permSim, data, initNRO, ki);
 		
 		Centroids centroids = new Centroids(res);
 		centroids.writeData(outFileName);
 	}
 	
 	
-	public static IFeaturesCollector[] order(ISimilarity sim, ISimilarity permSim, IFeaturesCollector[] set, int candidatesN, int permLength) {
-		IFeaturesCollector[] copySet = set.clone();
+	public static AbstractFeaturesCollector[] order(ISimilarity sim, ISimilarity permSim, AbstractFeaturesCollector[] set, int candidatesN, int permLength) {
+		AbstractFeaturesCollector[] copySet = set.clone();
 		RandomOperations.shuffle(set);
 		
-		IFeaturesCollector[] candidates = new IFeaturesCollector[candidatesN];
-		IFeaturesCollector[] examples   = new IFeaturesCollector[copySet.length-candidatesN];
+		AbstractFeaturesCollector[] candidates = new AbstractFeaturesCollector[candidatesN];
+		AbstractFeaturesCollector[] examples   = new AbstractFeaturesCollector[copySet.length-candidatesN];
 		System.arraycopy(copySet, 0, candidates, 0, candidatesN);
 		System.arraycopy(copySet, candidatesN, examples, 0, copySet.length-candidatesN);
 		
@@ -164,7 +164,7 @@ public class MinROPos {
 
 	
 	
-	public static double getCoeffVar(int[] roOcc, double avg, IFeaturesCollector[] candidates, int nCand, Integer exc ) {
+	public static double getCoeffVar(int[] roOcc, double avg, AbstractFeaturesCollector[] candidates, int nCand, Integer exc ) {
 		double variance = 0;
 		for (int i = 0; i < roOcc.length; i++) {
 			if ( candidates[i] != null && (exc==null || i!=exc)) {
@@ -206,7 +206,7 @@ public class MinROPos {
 		return sum / permLength / (double) roCount;
 	}
 	
-	public static int getFirstZeroPosition(int[] values, IFeature[] tCand) {
+	public static int getFirstZeroPosition(int[] values, AbstractFeature[] tCand) {
 		for ( int i=0; i<values.length; i++) {
 			if ( tCand[i] != null && values[i] == 0 ) return i;
 		}
@@ -224,9 +224,9 @@ public class MinROPos {
 		private final int nCand;
 		private final int tPL;
 		private final int[] roOcc;
-		private final IFeaturesCollector[] ro;
+		private final AbstractFeaturesCollector[] ro;
 
-		public MinCoeffVarThread(int[] tries, Permutation[]  obj, int from, int to, int tPL, double[] res, double avg, int nCand, int iniCandN, IFeaturesCollector[] candidates ) {
+		public MinCoeffVarThread(int[] tries, Permutation[]  obj, int from, int to, int tPL, double[] res, double avg, int nCand, int iniCandN, AbstractFeaturesCollector[] candidates ) {
 			this.from = from;
 			this.to = to;
 			this.tries = tries;
@@ -253,8 +253,8 @@ public class MinROPos {
 	
 	
 	
-	public static IFeaturesCollector[] orderMinCoeffVar(ISimilarity sim,
-			IFeaturesCollector[] candidates, IFeaturesCollector[] examples,
+	public static AbstractFeaturesCollector[] orderMinCoeffVar(ISimilarity sim,
+			AbstractFeaturesCollector[] candidates, AbstractFeaturesCollector[] examples,
 			int permLength, int nTriesMax ) {
 		
 		
@@ -264,8 +264,8 @@ public class MinROPos {
 		for ( Permutation o : obj ) o.convertToOrdered();
 		
 		// INIT
-		IFeaturesCollector[] tCand = candidates.clone();
-		IFeaturesCollector[] res = new IFeaturesCollector[tCand.length];
+		AbstractFeaturesCollector[] tCand = candidates.clone();
+		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[tCand.length];
 		int iRes = 0;
 		int nCand = candidates.length;
 		
@@ -405,7 +405,7 @@ public class MinROPos {
 
 	}
 	
-	public static double getIntrisincDimensionality(IFeature[] obj, int[] ord1, int[] ord2, ISimilarity sim) {
+	public static double getIntrisincDimensionality(AbstractFeature[] obj, int[] ord1, int[] ord2, ISimilarity sim) {
 		double[] dist = null;
 		if ( ord1 != null ) {
 			dist = new double[ord1.length];
@@ -428,8 +428,8 @@ public class MinROPos {
 		return mean*mean/variance/2.0;
 	}
 	
-	public static IFeaturesCollector[] orderMinROPosVar(ISimilarity sim, ISimilarity permSim,
-			IFeaturesCollector[] candidates, IFeaturesCollector[] examples,
+	public static AbstractFeaturesCollector[] orderMinROPosVar(ISimilarity sim, ISimilarity permSim,
+			AbstractFeaturesCollector[] candidates, AbstractFeaturesCollector[] examples,
 			int permLength, int nTriesMax ) {
 		
 		
@@ -445,8 +445,8 @@ public class MinROPos {
 		Permutation[] obj = getPermutations(examples, candidates, sim);
 		for ( Permutation o : obj ) o.convertToOrdered();
 		
-		IFeaturesCollector[] tCand = candidates.clone();
-		IFeaturesCollector[] res = new IFeaturesCollector[tCand.length];
+		AbstractFeaturesCollector[] tCand = candidates.clone();
+		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[tCand.length];
 		int iRes = 0;
 		int nCand = candidates.length;
 		
@@ -688,15 +688,15 @@ public class MinROPos {
 		return res;
 	}
 	
-	public static IFeaturesCollector[] order4(ISimilarity sim,
-			IFeaturesCollector[] candidates, IFeaturesCollector[] examples,
+	public static AbstractFeaturesCollector[] order4(ISimilarity sim,
+			AbstractFeaturesCollector[] candidates, AbstractFeaturesCollector[] examples,
 			int permLength) {
 		
 		Log.info("Evaluating Permutations");
 		Permutation[] obj = getPermutations(examples, candidates, sim);	
 		
-		IFeaturesCollector[] tCand = candidates.clone();
-		IFeaturesCollector[] res = new IFeaturesCollector[tCand.length];
+		AbstractFeaturesCollector[] tCand = candidates.clone();
+		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[tCand.length];
 		int iRes = candidates.length - 1;
 		
 		Permutation[] obj1 = obj.clone();
@@ -778,12 +778,12 @@ public class MinROPos {
 	public static class PermThread implements Runnable {
 		private final int from;
 		private final int to;
-		private final IFeaturesCollector[] objs;
-		private final IFeaturesCollector[] ro;
+		private final AbstractFeaturesCollector[] objs;
+		private final AbstractFeaturesCollector[] ro;
 		private final ISimilarity sim;
 		private final Permutation[] res;
 
-		public PermThread(IFeaturesCollector[] ro, ISimilarity sim, IFeaturesCollector[]  objs, int from, int to, Permutation[] res ) {
+		public PermThread(AbstractFeaturesCollector[] ro, ISimilarity sim, AbstractFeaturesCollector[]  objs, int from, int to, Permutation[] res ) {
 			this.from = from;
 			this.to = to;
 			this.objs = objs;
@@ -802,7 +802,7 @@ public class MinROPos {
 	}
 	
 	
-	public static Permutation[] getPermutations(IFeaturesCollector[] objs, IFeaturesCollector[] ro, ISimilarity sim ) {
+	public static Permutation[] getPermutations(AbstractFeaturesCollector[] objs, AbstractFeaturesCollector[] ro, ISimilarity sim ) {
 		Permutation[] res = new Permutation[objs.length];
 //		for (int i = 0; i < objs.length; i++) {
 //			res[i] = new Permutation(objs[i], ro, sim, false);

@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.index;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.knn.KNNExecuter;
 import it.cnr.isti.vir.similarity.knn.KNNPQueue;
@@ -38,20 +38,20 @@ public class SimilarityCollection implements KNNExecuter {
 		coll = objCollection;	
 	}
 	
-	public void add(IFeaturesCollector obj) {
+	public void add(AbstractFeaturesCollector obj) {
 		if ( coll == null ) coll = new ArrayList();
 		coll.add(obj);
 	}
 
 	@Override
-	public synchronized ISimilarityResults getKNNResults(IFeaturesCollector qObj, int k) {
+	public synchronized ISimilarityResults getKNNResults(AbstractFeaturesCollector qObj, int k) {
 		//KNNObjects knn = new KNNObjects(qObj, k, sim);
 		KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj );
 		knn.offerAll(coll);
 		return knn.getResults();
 	}
 
-	public synchronized ISimilarityResults[] getKNNResults(IFeaturesCollector[] qObj, int k) {
+	public synchronized ISimilarityResults[] getKNNResults(AbstractFeaturesCollector[] qObj, int k) {
 		ISimilarityResults[] res = new ISimilarityResults[qObj.length];
 		for ( int i=0; i<res.length; i++) {
 			KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj[i] );

@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7;
 
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.mpeg7.vd.HomogeneousTexture;
 import it.cnr.isti.vir.similarity.metric.SAPIRMetric;
 
@@ -20,7 +20,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class SAPIRFeature implements IFeature {
+public class SAPIRFeature extends AbstractFeature {
 
 	byte version = 0;
 		
@@ -104,7 +104,7 @@ public class SAPIRFeature implements IFeature {
 		
 	}
 
-	public int compareTo(IFeature given) {
+	public int compareTo(AbstractFeature given) {
 		SAPIRFeature that = (SAPIRFeature) given;
 		for ( int i=0; i<l1Values.length; i++) {
 			int tRes = Float.compare(this.l1Values[i], that.l1Values[i]);

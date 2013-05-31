@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
@@ -207,22 +207,22 @@ public class Pivots {
 	}
 	
 
-	public static final IFeaturesCollector[] search(FeaturesCollectorsArchive candidatePivots, IFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException, SecurityException, IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+	public static final AbstractFeaturesCollector[] search(FeaturesCollectorsArchive candidatePivots, AbstractFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException, SecurityException, IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
 		return search(new FeaturesCollectorsArchives(candidatePivots), testObjects, sim, nPivots, nTries);
 	}
 	
 	
 	// For objects pivot distance evaluation
 	public static class PivObjsDistances implements Runnable {
-		private final IFeaturesCollector piv;
-		private final IFeaturesCollector[] objs;
+		private final AbstractFeaturesCollector piv;
+		private final AbstractFeaturesCollector[] objs;
 		private final int from;
 		private final int to;
 		private final float[] dist;
 		private final IMetric sim;
 
 
-		PivObjsDistances(IFeaturesCollector piv, IFeaturesCollector[]  objs, IMetric sim, int from, int to, float[] res) {
+		PivObjsDistances(AbstractFeaturesCollector piv, AbstractFeaturesCollector[]  objs, IMetric sim, int from, int to, float[] res) {
 			this.piv = piv;
 			this.objs = objs;
 			this.from = from;
@@ -239,7 +239,7 @@ public class Pivots {
 		}
 	}
 	
-	public static final IFeaturesCollector[] search(FeaturesCollectorsArchives candidatePivots, IFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException {
+	public static final AbstractFeaturesCollector[] search(FeaturesCollectorsArchives candidatePivots, AbstractFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException {
 		
 		// creating testObjects.length pairs of objects
 		int[] obj1 = RandomOperations.getRandomIntArray(testObjects.length, 0, testObjects.length-1);
@@ -254,7 +254,7 @@ public class Pivots {
 		// distance between best pivot and objects
 		float[] bestOPDist = new float[testObjects.length];
 		
-		IFeaturesCollector[] piv = new IFeaturesCollector[nPivots];
+		AbstractFeaturesCollector[] piv = new AbstractFeaturesCollector[nPivots];
 		
 		// kNNQueues are performed in parallels
 		final int nQueriesPerThread = (int) Math.ceil((double) testObjects.length / ParallelOptions.nThreads);
@@ -264,12 +264,12 @@ public class Pivots {
 		long start = System.currentTimeMillis();
 		for ( int iP=0; iP<piv.length; iP++) {
 			
-			IFeaturesCollector best = null;
+			AbstractFeaturesCollector best = null;
 			double bestSumGain = -1;
 			
 			for ( int iT=0; iT<nTries; iT++) {
 				//System.out.print(".");
-				IFeaturesCollector curr = candidatePivots.get(RandomOperations.getInt(0, candidatePivots.size()));
+				AbstractFeaturesCollector curr = candidatePivots.get(RandomOperations.getInt(0, candidatePivots.size()));
 				double currSumGain = 0;
 				
 				// evaluating distances between all test objects and curr Pivots

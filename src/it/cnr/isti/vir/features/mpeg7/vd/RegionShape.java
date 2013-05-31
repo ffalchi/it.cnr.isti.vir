@@ -11,13 +11,13 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7.vd;
 
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -28,7 +28,7 @@ import javax.xml.stream.XMLStreamReader;
 
 
 
-public class RegionShape implements IFeature {
+public class RegionShape extends AbstractFeature {
 
 	private static final double[] IQuantTable = {0.001763817, 0.005468893, 0.009438835, 0.013714449, 0.018346760, 0.023400748, 0.028960940, 0.035140141, 0.042093649, 0.050043696, 0.059324478, 0.070472849, 0.084434761, 0.103127662, 0.131506859, 0.192540857};
 	
@@ -68,6 +68,12 @@ public class RegionShape implements IFeature {
 		for (int i=0; i<magnitudeOfART.length; i++) magnitudeOfART[i] = str.readByte();
 	}
 	
+	public RegionShape(ByteBuffer in) throws IOException {
+		byte version = in.get();
+		magnitudeOfART = new byte[35];
+		for (int i=0; i<magnitudeOfART.length; i++) magnitudeOfART[i] = in.get();
+	}
+	
 	public void writeData(DataOutput str) throws IOException {
 		str.writeByte(version);
 		for (int i=0; i<magnitudeOfART.length; i++) str.writeByte(magnitudeOfART[i]);
@@ -93,7 +99,7 @@ public class RegionShape implements IFeature {
 		return str + "\n";
 	}
 
-	public boolean equals(IFeaturesCollector givenVD) {
+	public boolean equals(AbstractFeature givenVD) {
 		
 		if ( this.getClass() != givenVD.getClass() ) return false;
 		
@@ -107,7 +113,7 @@ public class RegionShape implements IFeature {
 		return true;
 	}
 	
-	public static final double mpeg7XMDistance(IFeature f1, IFeature f2) {
+	public static final double mpeg7XMDistance(AbstractFeature f1, AbstractFeature f2) {
 		byte[] coeff1 = ((RegionShape) f1).magnitudeOfART;
 		byte[] coeff2 = ((RegionShape) f2).magnitudeOfART;
 		double sum = 0;

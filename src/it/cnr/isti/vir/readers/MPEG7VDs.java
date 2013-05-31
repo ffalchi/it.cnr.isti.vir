@@ -11,9 +11,10 @@
  ******************************************************************************/
 package it.cnr.isti.vir.readers;
 
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.FeaturesCollectorException;
-import it.cnr.isti.vir.features.FeaturesCollectorHT;
 import it.cnr.isti.vir.features.FeaturesSubRegions;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
@@ -45,31 +46,31 @@ public class MPEG7VDs {
 																					EdgeHistogram.class,
 																					HomogeneousTexture.class );	
 	
-	public static FeaturesCollectorHT getFeaturesCollection(File file) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
+	public static AbstractFeaturesCollector getFeaturesCollection(File file) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
 		BufferedReader br = new BufferedReader( new FileReader(file) );
 		return getFeaturesCollection( XMLInputFactory.newInstance().createXMLStreamReader(br));
 	}
 
 	
-	public static FeaturesCollectorHT getFeaturesCollection(File file, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses  ) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
+	public static AbstractFeaturesCollector getFeaturesCollection(File file, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses  ) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
 		BufferedReader br = new BufferedReader( new FileReader(file) );
 		return getFeaturesCollection( XMLInputFactory.newInstance().createXMLStreamReader(br), fClasses, regionFClasses);
 	}
 	
 	
-	public static FeaturesCollectorHT getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
+	public static AbstractFeaturesCollector getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
 		return  getFeaturesCollection( 	XMLInputFactory.newInstance().createXMLStreamReader( new ByteArrayInputStream( sb.toString().getBytes() )),
 										fClasses,
 										regionFClasses );
 	}
 	
-	public static FeaturesCollectorHT getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
+	public static AbstractFeaturesCollector getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
 		return  getFeaturesCollection( 	XMLInputFactory.newInstance().createXMLStreamReader( new ByteArrayInputStream( sb.toString().getBytes() )),
 										fClasses,
 										null );
 	}
 	
-	public static FeaturesCollectorHT getFeaturesCollection( XMLStreamReader xmlr  ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
+	public static AbstractFeaturesCollector getFeaturesCollection( XMLStreamReader xmlr  ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
 		return getFeaturesCollection( xmlr, null, null );
 	}
 	
@@ -91,11 +92,11 @@ public class MPEG7VDs {
 		return  fClasses == null || fClasses.contains(c);
 	}
 	
-	protected static FeaturesCollectorHT getFeaturesCollection( XMLStreamReader xmlr, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
+	protected static AbstractFeaturesCollector getFeaturesCollection( XMLStreamReader xmlr, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
 		
-		FeaturesCollectorHT mainFC = new FeaturesCollectorHT();
-		FeaturesCollectorHT currFC = mainFC; 
-		LinkedList<FeaturesCollectorHT> regions = new LinkedList<FeaturesCollectorHT>();
+		FeaturesCollectorArr mainFC = new FeaturesCollectorArr();
+		FeaturesCollectorArr currFC = mainFC; 
+		LinkedList<AbstractFeaturesCollector> regions = new LinkedList<AbstractFeaturesCollector>();
 		
 		boolean subRegion=false;
 		for (int event = xmlr.next();  
@@ -142,7 +143,7 @@ public class MPEG7VDs {
 	        		} else if (xmlr.getLocalName().equals("StillRegion") ) { 
 	        			//We are inside a SubRegion
 	        			subRegion = true;
-	        			currFC = new FeaturesCollectorHT();
+	        			currFC = new FeaturesCollectorArr();
 	        		}
 	            	break;
 	            case XMLStreamConstants.END_ELEMENT:

@@ -14,22 +14,34 @@ package it.cnr.isti.vir.features;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class FeaturesSubCollecotr implements IFeaturesCollector {
+public class FeaturesSubCollector extends AbstractFeaturesCollector {
 
-	private FeaturesCollectorHT[] regionFC = null;
+	private AbstractFeaturesCollector[] regionFC = null;
 	
 	static final float version = (float) 1.0;
 	
-	public FeaturesSubCollecotr(DataInput str) throws Exception {
-		float version = str.readFloat();
-		int size = str.readInt();
-		FeaturesCollectorHT[] regionFC = new FeaturesCollectorHT[size];
+	
+	public FeaturesSubCollector(ByteBuffer in) throws Exception {
+		float version = in.getFloat();
+		int size = in.getInt();
+		AbstractFeaturesCollector[] regionFC = new FeaturesCollectorArr[size];
 
 		for(int i=0; i<size; i++) {
-			regionFC[i] = new FeaturesCollectorHT(str);
+			regionFC[i] = new FeaturesCollectorArr(in);
+		}
+	}
+	
+	public FeaturesSubCollector(DataInput str) throws Exception {
+		float version = str.readFloat();
+		int size = str.readInt();
+		AbstractFeaturesCollector[] regionFC = new FeaturesCollectorArr[size];
+
+		for(int i=0; i<size; i++) {
+			regionFC[i] = new FeaturesCollectorArr(str);
 		}
 	}
 	
@@ -49,15 +61,15 @@ public class FeaturesSubCollecotr implements IFeaturesCollector {
 		return true;
 	}
 
-	public FeaturesSubCollecotr(FeaturesCollectorHT[] regionFC) {
+	public FeaturesSubCollector(AbstractFeaturesCollector[] regionFC) {
 		this.regionFC = regionFC;
 	}
 	
 
-	public FeaturesSubCollecotr(Collection<FeaturesCollectorHT> collection ) {
-		regionFC = new FeaturesCollectorHT[collection.size()];
+	public FeaturesSubCollector(Collection<AbstractFeaturesCollector> collection ) {
+		regionFC = new AbstractFeaturesCollector[collection.size()];
 		int index=0;
-		for (Iterator<FeaturesCollectorHT> it=collection.iterator(); it.hasNext(); ) {
+		for (Iterator<AbstractFeaturesCollector> it=collection.iterator(); it.hasNext(); ) {
 			regionFC[index]=it.next();
 			index++;
 		}
@@ -67,7 +79,7 @@ public class FeaturesSubCollecotr implements IFeaturesCollector {
 		return regionFC.length;
 	}
 	
-	public FeaturesCollectorHT get(int index ) {
+	public AbstractFeaturesCollector get(int index ) {
 		return regionFC[index];
 	}
 	
@@ -90,18 +102,18 @@ public class FeaturesSubCollecotr implements IFeaturesCollector {
 		return hashCode;
 	}
 	
-	public int compareTo(IFeaturesCollector obj) {
-		return hashCode()-((FeaturesCollectorHT)obj).hashCode();
+	public int compareTo(AbstractFeaturesCollector obj) {
+		return hashCode()-((AbstractFeaturesCollector)obj).hashCode();
 	}
 	
 	@Override
-	public IFeaturesCollector getFeature( Class featureClass ) {
-		if ( featureClass.equals(this.getClass())) return this;
+	public <T extends AbstractFeature> T getFeature( Class<T> featureClass ) {
+		if ( featureClass.equals(this.getClass())) return (T) this;
 		return null;
 	}
 
 	@Override
-	public void add(IFeature f) {
+	public void add(AbstractFeature f) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -114,25 +126,17 @@ public class FeaturesSubCollecotr implements IFeaturesCollector {
 	}
 
 	@Override
-	public Collection<IFeature> getFeatures() {
+	public Collection<AbstractFeature> getFeatures() {
 		return null;
 	}
 
 	@Override
-	public boolean contains(Class c) throws FeaturesCollectorException{
-		throw new FeaturesCollectorException("Method not implemented");
+	public boolean contains(Class<AbstractFeature> c) {
+		if ( regionFC == null || regionFC.length == 0) return false;
+		for ( AbstractFeaturesCollector fc : regionFC) {
+			if ( !fc.contains(c)) return false;
+		}		
+		return true;
 	}
-
-//	@Override
-//	public void addAll(FeaturesCollectionInterface givenFC) {
-//		regionFC.addAll(givenFC);
-//		
-//	}
-//
-//	@Override
-//	public FeatureInterface[] getAllFeatures() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
 	
 }

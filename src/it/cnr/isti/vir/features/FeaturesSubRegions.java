@@ -11,17 +11,26 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features;
 
+import java.io.DataInput;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 
-public class FeaturesSubRegions extends FeaturesSubCollecotr {
+public class FeaturesSubRegions extends FeaturesSubCollector {
 
-	public FeaturesSubRegions(FeaturesCollectorHT[] regionFC) {
+	public FeaturesSubRegions(AbstractFeaturesCollector[] regionFC) {
 		super(regionFC);
 	}
 	
-	public FeaturesSubRegions(Collection<FeaturesCollectorHT> coll) {
+	public FeaturesSubRegions(Collection<AbstractFeaturesCollector> coll) {
 		super(coll);
 	}
 	
+	public FeaturesSubRegions(ByteBuffer in) throws Exception {
+		super(in);
+	}
+	
+	public FeaturesSubRegions(DataInput in) throws Exception {
+		super(in);
+	}	
 
 }

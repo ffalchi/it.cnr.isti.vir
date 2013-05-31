@@ -13,7 +13,7 @@ package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.RootSIFT;
 import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
 
@@ -53,12 +53,12 @@ public class RootSIFTMetric implements IMetric<RootSIFT>, ILocalFeaturesMetric<R
 
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance((RootSIFT) f1.getFeature(RootSIFT.class), (RootSIFT) f2.getFeature(RootSIFT.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance((RootSIFT) f1.getFeature(RootSIFT.class), (RootSIFT) f2.getFeature(RootSIFT.class), max);
 	}
 	

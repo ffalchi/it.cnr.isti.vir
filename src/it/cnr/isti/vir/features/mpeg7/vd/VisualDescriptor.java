@@ -11,12 +11,12 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7.vd;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public abstract class VisualDescriptor implements java.io.Serializable, IFeaturesCollector {
+public abstract class VisualDescriptor extends AbstractFeaturesCollector {
 	
 	private static final long serialVersionUID = 1271629156053143017L;
 	

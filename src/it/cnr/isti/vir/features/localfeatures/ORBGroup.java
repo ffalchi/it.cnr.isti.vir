@@ -11,7 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.util.RandomOperations;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
@@ -22,20 +23,19 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 
 	public static final byte version = 0;
 	
-	public ORBGroup(ORB[] arr, IFeaturesCollector fc) {
+	public ORBGroup(ORB[] arr, AbstractFeaturesCollector fc) {
 		super(arr, fc);
 	}
-
-	public ORBGroup(IFeaturesCollector fc) {
-		super(fc);
+	
+	public ORBGroup(ORB[] arr ) {
+		super(arr);
 	}
 
-	public ORBGroup(DataInput in) throws Exception {
-		this(in, null);
+	public ORBGroup(AbstractFeaturesCollector fc) {
+		super(fc);
 	}
 	
-	public ORBGroup(DataInput in, IFeaturesCollector fc) throws Exception {
-		super(fc);
+	public ORBGroup(DataInput in) throws Exception {
 		in.readByte(); // version
 		int nBytes = in.readInt();
 		byte[] bytes = new byte[nBytes];
@@ -43,19 +43,20 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
 		lfArr = new ORB[bBuffer.getInt()];
 		for (int i = 0; i < lfArr.length; i++) {
-			this.lfArr[i] = new ORB(bBuffer, this);
+			lfArr[i] = new ORB(bBuffer);
+			lfArr[i].setLinkedGroup(this);
 		}
 	}
 	
 	
-	public ORBGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
-		super(fc);
-		in.get(); // version
-		in.getInt(); // nBytes
+	public ORBGroup(ByteBuffer in ) throws IOException {
+		in.get(); 		// version
+		in.getInt(); 	// nBytes
 		int nLFs = in.getInt();
 		lfArr = new ORB[nLFs];
 		for ( int i = 0; i < nLFs; i++ ) {
-			lfArr[i] = new ORB(in, this);
+			lfArr[i] = new ORB(in);
+			lfArr[i].setLinkedGroup(this);
 		}
 	}
 
@@ -65,7 +66,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	}
 
 	@Override
-	public ALocalFeaturesGroup<ORB> create(ORB[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup<ORB> create(ORB[] arr, AbstractFeaturesCollector fc) {
 		return new ORBGroup( arr, fc);
 	}
 	@Override
@@ -73,7 +74,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		return version;
 	}
 	
-	public ORBGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
+	public ORBGroup(BufferedReader br, AbstractFeaturesCollector fc) throws IOException {
 		super(fc);
 		String[] temp = br.readLine().split("(\\s)+");
 		
@@ -82,7 +83,8 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		
 		lfArr = new ORB[n];
 	    for (int i = 0; i < n; i++) {
-	    	lfArr[i] = new ORB(br, this);
+	    	lfArr[i] = new ORB(br);
+	    	lfArr[i].setLinkedGroup(this);
 	    }
 	}
 	
@@ -125,4 +127,12 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		
 		return false;
 	}
+	
+
+	public static ORBGroup getRandom() {
+		ORB[] lfArr = new ORB[RandomOperations.getInt(1000)];
+		
+		return new ORBGroup(lfArr);
+	}
+	
 }

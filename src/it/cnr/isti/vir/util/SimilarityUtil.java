@@ -11,12 +11,12 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.similarity.ISimilarity;
 
 public class SimilarityUtil {
 
-	public static double getMinInterDistance(IFeature[] fc, ISimilarity sim) {
+	public static double getMinInterDistance(AbstractFeature[] fc, ISimilarity sim) {
 		double minInterDist = Double.MAX_VALUE;
 		for(int i1=0; i1<fc.length;i1++) {
 			for(int i2=0; i2<fc.length;i2++) {
@@ -30,7 +30,7 @@ public class SimilarityUtil {
 		return minInterDist;
 	}
 	
-	public static double getAvgInterDistance(IFeature[] fc, ISimilarity sim) {
+	public static double getAvgInterDistance(AbstractFeature[] fc, ISimilarity sim) {
 		double sumInterDist = 0.0;
 		for(int i1=0; i1<fc.length;i1++) {
 			for(int i2=0; i2<fc.length;i2++) {

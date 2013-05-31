@@ -11,9 +11,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7.vd;
 
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.distance.L1;
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.util.Conversions;
-import it.cnr.isti.vir.util.L1;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -24,7 +24,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public final class EdgeHistogram implements IFeature, java.io.Serializable {
+public final class EdgeHistogram extends AbstractFeature {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -259,7 +259,7 @@ public final class EdgeHistogram implements IFeature, java.io.Serializable {
 		return str + "\n";
 	}
 	
-	public boolean equals(IFeature givenVD) {
+	public boolean equals(AbstractFeature givenVD) {
 		
 		if ( this.getClass() != givenVD.getClass() ) return false;
 		

@@ -13,7 +13,7 @@ package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
 import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
@@ -27,7 +27,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class SAPIRMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<SAPIRObject> {
+public class SAPIRMetric implements IMetric<AbstractFeaturesCollector>, IMeanEvaluator<SAPIRObject> {
 	
 	private static long distCount = 0;
 	public static final FeatureClassCollector reqFeatures = new FeatureClassCollector(
@@ -69,14 +69,14 @@ public class SAPIRMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<
 		return distance(img1.getFeatures(), img2.getFeatures());
 	}*/
 	
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 	
 		return distance(f1,f2, Double.MAX_VALUE);
 	}
 
 	
 
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		distCount++;
 		double dist = 0;
 

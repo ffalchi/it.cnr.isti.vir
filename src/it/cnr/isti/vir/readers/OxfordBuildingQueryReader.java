@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.readers;
 
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.BoFLF;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
 import it.cnr.isti.vir.id.IDString;
@@ -35,11 +35,11 @@ public class OxfordBuildingQueryReader implements IObjectsReader<FeaturesCollect
 	File[] currFiles = null;
 	int currFileIndex = 0;
 	static Class idClass = IDString.class;
-	HashMap<AbstractID, IFeaturesCollector> ht;
+	HashMap<AbstractID, AbstractFeaturesCollector> ht;
 	BufferedReader br = null;
 	File dir;
 	
-	public OxfordBuildingQueryReader(HashMap<AbstractID, IFeaturesCollector> ht) {
+	public OxfordBuildingQueryReader(HashMap<AbstractID, AbstractFeaturesCollector> ht) {
 		this.ht = ht;
 	}
 	
@@ -106,7 +106,7 @@ public class OxfordBuildingQueryReader implements IObjectsReader<FeaturesCollect
 	    String[] temp = br.readLine().split("(\\s)+");
 	    
 	    AbstractID dataID = new IDString( temp[0].substring(5) );	    
-	    IFeaturesCollector dataFC = ht.get(dataID);
+	    AbstractFeaturesCollector dataFC = ht.get(dataID);
 	    BoFLFGroup dataGroup = (BoFLFGroup) dataFC.getFeature(BoFLFGroup.class);
 	    
 	    

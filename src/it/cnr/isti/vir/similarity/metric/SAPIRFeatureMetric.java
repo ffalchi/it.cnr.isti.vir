@@ -13,7 +13,7 @@ package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
 import it.cnr.isti.vir.util.Mean;
 
@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class SAPIRFeatureMetric implements IMetric<IFeaturesCollector>, IMeanEvaluator<SAPIRFeature> {
+public class SAPIRFeatureMetric implements IMetric<AbstractFeaturesCollector>, IMeanEvaluator<SAPIRFeature> {
 
 	public static final FeatureClassCollector reqFeatures = new FeatureClassCollector(
 			SAPIRFeature.class );
@@ -40,12 +40,12 @@ public class SAPIRFeatureMetric implements IMetric<IFeaturesCollector>, IMeanEva
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance(f1.getFeature(SAPIRFeature.class), f2.getFeature(SAPIRFeature.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance(f1.getFeature(SAPIRFeature.class), f2.getFeature(SAPIRFeature.class), max);
 	}	
 
@@ -71,8 +71,8 @@ public class SAPIRFeatureMetric implements IMetric<IFeaturesCollector>, IMeanEva
 		
 		float[][] v = new float[size][];
 		int i=0;
-		if ( coll.iterator().next() instanceof IFeaturesCollector ) {
-			for ( Iterator<IFeaturesCollector> it = coll.iterator(); it.hasNext(); ) {
+		if ( coll.iterator().next() instanceof AbstractFeaturesCollector ) {
+			for ( Iterator<AbstractFeaturesCollector> it = coll.iterator(); it.hasNext(); ) {
 				SAPIRFeature curr = it.next().getFeature(SAPIRFeature.class);
 				v[i++] = curr.l1Values;
 			}

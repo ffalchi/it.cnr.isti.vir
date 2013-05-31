@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
@@ -72,7 +72,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 		return min;
 	}
 	
-	public BoFLFGroup(DataInput in, IFeaturesCollector fc ) throws Exception {
+	public BoFLFGroup(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
 		super(fc);
 		
 		fWords = null;
@@ -99,12 +99,13 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 			ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
 			lfArr = new BoFLF[bBuffer.getInt()];
 			for (int i = 0; i < lfArr.length; i++) {
-				this.lfArr[i] = new BoFLF(bBuffer, this);
+				this.lfArr[i] = new BoFLF(bBuffer);
+				lfArr[i].setLinkedGroup(this);
 			}
 		}
 	}
 
-    public BoFLFGroup(ByteBuffer in, LFWords fWords, IFeaturesCollector fc) throws Exception {
+    public BoFLFGroup(ByteBuffer in, LFWords fWords, AbstractFeaturesCollector fc) throws Exception {
         super(fc);
         this.fWords = fWords;
         byte version = in.get();
@@ -127,11 +128,12 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 			int nBytes = in.getInt();
 			lfArr = new BoFLF[in.getInt()];
 			for (int i = 0; i < lfArr.length; i++) {
-				this.lfArr[i] = new BoFLF(in, this);
+				lfArr[i] = new BoFLF(in);
+				lfArr[i].setLinkedGroup(this);
 			}
 		}
     }
-	public BoFLFGroup(BoFLF[] arr, IFeaturesCollector fc, LFWords words ) throws Exception {
+	public BoFLFGroup(BoFLF[] arr, AbstractFeaturesCollector fc, LFWords words ) throws Exception {
 		super(fc);
 		fWords = words;
 		lfArr = arr;
@@ -142,7 +144,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
         this(in, fWords, null);
     }
     
-    public BoFLFGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
+    public BoFLFGroup(ByteBuffer in, AbstractFeaturesCollector fc) throws Exception {
         this(in, null, fc);
     }
     
@@ -159,7 +161,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
         this(features, fWords, null);
     }
 
-    public BoFLFGroup(ALocalFeature[] features, LFWords fWords, IFeaturesCollector fc) {
+    public BoFLFGroup(ALocalFeature[] features, LFWords fWords, AbstractFeaturesCollector fc) {
         super(fc);
         this.fWords = fWords;
         if ( features instanceof BoFLF[] ) {
@@ -181,7 +183,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
         Arrays.sort(lfArr);
     }
 
-    public BoFLFGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
+    public BoFLFGroup(BufferedReader br, AbstractFeaturesCollector fc) throws IOException {
 		super(fc);
 		ArrayList<BoFLF> arr = new ArrayList();
 		
@@ -600,7 +602,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 	}
 
 	@Override
-	public ALocalFeaturesGroup create(BoFLF[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup create(BoFLF[] arr, AbstractFeaturesCollector fc) {
 		return new BoFLFGroup( arr, fWords, fc);
 	}
 	
@@ -779,5 +781,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
         
 		return getReduced_Eval(eval, factor);
 	}
+
+	
 
 }

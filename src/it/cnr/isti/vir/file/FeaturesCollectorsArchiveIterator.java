@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.file;
 
 import it.cnr.isti.vir.features.FeaturesCollectors;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 
-public class FeaturesCollectorsArchiveIterator implements Iterator<IFeaturesCollector>{
+public class FeaturesCollectorsArchiveIterator implements Iterator<AbstractFeaturesCollector>{
 	
 	private final DataInputStream in;
 	public final Constructor fcClassConstructor;
@@ -49,12 +49,12 @@ public class FeaturesCollectorsArchiveIterator implements Iterator<IFeaturesColl
 	}
 
 	@Override
-	public IFeaturesCollector next() {
+	public AbstractFeaturesCollector next() {
 		try {
 			if (fcClassConstructor == null) {
 				return FeaturesCollectors.readData(in);
 			} else {
-				return (IFeaturesCollector) fcClassConstructor.newInstance(in);
+				return (AbstractFeaturesCollector) fcClassConstructor.newInstance(in);
 			}
 		} catch ( Exception e ) {
 			e.printStackTrace();

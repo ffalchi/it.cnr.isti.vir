@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 
 import java.io.DataInputStream;
 
@@ -23,9 +23,9 @@ public interface ISimilarity<F> {
 
 	public double distance( F f1, F f2, double max);
 
-	public double distance(IFeaturesCollector f1, IFeaturesCollector f2 );
+	public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 );
 	
-	public double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max );
+	public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max );
 	
 	public abstract long getDistCount();
 	

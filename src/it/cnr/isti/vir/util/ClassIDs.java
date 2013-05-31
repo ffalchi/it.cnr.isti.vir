@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
-import it.cnr.isti.vir.features.IFeature;
+import it.cnr.isti.vir.features.AbstractFeature;
 
 import java.lang.reflect.Constructor;
 import java.util.Hashtable;

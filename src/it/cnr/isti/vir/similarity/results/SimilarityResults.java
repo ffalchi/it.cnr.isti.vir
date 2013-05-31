@@ -14,8 +14,8 @@ package it.cnr.isti.vir.similarity.results;
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
-import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.file.ArchiveException;
@@ -350,8 +350,8 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 
 
 	@Override
-	public Collection<IFeaturesCollector_Labeled_HasID> getFCs( FeaturesCollectorsArchives archives ) throws ArchiveException {
-		ArrayList<IFeaturesCollector_Labeled_HasID> res = new ArrayList();
+	public Collection<AbstractFeaturesCollector_Labeled_HasID> getFCs( FeaturesCollectorsArchives archives ) throws ArchiveException {
+		ArrayList<AbstractFeaturesCollector_Labeled_HasID> res = new ArrayList();
 		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
 			ObjectWithDistance<E> curr = itThis.next();
 			AbstractID id = ((IHasID) curr.obj).getID();
@@ -359,7 +359,7 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 			if ( curr.obj instanceof ILabeled )
 				label = ((ILabeled) curr.obj).getLabel();
 			
-			IFeaturesCollector temp = (IFeaturesCollector) archives.get( id );
+			AbstractFeaturesCollector temp = (AbstractFeaturesCollector) archives.get( id );
 			FeaturesCollectorArr currFC = new FeaturesCollectorArr( temp.getFeatures(), id, label );
 			
 			res.add( currFC );

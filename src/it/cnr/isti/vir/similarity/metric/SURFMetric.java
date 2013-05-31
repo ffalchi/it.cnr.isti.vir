@@ -13,7 +13,7 @@ package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.SURF;
 import it.cnr.isti.vir.features.localfeatures.SURFGroup;
 
@@ -54,12 +54,12 @@ public class SURFMetric implements IMetric<SURF>, ILocalFeaturesMetric<SURF>, IM
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2 ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
 		return distance((SURF) f1.getFeature(SURF.class), (SURF) f2.getFeature(SURF.class));
 	}
 	
 	@Override
-	public final double distance(IFeaturesCollector f1, IFeaturesCollector f2, double max ) {
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
 		return distance((SURF) f1.getFeature(SURF.class), (SURF) f2.getFeature(SURF.class));
 	}
 	

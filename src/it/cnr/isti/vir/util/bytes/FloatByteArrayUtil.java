@@ -9,21 +9,58 @@
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package it.cnr.isti.vir.util;
+package it.cnr.isti.vir.util.bytes;
 
-public class HammingDistance {
+public class FloatByteArrayUtil {
+	private static final int MASK = 0xff;	
 
-	public static final int distance(long[] bits1, long[] bits2) {
-		int acc = 0;
-		for ( int i=0; i<bits1.length; i++)
-			acc+=Long.bitCount(bits1[i]^bits2[i]);
-		
-		return acc;
+	/**
+	 * @param byteArray		source bytes
+	 * @param byteOffset	source offset
+	 * @return
+	 */
+	public static final float get(byte encodedValue[], int byteOffset) {
+		int intValue = IntByteArrayUtil.get(encodedValue, byteOffset);
+		return Float.intBitsToFloat(intValue);
 	}
 	
-	public static final float distance_norm(long[] bits1, long[] bits2) {
-		return distance(bits1, bits2) / (64*bits1.length);
+	/**
+	 * @param byteArr		source bytes
+	 * @param byteOffset	source offset
+	 * @param nFloats		desired array length
+	 * @return
+	 */
+	public static final float[] get(byte byteArr[], int byteOffset, int nFloats) {
+		float[] arr = new float[nFloats];
+		for ( int i=0; i<arr.length; i++) {
+			arr[i]=get(byteArr, byteOffset+8*i);
+		}
+		return arr;
 	}
 	
+	
+	/**
+	 * @param f				source
+	 * @param byteArray		dest
+	 * @param byteOffset	dest offset
+	 * @return				new offset
+	 */
+	public static final int convToBytes(float f, byte[] byteArray, int byteOffset) {
+		return IntByteArrayUtil.intToByteArray(Float.floatToRawIntBits(f), byteArray, byteOffset );
+	}
+	
+	/**
+	 * @param f				source array
+	 * @param byteArray		dest
+	 * @param byteOffset	dest offset
+	 * @return				new offset
+	 */
+	public static final int convToBytes(float[] f, byte[] byteArray, int byteOffset) {
+		int offset = byteOffset;
+		for ( int i=0; i<f.length; i++) {
+			offset = IntByteArrayUtil.intToByteArray(Float.floatToRawIntBits(f[i]), byteArray, offset );
+		}
+		return offset;
+	}
 
 }

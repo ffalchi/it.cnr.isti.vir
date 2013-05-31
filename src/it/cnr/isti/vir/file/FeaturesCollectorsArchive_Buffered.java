@@ -19,7 +19,7 @@ package it.cnr.isti.vir.file;
 import gnu.trove.list.array.TLongArrayList;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.FeaturesCollectors;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IHasID;
 
@@ -47,13 +47,13 @@ public class FeaturesCollectorsArchive_Buffered {
 	private final Constructor fcClassConstructor;
 
 	private final Class<? extends AbstractID> idClass;
-	private final Class<? extends IFeaturesCollector> fcClass;
+	private final Class<? extends AbstractFeaturesCollector> fcClass;
 
 	File offsetFile;
 	File idFile;
 	
 	public FeaturesCollectorsArchive_Buffered(File file,
-			FeatureClassCollector featuresClasses, Class<? extends AbstractID> idClass, Class<? extends IFeaturesCollector> fcClass)
+			FeatureClassCollector featuresClasses, Class<? extends AbstractID> idClass, Class<? extends AbstractFeaturesCollector> fcClass)
 			throws Exception {
 		
 		file.delete();
@@ -78,7 +78,7 @@ public class FeaturesCollectorsArchive_Buffered {
 
 	}
 
-	public void add(IFeaturesCollector fc) throws ArchiveException, IOException {
+	public void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
 
 		int currPos = positions.size();
 		positions.add(out.size());

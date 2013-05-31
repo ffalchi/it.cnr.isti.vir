@@ -11,13 +11,13 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7.vd;
 
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +26,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public final class DominantColor implements IFeature {
+public final class DominantColor extends AbstractFeature {
 
 	// RGB
 	public static final int numOfBins = 256;
@@ -78,6 +78,19 @@ public final class DominantColor implements IFeature {
 			}
 
 			return true;
+		}
+		
+		public Value(ByteBuffer in) throws IOException {
+			percentage = in.get();
+			colorVariance = new byte[in.get()];
+			for ( int i=0; i<colorVariance.length; i++) {
+				colorVariance[i] = in.get(  );
+			}			
+			
+			index = new byte[in.get()];
+			for ( int i=0; i<index.length; i++) {
+				index[i] = in.get(  );
+			}
 		}
 		
 		public Value(DataInput str) throws IOException {
@@ -245,7 +258,7 @@ public final class DominantColor implements IFeature {
 	    } // end while
 	}
 	
-	public final static double mpeg7XMDistance(IFeature featureInterface, IFeature featureInterface2 ) {
+	public final static double mpeg7XMDistance(AbstractFeature featureInterface, AbstractFeature featureInterface2 ) {
 		return mpeg7XMDistance((DominantColor) featureInterface, (DominantColor) featureInterface2, true);
 	}
 	
@@ -714,5 +727,15 @@ public final class DominantColor implements IFeature {
 		}	
 	}
 	
+	public DominantColor(ByteBuffer in) throws IOException {
+		in.get();
+		spatialCoherency = in.get();
+		LinkedList<Value> values = new LinkedList<Value>();
+		int valueSize = in.getShort();
+		
+		for ( int i=0; i<valueSize; i++ ) {
+			values.add(new Value(in));
+		}	
+	}	
 	
 }

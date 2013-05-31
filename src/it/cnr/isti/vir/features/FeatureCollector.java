@@ -25,21 +25,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 
-public class FeatureCollector implements IFeaturesCollector_Labeled_HasID {
+public class FeatureCollector extends AbstractFeaturesCollector_Labeled_HasID {
 
-	protected final IFeature f;
+	protected final AbstractFeature f;
 	protected AbstractLabel l;
 	protected final AbstractID id;
 	
-	public FeatureCollector(IFeature f ) {
+	public FeatureCollector(AbstractFeature f ) {
 		this(f, null);
 	}
 	
-	public FeatureCollector(IFeature f, AbstractID id) {
+	public FeatureCollector(AbstractFeature f, AbstractID id) {
 		this(f, id, null);
 	}
 	
-	public FeatureCollector(IFeature f, AbstractID id, AbstractLabel l) {
+	public FeatureCollector(AbstractFeature f, AbstractID id, AbstractLabel l) {
 		this.f = f;
 		this.l = l;
 		this.id = id;
@@ -76,12 +76,12 @@ public class FeatureCollector implements IFeaturesCollector_Labeled_HasID {
 	
 	
 	@Override
-	public IFeature getFeature(Class featureClass) {
+	public AbstractFeature getFeature(Class featureClass) {
 		return f;
 	}
 
 	@Override
-	public void add(IFeature f) {
+	public void add(AbstractFeature f) {
 		
 	}
 
@@ -93,13 +93,15 @@ public class FeatureCollector implements IFeaturesCollector_Labeled_HasID {
 	public FeatureCollector(ByteBuffer src) throws IOException  {
 		id = IDClasses.readData(src);
 		l = LabelClasses.readData(src);
-		f = FeatureClasses.readData(src, this);
+		f = FeatureClasses.readData(src);
+		f.setLinkedFC(this);
 	}
 	
 	public FeatureCollector(DataInput in) throws IOException {
 		id = IDClasses.readData(in);
 		l = LabelClasses.readData(in);
-		f = FeatureClasses.readData(in, this);
+		f = FeatureClasses.readData(in);
+		f.setLinkedFC(this);
 	}
 	
 	
@@ -131,14 +133,14 @@ public class FeatureCollector implements IFeaturesCollector_Labeled_HasID {
 	}
 
 	@Override
-	public Collection<IFeature> getFeatures() {
+	public Collection<AbstractFeature> getFeatures() {
 		ArrayList t =  new ArrayList(1);
 		t.add(f);
 		return t;
 	}
 
 	@Override
-	public boolean contains(Class<IFeature> c) {
+	public boolean contains(Class<AbstractFeature> c) {
 		if ( f.getClass().equals(c) ) return true;
 		return false;
 	}

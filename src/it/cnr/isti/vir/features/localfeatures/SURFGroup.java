@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 
@@ -25,7 +25,7 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 	
 	public static final byte version = 3;	
 	
-	public SURFGroup(SURF[] arr, IFeaturesCollector fc) {
+	public SURFGroup(SURF[] arr, AbstractFeaturesCollector fc) {
 		super(arr, fc );
 	}
 	
@@ -33,7 +33,7 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 		this(in, null);
 	}
 	
-	public SURFGroup(DataInput in, IFeaturesCollector fc) throws Exception {
+	public SURFGroup(DataInput in, AbstractFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.readByte();
 		
@@ -45,7 +45,8 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 			ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
 			lfArr = new SURF[bBuffer.getInt()];
 			for (int i = 0; i < lfArr.length; i++) {
-				this.lfArr[i] = new SURF(bBuffer, this);
+				this.lfArr[i] = new SURF(bBuffer);
+				lfArr[i].setLinkedGroup(this);
 			}
 		} else {
 			// OLDS
@@ -55,7 +56,8 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 			if ( size == 0 ) return;
 			
 			for (int i=0; i<lfArr.length; i++ ) {
-				lfArr[i] = SURF.read_old(in, this);
+				lfArr[i] = SURF.read_old(in);
+				lfArr[i].setLinkedGroup(this);
 			}			
 			
 			if ( version > 0 ) {
@@ -66,11 +68,11 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 	}
 
 	
-	public SURFGroup(IFeaturesCollector fc) {
+	public SURFGroup(AbstractFeaturesCollector fc) {
 		super(fc);
 	}
 	
-	public SURFGroup(ByteBuffer in, IFeaturesCollector fc) throws Exception {
+	public SURFGroup(ByteBuffer in, AbstractFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.get();
 		if ( version >= 3) {
@@ -79,7 +81,8 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 			int nLFs = in.getInt();
 			lfArr = new SURF[nLFs];
 			for ( int i = 0; i < nLFs; i++ ) {
-				lfArr[i] = new SURF(in, this);
+				lfArr[i] = new SURF(in);
+				lfArr[i].setLinkedGroup(this);
 			}
 		} else {
 			int size = in.getInt();
@@ -87,7 +90,8 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 			if ( size == 0 ) return;
 			
 			for ( int i=0; i<size; i++) {
-				lfArr[i] = new SURF(in, this);
+				lfArr[i] = new SURF(in);
+				lfArr[i].setLinkedGroup(this);
 			}
 			
 			if ( version > 0 ) {
@@ -97,7 +101,7 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 		
 	}
 	
-	public SURFGroup(BufferedReader br, IFeaturesCollector fc) throws IOException {
+	public SURFGroup(BufferedReader br, AbstractFeaturesCollector fc) throws IOException {
 		super(fc);
 		String[] temp = br.readLine().split("(\\s)+");
 		int len = Integer.parseInt(temp[0]);
@@ -286,7 +290,7 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 	}
 
 	@Override
-	public ALocalFeaturesGroup create(SURF[] arr, IFeaturesCollector fc) {
+	public ALocalFeaturesGroup create(SURF[] arr, AbstractFeaturesCollector fc) {
 		return new SURFGroup( arr, fc);
 	}
 

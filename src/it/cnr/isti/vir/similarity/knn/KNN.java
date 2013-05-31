@@ -11,8 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.knn;
 
-import it.cnr.isti.vir.features.FeaturesCollectorHT;
-import it.cnr.isti.vir.features.FeaturesCollectorHTwithID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 
@@ -23,13 +22,13 @@ import java.util.TreeSet;
 public abstract class KNN<ResultClass> {
 	
 	public final ISimilarity comp;
-	public final FeaturesCollectorHT qObj;
+	public final AbstractFeaturesCollector qObj;
 	protected double excludingDistance = -1;
 	
 	public final int k;
 	protected TreeSet<ObjectWithDistance<ResultClass>> set = new TreeSet<ObjectWithDistance<ResultClass>>();
 		
-	public KNN(FeaturesCollectorHT qObj, int k, ISimilarity comp ) {
+	public KNN(AbstractFeaturesCollector qObj, int k, ISimilarity comp ) {
 		this.qObj = qObj;
 		this.k = k;
 		this.comp = comp;
@@ -40,7 +39,7 @@ public abstract class KNN<ResultClass> {
 		this.comp = givenKNN.comp;
 		this.qObj = givenKNN.qObj;
 		this.k = givenKNN.k;
-		for(Iterator<FeaturesCollectorHT> it=givenKNN.set.iterator(); it.hasNext();) {
+		for(Iterator<AbstractFeaturesCollector> it=givenKNN.set.iterator(); it.hasNext();) {
 			add(it.next());
 		}
 	}
@@ -54,8 +53,8 @@ public abstract class KNN<ResultClass> {
 		return set.iterator();
 	}
 	
-	public final void addAll( Collection<FeaturesCollectorHT> objColl) {
-		for(Iterator<FeaturesCollectorHT> it=objColl.iterator(); it.hasNext();) {
+	public final void addAll( Collection<AbstractFeaturesCollector> objColl) {
+		for(Iterator<AbstractFeaturesCollector> it=objColl.iterator(); it.hasNext();) {
 			add(it.next());
 		}
 	}
@@ -67,7 +66,7 @@ public abstract class KNN<ResultClass> {
 		}
 	}
 	
-	public final void add( FeaturesCollectorHT givenObj ) {
+	public final void add( AbstractFeaturesCollector givenObj ) {
 		double qObjDist = comp.distance( qObj, givenObj );
 		if ( qObjDist < excludingDistance || set.size() < k ) {
 			this.addBlind( givenObj, qObjDist );
@@ -118,7 +117,7 @@ public abstract class KNN<ResultClass> {
 		
 	}
 
-	protected abstract void addBlind( FeaturesCollectorHT givenObj, double dist );
+	protected abstract void addBlind( AbstractFeaturesCollector givenObj, double dist );
 	
 
 

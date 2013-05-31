@@ -14,8 +14,8 @@ package it.cnr.isti.vir.classification.classifier;
 import it.cnr.isti.vir.classification.PredictedLabel;
 import it.cnr.isti.vir.classification.PredictedLabelWithSimilars;
 import it.cnr.isti.vir.classification.classifier.evaluation.TestDocumentSingleLabeled;
-import it.cnr.isti.vir.features.IFeaturesCollector;
-import it.cnr.isti.vir.features.IFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.similarity.knn.KNNExecuter;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 
@@ -43,7 +43,7 @@ public abstract class AbstractKNNClassifier implements IClassifier {
 		this.k = k;
 	}
 
-	public PredictedLabel[] classify(IFeaturesCollector givenObj, int[] ks) throws ClassifierException {
+	public PredictedLabel[] classify(AbstractFeaturesCollector givenObj, int[] ks) throws ClassifierException {
 		
 		int maxK = -1;
 		for (int i=0; i<ks.length; i++ ) {
@@ -60,7 +60,7 @@ public abstract class AbstractKNNClassifier implements IClassifier {
 		
 	}
 	
-	public PredictedLabelWithSimilars classifyWithSimilars(IFeaturesCollector res) throws ClassifierException {
+	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector res) throws ClassifierException {
 		try {
 			ISimilarityResults<?> knn = knnExec.getKNNResults(res, k);
 			
@@ -76,7 +76,7 @@ public abstract class AbstractKNNClassifier implements IClassifier {
 	
 		
 	@Override
-	public PredictedLabel classify(IFeaturesCollector res) throws ClassifierException {
+	public PredictedLabel classify(AbstractFeaturesCollector res) throws ClassifierException {
 		try {
 			ISimilarityResults<?> knn = knnExec.getKNNResults(res, k);
 			
@@ -88,10 +88,10 @@ public abstract class AbstractKNNClassifier implements IClassifier {
 	}
 
 	@Override
-	public LinkedList<TestDocumentSingleLabeled> classify(	Collection<IFeaturesCollector_Labeled_HasID> testDocuments) throws ClassifierException {
+	public LinkedList<TestDocumentSingleLabeled> classify(	Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments) throws ClassifierException {
 		LinkedList<TestDocumentSingleLabeled> testList = new LinkedList<TestDocumentSingleLabeled>();
-		for(Iterator<IFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
-			IFeaturesCollector_Labeled_HasID curr = it.next();
+		for(Iterator<AbstractFeaturesCollector_Labeled_HasID> it = testDocuments.iterator(); it.hasNext(); ) {
+			AbstractFeaturesCollector_Labeled_HasID curr = it.next();
 			testList.add( new TestDocumentSingleLabeled(curr, this.classify(curr) ) );
 		}
 		return testList;

@@ -9,52 +9,25 @@
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package it.cnr.isti.vir.util;
+package it.cnr.isti.vir.features;
 
-public class L2 {
+import java.io.DataOutput;
+import java.io.IOException;
 
-	public static int getSquared(byte[] v1, byte[] v2) {
-		int dist = 0;	    
-		int dif = 0;		
-	    for (int i = 0; i < 128; i++) {
-	    	dif = (int) v1[i] - (int) v2[i];
-	    	dist += dif * dif;
-	    }		
-		return dist;
+public abstract class AbstractFeature {
+
+	private AbstractFeaturesCollector linkedFC;
+	
+	public abstract void writeData(DataOutput out) throws IOException;
+
+	public void setLinkedFC(AbstractFeaturesCollector featuresCollector) {
+		linkedFC = featuresCollector;
 	}
 	
-	public static int getSquared(byte[] v1, byte[] v2, int maxDist) {
-		int dist = 0;	    
-		int dif = 0;
-	    for (int i = 0; i < 128; i++) {
-	    	dif = (int) v1[i] - (int) v2[i];
-	    	dist += dif * dif;
-	    	if ( dist > maxDist ) return -dist;
-	    }		
-		return dist;
-	}
-	
-	public static double get(float[]f1, float[]f2) {
-		return  Math.sqrt(getSquared(f1,f2));
+	public AbstractFeaturesCollector getLinkedFC(FeaturesCollectorArr featuresCollectorArr) {
+		return linkedFC;
 	}
 
+
 	
-	public static double getSquared(float[]f1, float[]f2) {
-		double acc = 0;
-		for ( int j=0; j<f1.length; j++) {
-			double diff = f1[j] - f2[j];
-			acc += diff * diff;
-		}
-		return acc; 
-	}
-	
-	public static double get(float[][] f1, float[][] f2) {
-		double dist = 0;
-		
-		for ( int i=0; i<f1.length; i++) {
-			dist += get(f1[i], f2[i]);
-		}
-		
-		return dist;
-	}
 }

@@ -11,8 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.util.IntByteArrayUtil;
 import it.cnr.isti.vir.util.Trigonometry;
+import it.cnr.isti.vir.util.bytes.IntByteArrayUtil;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -44,25 +44,16 @@ public class BoFLF extends ALocalFeature<BoFLFGroup> {
 		return bArrI + 8;
 	}
 	
-	public BoFLF(DataInput str, BoFLFGroup group) throws IOException {
+	public BoFLF(DataInput str) throws IOException {
 		
-		linkedGroup = group;
-		
-		byte kpExists = str.readByte();
-		if ( kpExists != -1 ) {
-			new KeyPoint(str);
-		}		
+		super(str);	
 		
 		bag = str.readInt();
 
 	}
 	
-	public BoFLF(ByteBuffer in, BoFLFGroup linkedGroup) {
-		this.linkedGroup = linkedGroup;
-		byte kpExists = in.get();
-		if ( kpExists != -1 ) {
-			kp = new KeyPoint(in);
-		}
+	public BoFLF(ByteBuffer in) throws IOException {
+		super(in);
 		bag = in.getInt();
 	}
 	

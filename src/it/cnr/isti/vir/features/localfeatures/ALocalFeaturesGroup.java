@@ -13,8 +13,8 @@ package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.localfeatures.evaluation.ILFEval;
 import it.cnr.isti.vir.geom.Box;
 import it.cnr.isti.vir.id.AbstractID;
@@ -22,8 +22,10 @@ import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.util.RandomOperations;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -33,14 +35,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements IFeature, ILabeled, IHasID {
+public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends AbstractFeature implements ILabeled, IHasID {
 	
 	public LF[] lfArr;
 
-	public IFeaturesCollector linkedFC;
-	
-//	private Point2D.Double maxXY;
-//        private Point2D.Double minXY;
+	public AbstractFeaturesCollector linkedFC;
+
 	private float[][] box;
 	private float[] boxWidthHeight;
 	private float[] bofIDF;
@@ -49,6 +49,26 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 	private static final float sqrt2 = (float) Math.sqrt(2.0);
 
 	public abstract byte getSerVersion();
+	
+	protected ALocalFeaturesGroup() {};
+	
+	protected ALocalFeaturesGroup(AbstractFeaturesCollector fc) {
+		this.linkedFC = fc;
+	}
+	
+	protected ALocalFeaturesGroup(LF[] arr, AbstractFeaturesCollector fc) {
+		this(arr);
+		this.linkedFC = fc;
+	}
+	
+	protected ALocalFeaturesGroup(LF[] arr) {
+		lfArr = arr;
+	}
+	
+	public ALocalFeaturesGroup(int initCapacity, AbstractFeaturesCollector fc) {
+		lfArr = (LF[]) new ALocalFeature[initCapacity];
+		this.linkedFC = fc;
+	}
 	
 	public float[] getBofIDF() {
 		return bofIDF;
@@ -70,7 +90,6 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		boxWidthHeight = null;
 		bofIDF = null;
 		meanXY = null;
-		// avgDistFromMean
 	}
 
 	public float[] getMeanXY() {
@@ -151,33 +170,6 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		box = t;
 	}
 
-//        public void initMaxMinXY() {
-//		double minX = Double.MAX_VALUE;
-//		double minY = Double.MAX_VALUE;
-//                double maxX = 0.0;
-//		double maxY = 0.0;
-//		ILocalFeature[] arr = (ILocalFeature[]) lfArr;
-//		for ( int i=0; i<lfArr.length; i++) {
-//			Point2D.Double currXY = arr[i].getPoint2D() ;
-//			if ( currXY[0] < minX ) minX = currXY[0];
-//			if ( currXY[1] < minY ) minY = currXY[1];
-//                        if ( currXY[0] > maxX ) maxX = currXY[0];
-//			if ( currXY[1] > maxY ) maxY = currXY[1];
-//		}
-//                this.minXY = new Point2D.Double(minX, minY);
-//                this.maxXY = new Point2D.Double(maxX, maxY);
-//	}
-	
-//	public Point2D.Double getMaxXY() {
-//		if ( maxXY == null ) initMaxMinXY();
-//		return maxXY;
-//	}
-//
-//        public Point2D.Double getMinXY() {
-//		if ( minXY == null ) initMaxMinXY();
-//		return minXY;
-//	}
-
 	public final double getBoxDiagonal() {
 		float[] wh = getBoxWidthHeight();
 		return Math.sqrt(wh[0] * wh[0] + wh[1] * wh[1]);
@@ -205,23 +197,17 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		return eval;
 	}
 	
-	public void setLinkedFC(IFeaturesCollector linkedFC) {
+	public void setLinkedFC(AbstractFeaturesCollector linkedFC) {
 		this.linkedFC = linkedFC;
 	}
 	
-	public IFeaturesCollector getLinkedFC() {
+	public AbstractFeaturesCollector getLinkedFC() {
 		return linkedFC;
 	}
 	
 	public LF[] getLocalFeatures() {
 		return lfArr;
 	}
-	
-//	public LocalFeaturesGroup(LocalFeaturesGroup<LF> lfGroup, IFeatureCollector fc) {
-//		this.linkedFC = fc;
-//		this.lfArr = lfGroup.lfArr;
-//		this.eval = lfGroup.eval;
-//	}
 	
 	public final ILFEval getEval(Object obj) {
 		for (int i=0; i<lfArr.length; i++) {
@@ -234,32 +220,11 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		this.eval = eval;
 	}
 
-	protected ALocalFeaturesGroup(IFeaturesCollector fc) {
-		this.linkedFC = fc;
-//		coll = new ArrayList<LF>(1);
-	}
-	
-	protected ALocalFeaturesGroup(LF[] arr, IFeaturesCollector fc) {
-		lfArr = arr;
-		this.linkedFC = fc;
-	}
-	
-	public ALocalFeaturesGroup(int initCapacity, IFeaturesCollector fc) {
-		lfArr = (LF[]) new ALocalFeature[initCapacity];
-		this.linkedFC = fc;
-	}
 
-	public Collection getCollection() {
+
+	public Collection<LF> getCollection() {
 		return Arrays.asList(lfArr);
 	}
-	
-//	final void add(LF localFeature) {
-//		coll.add(localFeature);
-//	}
-	
-//	public final Iterator<LF> iterator() {
-//		return coll.iterator();
-//	}
 	
 	public final int size() {
 		return lfArr.length;
@@ -310,22 +275,6 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		eval = null;
 	}
 	
-
-	
-	/*
-	public static Class getGroupClass(Class c ) {
-		if ( c.equals(SIFT.class ) ) return SIFTGroup.class;
-		if ( c.equals(ColorSIFT.class ) ) return ColorSIFTGroup.class;
-		if ( c.equals(SURF.class ) ) return SURFGroup.class;
-		if ( c.equals(RootSIFT.class ) ) return RootSIFTGroup.class;
-		return null;
-	}*/
-
-	/*
-	public int compareTo(IFeaturesCollector obj) {
-		return hashCode()-((FeaturesCollectorHT)obj).hashCode();
-	}
-	*/
 	public boolean equals(Object obj) {
 		if ( this == obj ) return true;
 		ALocalFeaturesGroup<LF> givenF = (ALocalFeaturesGroup<LF>) obj;
@@ -450,7 +399,7 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		return create(newArr, linkedFC );
 	}
     
-    public abstract ALocalFeaturesGroup create(LF[] arr, IFeaturesCollector fc);
+    public abstract ALocalFeaturesGroup create(LF[] arr, AbstractFeaturesCollector fc);
     
 	public ALocalFeaturesGroup getReducedMinSizeByFactor(float lsMinSizeFactor) throws Exception {
 		float minSize = getMinSize();
@@ -485,13 +434,14 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		Class<? extends ALocalFeature> cLF = getLocalFeatureClass();
 		
 		ALocalFeaturesGroup<LF> res =
-				c.getConstructor(Array.newInstance(cLF, 0).getClass(), IFeaturesCollector.class)
+				c.getConstructor(Array.newInstance(cLF, 0).getClass(), AbstractFeaturesCollector.class)
 				.newInstance(getLFAboveSize(minSize), linkedFC);
 		System.out.println("Was " + this.size() + " reduced to " + res.size() );
 		return res;
 	}
 
 	public final void writeData(DataOutput out) throws IOException {
+		// VERSION
 		out.writeByte(this.getSerVersion());
 		
 		byte[][] bytes = new byte[lfArr.length][];
@@ -532,5 +482,11 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> implements I
 		}
 	}
 	
+	public final byte[] getBytes() throws IOException {
+		ByteArrayOutputStream backing = new ByteArrayOutputStream();
+		DataOutput foo = new DataOutputStream(backing);
+		this.writeData(foo);
+		return backing.toByteArray();
+	}
 	
 }

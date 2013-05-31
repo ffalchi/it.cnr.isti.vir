@@ -11,8 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7.vd;
 
-import it.cnr.isti.vir.features.IFeature;
-import it.cnr.isti.vir.features.IFeaturesCollector;
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.util.Conversions;
 
 import java.io.DataInput;
@@ -24,7 +24,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-public class HomogeneousTexture implements IFeature, java.io.Serializable {
+public class HomogeneousTexture extends AbstractFeature {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -295,7 +295,7 @@ public class HomogeneousTexture implements IFeature, java.io.Serializable {
 		return str + "\n";
 	}
 	
-	public boolean equals(IFeaturesCollector givenVD) {
+	public boolean equals(AbstractFeature givenVD) {
 		
 		if ( this.getClass() != givenVD.getClass() ) return false;
 		

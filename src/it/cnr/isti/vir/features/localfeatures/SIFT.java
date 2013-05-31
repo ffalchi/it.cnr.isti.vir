@@ -11,9 +11,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.util.FloatByteArrayUtil;
-import it.cnr.isti.vir.util.L2;
+import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.util.Mean;
+import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
@@ -33,22 +33,14 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 	public Class getGroupClass() { return SIFTGroup.class; };
 	
 	public SIFT(DataInput str ) throws IOException {
-		this(str, null);
-	}
-		
-	public SIFT(DataInput str, SIFTGroup group) throws IOException {
-		super(str, group);
+		super(str);
 
 		values = new byte[vLen];
 		str.readFully(values);
 	}
 	
 	public SIFT(ByteBuffer src ) throws IOException {
-		this(src, null);
-	}
-	
-	public SIFT(ByteBuffer src, SIFTGroup group ) throws IOException {
-		super(src, group);
+		super(src);
 
 		values = new byte[vLen];
 		src.get(values);
@@ -227,7 +219,7 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 		SIFT[] res = new SIFT[size];
 		for (int i=0, currIndex = 0; i<size; i++, currIndex += 160) {
 			
-			float[] tData = FloatByteArrayUtil.byteArrayToFloatArray(byteArr, currIndex, 4); 	// TO DO !!!
+			float[] tData = FloatByteArrayUtil.get(byteArr, currIndex, 4); 	// TO DO !!!
 						
 			byte[] tValues = new byte[vLen];			
 			for ( int iValues=0; iValues<vLen; iValues++ ) {
@@ -247,8 +239,7 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 	   PI).  Then the descriptor vector for each keypoint is given as a
 	   list of integers in range [0,255].
 	*/
-	public SIFT(BufferedReader br, SIFTGroup group) throws IOException {
-		linkedGroup = group;
+	public SIFT(BufferedReader br) throws IOException {
 		values = new byte[128];
 		
 		// First line parsing

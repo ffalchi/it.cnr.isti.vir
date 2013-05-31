@@ -29,7 +29,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class Permutation implements IFeature {
+public class Permutation extends AbstractFeature {
 
 	
 	byte version = 2;
@@ -44,15 +44,15 @@ public class Permutation implements IFeature {
 	}
 
 	
-	public Permutation(IFeaturesCollector obj, IFeature[] ro, ISimilarity sim  ) {
+	public Permutation(AbstractFeaturesCollector obj, AbstractFeature[] ro, ISimilarity sim  ) {
 		this(obj, ro, sim, ro.length, true);
 	}
 
-	public Permutation(IFeaturesCollector obj, IFeature[] ro, ISimilarity sim, boolean roPosition ) {
+	public Permutation(AbstractFeaturesCollector obj, AbstractFeature[] ro, ISimilarity sim, boolean roPosition ) {
 		this(obj, ro, sim, ro.length, roPosition);
 	}
 	
-	public Permutation(IFeaturesCollector obj, IFeature[] ro, ISimilarity sim, int pLength, boolean roPosition) {
+	public Permutation(AbstractFeaturesCollector obj, AbstractFeature[] ro, ISimilarity sim, int pLength, boolean roPosition) {
 		
 		nRO = ro.length;
 		SimPQueueArr<Integer> pQueue = new SimPQueueArr<Integer>(pLength);
@@ -252,12 +252,12 @@ public class Permutation implements IFeature {
 	static class GetAllThread implements Runnable {
 		private final int from;
 		private final int to;
-		private final IFeaturesCollector[] objs;
-		private final IFeaturesCollector[] ro;
+		private final AbstractFeaturesCollector[] objs;
+		private final AbstractFeaturesCollector[] ro;
 		private final ISimilarity sim;
 		private final Permutation[] res;
 
-		public GetAllThread(IFeaturesCollector[] ro, ISimilarity sim, IFeaturesCollector[]  objs, int from, int to, Permutation[] res ) {
+		public GetAllThread(AbstractFeaturesCollector[] ro, ISimilarity sim, AbstractFeaturesCollector[]  objs, int from, int to, Permutation[] res ) {
 			this.from = from;
 			this.to = to;
 			this.objs = objs;
@@ -279,7 +279,7 @@ public class Permutation implements IFeature {
 	}
 
 	
-	public static Permutation[] getAll( IFeaturesCollector[] objs, IFeaturesCollector[] ro, ISimilarity sim) {
+	public static Permutation[] getAll( AbstractFeaturesCollector[] objs, AbstractFeaturesCollector[] ro, ISimilarity sim) {
 		Permutation[] perm = new Permutation[objs.length];
 		
 		// kNNQueues are performed in parallels
@@ -310,12 +310,12 @@ public class Permutation implements IFeature {
 	public static class PermThread implements Runnable {
 		private final int from;
 		private final int to;
-		private final IFeaturesCollector[] objs;
-		private final IFeaturesCollector[] ro;
+		private final AbstractFeaturesCollector[] objs;
+		private final AbstractFeaturesCollector[] ro;
 		private final ISimilarity sim;
-		private final IFeaturesCollector[] res;
+		private final AbstractFeaturesCollector[] res;
 
-		public PermThread(IFeaturesCollector[] ro, ISimilarity sim, IFeaturesCollector[]  objs, int from, int to, IFeaturesCollector[] res ) {
+		public PermThread(AbstractFeaturesCollector[] ro, ISimilarity sim, AbstractFeaturesCollector[]  objs, int from, int to, AbstractFeaturesCollector[] res ) {
 			this.from = from;
 			this.to = to;
 			this.objs = objs;
@@ -341,21 +341,21 @@ public class Permutation implements IFeature {
 		}
 	}
 	
-	public static void featuresCollectorsArchiveConvert(File inFile, File outFile, IFeaturesCollector[] ro, ISimilarity sim) throws Exception {
+	public static void featuresCollectorsArchiveConvert(File inFile, File outFile, AbstractFeaturesCollector[] ro, ISimilarity sim) throws Exception {
 		FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive(inFile, false);
 		Log.info("FeaturesCollectorsArchiveConvert is creating new FCArchive: " + outFile.getAbsolutePath());
 		FeaturesCollectorsArchive_Buffered outArchive = new FeaturesCollectorsArchive_Buffered(outFile, new FeatureClassCollector(Permutation.class), inArchive.getIDClass(), FeatureCollector.class);
 		
 		int batchSize = 10000;
-		IFeaturesCollector[] objs = new IFeaturesCollector[batchSize] ;
-		IFeaturesCollector[] tResults = new IFeaturesCollector[batchSize] ;
-		Iterator<IFeaturesCollector> it = inArchive.iterator();
+		AbstractFeaturesCollector[] objs = new AbstractFeaturesCollector[batchSize] ;
+		AbstractFeaturesCollector[] tResults = new AbstractFeaturesCollector[batchSize] ;
+		Iterator<AbstractFeaturesCollector> it = inArchive.iterator();
 		int count =0;
 		while( it.hasNext() ) {
 			
 			// reading objects in batch
 			for ( int i=0; i<objs.length; i++  ) {
-				IFeaturesCollector fc = null;
+				AbstractFeaturesCollector fc = null;
 				if ( it.hasNext() ) {
 					objs[i] = it.next();
 				} else {
