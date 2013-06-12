@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.UUID;
 
 public class RandomOperations {
 	final static Random r = new Random(System.currentTimeMillis());
@@ -99,6 +100,25 @@ public class RandomOperations {
 			int temp =getInt(min, max);
 			while(hSet.contains(temp)) {
 				temp =getInt(min, max);
+			}
+			arr[i] = temp;
+			hSet.add(temp);
+		}
+		return arr;
+	}
+	
+	/**
+	 * @param size
+	 * @param max	Inclusive max
+	 * @return
+	 */
+	public static int[] getDistinctIntArray(int size, int max) {
+		HashSet<Integer> hSet = new HashSet(2*size);
+		int[] arr = new int[size];
+		for ( int i=0; i<arr.length; i++) {
+			int temp = getInt( max);
+			while(hSet.contains(temp)) {
+				temp = getInt( max);
 			}
 			arr[i] = temp;
 			hSet.add(temp);
@@ -313,6 +333,49 @@ public class RandomOperations {
 		return r.nextBoolean();
 	}
 
-
+	
+	public static String getRandomUUIdString() {
+		UUID uuid = UUID.randomUUID();
+        String randomUUIDString = uuid.toString();
+        return randomUUIDString;
+	}
+	
+	
+	public static final int[] getPerturbated(int[] orig, int nBitsPerturbated) {
+		int[] res = orig.clone();
+		int nBits = Integer.SIZE * res.length;
+		for(int i=0; i<nBits; i++) {
+			int currRandom = RandomOperations.getInt(nBits);
+			int int_pos = currRandom/Integer.SIZE;
+			int mask = 1<<currRandom%Integer.SIZE;
+			res[int_pos]=res[int_pos]^mask;
+		}
+		return res;
+	}
+	
+//	public static final long[] getPerturbated(long[] orig, int nBitsPerturbated) {
+//		long[] res = orig.clone();
+//		int nBits = Long.SIZE * res.length;
+//		for(int i=0; i<nBits; i++) {
+//			int currRandom = RandomOperations.getInt(nBits);
+//			int int_pos = currRandom/Long.SIZE;
+//			long mask = (long) 1<<currRandom%Long.SIZE;
+//			res[int_pos]=res[int_pos]^mask;
+//		}
+//		return res;
+//	}
+	
+	public static final long[] getPerturbated(long[] orig, int nBitsPerturbated) {
+		long[] res = orig.clone();
+		int nBits = Long.SIZE * orig.length;
+		int[] pert = RandomOperations.getDistinctIntArray(nBitsPerturbated, nBits-1);
+		
+		for(int bit : pert) {
+			int pos = bit/Long.SIZE;
+			long mask = ((long) 1)<<bit%Long.SIZE;
+			res[pos]=res[pos]^mask;
+		}
+		return res;
+	}
 	
 }

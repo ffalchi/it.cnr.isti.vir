@@ -11,18 +11,20 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.index;
 
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.ISimilarity;
-import it.cnr.isti.vir.similarity.knn.KNNExecuter;
+import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.knn.KNNPQueue;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
+import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class SimilarityCollection implements KNNExecuter {
+public class SimilarityCollection implements IkNNExecuter {
 
 	protected ISimilarity sim;
 	protected Collection coll = null;
@@ -44,7 +46,7 @@ public class SimilarityCollection implements KNNExecuter {
 	}
 
 	@Override
-	public synchronized ISimilarityResults getKNNResults(AbstractFeaturesCollector qObj, int k) {
+	public synchronized ISimilarityResults getKNNResults(AbstractFeature qObj, int k) {
 		//KNNObjects knn = new KNNObjects(qObj, k, sim);
 		KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj );
 		knn.offerAll(coll);

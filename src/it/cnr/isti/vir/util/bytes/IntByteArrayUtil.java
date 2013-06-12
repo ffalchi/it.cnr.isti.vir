@@ -50,10 +50,10 @@ public class IntByteArrayUtil {
 	 * @param byteOffset	Destination offset
 	 * @return				Updated offset
 	 */
-	public static final int intArrayToByteArray(int[] n, byte[] byteArray, int byteOffset) {
+	public static final int convToBytes(int[] n, byte[] byteArray, int byteOffset) {
 		int index = byteOffset;
 		for ( int i=0; i<n.length; i++) {
-			index = intToByteArray(n[i], byteArray, index );
+			index = convToBytes(n[i], byteArray, index );
 		}
 		return index;
 	}
@@ -65,7 +65,7 @@ public class IntByteArrayUtil {
 	 * @param byteOffset	Destination offset
 	 * @return				Updated offset
 	 */
-	public static final int intToByteArray(int value, byte[] encodedValue, int byteOffset) {
+	public static final int convToBytes(int value, byte[] encodedValue, int byteOffset) {
 	    int index = byteOffset;
 	    encodedValue[index++] = (byte) (value >> Byte.SIZE * 3);
 	    encodedValue[index++] = (byte) (value >> Byte.SIZE * 2);   

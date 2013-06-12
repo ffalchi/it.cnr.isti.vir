@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<name>Feature2D.ORB</name>
+<WTA_K>2</WTA_K>
+<edgeThreshold>31</edgeThreshold>
+<firstLevel>0</firstLevel>
+<nFeatures>2000</nFeatures>
+<nLevels>8</nLevels>
+<patchSize>31</patchSize>
+<scaleFactor>1.2000000476837158e+000</scaleFactor>
+<scoreType>0</scoreType>
+</opencv_storage>

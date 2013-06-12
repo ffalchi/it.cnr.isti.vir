@@ -344,7 +344,7 @@ public class Permutation extends AbstractFeature {
 	public static void featuresCollectorsArchiveConvert(File inFile, File outFile, AbstractFeaturesCollector[] ro, ISimilarity sim) throws Exception {
 		FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive(inFile, false);
 		Log.info("FeaturesCollectorsArchiveConvert is creating new FCArchive: " + outFile.getAbsolutePath());
-		FeaturesCollectorsArchive_Buffered outArchive = new FeaturesCollectorsArchive_Buffered(outFile, new FeatureClassCollector(Permutation.class), inArchive.getIDClass(), FeatureCollector.class);
+		FeaturesCollectorsArchive_Buffered outArchive = new FeaturesCollectorsArchive_Buffered(outFile, inArchive.getIDClass(), FeatureCollector.class);
 		
 		int batchSize = 10000;
 		AbstractFeaturesCollector[] objs = new AbstractFeaturesCollector[batchSize] ;

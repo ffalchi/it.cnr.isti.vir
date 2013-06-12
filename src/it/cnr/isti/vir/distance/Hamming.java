@@ -21,8 +21,8 @@ public class Hamming {
 		return acc;
 	}
 	
-	public static final float distance_norm(long[] bits1, long[] bits2) {
-		return distance(bits1, bits2) / (64*bits1.length);
+	public static final float distance_norm(long[] bits1, long[] bits2, int nBits) {
+		return distance(bits1, bits2) / (float) nBits;
 	}
 	
 

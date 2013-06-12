@@ -15,6 +15,8 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.similarity.ISimilarity;
+import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
+import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch_multiSim;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.Log;
@@ -187,7 +189,8 @@ public class FeaturesCollectorsArchives {
 
 		for (int i = 0; i < archive.length; i++) {
 			Log.info_verbose("... searching in archive " + archive[i].getfile());
-			archive[i].getKNN(qObj, kNNQueue, sim, onlyID);
+			FeaturesCollectorsArchiveSearch search = new FeaturesCollectorsArchiveSearch(archive[i]);
+			search.getKNN(qObj, kNNQueue, sim, onlyID);
 		}
 
 		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
@@ -213,7 +216,8 @@ public class FeaturesCollectorsArchives {
 
 		for (int i = 0; i < archive.length; i++) {
 			Log.info_verbose("... searching in archive " + archive[i].getfile());
-			archive[i].getKNNs(qObj, kNNQueue, sim, onlyID);
+			FeaturesCollectorsArchiveSearch_multiSim search = new FeaturesCollectorsArchiveSearch_multiSim(archive[i]);
+			search.getKNNs(qObj, kNNQueue, sim, onlyID);
 		}
 
 		SimilarityResults[][] res = new SimilarityResults[sim.length][qObj.length];

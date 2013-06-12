@@ -155,7 +155,7 @@ public class KeyPoint {
 	
 
 	public String toString() {
-		return "{[" + xy[0] + ", " + xy[1] + "], " + ori + ", " + size + "}";
+		return "kp: " + xy[0] + " " + xy[1] + " " + ori + " " + size;
 	}
 	
 }

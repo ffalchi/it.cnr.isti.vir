@@ -14,9 +14,12 @@ package it.cnr.isti.vir.features.bof;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClasses;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.BoFLF;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
+import it.cnr.isti.vir.features.localfeatures.BoFLFSoft;
+import it.cnr.isti.vir.features.localfeatures.BoFLFSoftGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
@@ -542,8 +545,7 @@ public class LFWords<F> {
 			 bag[i1]=getNNIndex(features[i1]);
 		 }return bag;
 	 }
-/*
-	public final BoFLFSoft[] getBoFLFSoftArr_noPivotedFiltering(final F[] features, final int k, final BoFLFGroupSoft group) {
+	public final BoFLFSoft[] getBoFLFSoftArr_noPivotedFiltering(final F[] features, final int k, final BoFLFSoftGroup group) {
 		
 		BoFLFSoft[] bag = new BoFLFSoft[features.length];
 		for (int i1=0; i1<features.length; i1++) {
@@ -551,10 +553,10 @@ public class LFWords<F> {
 		}
 		return bag;
 	}
-	*/ 
+	
 	// PARALLEL !!!
-	/*
-	public final BoFLFSoft[] getBoFLFSoftArr_noPivotedFiltering(final F[] features, final int k, final BoFLFGroupSoft group) {
+/*
+	public final BoFLFSoft[] getBoFLFSoftArr_noPivotedFiltering(final F[] features, final int k, final BoFLFSoftGroup group) {
 				
 		final BoFLFSoft[] bag = new BoFLFSoft[features.length];
 
@@ -584,7 +586,7 @@ public class LFWords<F> {
 		
 		return bag;
 	}
-	*/
+*/
 	
 	// PARALLEL !!!
 	 /*
@@ -712,8 +714,8 @@ public class LFWords<F> {
         return res;
 	}*/
 	
-	 /*
-	public final BoFLFSoft[] getBoFLFArrSoft(F[] features, int k, BoFLFGroupSoft group) {
+	 
+	public final BoFLFSoft[] getBoFLFArrSoft(F[] features, int k, BoFLFSoftGroup group) {
 		
 		BoFLFSoft[] res = null;
 //		if (sim.getClass().equals(SURFMetric.class)) {
@@ -734,7 +736,7 @@ public class LFWords<F> {
 
 		return res;
 	}
-	*/
+	
 	
 	public final int[] getBags(F[] features) {
 //		if ( miFile != null ) {
@@ -1163,8 +1165,8 @@ public class LFWords<F> {
 		}*/		
 
 	}
-	/*
-	public final BoFLFSoft getBoFLFSoft(F feature, int k, BoFLFGroupSoft group) {
+	
+	public final BoFLFSoft getBoFLFSoft(F feature, int k, BoFLFSoftGroup group) {
 		
 		SimPQueue_kNN queue = new SimPQueue_kNN(k);
 		for (int i = 0; i < size; i++) {
@@ -1174,24 +1176,22 @@ public class LFWords<F> {
 		}
 		int[] bags = new int[k];
 		float[] ds = new float[k];
-		ISimilarityResults res = queue.getResults();
+		ISimilarityResults results = queue.getResults();
 		int i=0;
-		for ( Iterator<ObjectWithDistance> it = res.iterator(); it.hasNext(); ) {
+		for ( Iterator<ObjectWithDistance> it = results.iterator(); it.hasNext(); ) {
 			ObjectWithDistance curr = it.next();
 			bags[i] = (Integer) curr.getObj();
 			ds[i] = (float) curr.getDist();
 			i++;
 		}
-		ILocalFeature lf = (ILocalFeature) feature;
-		return new BoFLFSoft(
+		ALocalFeature lf = (ALocalFeature) feature;
+		BoFLFSoft res =  new BoFLFSoft(
+				lf.getKeyPoint(),
                 bags,
-                ds,
-                lf.getXY(),
-                lf.getOrientation(),
-                lf.getScale(),
-                group);
+                ds);
+		res.setLinkedGroup(group);
 		
-			
+		return res;
 //		} else {
 //			FeaturesCollector_SingleWithIDClassified nn = (FeaturesCollector_SingleWithIDClassified) index
 //					.getNN(new FeaturesCollector_SingleWithIDClassified(
@@ -1200,7 +1200,7 @@ public class LFWords<F> {
 //		}
 
 	}
-*/
+
 	public final int getNNIndex(F feature) {
 		double nnDist = sim.distance(feature, fArr[0]);
 		int nnIndex = 0;
@@ -1292,6 +1292,10 @@ public class LFWords<F> {
 
 	public String toString() {
 		String temp = "";
+		
+		for ( int i=0; i<fArr.length; i++ ) {
+			temp += i + "\t" + fArr[i] + "\n";
+		}
 		
 		temp += "eval:";
 		if ( eval != null)

@@ -372,9 +372,9 @@ public class KMeans<O extends AbstractFeature> {
 				"\tnIter"	+
 				"\tc"+
 				"\tchg"+			
-				"\tdist" +		
-				"\t\t\tdRed" +	
-				"\t\t\tsecs" );		
+				"\tdistortion" +		
+				"\tdistRed" +	
+				"\tsecs" );		
 		
 		clusters = new ArrayList[centroids.length];
 		for ( int i=0; i<clusters.length; i++) {
@@ -544,6 +544,12 @@ public class KMeans<O extends AbstractFeature> {
 			
 		}
 		
+		System.out.println();
+		System.out.print("clusters sizes:");
+		long[] size = getClusterSizes();
+		for ( long l : size ) {
+			System.out.print("\t" + l ) ;
+		}
 		System.out.println();
 		/*
 		if ( centroids[0] instanceof IHasID ) {

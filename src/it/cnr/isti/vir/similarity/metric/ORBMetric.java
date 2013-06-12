@@ -12,18 +12,18 @@
 package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
-import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.ORB;
-import it.cnr.isti.vir.features.localfeatures.SIFT;
-import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
+import it.cnr.isti.vir.features.localfeatures.ORBGroup;
 
 import java.util.Collection;
 import java.util.Properties;
 
 public class ORBMetric implements IMetric<ORB>, ILocalFeaturesMetric<ORB>, IMeanEvaluator<ORB> {
 
-	private static long distCount = 0;
+	private static long distCount;
+	
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORB.class);
 	
 	public final long getDistCount() {
@@ -45,13 +45,12 @@ public class ORBMetric implements IMetric<ORB>, ILocalFeaturesMetric<ORB>, IMean
 	
 	@Override
 	public final Class getRequestedFeatureClass() {
-		return SIFT.class;
+		return ORB.class;
 	}
 	
 	public String toString() {
 		return this.getClass().toString();
 	}
-
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
@@ -81,7 +80,7 @@ public class ORBMetric implements IMetric<ORB>, ILocalFeaturesMetric<ORB>, IMean
 	
 	@Override
 	public final Class getRequestedFeatureGroupClass() {
-		return SIFTGroup.class;
+		return ORBGroup.class;
 	}
 	
 }

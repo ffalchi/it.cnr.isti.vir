@@ -17,8 +17,8 @@ public class ORBGroupTest {
 		
 		ORB[] f = new ORB[rnd.nextInt(1000)];
 		for ( int i1=0; i1<f.length; i1++) {
-			long[] data = new long[ORB.VLENGTH];
-			for ( int i=0; i<ORB.VLENGTH; i++ ) {
+			long[] data = new long[ORB.NLONG];
+			for ( int i=0; i<ORB.NLONG; i++ ) {
 				data[i] = rnd.nextLong();
 			}
 			f[i1] = new ORB(KeyPoint.getRandom(), data );		

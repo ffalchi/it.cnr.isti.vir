@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
-public interface ISimilarityResults<E>  {
+public interface ISimilarityResults<E> extends Iterable<ObjectWithDistance<E>> {
 
 	public Iterator<ObjectWithDistance<E>> iterator();
 	

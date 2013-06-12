@@ -27,23 +27,31 @@ import java.util.Arrays;
 public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 
     public static final byte version = 1;
-    protected final LFWords fWords;
+    protected LFWords fWords;
     protected double magnitude = -1.0;
     protected double magnitude_TFIDF = -1.0;
     protected double magnitude_IDF = -1.0;
     protected static final double log2 = Math.log(2.0);
     
 
+    
+    public LFWords getfWords() {
+		return fWords;
+	}
+
+
+	public void setfWords(LFWords fWords) {
+		this.fWords = fWords;
+	}
+
+
+    
 	@Override
 	public byte getSerVersion() {
 		return version;
 	}
     
-    
-	public BoFLFGroup(DataInput in) throws Exception {
-		this(in, null);
-	}
-	
+
 	public int[] getWords() {
 		int[] res = new int[lfArr.length];
 		
@@ -72,8 +80,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 		return min;
 	}
 	
-	public BoFLFGroup(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
-		super(fc);
+	public BoFLFGroup(DataInput in ) throws Exception {
 		
 		fWords = null;
 		byte version = in.readByte();
@@ -99,25 +106,19 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 			ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
 			lfArr = new BoFLF[bBuffer.getInt()];
 			for (int i = 0; i < lfArr.length; i++) {
-				this.lfArr[i] = new BoFLF(bBuffer);
+				lfArr[i] = new BoFLF(bBuffer);
 				lfArr[i].setLinkedGroup(this);
 			}
 		}
 	}
 
-    public BoFLFGroup(ByteBuffer in, LFWords fWords, AbstractFeaturesCollector fc) throws Exception {
-        super(fc);
-        this.fWords = fWords;
+    public BoFLFGroup(ByteBuffer in ) throws Exception {
         byte version = in.get();
         		
 		if ( version < 1 ) {
 			// VERSION 0;
 	        int size = in.getInt();
 	        lfArr = new BoFLF[size];
-	//        if (size == 0) {
-	//            return;
-	//        }
-	
 	        for (int i = 0; i < size; i++) {
 	            lfArr[i] = BoFLF.read_old(in, this);
 	        }
@@ -133,24 +134,20 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 			}
 		}
     }
+    
+    
+	public BoFLFGroup(BoFLF[] arr ) throws Exception {
+		fWords = null;
+		lfArr = arr;
+		Arrays.sort(lfArr);
+	}
+    
 	public BoFLFGroup(BoFLF[] arr, AbstractFeaturesCollector fc, LFWords words ) throws Exception {
 		super(fc);
 		fWords = words;
 		lfArr = arr;
 		Arrays.sort(lfArr);
 	}
-	
-    public BoFLFGroup(ByteBuffer in, LFWords fWords) throws Exception {
-        this(in, fWords, null);
-    }
-    
-    public BoFLFGroup(ByteBuffer in, AbstractFeaturesCollector fc) throws Exception {
-        this(in, null, fc);
-    }
-    
-    public BoFLFGroup(ByteBuffer in ) throws Exception {
-        this(in, null, null);
-    }
 
 
 	public BoFLFGroup(ALocalFeaturesGroup group, LFWords fWords) {
@@ -172,11 +169,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 	        for (int i = 0; i < temp.length; i++) {
 	            lfArr[i] = new BoFLF(
 	                    temp[i],
-	                    new KeyPoint(
-	                    	features[i].getXY(),
-	                    	features[i].getOrientation(),
-	                    	features[i].getScale()
-	                    ),
+	                    features[i].kp,
 	                    this);
 	        }
         }

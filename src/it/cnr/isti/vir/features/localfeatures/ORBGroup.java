@@ -88,15 +88,6 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	    }
 	}
 	
-	public String toString() {
-		String tStr = "ORBGroup of " + this.size() + " ORBs\n";
-		for ( ORB o : lfArr ) {
-			tStr += o.toString();
-		}
-		return tStr;
-		
-	}
-	
 	static final public double getRangePercMatches(
 			ALocalFeaturesGroup<ORB> sg1,
 			ALocalFeaturesGroup<ORB> sg2,
@@ -109,7 +100,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 			}
 		}
 		
-		return count/sg1.size();
+		return count / (double) sg1.size();
 	}
 	
 	/**
@@ -120,7 +111,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	 */
 	static final public boolean hasMatchBelowRadius(ORB s1, ALocalFeaturesGroup<ORB> sg, int range) {
 		for (ORB f:sg.lfArr) {
-			if ( s1.getDistance(s1, f) <= range) {
+			if ( ORB.getDistance(s1, f) <= range) {
 				return true;
 			}
 		}
@@ -134,5 +125,92 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		
 		return new ORBGroup(lfArr);
 	}
+	
+	static final public ORB getLoweMatch(ORB s1, ALocalFeaturesGroup<ORB> sg,
+			double conf, int maxFDsq) {
+		int distsq1 = Integer.MAX_VALUE;
+		int distsq2 = Integer.MAX_VALUE;
+		int dsq = 0;
+		ORB curr, best = null;
+		ORB[] arr = sg.lfArr;
+		for (int i = 0; i < arr.length; i++) {
+			curr = arr[i];
+			dsq = ORB.getDistance(s1, curr);
+			if (dsq < 0)
+				continue;
+			if (dsq < distsq1) {
+				distsq2 = distsq1;
+				distsq1 = dsq;
+				best = curr;
+			} else if (dsq < distsq2) {
+				distsq2 = dsq;
+			}
+		}
+
+		// System.out.print(bestSIFT.scale + "\t");
+		// if ( bestSIFT.scale > 4 ) return null;
+		if (distsq1 > maxFDsq)
+			return null;
+		if (distsq2 == 0)
+			return null;
+		/*
+		 * Check whether closest distance is less than ratio threshold of
+		 * second.
+		 */
+		if ((double) distsq1 / (double) distsq2 < conf)
+			return best;
+		return null;
+	}
+
+	static final public ORB getLoweMatch(ORB s1, ALocalFeaturesGroup<ORB> sg,
+			double conf) {
+		int distsq1 = Integer.MAX_VALUE;
+		int distsq2 = Integer.MAX_VALUE;
+		int dsq = 0;
+		ORB curr, best = null;
+
+		ORB[] arr = sg.lfArr;
+		for (int i = 0; i < arr.length; i++) {
+			curr = arr[i];
+			dsq = ORB.getDistance(s1, curr );
+			if (dsq < distsq1) {
+				distsq2 = distsq1;
+				distsq1 = dsq;
+				best = curr;
+			} else if (dsq < distsq2) {
+				distsq2 = dsq;
+			}
+		}
+
+		if (distsq2 == 0)
+			return null;
+		/*
+		 * Check whether closest distance is less than ratio threshold of
+		 * second.
+		 */
+		if ((double) distsq1 / (double) distsq2 < conf)
+			return best;
+		return null;
+	}
+	
+	static final public double getLowePercMatches(ALocalFeaturesGroup<ORB> sg1,
+			ALocalFeaturesGroup<ORB> sg2, double conf) {
+		return (double) getLoweNMatches(sg1, sg2, conf) / sg1.size();
+	}
+	
+	static final public int getLoweNMatches(ALocalFeaturesGroup<ORB> sg1,
+			ALocalFeaturesGroup<ORB> sg2, double conf) {
+		if (sg2.size() < 2)
+			return 0;
+		int nMatches = 0;
+		ORB[] arr = sg1.lfArr;
+		for (int i = 0; i < arr.length; i++) {
+			if (ORBGroup.getLoweMatch(arr[i], sg2, conf) != null)
+				nMatches++;
+		}
+
+		return nMatches;
+	}
+
 	
 }

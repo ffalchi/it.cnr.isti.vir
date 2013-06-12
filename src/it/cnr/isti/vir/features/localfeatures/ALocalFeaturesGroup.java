@@ -306,7 +306,7 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 		}*/
 	}
 	
-	protected final void readEval(ByteBuffer in) throws Exception {
+	protected final void readEval(ByteBuffer in) throws IOException {
 		boolean evalPresent = in.get() != 0;
 		/*
 		if (evalPresent) {
@@ -487,6 +487,15 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 		DataOutput foo = new DataOutputStream(backing);
 		this.writeData(foo);
 		return backing.toByteArray();
+	}
+	
+	public String toString() {
+		String tStr = this.getClass() + " of " + this.size() + " features\n";
+		for ( ALocalFeature o : lfArr ) {
+			tStr += o.toString();
+		}
+		return tStr;
+		
 	}
 	
 }

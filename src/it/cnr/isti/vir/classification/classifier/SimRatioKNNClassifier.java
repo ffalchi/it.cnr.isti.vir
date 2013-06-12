@@ -14,7 +14,7 @@ package it.cnr.isti.vir.classification.classifier;
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.classification.PredictedLabel;
-import it.cnr.isti.vir.similarity.knn.KNNExecuter;
+import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityLFGroup_ResultsArr;
@@ -28,7 +28,7 @@ public class SimRatioKNNClassifier extends AbstractKNNClassifier  {
 		super();
 	}
 	
-	public SimRatioKNNClassifier(KNNExecuter knnExec) {
+	public SimRatioKNNClassifier(IkNNExecuter knnExec) {
 		super(knnExec, 1);
 	}
 

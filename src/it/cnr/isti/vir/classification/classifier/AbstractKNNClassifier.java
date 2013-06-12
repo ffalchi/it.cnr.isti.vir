@@ -16,7 +16,7 @@ import it.cnr.isti.vir.classification.PredictedLabelWithSimilars;
 import it.cnr.isti.vir.classification.classifier.evaluation.TestDocumentSingleLabeled;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
-import it.cnr.isti.vir.similarity.knn.KNNExecuter;
+import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 
 import java.util.Collection;
@@ -26,7 +26,7 @@ import java.util.Properties;
 
 public abstract class AbstractKNNClassifier implements IClassifier {
 	
-	public final KNNExecuter knnExec;
+	public final IkNNExecuter knnExec;
 	
 	protected int k;
 	
@@ -38,7 +38,7 @@ public abstract class AbstractKNNClassifier implements IClassifier {
 		knnExec = null;
 	}
 	
-	public AbstractKNNClassifier(KNNExecuter knnExec, int k) {
+	public AbstractKNNClassifier(IkNNExecuter knnExec, int k) {
 		this.knnExec = knnExec;
 		this.k = k;
 	}

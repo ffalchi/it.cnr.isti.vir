@@ -24,30 +24,29 @@ import java.util.Iterator;
 
 public class ORB extends ALocalFeature<ORBGroup> {
 
-	static final int VLENGTH = 4;
-	static final int BYTES_LENGTH = VLENGTH * Long.SIZE / Byte.SIZE;
-
+	public static final int NLONG = 4;
+	public static final int BYTES_LENGTH = NLONG * Long.SIZE / Byte.SIZE;
+	public static final int BITS_LENGTH = Byte.SIZE * BYTES_LENGTH;
+	// 256 bits in 4x8 bytes
+	private final long[] data;
 	
 	public final int getDataByteSize() {
 		return BYTES_LENGTH;
 	}
-	
-	// 512 bits in 8x8 bytes
-	private final long[] data;
 	
 	public ORB(KeyPoint kp, long[] data) {
 		this.kp = kp;
 		this.data = data;
 	}
 	
-	public final int putBytes(byte[] bArr, int bArrI) {
+	public final int putDescriptor(byte[] bArr, int bArrI) {
 		return LongByteArrayUtil.convToBytes(data, bArr, bArrI);
 	}
 		
 	public ORB(DataInput str) throws IOException {
 		super(str);
-		data = new long[VLENGTH];
-		for ( int i=0; i<VLENGTH; i++ ) {
+		data = new long[NLONG];
+		for ( int i=0; i<NLONG; i++ ) {
 			data[i] = str.readLong();
 		}
 
@@ -55,8 +54,8 @@ public class ORB extends ALocalFeature<ORBGroup> {
 	
 	public ORB(ByteBuffer src ) throws IOException {
 		super(src);
-		data = new long[VLENGTH];
-		for ( int i=0; i<VLENGTH; i++ ) {
+		data = new long[NLONG];
+		for ( int i=0; i<NLONG; i++ ) {
 			data[i] = src.getLong();
 		}
 	}
@@ -90,7 +89,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		
 		if ( coll.size() == 0 ) return null;
 		
-		int[] bitSum = new int[VLENGTH*Long.SIZE];
+		int[] bitSum = new int[NLONG*Long.SIZE];
 		
 		for ( Iterator<ORB> it = coll.iterator(); it.hasNext(); ) {
 			long[] currVec = it.next().data;
@@ -106,7 +105,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 			}
 		}
 		
-		long[] newValues = new long[VLENGTH];
+		long[] newValues = new long[NLONG];
 		
 		int threshold = coll.size() / 2;
 		long oneLong = 1;
@@ -126,7 +125,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 	
 		
 	public static float getDistance_Norm(ORB o1, ORB o2) {
-		return Hamming.distance_norm(o1.data, o2.data);
+		return Hamming.distance_norm(o1.data, o2.data, BITS_LENGTH);
 	}
 	
 	public static int getDistance(ORB o1, ORB o2) {
@@ -158,17 +157,18 @@ public class ORB extends ALocalFeature<ORBGroup> {
 
 	
 	public String toString() {
-		String tStr = "";
-		if ( kp != null ) {
-			tStr += kp.toString();
-		} else {
-			tStr += "{null}";
-		}
+		String tStr = super.toString();
+		tStr += "\tdata:";
 		for ( long value : data ) {
-			tStr += " " + value;
+			tStr += "\t" + value;
 		}
 		tStr += "\n";
 		return tStr;
+	}
+	
+	public ORB getRandomPerturbated(int nBits) {
+		long[] newData = RandomOperations.getPerturbated(data, nBits);
+		return new ORB(this.kp, newData);
 	}
 
 

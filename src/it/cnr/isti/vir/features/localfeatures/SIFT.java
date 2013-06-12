@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 public class SIFT extends ALocalFeature<SIFTGroup> {
 
-	static final int vLen = 128;
+	public static final int VLEN = 128;
     private final static float sqrt2 = (float) Math.sqrt(2.0);
 	private static final double maxSQRDistValue = 255 * 255 * 128;
 	
@@ -35,24 +35,24 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 	public SIFT(DataInput str ) throws IOException {
 		super(str);
 
-		values = new byte[vLen];
+		values = new byte[VLEN];
 		str.readFully(values);
 	}
 	
 	public SIFT(ByteBuffer src ) throws IOException {
 		super(src);
 
-		values = new byte[vLen];
+		values = new byte[VLEN];
 		src.get(values);
 	}
 	
 	public int getDataByteSize() {
-		return vLen;
+		return VLEN;
 	}
 	
-	public int putBytes(byte[] bArr, int bArrI) {
-		System.arraycopy(values, 0, bArr, bArrI, vLen);
-		return bArrI + vLen;
+	public int putDescriptor(byte[] bArr, int bArrI) {
+		System.arraycopy(values, 0, bArr, bArrI, VLEN);
+		return bArrI + VLEN;
 	}
 	
 	public byte[] getValues() {
@@ -64,7 +64,9 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 		this.values = values;
 	}
 
-	
+	public SIFT(KeyPoint kp, byte[] values) {
+		this(kp, values, null);
+	}
 	
 	public SIFT(KeyPoint kp, byte[] values, SIFTGroup group) {
 		this.kp = kp;
@@ -156,9 +158,10 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 	}
 
 	public String toString() {
-		String tStr = kp + "[";
+		String tStr = super.toString();
+		tStr+= "[";
 		for (int i=0; i<values.length; i++ ) {
-			tStr += ", " + values[i];
+			tStr += values[i] + " ";
 		}
 		tStr+="]\n";
 		return tStr;
@@ -168,7 +171,7 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 	 *  returns true if all values are zero
 	 */
 	public boolean hasZeroValues() {
-		for ( int i=0; i<vLen; i++) {
+		for ( int i=0; i<VLEN; i++) {
 			if ( values[i] != 0 ) return false;
 		}
 		return true;
@@ -200,8 +203,8 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 		
 		KeyPoint kp = new KeyPoint(x, y, ori, scale);
 				
-		byte[] values = new byte[vLen];			
-		for ( int iValues=0; iValues<vLen; iValues++ ) {
+		byte[] values = new byte[VLEN];			
+		for ( int iValues=0; iValues<VLEN; iValues++ ) {
 			values[iValues] = src.get();
 		}
 		
@@ -221,8 +224,8 @@ public class SIFT extends ALocalFeature<SIFTGroup> {
 			
 			float[] tData = FloatByteArrayUtil.get(byteArr, currIndex, 4); 	// TO DO !!!
 						
-			byte[] tValues = new byte[vLen];			
-			for ( int iValues=0; iValues<vLen; iValues++ ) {
+			byte[] tValues = new byte[VLEN];			
+			for ( int iValues=0; iValues<VLEN; iValues++ ) {
 				tValues[iValues]=byteArr[currIndex+4*8+iValues];
 			}
 			

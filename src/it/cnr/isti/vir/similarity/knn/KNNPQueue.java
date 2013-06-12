@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 public class KNNPQueue<F> {
 	
-	static boolean parallel = false;
+	static boolean parallel = true;
 
 	protected final AbstractSimPQueue pQueue;
 	protected final ISimilarity sim;
@@ -56,8 +56,7 @@ public class KNNPQueue<F> {
 			if ( storeID ) pQueue.offer( ((IHasID) obj).getID(),distance);
 			else pQueue.offer(obj, distance);
 			excDistance = pQueue.excDistance;
-		}
-		
+		}		
 	}
 	
 	public final void offerAll(Collection<F> coll) {
@@ -103,7 +102,7 @@ public class KNNPQueue<F> {
     }
 	
 	
-	public final synchronized void offerAll(F[] coll) {
+	public final void offerAll(F[] coll) {
 		
 		if ( parallel ) {
 			int threadN = ParallelOptions.nThreads;
@@ -162,7 +161,7 @@ public class KNNPQueue<F> {
         }                
     }
 	
-	public final synchronized void offerAll(ArrayList<F> coll) {
+	public final void offerAll(ArrayList<F> coll) {
 		
 		if ( parallel ) {
 			int threadN = ParallelOptions.nThreads;

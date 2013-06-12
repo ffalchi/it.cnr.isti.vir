@@ -210,15 +210,15 @@ public class BoF extends AbstractFeature {
 		res[0]=version;
 		offset+=1;
 		if ( fWords != null )
-			IntByteArrayUtil.intToByteArray(fWords.hashCode(), res, offset);
+			IntByteArrayUtil.convToBytes(fWords.hashCode(), res, offset);
 		else 
-			IntByteArrayUtil.intToByteArray(0, res, offset);
+			IntByteArrayUtil.convToBytes(0, res, offset);
 		offset+=4;
 		
-		IntByteArrayUtil.intToByteArray(bag.length, res, offset);
+		IntByteArrayUtil.convToBytes(bag.length, res, offset);
 		offset+=4;
 		
-		IntByteArrayUtil.intArrayToByteArray(bag, res, offset);
+		IntByteArrayUtil.convToBytes(bag, res, offset);
 		offset+=4*bag.length;
 		/*
 		FloatByteArrayUtil.floatArrayToByteArray(ori, 	res, offset);

@@ -52,7 +52,7 @@ public class CoPhIRCollectionReader {
 			// SAPIRObject.getFCClasses(), IDInteger.class, SAPIRObject.class );
 
 			FeaturesCollectorsArchive_Buffered archive = new FeaturesCollectorsArchive_Buffered(
-					archiveFile, SAPIRObject.getFCClasses(), IDInteger.class,
+					archiveFile, IDInteger.class,
 					SAPIRObject.class);
 			Log.info_verbose("Reading: " + listOfFiles[i]);
 			Log.info_verbose("Saving to: " + outputArchiveFileName);

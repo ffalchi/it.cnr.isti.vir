@@ -28,6 +28,10 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 		return version;
 	}
 	
+	public SIFTGroup(SIFT[] arr) {
+		super(arr);
+	}
+	
 	public SIFTGroup(SIFT[] arr, AbstractFeaturesCollector fc) {
 		super(arr, fc);
 	}
@@ -41,7 +45,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 	}
 
 	
-	public SIFTGroup(ByteBuffer in) throws Exception {
+	public SIFTGroup(ByteBuffer in) throws IOException {
 		byte version = in.get();
 		if ( version >= 2 ) {
 			// VERSION 2

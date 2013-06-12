@@ -16,9 +16,11 @@
 
 package it.cnr.isti.vir.similarity;
 
-import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
+
+import java.util.Properties;
 
 /**
  *
@@ -31,6 +33,10 @@ public class BoFCosSimilarity implements ISimilarity<BoFLFGroup> {
     public static final FeatureClassCollector reqFeatures = new FeatureClassCollector(BoFLFGroup.class);
     
     public BoFCosSimilarity( ) {
+        super();
+    }
+    
+    public BoFCosSimilarity( Properties pro) {
         super();
     }
 

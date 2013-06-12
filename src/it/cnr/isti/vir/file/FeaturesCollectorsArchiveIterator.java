@@ -11,14 +11,13 @@
  ******************************************************************************/
 package it.cnr.isti.vir.file;
 
-import it.cnr.isti.vir.features.FeaturesCollectors;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeaturesCollectors;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
@@ -26,9 +25,11 @@ import java.util.Iterator;
 public class FeaturesCollectorsArchiveIterator implements Iterator<AbstractFeaturesCollector>{
 	
 	private final DataInputStream in;
-	public final Constructor fcClassConstructor;
+	public final Constructor<? extends AbstractFeaturesCollector> fcClassConstructor;
 	
-	public FeaturesCollectorsArchiveIterator(File f, Constructor fcClassConstructor) throws IOException {
+	private boolean erorrState = false;
+	
+	public FeaturesCollectorsArchiveIterator(File f, Constructor<? extends AbstractFeaturesCollector> fcClassConstructor) throws IOException {
 		
 			in = new DataInputStream(
 				new BufferedInputStream(
@@ -40,6 +41,7 @@ public class FeaturesCollectorsArchiveIterator implements Iterator<AbstractFeatu
 
 	@Override
 	public boolean hasNext() {
+		if ( erorrState ) return false;
 		try {
 			return ( in.available() != 0 );
 		} catch (IOException e) {
@@ -57,6 +59,7 @@ public class FeaturesCollectorsArchiveIterator implements Iterator<AbstractFeatu
 				return (AbstractFeaturesCollector) fcClassConstructor.newInstance(in);
 			}
 		} catch ( Exception e ) {
+			erorrState = true;
 			e.printStackTrace();
 			return null;
 		}
@@ -65,6 +68,11 @@ public class FeaturesCollectorsArchiveIterator implements Iterator<AbstractFeatu
 	@Override
 	public void remove() {
 		 throw new UnsupportedOperationException(); 		
+	}
+	
+	@Override
+	public void finalize() throws IOException {
+		if ( in!= null ) in.close();
 	}
 
 }

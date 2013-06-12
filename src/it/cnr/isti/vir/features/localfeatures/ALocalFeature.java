@@ -27,7 +27,7 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 	
 	public abstract int getDataByteSize();
 	
-	public abstract int putBytes(byte[] byteArr, int offset);
+	public abstract int putDescriptor(byte[] byteArr, int offset);
 	
 	public final byte[] getBytes() {
 		int byteSize = 1;
@@ -45,7 +45,7 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 			bArrI = kp.putBytes(bytes, bArrI);
 		}
 		
-		bArrI = putBytes(bytes, bArrI);
+		bArrI = putDescriptor(bytes, bArrI);
 	
 		return bytes;
 	}
@@ -138,11 +138,7 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 	
 	public final void writeData(DataOutput str) throws IOException {
 		str.write(getBytes());
-	}
-	
-
-	
-	
+	}	
 	
 	public abstract Class<LFGroup> getGroupClass();
 	
@@ -166,6 +162,21 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 		return 0 == this.compareTo((ALocalFeature<LFGroup>) obj);
 	}
 
+	
+	public String toString() {
+		String tStr = "";
+		if ( kp != null ) {
+			tStr += kp.toString();
+		} else {
+			tStr += "kp: null ";
+		}
+		return tStr;
+	}
+	
+	public KeyPoint getKeyPoint() {
+		return kp;
+	}
+	
 	
 	//public abstract byte[] getBytes();
 	

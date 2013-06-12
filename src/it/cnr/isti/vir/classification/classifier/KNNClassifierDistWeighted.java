@@ -14,7 +14,7 @@ package it.cnr.isti.vir.classification.classifier;
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.classification.PredictedLabel;
-import it.cnr.isti.vir.similarity.knn.KNNExecuter;
+import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 
@@ -27,7 +27,7 @@ public class KNNClassifierDistWeighted extends AbstractKNNClassifier  {
 	public KNNClassifierDistWeighted() {
 	}
 	
-	public KNNClassifierDistWeighted(KNNExecuter knnExec, int k) {
+	public KNNClassifierDistWeighted(IkNNExecuter knnExec, int k) {
 		super(knnExec, k);
 	}
 	

@@ -17,10 +17,12 @@
 package it.cnr.isti.vir.file;
 
 import gnu.trove.list.array.TLongArrayList;
-import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.FeaturesCollectors;
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeaturesCollectorArr;
+import it.cnr.isti.vir.features.FeaturesCollectors;
 import it.cnr.isti.vir.id.AbstractID;
+import it.cnr.isti.vir.id.IDString;
 import it.cnr.isti.vir.id.IHasID;
 
 import java.io.BufferedOutputStream;
@@ -29,6 +31,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 /**
@@ -43,7 +46,6 @@ public class FeaturesCollectorsArchive_Buffered {
 	private final DataOutputStream out;
 	//private final RandomAccessFile rndFile;
 	private final File f;
-	private final FeatureClassCollector featuresClasses;
 	private final Constructor fcClassConstructor;
 
 	private final Class<? extends AbstractID> idClass;
@@ -52,8 +54,22 @@ public class FeaturesCollectorsArchive_Buffered {
 	File offsetFile;
 	File idFile;
 	
+	
+	public static  FeaturesCollectorsArchive_Buffered create(File file ) throws Exception {
+		return new FeaturesCollectorsArchive_Buffered(file, IDString.class, FeaturesCollectorArr.class );
+	}
+	
+	
+	public static  FeaturesCollectorsArchive_Buffered create(File file, Class<? extends AbstractID> idclass ) throws Exception {
+		return new FeaturesCollectorsArchive_Buffered(file, idclass, FeaturesCollectorArr.class );
+	}
+	
+	public static  FeaturesCollectorsArchive_Buffered create(File file, Class<? extends AbstractID> idclass, Class<? extends AbstractFeaturesCollector> fcClass ) throws Exception {
+		return new FeaturesCollectorsArchive_Buffered(file, idclass, fcClass );
+	}
+	
 	public FeaturesCollectorsArchive_Buffered(File file,
-			FeatureClassCollector featuresClasses, Class<? extends AbstractID> idClass, Class<? extends AbstractFeaturesCollector> fcClass)
+			Class<? extends AbstractID> idClass, Class<? extends AbstractFeaturesCollector> fcClass)
 			throws Exception {
 		
 		file.delete();
@@ -63,12 +79,11 @@ public class FeaturesCollectorsArchive_Buffered {
 				);
 		//rndFile = new RandomAccessFile(file, "rw");
 		this.f = file;
-		this.featuresClasses = featuresClasses;
 		this.idClass = idClass;
 		this.fcClass = fcClass;
 		this.fcClassConstructor = FeaturesCollectorsArchive.getFCConstructor(fcClass);
 
-		FeaturesCollectorsArchive.writeIntro(out, featuresClasses, idClass,	fcClass);
+		FeaturesCollectorsArchive.writeIntro(out, idClass,	fcClass);
 		
 		positions = new TLongArrayList();
 		ids = new ArrayList();
@@ -77,6 +92,10 @@ public class FeaturesCollectorsArchive_Buffered {
 		idFile = new File(FeaturesCollectorsArchive.getOffsetFileName(file));
 
 	}
+	
+	public synchronized void add(AbstractFeature f, AbstractID id ) throws ArchiveException, IOException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		add(fcClass.getConstructor(AbstractFeature.class, AbstractID.class).newInstance(f, id));
+	}	
 
 	public void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
 
@@ -110,5 +129,10 @@ public class FeaturesCollectorsArchive_Buffered {
 	public void close() throws IOException {
 		out.close();
 		FeaturesCollectorsArchive.createIndexFiles(offsetFile, idFile, positions, ids);		
+	}
+	
+	@Override
+	protected void finalize() throws IOException {
+		close();
 	}
 }

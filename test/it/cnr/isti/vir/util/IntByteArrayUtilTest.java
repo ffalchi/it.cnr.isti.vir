@@ -21,7 +21,7 @@ public class IntByteArrayUtilTest {
     		int value = rnd.nextInt();
     		int rndOffset = rnd.nextInt(MAX_OFFSET);
     		byte[] bytes = new byte[Integer.SIZE+rndOffset];
-    		IntByteArrayUtil.intToByteArray(value, bytes, rndOffset);
+    		IntByteArrayUtil.convToBytes(value, bytes, rndOffset);
     		int decodedValue = IntByteArrayUtil.get(bytes, rndOffset);
     		
     		assertTrue(decodedValue == value);
@@ -44,7 +44,7 @@ public class IntByteArrayUtilTest {
     		byte[] bytes = new byte[Integer.SIZE*rndArrLength+rndOffset];
     		
     		// Encoding and decoding
-    		IntByteArrayUtil.intArrayToByteArray(value, bytes, rndOffset);
+    		IntByteArrayUtil.convToBytes(value, bytes, rndOffset);
     		int[] decodedValue = IntByteArrayUtil.get(bytes, rndOffset, rndArrLength);
     		
     		assertTrue(Arrays.equals(decodedValue,value));

@@ -46,7 +46,7 @@ public class FloatByteArrayUtil {
 	 * @return				new offset
 	 */
 	public static final int convToBytes(float f, byte[] byteArray, int byteOffset) {
-		return IntByteArrayUtil.intToByteArray(Float.floatToRawIntBits(f), byteArray, byteOffset );
+		return IntByteArrayUtil.convToBytes(Float.floatToRawIntBits(f), byteArray, byteOffset );
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public class FloatByteArrayUtil {
 	public static final int convToBytes(float[] f, byte[] byteArray, int byteOffset) {
 		int offset = byteOffset;
 		for ( int i=0; i<f.length; i++) {
-			offset = IntByteArrayUtil.intToByteArray(Float.floatToRawIntBits(f[i]), byteArray, offset );
+			offset = IntByteArrayUtil.convToBytes(Float.floatToRawIntBits(f[i]), byteArray, offset );
 		}
 		return offset;
 	}

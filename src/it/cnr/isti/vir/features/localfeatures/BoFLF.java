@@ -24,6 +24,15 @@ public class BoFLF extends ALocalFeature<BoFLFGroup> {
 	
 	public final Class getGroupClass() { return BoFLFGroup.class; };
 	
+	public BoFLF(int bag ) {
+		this(bag, null);
+	}
+	
+	public BoFLF(int bag, KeyPoint kp ) {
+		this.kp = kp;
+		this.bag = bag;
+	}
+	
 	public BoFLF(int bag, KeyPoint kp, BoFLFGroup linkedGroup) {
 		this.kp = kp;
 		this.bag = bag;
@@ -36,20 +45,16 @@ public class BoFLF extends ALocalFeature<BoFLFGroup> {
 	
 	
 	public final int getDataByteSize() {
-		return 8;
+		return Integer.SIZE/Byte.SIZE;
 	}
 	
-	public int putBytes(byte[] bArr, int bArrI) {
-		IntByteArrayUtil.intToByteArray(bag, bArr, bArrI);
-		return bArrI + 8;
+	public int putDescriptor(byte[] bArr, int bArrI) {
+		return IntByteArrayUtil.convToBytes(bag, bArr, bArrI);
 	}
 	
 	public BoFLF(DataInput str) throws IOException {
-		
-		super(str);	
-		
+		super(str);			
 		bag = str.readInt();
-
 	}
 	
 	public BoFLF(ByteBuffer in) throws IOException {
@@ -82,19 +87,23 @@ public class BoFLF extends ALocalFeature<BoFLFGroup> {
 	}
 
 	@Override
-	public int compareTo(ALocalFeature o) {
+	public int compareTo(ALocalFeature<BoFLFGroup> o) {
 		BoFLF given = (BoFLF) o;
 		int tComp = Integer.compare(bag, given.bag);
 		if (tComp != 0) return tComp;
-		tComp = kp.compareTo(given.kp);
-		if (tComp != 0) return tComp;
+		if ( this.kp != given.kp ) {
+			if ( kp == null ) return -1;
+			if ( given.kp == null ) return 1;
+			tComp = this.kp.compareTo( given.kp);	
+			if ( tComp != 0 ) return tComp;
+		}
 		return 0;
 	}
 
 
 	public String toString() {
 		return bag + ", " + kp;
+		//return bag + " " ;
 	}
-
 
 }

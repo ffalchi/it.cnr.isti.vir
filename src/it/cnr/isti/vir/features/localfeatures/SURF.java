@@ -72,7 +72,7 @@ public class SURF extends ALocalFeature<SURFGroup> {
 	}
 
 	@Override
-	public int putBytes(byte[] byteArray, int bArrI) {
+	public int putDescriptor(byte[] byteArray, int bArrI) {
 		int offSet = bArrI;
 		offSet = FloatByteArrayUtil.convToBytes(data, byteArray, offSet);
 		byteArray[bArrI++] = laplace;

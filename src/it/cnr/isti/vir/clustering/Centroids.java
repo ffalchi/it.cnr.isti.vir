@@ -11,10 +11,10 @@
  ******************************************************************************/
 package it.cnr.isti.vir.clustering;
 
-import it.cnr.isti.vir.features.FeatureClasses;
-import it.cnr.isti.vir.features.FeaturesCollectors;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClasses;
+import it.cnr.isti.vir.features.FeaturesCollectors;
 import it.cnr.isti.vir.id.IHasID;
 
 import java.io.BufferedInputStream;
@@ -82,7 +82,7 @@ public class Centroids {
 		if ( version > 0 ) {
 			readingFC = in.readBoolean();
 		}
-		Class<AbstractFeature> c = null;
+		Class c = null;
 		if ( readingFC ) {
 			c = FeaturesCollectors.getClass(in.readByte());
 		} else {

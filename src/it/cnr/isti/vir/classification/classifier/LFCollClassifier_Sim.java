@@ -19,7 +19,7 @@ import it.cnr.isti.vir.classification.classifier.evaluation.TestDocumentSingleLa
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
-import it.cnr.isti.vir.similarity.knn.KNNExecuter;
+import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 
@@ -29,7 +29,7 @@ import java.util.LinkedList;
 
 public class LFCollClassifier_Sim implements IClassifier {
 
-	protected KNNExecuter knnIndex;
+	protected IkNNExecuter knnIndex;
 	protected LFCollClassifier classifier;
 	protected int k;
 	protected double internalKFactor;
@@ -37,7 +37,7 @@ public class LFCollClassifier_Sim implements IClassifier {
 	
 
 	public LFCollClassifier_Sim(LFCollClassifier classifier,
-								KNNExecuter knnIndex,
+								IkNNExecuter knnIndex,
 								FeaturesCollectorsArchives archives,
 								int k,
 								double internalKFactor ) {

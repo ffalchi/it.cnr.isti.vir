@@ -36,21 +36,26 @@ public class FeaturesCollectors {
 	static final Constructor<?>[] constructors 	= ClassIDs.getConstructors(fccIDclass, DataInput.class);
 	static final Constructor<?>[] constructorsNIO 	= ClassIDs.getConstructors(fccIDclass, ByteBuffer.class);
 	
-	public static final Class getClass(int id)  {
+	public static final Class<? extends AbstractFeaturesCollector> getClass(int id)  {
 		if ( id < 0 ) return null;
 		return fccIDclass[id];
 	}
 	
-	public static final Integer getClassID(Class featureClass) {
+	public static final Integer getClassID(Class<? extends AbstractFeaturesCollector> featureClass) {
 		Integer id = idclassFCCHT.get(featureClass);
 		if ( id == null ) System.err.println("FeatureCollector class " + featureClass.getName() + " not found");
 		return id;
 	}
 	
-	public static final AbstractFeaturesCollector readData(DataInput in ) throws IOException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+	public static final AbstractFeaturesCollector readData(DataInput in ) throws IOException {
 		int fccID = in.readInt();
 	
-		return (AbstractFeaturesCollector) constructors[fccID].newInstance(in); 
+		try {
+			return (AbstractFeaturesCollector) constructors[fccID].newInstance(in);
+		} catch (InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			throw new IOException(e);
+		} 
 	}
 
 	public static final AbstractFeaturesCollector readData(ByteBuffer buf ) throws IOException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
@@ -64,11 +69,11 @@ public class FeaturesCollectors {
 		fc.writeData(out);
 	}
 
-	public static Class readClass( DataInput in ) throws IOException {
+	public static Class<? extends AbstractFeaturesCollector> readClass( DataInput in ) throws IOException {
 		return getClass(in.readInt());
 	}
 
-	public static void writeClass(Class fcClass, DataOutput out) throws IOException {
+	public static void writeClass(Class<? extends AbstractFeaturesCollector> fcClass, DataOutput out) throws IOException {
 		if ( fcClass == null ) out.writeInt(-1);
 		else out.writeInt(getClassID(fcClass));		
 	}

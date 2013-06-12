@@ -57,7 +57,7 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
 		return vLen;
 	}
 	
-	public int putBytes(byte[] bArr, int bArrI) {
+	public int putDescriptor(byte[] bArr, int bArrI) {
 		System.arraycopy(values, 0, bArr, bArrI, vLen);
 		return bArrI + vLen;
 	}
