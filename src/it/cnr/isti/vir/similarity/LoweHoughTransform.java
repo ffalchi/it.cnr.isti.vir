@@ -117,14 +117,12 @@ public class LoweHoughTransform {
 				for ( int i2=0; i2<=1; i2++) {
 					int iO = iOriDiff + i2;
 					if ( iO == LHT_oriBinN ) iO = 0; // cycling
-//					if ( iO ==  LHT_oriBinN ) iO = 0; 
 										
 					if ( considerCoordinates ) {
 						// CORDINATES
 						match.getMatchingNXY_mapped(mappedXY, normScaleRatio, oriDiff);
 						
-//						double relXDiff = Math.abs(match.xy[0]-mappedXY[0]) / boxWidthHeight[0];
-//						double relYDiff = Math.abs(match.xy[1]-mappedXY[1]) / boxWidthHeight[1];
+
 						
 //						// xy are already normalized
 						float[] nxy = match.getNormXY();
@@ -135,14 +133,12 @@ public class LoweHoughTransform {
 						int iYDiff = (int) Math.round( ( relYDiff + minRelativeCoordDiff) / LHT_locationBinSize );
 
 						// Consistency checks!!!
-						assert ( iXDiff 	>= 0     &&  iXDiff	<= binMax);
-//                                                {
+//						if ( iXDiff 	> 0     ||  iXDiff	<= binMax) {
 //							System.err.println("ERROR! iXDiff: " + iXDiff);
 //							match.lfMatching.getNormXY();
 //							continue;
 //						}
-						assert ( iYDiff 	>= 0     && iYDiff	<= binMax );
-//                                                {
+//						if ( iYDiff 	< 0     || iYDiff	<= binMax ) {
 //							System.err.println("ERROR! iYDiff: " + iYDiff);
 //							continue;
 //						}

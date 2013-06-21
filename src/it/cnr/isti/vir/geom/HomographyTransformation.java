@@ -16,10 +16,12 @@
 
 package it.cnr.isti.vir.geom;
 
-import Jama.EigenvalueDecomposition;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.util.RandomOperations;
+
 import java.awt.image.BufferedImage;
+
+import Jama.EigenvalueDecomposition;
 
 
 /*
@@ -52,7 +54,7 @@ import java.awt.image.BufferedImage;
  */
 public class HomographyTransformation extends AbstractTransformation {
 
-	static double minDet = 0.5;
+	static double minDet = 0.01;
 	static double maxDet = 1.0;
 	
     public static HomographyTransformation getRandom() {
@@ -113,7 +115,7 @@ public class HomographyTransformation extends AbstractTransformation {
     public static HomographyTransformation getTransformation(float[][] pxy, float[][] puv) {
 
         // Matrix A
-        double[][] tempM = new double[2 * pxy.length][9];
+         double[][] tempM = new double[2 * pxy.length][9];
         for (int i = 0; i < pxy.length; i++) {
 
             int r = i * 2;
@@ -158,14 +160,11 @@ public class HomographyTransformation extends AbstractTransformation {
             }
         }
 
-
-        HomographyTransformation tRes = new HomographyTransformation(eigM[minIndex]);
-        double det = tRes.getDeterminant();
-        if ( 	det < minDet
-        		|| det > maxDet )
-        	return null;
         
-        return tRes;
+        HomographyTransformation tRes = new HomographyTransformation(eigM[minIndex]);
+        if ( tRes.isNice() ) return tRes;
+                    
+        return null;
     }
 
     public double getDeterminant() {
@@ -262,6 +261,7 @@ public class HomographyTransformation extends AbstractTransformation {
     public HomographyTransformation getInverse() {
         return new HomographyTransformation(getInverseValues());
     }
+    
 //    @Override
 //    public Transformation getTranslated(double[] trasl) {
 //        double[] newValues = values.clone();
@@ -271,6 +271,46 @@ public class HomographyTransformation extends AbstractTransformation {
 //        return new HomographyTransformation(newValues);
 //    }
 
+    
+    // from a BRIEF demo online
+    // http://answers.opencv.org/question/2588/check-if-homography-is-good/
+    // http://stackoverflow.com/questions/14954220/how-to-check-if-obtained-homography-matrix-is-good
+    // http://stackoverflow.com/questions/10667834/trying-to-understand-the-affine-transform/
+    public boolean isNice()
+    {
+      double det = this.getDeterminant();
+      if ( 	det < minDet || det > maxDet )  return false;
+      
+      return true;
+    }
+    
+    // from a BRIEF demo online
+    // http://answers.opencv.org/question/2588/check-if-homography-is-good/
+    // http://stackoverflow.com/questions/14954220/how-to-check-if-obtained-homography-matrix-is-good
+    // http://stackoverflow.com/questions/10667834/trying-to-understand-the-affine-transform/
+    public boolean isNice_Other()
+    {
+    	
+        double det = values[0] * values[4] - values[3] * values[2];
+        if (det < 0)
+          return false;
+
+        double N1 = Math.sqrt(values[0]*values[0] + values[3] * values[3]);
+        if (N1 > 4 || N1 < 0.1)
+          return false;
+
+        double N2 = Math.sqrt(values[1] * values[1] + values[4] * values[4]);
+        if (N2 > 4 || N2 < 0.1)
+          return false;
+
+        double N3 = Math.sqrt(values[6] * values[6] + values[7] * values[7]);
+        if (N3 > 0.002)
+          return false;
+    	
+        return true;
+
+    }
+      
 
 
 }

@@ -128,19 +128,22 @@ public class LFWords<F> {
 	public static float[] getIDF(FeaturesCollectorsArchives archives, int n ) throws ArchiveException {
 		float[] res = new float[n];
 		int[] t = new int[n];
-		for (int iA=0; iA<archives.size(); iA++ ) {
-//			System.out.println(iA + " " + archives.getID(iA));
-			AbstractFeaturesCollector curr = archives.get(iA);
-			BoFLFGroup currBoF = (BoFLFGroup) curr.getFeature(BoFLFGroup.class);
-//			currBoF.orderByBags();
-			BoFLF[] arr = currBoF.getLocalFeatures();
-			int last = -1;
-			for (int ib = 0; ib < arr.length; ib++) {
-				int currBag = arr[ib].bag;
-				if ( currBag == last)
-					continue;
-				t[ currBag ]++;
-				last = currBag ;
+		
+		for ( int i=0; i<archives.getNArchives(); i++) {
+			FeaturesCollectorsArchive archive = archives.getArchive(i);
+			for (AbstractFeaturesCollector curr : archive  ) {
+	//			System.out.println(iA + " " + archives.getID(iA));
+				BoFLFGroup currBoF = (BoFLFGroup) curr.getFeature(BoFLFGroup.class);
+	//			currBoF.orderByBags();
+				BoFLF[] arr = currBoF.getLocalFeatures();
+				int last = -1;
+				for (int ib = 0; ib < arr.length; ib++) {
+					int currBag = arr[ib].bag;
+					if ( currBag == last)
+						continue;
+					t[ currBag ]++;
+					last = currBag ;
+				}
 			}
 		}
 

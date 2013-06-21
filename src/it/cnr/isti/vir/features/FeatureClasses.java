@@ -12,6 +12,8 @@
 package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.features.bof.BoF;
+import it.cnr.isti.vir.features.localfeatures.BRISK;
+import it.cnr.isti.vir.features.localfeatures.BRISKGroup;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
 import it.cnr.isti.vir.features.localfeatures.ORB;
 import it.cnr.isti.vir.features.localfeatures.ORBGroup;
@@ -77,7 +79,9 @@ public class FeatureClasses {
 		ORBGroup.class,
 		SAPIRObject.class,
 		SAPIRFeature.class,
-		Permutation.class
+		Permutation.class,
+		BRISK.class,
+		BRISKGroup.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

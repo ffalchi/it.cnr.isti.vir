@@ -12,10 +12,10 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.geom.AbstractTransformation;
 import it.cnr.isti.vir.geom.AffineTransformation;
 import it.cnr.isti.vir.geom.Box;
 import it.cnr.isti.vir.geom.RSTTransformation;
-import it.cnr.isti.vir.geom.AbstractTransformation;
 import it.cnr.isti.vir.geom.TransformationHypothesis;
 import it.cnr.isti.vir.geom.Transformations;
 import it.cnr.isti.vir.util.RandomOperations;
@@ -557,7 +557,9 @@ public class LocalFeaturesMatches {
     				double minDist,
     				boolean onlyFirst) {
     	
-        int nPoints = Transformations.getNPointsForEstimation(trClass);
+
+    	int nPoints = Transformations.getNPointsForEstimation(trClass);
+    	
 		int cycles = cycles_deprecated;
 //        int cycles = (int) getNHypothesizes( 0.25, nPoints ) + 1;
 		

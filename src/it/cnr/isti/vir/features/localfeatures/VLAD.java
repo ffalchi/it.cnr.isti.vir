@@ -37,7 +37,7 @@ public class VLAD extends AbstractFeature {
 	}
 	
 	public void writeData(ByteBuffer buff) throws IOException {
-		buff.putInt((short) values.length);
+		buff.putInt( values.length);
 		for ( int i=0; i<values.length; i++ )
 			buff.putFloat(values[i]);
 	}

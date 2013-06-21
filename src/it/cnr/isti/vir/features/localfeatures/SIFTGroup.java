@@ -224,11 +224,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 	// return matches;
 	// }
 
-	static final public LocalFeaturesMatches getLoweMatches(
-			ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2) {
-		return getLoweMatches(sg1, sg2, 0.8);
-	}
-	
+
 	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;

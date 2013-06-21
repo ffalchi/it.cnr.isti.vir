@@ -22,6 +22,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -215,6 +216,7 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 
 	@Override
 	public Collection<AbstractFeature> getFeatures() {
+		if ( feature == null ) return new ArrayList();
 		return Arrays.asList(feature);
 	}
 

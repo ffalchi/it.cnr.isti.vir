@@ -16,10 +16,15 @@
 
 package it.cnr.isti.vir.similarity;
 
-import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
+import it.cnr.isti.vir.file.ArchiveException;
+import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 /**
@@ -30,15 +35,7 @@ public class BoFTFIDFSimilarity implements ISimilarity<BoFLFGroup>, IRequiresIDF
 
     private float[] idf = null;
     private static final long dCount = 0;
-//    private boolean useIDF = true;
-//    
-//    public boolean isUseIDF() {
-//		return useIDF;
-//	}
-//
-//	public void setUseIDF(boolean useIDF) {
-//		this.useIDF = useIDF;
-//	}
+
 
 	public static final FeatureClassCollector reqFeatures = new FeatureClassCollector(BoFLFGroup.class);
     
@@ -50,8 +47,24 @@ public class BoFTFIDFSimilarity implements ISimilarity<BoFLFGroup>, IRequiresIDF
 		this.idf = idf;
 	}
 
-	public BoFTFIDFSimilarity( Properties properties) throws SimilarityOptionException {
+	public BoFTFIDFSimilarity( Properties properties) throws SimilarityOptionException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, ArchiveException, IOException {
 		this();
+		
+		String archiveForIDFStr = properties.getProperty("BoFTFIDFSimilarity.archiveForIDF");
+		if ( archiveForIDFStr != null ) {
+			String nWordsStr = properties.getProperty("BoFTFIDFSimilarity.nWords");
+			if ( nWordsStr == null ) {
+				throw new SimilarityOptionException("BoFTFIDFSimilarity.nWords not found in properties");
+			} else {
+				int nWords = Integer.parseInt(nWordsStr);
+				LFWords fakeWords = new LFWords(nWords);
+				System.out.println("Evaluating IDF");
+				idf = fakeWords.getIDF(new FeaturesCollectorsArchive(archiveForIDFStr));			
+			}			
+		}
+		
+		
+		
 		
 //		String value = properties.getProperty("useIDF");
 //		if ( value != null ) {

@@ -22,19 +22,19 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class ORB extends ALocalFeature<ORBGroup> {
+public class FREAK extends ALocalFeature<FREAKGroup> {
 
-	public static final int NLONG = 4;
+	public static final int NLONG = 8;
 	public static final int BYTES_LENGTH = NLONG * Long.SIZE / Byte.SIZE;
 	public static final int BITS_LENGTH = Byte.SIZE * BYTES_LENGTH;
-	// 256 bits in 4x8 bytes
+	// 512 bits in 8x8 bytes
 	private final long[] data;
 	
 	public final int getDataByteSize() {
 		return BYTES_LENGTH;
 	}
 	
-	public ORB(KeyPoint kp, long[] data) {
+	public FREAK(KeyPoint kp, long[] data) {
 		this.kp = kp;
 		this.data = data;
 	}
@@ -43,16 +43,15 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		return LongByteArrayUtil.convToBytes(data, bArr, bArrI);
 	}
 		
-	public ORB(DataInput str) throws IOException {
+	public FREAK(DataInput str) throws IOException {
 		super(str);
 		data = new long[NLONG];
 		for ( int i=0; i<NLONG; i++ ) {
 			data[i] = str.readLong();
 		}
-
 	}
 	
-	public ORB(ByteBuffer src ) throws IOException {
+	public FREAK(ByteBuffer src ) throws IOException {
 		super(src);
 		data = new long[NLONG];
 		for ( int i=0; i<NLONG; i++ ) {
@@ -61,7 +60,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 	}
 	
 	
-	public ORB(BufferedReader br ) throws IOException
+	public FREAK(BufferedReader br ) throws IOException
 	{
 		String[] metadata = br.readLine().split("(\\s)+");
 		float x = Float.parseFloat(metadata[0]);
@@ -80,18 +79,18 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		for ( int i=0; i<BYTES_LENGTH; i++) {
 			bytesValues[i] = (byte) Integer.parseInt(bytes[i]);
 		}
-		data = new long[4];
+		data = new long[NLONG];
 		ByteBuffer.wrap(bytesValues).asLongBuffer().get(data);
 	}
 
 
-	public static ORB getMean(Collection<ORB> coll) {
+	public static FREAK getMean(Collection<FREAK> coll) {
 		
 		if ( coll.size() == 0 ) return null;
 		
 		int[] bitSum = new int[NLONG*Long.SIZE];
 		
-		for ( Iterator<ORB> it = coll.iterator(); it.hasNext(); ) {
+		for ( Iterator<FREAK> it = coll.iterator(); it.hasNext(); ) {
 			long[] currVec = it.next().data;
 			int iBitSum = 0;
 			for ( int iLong=0; iLong<currVec.length; iLong++ ) {
@@ -120,20 +119,20 @@ public class ORB extends ALocalFeature<ORBGroup> {
 			}
 
 		}
-		return new ORB( null, newValues );
+		return new FREAK( null, newValues );
 	}
 	
 		
-	public static float getDistance_Norm(ORB o1, ORB o2) {
+	public static float getDistance_Norm(FREAK o1, FREAK o2) {
 		return Hamming.distance_norm(o1.data, o2.data, BITS_LENGTH);
 	}
 	
-	public static int getDistance(ORB o1, ORB o2) {
+	public static int getDistance(FREAK o1, FREAK o2) {
 		return Hamming.distance(o1.data, o2.data);
 	}
 	
 	@Override
-	public int compareTo(ALocalFeature<ORBGroup> given) {
+	public int compareTo(ALocalFeature<FREAKGroup> given) {
 		if ( this == given ) return 0;
 		if ( this.kp != given.kp ) {
 			if ( kp == null ) return -1;
@@ -142,7 +141,7 @@ public class ORB extends ALocalFeature<ORBGroup> {
 			if ( tComp != 0 ) return tComp;
 		}
 		for ( int i=0; i<data.length; i++ ) {
-			int tComp = Long.compare(data[i], ((ORB)given).data[i]);
+			int tComp = Long.compare(data[i], ((FREAK)given).data[i]);
 			if ( tComp != 0 ) return tComp;
 		}
 		return 0;
@@ -151,8 +150,8 @@ public class ORB extends ALocalFeature<ORBGroup> {
 
 
 	@Override
-	public Class<ORBGroup> getGroupClass() {
-		return ORBGroup.class;
+	public Class<FREAKGroup> getGroupClass() {
+		return FREAKGroup.class;
 	}
 
 	
@@ -166,11 +165,9 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		return tStr;
 	}
 	
-	public ORB getRandomPerturbated(int nBits) {
+	public FREAK getRandomPerturbated(int nBits) {
 		long[] newData = RandomOperations.getPerturbated(data, nBits);
-		return new ORB(this.kp, newData);
+		return new FREAK(this.kp, newData);
 	}
-
-
 
 }

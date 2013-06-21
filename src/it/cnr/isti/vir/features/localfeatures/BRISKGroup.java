@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
+FREAK * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
@@ -21,43 +21,43 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class ORBGroup extends ALocalFeaturesGroup<ORB> {
+public class BRISKGroup extends ALocalFeaturesGroup<BRISK> {
 
 	public static final byte version = 0;
 	
-	public ORBGroup(ORB[] arr, AbstractFeaturesCollector fc) {
+	public BRISKGroup(BRISK[] arr, AbstractFeaturesCollector fc) {
 		super(arr, fc);
 	}
 	
-	public ORBGroup(ORB[] arr ) {
+	public BRISKGroup(BRISK[] arr ) {
 		super(arr);
 	}
 
-	public ORBGroup(AbstractFeaturesCollector fc) {
+	public BRISKGroup(AbstractFeaturesCollector fc) {
 		super(fc);
 	}
 	
-	public ORBGroup(DataInput in) throws Exception {
+	public BRISKGroup(DataInput in) throws Exception {
 		in.readByte(); // version
 		int nBytes = in.readInt();
 		byte[] bytes = new byte[nBytes];
 		in.readFully(bytes);
 		ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
-		lfArr = new ORB[bBuffer.getInt()];
+		lfArr = new BRISK[bBuffer.getInt()];
 		for (int i = 0; i < lfArr.length; i++) {
-			lfArr[i] = new ORB(bBuffer);
+			lfArr[i] = new BRISK(bBuffer);
 			lfArr[i].setLinkedGroup(this);
 		}
 	}
 	
 	
-	public ORBGroup(ByteBuffer in ) throws IOException {
+	public BRISKGroup(ByteBuffer in ) throws IOException {
 		in.get(); 		// version
 		in.getInt(); 	// nBytes
 		int nLFs = in.getInt();
-		lfArr = new ORB[nLFs];
+		lfArr = new BRISK[nLFs];
 		for ( int i = 0; i < nLFs; i++ ) {
-			lfArr[i] = new ORB(in);
+			lfArr[i] = new BRISK(in);
 			lfArr[i].setLinkedGroup(this);
 		}
 	}
@@ -68,35 +68,35 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	}
 
 	@Override
-	public ALocalFeaturesGroup<ORB> create(ORB[] arr, AbstractFeaturesCollector fc) {
-		return new ORBGroup( arr, fc);
+	public ALocalFeaturesGroup<BRISK> create(BRISK[] arr, AbstractFeaturesCollector fc) {
+		return new BRISKGroup( arr, fc);
 	}
 	@Override
 	public byte getSerVersion() {
 		return version;
 	}
 	
-	public ORBGroup(BufferedReader br, AbstractFeaturesCollector fc) throws IOException {
+	public BRISKGroup(BufferedReader br, AbstractFeaturesCollector fc) throws IOException {
 		super(fc);
 		String[] temp = br.readLine().split("(\\s)+");
 		
 		int n = Integer.parseInt(temp[0]);
 		int len = Integer.parseInt(temp[1]);
 		
-		lfArr = new ORB[n];
+		lfArr = new BRISK[n];
 	    for (int i = 0; i < n; i++) {
-	    	lfArr[i] = new ORB(br);
+	    	lfArr[i] = new BRISK(br);
 	    	lfArr[i].setLinkedGroup(this);
 	    }
 	}
 	
 	static final public double getRangePercMatches(
-			ALocalFeaturesGroup<ORB> sg1,
-			ALocalFeaturesGroup<ORB> sg2,
+			ALocalFeaturesGroup<BRISK> sg1,
+			ALocalFeaturesGroup<BRISK> sg2,
 			int range) {
 		
 		int count = 0;
-		for (ORB f: sg1.lfArr) {
+		for (BRISK f: sg1.lfArr) {
 			if ( hasMatchBelowRadius(f, sg2, range)) {
 				count++;
 			}
@@ -111,9 +111,9 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	 * @param range  Range
 	 * @return	true if it exists at least one match below or equal the range
 	 */
-	static final public boolean hasMatchBelowRadius(ORB s1, ALocalFeaturesGroup<ORB> sg, int range) {
-		for (ORB f:sg.lfArr) {
-			if ( ORB.getDistance(s1, f) <= range) {
+	static final public boolean hasMatchBelowRadius(BRISK s1, ALocalFeaturesGroup<BRISK> sg, int range) {
+		for (BRISK f:sg.lfArr) {
+			if ( BRISK.getDistance(s1, f) <= range) {
 				return true;
 			}
 		}
@@ -122,22 +122,22 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	}
 	
 
-	public static ORBGroup getRandom() {
-		ORB[] lfArr = new ORB[RandomOperations.getInt(1000)];
+	public static BRISKGroup getRandom() {
+		BRISK[] lfArr = new BRISK[RandomOperations.getInt(1000)];
 		
-		return new ORBGroup(lfArr);
+		return new BRISKGroup(lfArr);
 	}
 	
-	static final public ORB getLoweMatch(ORB s1, ALocalFeaturesGroup<ORB> sg,
+	static final public BRISK getLoweMatch(BRISK s1, ALocalFeaturesGroup<BRISK> sg,
 			double conf, int maxFDsq) {
 		int distsq1 = Integer.MAX_VALUE;
 		int distsq2 = Integer.MAX_VALUE;
 		int dsq = 0;
-		ORB curr, best = null;
-		ORB[] arr = sg.lfArr;
+		BRISK curr, best = null;
+		BRISK[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = ORB.getDistance(s1, curr);
+			dsq = BRISK.getDistance(s1, curr);
 			if (dsq < 0)
 				continue;
 			if (dsq < distsq1) {
@@ -164,17 +164,17 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		return null;
 	}
 
-	static final public ORB getLoweMatch(ORB s1, ALocalFeaturesGroup<ORB> sg,
+	static final public BRISK getLoweMatch(BRISK s1, ALocalFeaturesGroup<BRISK> sg,
 			double conf) {
 		int distsq1 = Integer.MAX_VALUE;
 		int distsq2 = Integer.MAX_VALUE;
 		int dsq = 0;
-		ORB curr, best = null;
+		BRISK curr, best = null;
 
-		ORB[] arr = sg.lfArr;
+		BRISK[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = ORB.getDistance(s1, curr );
+			dsq = BRISK.getDistance(s1, curr );
 			if (dsq < distsq1) {
 				distsq2 = distsq1;
 				distsq1 = dsq;
@@ -195,32 +195,33 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		return null;
 	}
 	
-	static final public double getLowePercMatches(ALocalFeaturesGroup<ORB> sg1,
-			ALocalFeaturesGroup<ORB> sg2, double conf) {
+	static final public double getLowePercMatches(ALocalFeaturesGroup<BRISK> sg1,
+			ALocalFeaturesGroup<BRISK> sg2, double conf) {
 		return (double) getLoweNMatches(sg1, sg2, conf) / sg1.size();
 	}
 	
-	static final public int getLoweNMatches(ALocalFeaturesGroup<ORB> sg1,
-			ALocalFeaturesGroup<ORB> sg2, double conf) {
+	static final public int getLoweNMatches(ALocalFeaturesGroup<BRISK> sg1,
+			ALocalFeaturesGroup<BRISK> sg2, double conf) {
 		if (sg2.size() < 2)
 			return 0;
 		int nMatches = 0;
-		ORB[] arr = sg1.lfArr;
+		BRISK[] arr = sg1.lfArr;
 		for (int i = 0; i < arr.length; i++) {
-			if (ORBGroup.getLoweMatch(arr[i], sg2, conf) != null)
+			if (BRISKGroup.getLoweMatch(arr[i], sg2, conf) != null)
 				nMatches++;
 		}
 
 		return nMatches;
 	}
 	
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<ORB> sg1, ALocalFeaturesGroup<ORB> sg2, double dRatioThr) {
+	
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<BRISK> sg1, ALocalFeaturesGroup<BRISK> sg2, double dRatioThr) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
-		ORB[] arr = sg1.lfArr;
+		BRISK[] arr = sg1.lfArr;
 		for (int i=0; i<arr.length; i++ ) {
-			ORB match = ORBGroup.getLoweMatch(arr[i], sg2, dRatioThr );
+			BRISK match = BRISKGroup.getLoweMatch(arr[i], sg2, dRatioThr );
 			if ( match != null)
 				matches.add( new LocalFeatureMatch( arr[i], match ) );
 		}
@@ -228,17 +229,18 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		return matches;
 	}
 
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<ORB> sg1, ALocalFeaturesGroup<ORB> sg2, double dRatioThr, final int maxLFDistSq) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<BRISK> sg1, ALocalFeaturesGroup<BRISK> sg2, double dRatioThr, final int maxLFDistSq) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
-		ORB[] arr = sg1.lfArr;
+		BRISK[] arr = sg1.lfArr;
 		for (int i=0; i<arr.length; i++ ) {
-			ORB match = ORBGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
+			BRISK match = BRISKGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
 			if ( match != null)
 				matches.add( new LocalFeatureMatch( arr[i], match ) );
 		}
 		
 		return matches;
 	}
+
 }
