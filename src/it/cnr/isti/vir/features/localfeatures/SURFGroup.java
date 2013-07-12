@@ -49,20 +49,20 @@ public class SURFGroup extends ALocalFeaturesGroup<SURF> {
 				lfArr[i].setLinkedGroup(this);
 			}
 		} else {
-			// OLDS
-			int size = in.readInt();
-			
-			lfArr = new SURF[size];
-			if ( size == 0 ) return;
-			
-			for (int i=0; i<lfArr.length; i++ ) {
-				lfArr[i] = SURF.read_old(in);
-				lfArr[i].setLinkedGroup(this);
-			}			
-			
-			if ( version > 0 ) {
-				readEval(in);
-			}
+//			// OLDS
+//			int size = in.readInt();
+//			
+//			lfArr = new SURF[size];
+//			if ( size == 0 ) return;
+//			
+//			for (int i=0; i<lfArr.length; i++ ) {
+//				lfArr[i] = SURF.read_old(in);
+//				lfArr[i].setLinkedGroup(this);
+//			}			
+//			
+//			if ( version > 0 ) {
+//				readEval(in);
+//			}
 		}
 		
 	}

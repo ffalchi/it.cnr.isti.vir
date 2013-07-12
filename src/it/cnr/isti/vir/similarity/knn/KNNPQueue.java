@@ -11,12 +11,15 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity.knn;
 
+import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
+import it.cnr.isti.vir.similarity.knn.MultipleKNNPQueueID.OfferAll;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.util.ParallelOptions;
+import it.cnr.isti.vir.util.SplitInGroups;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +47,11 @@ public class KNNPQueue<F> {
 	}
 	
 	public final boolean offer(F obj) {
-		double tDistance = sim.distance((AbstractFeaturesCollector) query, (AbstractFeaturesCollector) obj, pQueue.excDistance);
+		double tDistance;
+		if ( query instanceof AbstractFeaturesCollector )
+			tDistance = sim.distance((AbstractFeaturesCollector) query, (AbstractFeaturesCollector)  obj,pQueue.excDistance);
+		else 
+			tDistance = sim.distance((AbstractFeature) query, (AbstractFeature)  obj,pQueue.excDistance);
 		if ( tDistance >=0 && tDistance <= pQueue.excDistance )	{
 			offer(obj, tDistance);
 		}
@@ -106,25 +113,21 @@ public class KNNPQueue<F> {
 		
 		if ( parallel ) {
 			int threadN = ParallelOptions.nThreads;
-	        int t;
-	        if ( coll.length % threadN == 0 ) {
-	        	t = coll.length / threadN;       
-	        } else {
-	        	t = coll.length / (threadN-1);  
-	        }
-	        int ti = 0;
 	        Thread[] thread = new Thread[threadN];
-	        for ( int from=0; from<coll.length; from+=t) {
-	        	int to = from+t-1;
-	        	if ( to >= coll.length ) to = coll.length-1;
-	        	thread[ti] = new Thread( new OfferAllArray(this, from,to,coll) ) ;
-	        	thread[ti].start();
-	        	ti++;
+	        int[] group = SplitInGroups.split(coll.length, thread.length);
+	        int from=0;
+	        for ( int i=0; i<group.length; i++ ) {
+	        	int curr=group[i];
+	        	if ( curr == 0 ) break;
+	        	int to=from+curr-1;
+	        	thread[i] = new Thread( new OfferAllArray(this, from,to,coll) ) ;
+	        	thread[i].start();
+	        	from=to+1;
 	        }
 	        
-	        for ( ti=0; ti<threadN; ti++ ) {
+	        for ( Thread t : thread ) {
 	        	try {
-					thread[ti].join();
+	        		if ( t != null ) t.join();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -143,20 +146,20 @@ public class KNNPQueue<F> {
 	static class OfferAllColl implements Runnable {
         private final int from;
         private final int to;
-        private final ArrayList arrColl;
+        private final Collection coll;
         private final KNNPQueue knn;
         
-        OfferAllColl(KNNPQueue knn, int from, int to, ArrayList arrColl) {
+        OfferAllColl(KNNPQueue knn, int from, int to, Collection coll ) {
             this.from = from;
             this.to = to;
-            this.arrColl = arrColl;
+            this.coll = coll;
             this.knn = knn;
         }
         
         @Override
         public void run() {
-            for (int i = from; i <= to; i++) {
-            	knn.offer( arrColl.get(i));
+            for (Object f : coll) {
+            	knn.offer( f );
             }
         }                
     }
@@ -165,30 +168,53 @@ public class KNNPQueue<F> {
 		
 		if ( parallel ) {
 			int threadN = ParallelOptions.nThreads;
-	        int t;
-	        if ( coll.size() % threadN == 0 ) {
-	        	t = coll.size() / threadN;       
-	        } else {
-	        	t = coll.size() / (threadN-1);  
-	        }
-	        int ti = 0;
 	        Thread[] thread = new Thread[threadN];
-	        for ( int from=0; from<coll.size(); from+=t) {
-	        	int to = from+t-1;
-	        	if ( to >= coll.size() ) to = coll.size()-1;
-	        	thread[ti] = new Thread( new OfferAllColl(this, from,to,coll) ) ;
-	        	thread[ti].start();
-	        	ti++;
+	        int[] group = SplitInGroups.split(coll.size(), thread.length);
+	        int from=0;
+	        for ( int i=0; i<group.length; i++ ) {
+	        	int curr=group[i];
+	        	if ( curr == 0 ) break;
+	        	int to=from+curr-1;
+	        	thread[i] = new Thread( new OfferAllColl(this, from,to,coll) ) ;
+	        	thread[i].start();
+	        	from=to+1;
 	        }
 	        
-	        for ( ti=0; ti<threadN; ti++ ) {
+	        for ( Thread t : thread ) {
 	        	try {
-					thread[ti].join();
+	        		if ( t != null ) t.join();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	        }
+			
+			
+//			int threadN = ParallelOptions.nThreads;
+//	        int t;
+//	        if ( coll.size() % threadN == 0 ) {
+//	        	t = coll.size() / threadN;       
+//	        } else {
+//	        	t = coll.size() / (threadN-1);  
+//	        }
+//	        int ti = 0;
+//	        Thread[] thread = new Thread[threadN];
+//	        for ( int from=0; from<coll.size(); from+=t) {
+//	        	int to = from+t-1;
+//	        	if ( to >= coll.size() ) to = coll.size()-1;
+//	        	thread[ti] = new Thread( new OfferAllColl(this, from,to,coll) ) ;
+//	        	thread[ti].start();
+//	        	ti++;
+//	        }
+//	        
+//	        for ( ti=0; ti<threadN; ti++ ) {
+//	        	try {
+//					thread[ti].join();
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//	        }
 		}
 		else
 		{

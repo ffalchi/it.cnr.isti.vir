@@ -52,7 +52,8 @@ public class PredictedLabel {
 		int i=0;
 		for ( Iterator<ObjectWithDistance> it = res.iterator(); it.hasNext(); ) {
 			ObjectWithDistance curr = it.next();
-			mostSimilars[i++] = ((IHasID) curr.getObj()).getID();
+			if ( curr.getObj() instanceof IHasID) 
+				mostSimilars[i++] = ((IHasID) curr.getObj()).getID();
 		}
 	}
 	

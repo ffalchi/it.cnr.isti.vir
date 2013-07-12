@@ -68,7 +68,7 @@ public class QueriesOrder1 implements IQueriesOrdering{
 			Integer best = null;
 			double bestSum = -1;
 			
-			if ( triesMax != null && list.size() > triesMax ) RandomOperations.reorderLinkedList(list);
+			if ( triesMax != null && list.size() > triesMax ) RandomOperations.shuffle(list);
 			
 			// for each not ordered image (not more then triesMax)
 			int triesCount = 0;

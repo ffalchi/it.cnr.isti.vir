@@ -52,7 +52,7 @@ public class Pivots {
 			Integer best = null;
 			double bestSum = -1;
 			
-			if ( triesMax != null && list.size() > triesMax ) RandomOperations.reorderLinkedList(list);
+			if ( triesMax != null && list.size() > triesMax ) RandomOperations.shuffle(list);
 			
 			// for each not ordered image (not more then triesMax)
 			int triesCount = 0;
@@ -139,7 +139,7 @@ public class Pivots {
 			Integer best = null;
 			double bestSum = -1;
 			
-			if ( triesMax != null && list.size() > triesMax ) RandomOperations.reorderLinkedList(list);
+			if ( triesMax != null && list.size() > triesMax ) RandomOperations.shuffle(list);
 			
 			// for each object not pivot
 			int triesCount = 0;

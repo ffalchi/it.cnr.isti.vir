@@ -12,13 +12,13 @@
 package it.cnr.isti.vir.similarity.knn;
 
 import it.cnr.isti.vir.features.AbstractFeature;
-import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.metric.IMetric;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
-import it.cnr.isti.vir.util.Pivots;
+import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.Reordering;
+import it.cnr.isti.vir.util.SplitInGroups;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -33,7 +33,6 @@ public class MultipleKNNPQueueID<F>  {
 	private final IMetric<F> comp;
 	private final Integer k;
 	private final boolean storeID;
-	private final boolean distET;
 		
 	// not usable for multithread
 	final double[] tempDs;
@@ -78,14 +77,14 @@ public class MultipleKNNPQueueID<F>  {
 	@SuppressWarnings("unchecked")
 	
 	public MultipleKNNPQueueID(	Collection queryColl,
-			Integer k,
+								Integer k,
 								IMetric comp,
 								boolean useInterDistances,
 								IQueriesOrdering ordering,
 								Integer nRecents
 								) {
-		this(queryColl, k, comp, useInterDistances, ordering, nRecents, false, true, SimPQueueDMax.class, false );
-	
+//		this(queryColl, k, comp, useInterDistances, ordering, nRecents, false, true, SimPQueueDMax.class, false );
+		this(queryColl, k, comp, useInterDistances, ordering, nRecents, true, SimPQueueDMax.class, false );
 	}
 	
 	
@@ -101,7 +100,7 @@ public class MultipleKNNPQueueID<F>  {
 						false,
 						null,
 						null,
-						true,
+//						true,
 						false,
 						pQueueClass,
 						true );
@@ -113,7 +112,7 @@ public class MultipleKNNPQueueID<F>  {
 								boolean useInterDistances,
 								IQueriesOrdering ordering,
 								Integer nRecents,
-								boolean distET,
+//								boolean distET,
 								boolean storeID,
 								Class pQueueClass,
 								boolean silent) {
@@ -125,7 +124,6 @@ public class MultipleKNNPQueueID<F>  {
 		this.k = k;
 		this.silent = silent;
 		
-		this.distET = distET;
 
 		//temporary
 		tempDs = new double[qObj.length];
@@ -179,9 +177,53 @@ public class MultipleKNNPQueueID<F>  {
 		return knn.length;
 	}
 
-//	public final void offer(Collection<F> coll ) {
-//		((SURFMetric) comp).offer((Collection<SURF>) coll, (KNNPQueue<SURF>[]) knn);
-//	}
+	static class OfferAll implements Runnable {
+        private final int from;
+        private final int to;
+        private final Collection arrColl;
+        private final KNNPQueue[] knn;
+        
+        OfferAll(KNNPQueue[] knn, int from, int to, Collection arrColl) {
+            this.from = from;
+            this.to = to;
+            this.arrColl = arrColl;
+            this.knn = knn;
+        }
+        
+        @Override
+        public void run() {
+        	for ( Object obj : arrColl ) {
+	            for (int i = from; i <= to; i++) {
+	            	knn[i].offer( obj);
+	            }
+        	}
+        }                
+    }
+	
+	// Parallel on the objects
+	public final void offer(Collection<F> coll ) {
+		int threadN = ParallelOptions.nThreads;
+        Thread[] thread = new Thread[threadN];
+        int[] group = SplitInGroups.split(knn.length, thread.length);
+        int from=0;
+        for ( int i=0; i<group.length; i++ ) {
+        	int curr=group[i];
+        	if ( curr == 0 ) break;
+        	int to=from+curr-1;
+        	thread[i] = new Thread( new OfferAll(knn, from,to,coll) ) ;
+        	thread[i].start();
+        	from=to+1;
+        }
+        
+        for ( Thread t : thread ) {
+        	try {
+        		if ( t != null ) t.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        }
+	}
 	
 	public final void offer(F obj) {
 		offer(obj, 0, knn.length);
@@ -198,8 +240,9 @@ public class MultipleKNNPQueueID<F>  {
 				
 				// using max
 				double dist = -1;
-				if ( distET ) dist = comp.distance( knn[i].query, obj, knn[i].excDistance );
-				else dist = comp.distance( knn[i].query, obj);
+//				if ( distET )
+					dist = comp.distance( knn[i].query, obj, knn[i].excDistance );
+//				else dist = comp.distance( knn[i].query, obj);
 				
 				if ( dist >= 0 ) {
 					tempDs[distCount] = dist;			
@@ -210,18 +253,20 @@ public class MultipleKNNPQueueID<F>  {
 				}
 					
 			}
-		} else if ( distET ) {
+		} else {
+//			if ( distET ) {
 			for ( int i=min; i<max; i++ ) {
 				// using max
 				double dist = comp.distance( knn[i].query, obj, knn[i].excDistance );
 				if ( dist >= 0 && dist < knn[i].excDistance ) knn[i].offer(obj, dist);
 			}
-		} else {
-			for ( int i=min; i<max; i++ ) {
-				double dist = comp.distance( knn[i].query, obj);
-				if ( dist < knn[i].excDistance ) knn[i].offer(obj, dist);
-			}
-		}
+		} 
+//			else {
+//			for ( int i=min; i<max; i++ ) {
+//				double dist = comp.distance( knn[i].query, obj);
+//				if ( dist < knn[i].excDistance ) knn[i].offer(obj, dist);
+//			}
+//		}
 		
 //		if ( recentsFilter != null ) {
 //			recentsFilter.add(obj, tempDs);

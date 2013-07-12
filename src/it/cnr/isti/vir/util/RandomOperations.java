@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -300,7 +301,7 @@ public class RandomOperations {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static final void reorderLinkedList(LinkedList list ) {
+	public static final void shuffle(List list ) {
 		Object[] tempArr = new Object[list.size()];
 		
 		int i =0;
@@ -310,7 +311,7 @@ public class RandomOperations {
 		
 		shuffle(tempArr);
 		
-		while (list.size() > 0 ) list.remove();
+		list.clear();
 		
 		for ( i=0; i<tempArr.length; i++ ) {
 			list.add(tempArr[i]);

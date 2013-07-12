@@ -18,9 +18,8 @@ import it.cnr.isti.vir.classification.PredictedLabelWithSimilars;
 import it.cnr.isti.vir.classification.classifier.evaluation.TestDocumentSingleLabeled;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
-import it.cnr.isti.vir.features.bof.LFWords;
-import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SURF;
 import it.cnr.isti.vir.geom.AffineTransformation;
@@ -28,8 +27,6 @@ import it.cnr.isti.vir.geom.HomographyTransformation;
 import it.cnr.isti.vir.geom.RSTTransformation;
 import it.cnr.isti.vir.geom.TransformationHypothesis;
 import it.cnr.isti.vir.geom.Transformations;
-import it.cnr.isti.vir.id.AbstractID;
-import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 import it.cnr.isti.vir.similarity.LoweHoughTransform;
@@ -43,6 +40,8 @@ import it.cnr.isti.vir.similarity.pqueues.SimPQueue_kNN;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
+import it.cnr.isti.vir.util.ParallelOptions;
+import it.cnr.isti.vir.util.SplitInGroups;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +50,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Vector;
@@ -58,7 +58,7 @@ import java.util.Vector;
 public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier, ILFClassifier  {
 
 	private ILocalFeaturesMetric<LF> sim;
-	private ArrayList<LF> coll;
+	private final List<LF> coll;
 //	private Integer triesMax = 10;
 //	private Integer nObjects = 100;
 	private boolean pivotedFiltering = false;
@@ -78,13 +78,13 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	Double RANSAC_minDist;
 	double[] RANSAC_minMaxSR;
 	private boolean justCount = false;
-	private LFWords words = null;
-	private int bagOfWordsFilterSize = -1;
-	
-	public void setBagOfWordsFilter(LFWords words, int bOW_k) {
-		this.words = words;
-		bagOfWordsFilterSize = bOW_k;
-	}
+//	private LFWords words = null;
+//	private int bagOfWordsFilterSize = -1;
+//	
+//	public void setBagOfWordsFilter(LFWords words, int bOW_k) {
+//		this.words = words;
+//		bagOfWordsFilterSize = bOW_k;
+//	}
 	
 	
 //	public LFCollClassifier(Properties properties) {
@@ -197,7 +197,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 												pivotedFiltering,
 												new QueriesOrder1(10,100),  // ordering
 												null,  						// nRecents
-												true, 						// distET
+//												true, 						// distET
 												false, 						// storeID
 												simPQueueClass,
 												true
@@ -222,6 +222,21 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		this(sim, givenColl, null, lfClassifier, simPQueueClass, k, weightedSum);
 	}
 	
+	public List<LF> convert(Collection<AbstractFeaturesCollector_Labeled_HasID> givenColl ) {
+		ArrayList<LF> coll = new ArrayList<LF> ();
+		for ( Iterator<AbstractFeaturesCollector_Labeled_HasID> itfc=givenColl.iterator(); itfc.hasNext(); ) {
+			AbstractFeaturesCollector_Labeled_HasID fc = itfc.next();
+			//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
+			ALocalFeaturesGroup<LF> fg =
+					(ALocalFeaturesGroup<LF>) fc.getFeature(sim.getRequestedFeatureGroupClass());
+			for ( int i=0; i<fg.size(); i++) {
+				coll.add( (LF) fg.getFeature(i) );
+			}
+		}
+		//RandomOperations.shuffle(coll);
+		return coll; 
+	}
+	
 	public LFCollClassifier(ILocalFeaturesMetric<LF> sim, 
 							Collection<AbstractFeaturesCollector_Labeled_HasID> givenColl,
 							Double lfConfThr,
@@ -231,7 +246,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 							boolean w) {
 		this.sim = sim;
 		this.k = k;
-		coll = new ArrayList<LF> ();
+		;
 		weightedSum = w;
 		
 		this.lfConfThr = lfConfThr;
@@ -239,15 +254,9 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		this.simPQueueClass = simPQueueClass;
 		
 		if ( givenColl != null )
-			for ( Iterator<AbstractFeaturesCollector_Labeled_HasID> itfc=givenColl.iterator(); itfc.hasNext(); ) {
-				AbstractFeaturesCollector_Labeled_HasID fc = itfc.next();
-				//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-				ALocalFeaturesGroup<LF> fg =
-						(ALocalFeaturesGroup<LF>) fc.getFeature(sim.getRequestedFeatureGroupClass());
-				for ( int i=0; i<fg.size(); i++) {
-					coll.add( (LF) fg.getFeature(i) );
-				}
-			}
+			coll = convert(givenColl);
+		else 
+			coll = null;
 		System.out.println("LFCollClassifier created a training collection of "+coll.size()+ " local features.");
 //		changeCollection(givenColl);
 
@@ -268,14 +277,22 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		return classifyWithSimilars(fc, this.getDefaultLFConfThr());
 	}
 	
-	// SERIAL
-//	private MultipleKNNPQueueID<LF> getkNNs(IFeaturesCollector fc) {
-//		AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-//		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
+
+	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc) {
+		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();
+		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);
+		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
+		kNNs.offer(coll);
+		return kNNs;
+//		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
+//		ALocalFeaturesGroup<LF> fg = fc.getFeature(sim.getRequestedFeatureGroupClass());
+//		final MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
 //
-//		IID fcID = null;
+//		final AbstractID fcID;
 //		if ( IHasID.class.isInstance(fc) ) {
 //			fcID = ((IHasID) fc).getID();
+//		} else {
+//			fcID = null;
 //		}
 //
 //		for ( Iterator<LF> it = coll.iterator(); it.hasNext(); ) {
@@ -283,111 +300,52 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //			if ( 	notSameFCID
 //					&& fcID != null
 //					&& (
-//							fc == curr
-//							||
-//							fcID.equals( ((ILocalFeature) curr).getLinkedGroup().getID() )
+//							fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
 //						)) {
 //				continue;
 //			}
 //			kNNs.offer(curr);
 //		}
-//
-//		return kNNs;
-//	}
-	
-	// Parallel
-	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc) {
-		
-		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-		ALocalFeaturesGroup<LF> fg = fc.getFeature(sim.getRequestedFeatureGroupClass());
-		final MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
-
-		final AbstractID fcID;
-		if ( IHasID.class.isInstance(fc) ) {
-			fcID = ((IHasID) fc).getID();
-		} else {
-			fcID = null;
-		}
-
-		for ( Iterator<LF> it = coll.iterator(); it.hasNext(); ) {
-			LF curr = it.next();
-			if ( 	notSameFCID
-					&& fcID != null
-					&& (
-							fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
-						)) {
-				continue;
-			}
-			kNNs.offer(curr);
-		}
-		
-		// For parallel
-//		final int nObjPerThread = (int) Math.ceil( kNNs.size() / ParallelOptions.nThreads);
-//		ArrayList<Integer> arrList = new ArrayList(kNNs.size());
-//		for (int iO = 0; iO<kNNs.size(); iO+=nObjPerThread) {
-//			arrList.add(iO);
-//		}
-//		final IFeaturesCollector fcFinal = fc;
 //		
-//		Parallel.forEach(arrList, new Function<Integer, Void>() {
-//			public Void apply(Integer i) {
-//					int max = i+nObjPerThread;
-//					if ( max > kNNs.size() )
-//						max = kNNs.size();
 //
-//					for ( Iterator<LF> it = coll.iterator(); it.hasNext(); ) {
-//						LF curr = it.next();
-//						if ( 	notSameFCID
-//								&& fcID != null
-//								&& (
-//										fcFinal == curr
-//										||
-//										fcID.equals( ((ILocalFeature) curr).getLinkedGroup().getID() )
-//									)) {
-//							continue;
-//						}
-//						kNNs.offer(curr, i, max);
-//					}
-//					
-//					return null;
-//				}
-//		});
 
-		return kNNs;
 	}
 	
 
 	// perform the classification only on the given collection
-	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) {
-		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();
-		
-		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);
-		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
-		AbstractID fcID = null;
-		if ( IHasID.class.isInstance(fc) ) {
-			fcID = ((IHasID) fc).getID();
-		}
-//		kNNs.offer(coll); tried to speed up did not much
-		for ( Iterator<AbstractFeaturesCollector_Labeled_HasID> itfc=collection.iterator(); itfc.hasNext(); ) {
-			AbstractFeaturesCollector_Labeled_HasID currFC = itfc.next();
-			//AbstractLFGroup<LF> currFG = (AbstractLFGroup<LF>) currFC.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
-			ALocalFeaturesGroup<LF> currFG = fc.getFeature(c);
-			for ( int i=0; i<currFG.size(); i++) {
-				LF curr = (LF) currFG.getFeature(i);
-				if ( 	notSameFCID
-						&& fcID != null
-						&&  (
-								fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
-							) ) {
-					//LEAVE ONE OUT ON ID
-					continue;
-				}
-				kNNs.offer(curr);
-			}
-		}
-		return kNNs;
-	}
+//	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) {
+//		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();
+//		
+//		//AbstractLFGroup<LF> fg = (AbstractLFGroup<LF>) fc.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
+//		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);
+//		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
+//		AbstractID fcID = null;
+//		if ( IHasID.class.isInstance(fc) ) {
+//			fcID = ((IHasID) fc).getID();
+//		}
+////		kNNs.offer(coll); tried to speed up did not much
+//		for ( Iterator<AbstractFeaturesCollector_Labeled_HasID> itfc=collection.iterator(); itfc.hasNext(); ) {
+//			AbstractFeaturesCollector_Labeled_HasID currFC = itfc.next();
+//			//AbstractLFGroup<LF> currFG = (AbstractLFGroup<LF>) currFC.getFeature(AbstractLFGroup.getGroupClass(sim.getRequestedFeatureClass()));
+//			ALocalFeaturesGroup<LF> currFG = fc.getFeature(c);
+//			for ( int i=0; i<currFG.size(); i++) {
+//				LF curr = (LF) currFG.getFeature(i);
+//				if ( 	notSameFCID
+//						&& fcID != null
+//						&&  (
+//								fcID.equals( ((ALocalFeature) curr).getLinkedGroup().getID() )
+//							) ) {
+//					//LEAVE ONE OUT ON ID
+//					continue;
+//				}
+//				kNNs.offer(curr);
+//			}
+//		}
+//		return kNNs;
+//	}
+	//
+	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) {		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());		kNNs.offer(convert(collection));		return kNNs;	}
+	
 
 	
 	@Override
@@ -403,28 +361,8 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold) {
 		return classify(getkNNs(fc), lfConfThreshold);
 	}
-
-	public PredictedLabel classify(AbstractFeaturesCollector fc, Collection training) {
-		return classify(getkNNs(fc, training), lfConfThr);
-	}
-	
-	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Collection training) {
-		return classifyWithSimilars(getkNNs(fc, training), lfConfThr);
-	}
-	
-	public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold, Collection training) {
-		return classify(getkNNs(fc, training), lfConfThreshold);
-	}
-	
-	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold, Collection training) {
-		return classify(getkNNs(fc, training), lfConfThreshold);
-	}
-	
-	public PredictedLabelWithSimilars[] classifyWithSimilars(
-			AbstractFeaturesCollector fc, double[] lfConfThreshold,
-			Collection training) {
-		return classifyWithSimilars(getkNNs(fc, training), lfConfThreshold);
-	}
+	public PredictedLabel classify(AbstractFeaturesCollector fc, Collection training) {		return classify(getkNNs(fc, training), lfConfThr);	}		public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Collection training) {		return classifyWithSimilars(getkNNs(fc, training), lfConfThr);	}		public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold, Collection training) {		return classify(getkNNs(fc, training), lfConfThreshold);	}
+	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold, Collection training) {		return classify(getkNNs(fc, training), lfConfThreshold);	}		public PredictedLabelWithSimilars[] classifyWithSimilars(			AbstractFeaturesCollector fc, double[] lfConfThreshold,			Collection training) {		return classifyWithSimilars(getkNNs(fc, training), lfConfThreshold);	}
 	
 	public final LinkedList<TestDocumentSingleLabeled>[] classify(AbstractLabel[] acLabel, ISimilarityResults[][] results, double[] lfConfThr ) {
 //		PredictedClassLabelWithSimilars[] prLabel = new PredictedClassLabelWithSimilars[lfConfThreshold.length];
@@ -581,6 +519,98 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //
 //	}
 	
+	
+	
+	static class ParallelGeomChecks implements Runnable {
+		private final int from;
+		private final int to;
+		private final LocalFeaturesMatches[] arrColl;
+		private final SimPQueueLowe2NN[] pQueue;
+		private final LFCollClassifier classifier;
+
+
+		ParallelGeomChecks(
+				SimPQueueLowe2NN[] pQueue,
+				int from,
+				int to,
+				LocalFeaturesMatches[] arrColl,
+				LFCollClassifier classifier) {
+			this.from = from;
+			this.to = to;
+			this.arrColl = arrColl;
+			this.pQueue = pQueue;
+			this.classifier = classifier;
+		}
+
+		@Override
+		public void run() {
+			for (int iC = from; iC <= to; iC++) {
+				// FOR EACH IMAGE MATCHES
+
+				// Hough
+				LocalFeaturesMatches curr = arrColl[iC];
+				Hashtable<Long, LocalFeaturesMatches> ht =
+						LoweHoughTransform.getLoweHoughTransforms_HT(curr.getMatches(), false, classifier.RANSAC_minMaxSR);
+				if ( classifier.tr == null ) {
+					// ONLY HOUGH
+					LocalFeaturesMatches[] temp = LoweHoughTransform.orderHT(ht);
+					if ( temp.length == 0 || temp[0].size() <= 1 ) continue;	
+
+					// updating lfConf
+					for ( int i=0; i<temp[0].size(); i++ ){
+						LocalFeatureMatch match = temp[0].get(i);
+						int index = match.getIndex();
+						double currDist = match.getWeight();
+
+						// gets only the nearest point
+						pQueue[index].offer( match.lfMatching, currDist );
+
+					}
+
+				} else {
+					// RANSAC
+					int nPoint = Transformations.getNPointsForEstimation(classifier.tr);
+
+					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, classifier.RANSAC_cycles, classifier.RANSAC_nHoughMaxForRANSAC, classifier.RANSAC_error, classifier.tr, classifier.RANSAC_minDist, true);
+					if ( hyp != null && hyp.size() != 0 ) {
+						TransformationHypothesis bestHyp = hyp.get(0);
+						ArrayList<LocalFeatureMatch> matches = bestHyp.getMatches().getMatches();
+						//							double distance = 1.0 - (double) bestHyp.getMatches().getWeightSum() / kNNs.length;
+						//							if ( distance < 0 ) distance = 0.0;
+						//							tRes.add(new ObjectWithDistance( curr.getMatchingLFGroup(), distance));
+
+						int size = matches.size();
+						if ( size <= nPoint )
+							continue;
+						// updating lfConf
+						for ( int i=0; i<size; i++ ){
+							LocalFeatureMatch match = matches.get(i);
+							int index = match.getIndex();
+							// WEIGHT 
+							double currDist = match.getWeight();
+							pQueue[index].offer( match.lfMatching, currDist );
+						}
+					}
+				}
+			}
+		}
+	}                
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public final ISimilarityResults[] geomFilter( ISimilarityResults[] kNNs ) {
 		HashMap<ALocalFeaturesGroup,LocalFeaturesMatches> hashMap = new HashMap();
 			
@@ -591,7 +621,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		double[] absSecondLabelDist  = new double[kNNs.length];
 //		double[] bestLabelsDist   = new double[kNNs.length];
 				
-		double[] absoluteLastDist = new double[kNNs.length];
+		//double[] absoluteLastDist = new double[kNNs.length];
 		
 //		for ( int i=0; i<kNNs.length; i++) {
 //			bestLabelsDist[i] = secondLabelDist[i] = 1.0;
@@ -625,14 +655,19 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 			ALocalFeature qLF = (ALocalFeature) kNNs[i].getQuery();
 						
 //			noMultiplePointHashSet.clear();
+			
+			// Groups local features results belonging to the same iamge
 			for ( Iterator<ObjectWithDistance> it = kNNs[i].iterator(); it.hasNext(); ) {
 				
 				ObjectWithDistance curr = it.next();
 				ALocalFeature lf = (ALocalFeature) curr.getObj();
+				
+				// ASSIGN A WEIGHT TO THE MATCH
 				double dist = curr.getDist();
-				if ( !it.hasNext() ) {
-					absoluteLastDist[i] = dist;
-				}
+				
+//				if ( !it.hasNext() ) {
+//					absoluteLastDist[i] = dist;
+//				}
 				AbstractLabel currLabel = lf.getLabel();
 //				if ( currLabel != firstLabel ) {
 //					break;
@@ -687,67 +722,99 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //			 }	
 			
 		} else {
-			// Hough
-			for ( Iterator<LocalFeaturesMatches> it = c.iterator(); it.hasNext();  ) {
-				LocalFeaturesMatches curr = it.next();
-				Hashtable<Long, LocalFeaturesMatches> ht =
-					LoweHoughTransform.getLoweHoughTransforms_HT(curr.getMatches(), false, RANSAC_minMaxSR);
-				if ( tr == null ) {
-					LocalFeaturesMatches[] temp = LoweHoughTransform.orderHT(ht);
-					 if ( temp.length == 0 || temp[0].size() <= 1 ) continue;	
-					 // updating lfConf
-					 for ( int i=0; i<temp[0].size(); i++ ){
-						LocalFeatureMatch match = temp[0].get(i);
-						int index = match.getIndex();
-						double currDist = match.getWeight();
-						pQueue[index].offer( match.lfMatching, currDist );
-//						AbstractLabel currLabel = match.lfMatching.getLinkedGroup().getLabel();
-//						if ( currDist < bestLabelsDist[index]  ) {
-//							// new best found
-//							secondLabelDist[index]  = bestLabelsDist[index];
-//							bestLabelsDist[index] = currDist;
-//							bestLabel[index] = currLabel;
-//						} else {
-//							if ( currLabel != bestLabel[index]
-//							     && currDist < secondLabelDist[index] ) {
-//								// updating second
-//								secondLabelDist[index] = currDist;
-//							}
-//						}
-				 	 }
-
-//					 double weightSum = 0;
-//					 for ( int i=0; i<temp[0].size(); i++ ){
-//						 weightSum += temp[0].get(i).getWeight();
-//					 }
-//					 double distance = 1.0 - (double) temp[0].size() / kNNs.length;
-//					 if ( distance < 0 ) distance = 0.0;
-//					 tRes.add(new ObjectWithDistance( curr.getMatchingLFGroup(), distance));
-				} else {
-
-					int nPoint = Transformations.getNPointsForEstimation(tr);
-					
-					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, RANSAC_cycles, RANSAC_nHoughMaxForRANSAC, RANSAC_error, tr, RANSAC_minDist, true);
-					if ( hyp != null && hyp.size() != 0 ) {
-						TransformationHypothesis bestHyp = hyp.get(0);
-						ArrayList<LocalFeatureMatch> matches = bestHyp.getMatches().getMatches();
-//						double distance = 1.0 - (double) bestHyp.getMatches().getWeightSum() / kNNs.length;
-//						if ( distance < 0 ) distance = 0.0;
-//						tRes.add(new ObjectWithDistance( curr.getMatchingLFGroup(), distance));
-						
-						int size = matches.size();
-						if ( size <= nPoint )
-							continue;
-						 // updating lfConf
-						for ( int i=0; i<size; i++ ){
-							LocalFeatureMatch match = matches.get(i);
-							int index = match.getIndex();
-							double currDist = match.getWeight();
-							pQueue[index].offer( match.lfMatching, currDist );
-					 	 }
-					}
+			LocalFeaturesMatches[] cArr = new LocalFeaturesMatches[c.size()];
+			c.toArray(cArr);
+			int threadN = ParallelOptions.nThreads;
+	        Thread[] thread = new Thread[threadN];
+	        int[] group = SplitInGroups.split(c.size(), thread.length);
+	        int from=0;
+	        for ( int i=0; i<group.length; i++ ) {
+	        	int curr=group[i];
+	        	if ( curr == 0 ) break;
+	        	int to=from+curr-1;
+	        	thread[i] = new Thread( new ParallelGeomChecks(pQueue, from,to,cArr, this) ) ;
+	        	thread[i].start();
+	        	from=to+1;
+	        }
+	        
+	        for ( Thread t : thread ) {
+	        	try {
+	        		if ( t != null ) t.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			}
+	        }
+			
+//			// FOR EACH IMAGE MATCHES
+//			for ( Iterator<LocalFeaturesMatches> it = c.iterator(); it.hasNext();  ) {
+//				
+//				// Hough
+//				LocalFeaturesMatches curr = it.next();
+//				Hashtable<Long, LocalFeaturesMatches> ht =
+//					LoweHoughTransform.getLoweHoughTransforms_HT(curr.getMatches(), false, RANSAC_minMaxSR);
+//				if ( tr == null ) {
+//					// ONLY HOUGH
+//					LocalFeaturesMatches[] temp = LoweHoughTransform.orderHT(ht);
+//					 if ( temp.length == 0 || temp[0].size() <= 1 ) continue;	
+//					 
+//					 // updating lfConf
+//					 for ( int i=0; i<temp[0].size(); i++ ){
+//						LocalFeatureMatch match = temp[0].get(i);
+//						int index = match.getIndex();
+//						double currDist = match.getWeight();
+//						
+//						// this just get the nearest point
+//						pQueue[index].offer( match.lfMatching, currDist );
+//						
+////						AbstractLabel currLabel = match.lfMatching.getLinkedGroup().getLabel();
+////						if ( currDist < bestLabelsDist[index]  ) {
+////							// new best found
+////							secondLabelDist[index]  = bestLabelsDist[index];
+////							bestLabelsDist[index] = currDist;
+////							bestLabel[index] = currLabel;
+////						} else {
+////							if ( currLabel != bestLabel[index]
+////							     && currDist < secondLabelDist[index] ) {
+////								// updating second
+////								secondLabelDist[index] = currDist;
+////							}
+////						}
+//				 	 }
+//
+////					 double weightSum = 0;
+////					 for ( int i=0; i<temp[0].size(); i++ ){
+////						 weightSum += temp[0].get(i).getWeight();
+////					 }
+////					 double distance = 1.0 - (double) temp[0].size() / kNNs.length;
+////					 if ( distance < 0 ) distance = 0.0;
+////					 tRes.add(new ObjectWithDistance( curr.getMatchingLFGroup(), distance));
+//				} else {
+//					// RANSAC
+//					int nPoint = Transformations.getNPointsForEstimation(tr);
+//					
+//					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, RANSAC_cycles, RANSAC_nHoughMaxForRANSAC, RANSAC_error, tr, RANSAC_minDist, true);
+//					if ( hyp != null && hyp.size() != 0 ) {
+//						TransformationHypothesis bestHyp = hyp.get(0);
+//						ArrayList<LocalFeatureMatch> matches = bestHyp.getMatches().getMatches();
+////						double distance = 1.0 - (double) bestHyp.getMatches().getWeightSum() / kNNs.length;
+////						if ( distance < 0 ) distance = 0.0;
+////						tRes.add(new ObjectWithDistance( curr.getMatchingLFGroup(), distance));
+//						
+//						int size = matches.size();
+//						if ( size <= nPoint )
+//							continue;
+//						 // updating lfConf
+//						for ( int i=0; i<size; i++ ){
+//							LocalFeatureMatch match = matches.get(i);
+//							int index = match.getIndex();
+//							// WEIGHT 
+//							double currDist = match.getWeight();
+//							pQueue[index].offer( match.lfMatching, currDist );
+//					 	 }
+//					}
+//				}
+//			}
 		}
 		
 //		for ( int i=0; i<kNNs.length; i++ ) {
@@ -874,11 +941,12 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 			 }	
 			
 		} else {
-			// Hough
+			
 			for ( Iterator<LocalFeaturesMatches> it = c.iterator(); it.hasNext();  ) {
 				LocalFeaturesMatches curr = it.next();
 				Hashtable<Long, LocalFeaturesMatches> ht = LoweHoughTransform.getLoweHoughTransforms_HT(curr.getMatches(), false);
 				if ( tr == null ) {
+					// ONLY HOUGH
 					LocalFeaturesMatches[] temp = LoweHoughTransform.orderHT_weightsSum(ht);
 					 
 					
@@ -900,8 +968,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //					 if ( distance < 0 ) distance = 0.0;
 //					 tRes.add(new ObjectWithDistance( curr.getMatchingLFGroup(), distance));
 				} else {
-
-					
+					// RANSAC					
 					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, RANSAC_cycles, RANSAC_nHoughMaxForRANSAC, RANSAC_error, tr, RANSAC_minDist, true);
 					if ( hyp != null && hyp.size() != 0 ) {
 						TransformationHypothesis bestHyp = hyp.get(0);

@@ -610,7 +610,7 @@ public class LocalFeaturesMatches {
 			AbstractTransformation bestTr = null;
 
 
-			int actualCount = 0;
+			//int actualCount = 0;
 
 			if (cycles > total / 2) {
 				int[] index = new int[nPoints];
@@ -619,15 +619,18 @@ public class LocalFeaturesMatches {
 					boolean rejected = false;
 					
 					if ( count == 0 ) {
+						// initializing
 						for ( int ti=0; ti<index.length; ti++ ) {
 							index[ti] = ti;
 						}
-						// initializing
+						
 						for (int ti = 0; ti < index.length; ti++) {
 							LocalFeatureMatch m = currMatches.get(index[ti]);
 							pSrc[ti] = m.getMatchingNormXY();
 							pDest[ti] = m.getNormXY();
 							rejected = check(pSrc, pDest, ti, minDist, scaleBin, oriBin);
+							if (rejected)
+								break;
 						}
 					} else {
 	
@@ -649,7 +652,7 @@ public class LocalFeaturesMatches {
 					if (rejected)
 						continue;
 	
-					actualCount++;
+					//actualCount++;
 					// searching for Transformation that maps imgSrc in imgDest
 					AbstractTransformation t = Transformations.getTransformation(trClass, pSrc, pDest);
 					if (t == null)
@@ -685,7 +688,7 @@ public class LocalFeaturesMatches {
 					}
 					if (rejected) continue;
 
-					actualCount++;
+					//actualCount++;
 					// searching for Transformation that maps imgSrc in imgDest
 					AbstractTransformation t = Transformations.getTransformation(trClass, pSrc, pDest);
 					if (t == null) continue;
@@ -761,6 +764,7 @@ public class LocalFeaturesMatches {
     }
 
     private static boolean check(float[][] pSrc, float[][] pDest, int n, double minDist, byte scaleBin, byte oriBin) {
+    	// checks point n with previous ones (iDup<n) for consistency
     	for (int iDup = 0; iDup < n; iDup++) {
             if (    (   Math.abs(pDest[iDup][0] - pDest[n][0]) 		< minDist
                         &&  Math.abs(pDest[iDup][1] - pDest[n][1]) 	< minDist )

@@ -261,9 +261,9 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 	}
 	
 	public String toString() {
-		String tStr = "";
+		String tStr = this.getClass() + "\n";
 		for ( int i=0; i<feature.length; i++) {
-			tStr += feature[i].getClass() + "\n";
+//			tStr += feature[i].getClass() + "\n";
 			tStr += feature[i] + "\n"; 
 		}
 		return tStr;
