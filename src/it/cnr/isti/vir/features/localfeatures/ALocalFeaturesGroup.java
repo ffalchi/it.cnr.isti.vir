@@ -385,10 +385,10 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 		return minSize;
 	}
         
-    public final ALocalFeaturesGroup getReducedRandom(float redFactor) {
+    public final ALocalFeaturesGroup<LF> getReducedRandom(double redFactor) {
     	if ( lfArr == null || lfArr.length == 0 )
     		return create ( lfArr, linkedFC);
-		ArrayList tRes = new ArrayList<LF>(lfArr.length);
+		ArrayList<LF> tRes = new ArrayList<LF>(lfArr.length);
 		for (int i = 0; i < lfArr.length; i++) {
 			if ( RandomOperations.trueORfalse(redFactor) ) {
 				tRes.add(lfArr[i]);
@@ -399,7 +399,7 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 		return create(newArr, linkedFC );
 	}
     
-    public abstract ALocalFeaturesGroup create(LF[] arr, AbstractFeaturesCollector fc);
+    public abstract ALocalFeaturesGroup<LF> create(LF[] arr, AbstractFeaturesCollector fc);
     
 	public ALocalFeaturesGroup getReducedMinSizeByFactor(float lsMinSizeFactor) throws Exception {
 		float minSize = getMinSize();

@@ -180,7 +180,7 @@ public class FeaturesCollectorsArchives {
 			int k, final ISimilarity sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, InstantiationException,
-			IllegalAccessException, InvocationTargetException {
+			IllegalAccessException, InvocationTargetException, InterruptedException {
 
 		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
@@ -205,7 +205,7 @@ public class FeaturesCollectorsArchives {
 			int k, final ISimilarity[] sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, InstantiationException,
-			IllegalAccessException, InvocationTargetException {
+			IllegalAccessException, InvocationTargetException, InterruptedException {
 
 		SimPQueueArr[][] kNNQueue = new SimPQueueArr[sim.length][qObj.length];
 		for (int iS = 0; iS < sim.length; iS++) {

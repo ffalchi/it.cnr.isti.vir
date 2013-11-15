@@ -57,6 +57,8 @@ import java.util.Vector;
 
 public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier, ILFClassifier  {
 
+	public static final boolean rejectUnConsistent = false;
+	
 	private ILocalFeaturesMetric<LF> sim;
 	private final List<LF> coll;
 //	private Integer triesMax = 10;
@@ -263,7 +265,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 	@Override
-	public PredictedLabel classify(AbstractFeaturesCollector fc) {
+	public PredictedLabel classify(AbstractFeaturesCollector fc) throws InterruptedException {
 		if ( lfConfThr != null)
 			return classify(fc, lfConfThr);
 		return classify(fc, this.getDefaultLFConfThr());
@@ -271,14 +273,14 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	
 	
 	@Override
-	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc) throws ClassifierException {
+	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc) throws ClassifierException, InterruptedException {
 		if ( lfConfThr != null)
 			return classifyWithSimilars(fc, lfConfThr);
 		return classifyWithSimilars(fc, this.getDefaultLFConfThr());
 	}
 	
 
-	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc) {
+	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc) throws InterruptedException {
 		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();
 		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);
 		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
@@ -344,27 +346,27 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //		return kNNs;
 //	}
 	//
-	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) {		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());		kNNs.offer(convert(collection));		return kNNs;	}
+	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) throws InterruptedException {		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());		kNNs.offer(convert(collection));		return kNNs;	}
 	
 
 	
 	@Override
-	public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold) {
+	public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold) throws InterruptedException {
 		return classify(getkNNs(fc), lfConfThreshold);
 	}
 	
-	private PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Double lfConfThreshold) {
+	private PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Double lfConfThreshold) throws InterruptedException {
 		return classifyWithSimilars(getkNNs(fc), lfConfThreshold);
 	}
 	
 	@Override
-	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold) {
+	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold) throws InterruptedException {
 		return classify(getkNNs(fc), lfConfThreshold);
 	}
-	public PredictedLabel classify(AbstractFeaturesCollector fc, Collection training) {		return classify(getkNNs(fc, training), lfConfThr);	}		public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Collection training) {		return classifyWithSimilars(getkNNs(fc, training), lfConfThr);	}		public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold, Collection training) {		return classify(getkNNs(fc, training), lfConfThreshold);	}
-	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold, Collection training) {		return classify(getkNNs(fc, training), lfConfThreshold);	}		public PredictedLabelWithSimilars[] classifyWithSimilars(			AbstractFeaturesCollector fc, double[] lfConfThreshold,			Collection training) {		return classifyWithSimilars(getkNNs(fc, training), lfConfThreshold);	}
+	public PredictedLabel classify(AbstractFeaturesCollector fc, Collection training) throws InterruptedException {		return classify(getkNNs(fc, training), lfConfThr);	}		public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector fc, Collection training) throws InterruptedException {		return classifyWithSimilars(getkNNs(fc, training), lfConfThr);	}		public PredictedLabel classify(AbstractFeaturesCollector fc, Double lfConfThreshold, Collection training) throws InterruptedException {		return classify(getkNNs(fc, training), lfConfThreshold);	}
+	public PredictedLabel[] classify(AbstractFeaturesCollector fc, double[] lfConfThreshold, Collection training) throws InterruptedException {		return classify(getkNNs(fc, training), lfConfThreshold);	}		public PredictedLabelWithSimilars[] classifyWithSimilars(			AbstractFeaturesCollector fc, double[] lfConfThreshold,			Collection training) throws InterruptedException {		return classifyWithSimilars(getkNNs(fc, training), lfConfThreshold);	}
 	
-	public final LinkedList<TestDocumentSingleLabeled>[] classify(AbstractLabel[] acLabel, ISimilarityResults[][] results, double[] lfConfThr ) {
+	public final LinkedList<TestDocumentSingleLabeled>[] classify(AbstractLabel[] acLabel, ISimilarityResults[][] results, double[] lfConfThr ) throws InterruptedException {
 //		PredictedClassLabelWithSimilars[] prLabel = new PredictedClassLabelWithSimilars[lfConfThreshold.length];
 //		LinkedList<TestDocumentSingleLabeled> res = new LinkedList();
 //		for ( int i=0; i<pr.length; i++) {
@@ -390,7 +392,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		
 	}
 
-	public final PredictedLabel[] classify(MultipleKNNPQueueID<LF> kNNs, double[] lfConfThreshold ) {
+	public final PredictedLabel[] classify(MultipleKNNPQueueID<LF> kNNs, double[] lfConfThreshold ) throws InterruptedException {
 //		PredictedClassLabelWithSimilars[] pr = new PredictedClassLabelWithSimilars[lfConfThreshold.length];
 //		for ( int i=0; i<pr.length; i++)
 //			pr[i]=classify(kNNs, lfConfThreshold[i]);
@@ -399,20 +401,20 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 	private PredictedLabelWithSimilars[] classifyWithSimilars(
-			MultipleKNNPQueueID<LF> getkNNs, double[] lfConfThreshold) {
+			MultipleKNNPQueueID<LF> getkNNs, double[] lfConfThreshold) throws InterruptedException {
 		return classifyWithSimilars(getkNNs.getResults(), lfConfThreshold);
 	}
 	
-	public final PredictedLabel classify(MultipleKNNPQueueID<LF> kNNs, double lfConfThreshold ) {
+	public final PredictedLabel classify(MultipleKNNPQueueID<LF> kNNs, double lfConfThreshold ) throws InterruptedException {
 		return classifyWithSimilars(kNNs.getResults(), lfConfThreshold).getPredictedLabelOnly();
 	}
 	
-	private PredictedLabelWithSimilars classifyWithSimilars(MultipleKNNPQueueID<LF> kNNs, Double lfConfThreshold) {
+	private PredictedLabelWithSimilars classifyWithSimilars(MultipleKNNPQueueID<LF> kNNs, Double lfConfThreshold) throws InterruptedException {
 		return classifyWithSimilars(kNNs.getResults(), lfConfThreshold);
 	}
 	
 
-	public final PredictedLabelWithSimilars[] classifyWithSimilars(ISimilarityResults<LF>[] res, double[] lfConfThreshold ) {
+	public final PredictedLabelWithSimilars[] classifyWithSimilars(ISimilarityResults<LF>[] res, double[] lfConfThreshold ) throws InterruptedException {
 		PredictedLabelWithSimilars[] pr = new PredictedLabelWithSimilars[lfConfThreshold.length];
 		for ( int i=0; i<pr.length; i++)
 			pr[i]=classifyWithSimilars(res, lfConfThreshold[i]);
@@ -420,7 +422,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 
-	public final PredictedLabel[] classify(ISimilarityResults<LF>[] res, double[] lfConfThreshold ) {
+	public final PredictedLabel[] classify(ISimilarityResults<LF>[] res, double[] lfConfThreshold ) throws InterruptedException {
 		PredictedLabel[] pr = new PredictedLabel[lfConfThreshold.length];
 		for ( int i=0; i<pr.length; i++)
 			pr[i]=classifyWithSimilars(res, lfConfThreshold[i]).getPredictedLabelOnly();
@@ -527,8 +529,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		private final LocalFeaturesMatches[] arrColl;
 		private final SimPQueueLowe2NN[] pQueue;
 		private final LFCollClassifier classifier;
-
-
+		
 		ParallelGeomChecks(
 				SimPQueueLowe2NN[] pQueue,
 				int from,
@@ -571,7 +572,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 					// RANSAC
 					int nPoint = Transformations.getNPointsForEstimation(classifier.tr);
 
-					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, classifier.RANSAC_cycles, classifier.RANSAC_nHoughMaxForRANSAC, classifier.RANSAC_error, classifier.tr, classifier.RANSAC_minDist, true);
+					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, classifier.RANSAC_cycles, classifier.RANSAC_nHoughMaxForRANSAC, classifier.RANSAC_error, classifier.tr, classifier.RANSAC_minDist, true, LFCollClassifier.rejectUnConsistent);
 					if ( hyp != null && hyp.size() != 0 ) {
 						TransformationHypothesis bestHyp = hyp.get(0);
 						ArrayList<LocalFeatureMatch> matches = bestHyp.getMatches().getMatches();
@@ -611,7 +612,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	
 	
 	
-	public final ISimilarityResults[] geomFilter( ISimilarityResults[] kNNs ) {
+	public final ISimilarityResults[] geomFilter( ISimilarityResults[] kNNs ) throws InterruptedException {
 		HashMap<ALocalFeaturesGroup,LocalFeaturesMatches> hashMap = new HashMap();
 			
 		ILabeled[] absBest = new ILabeled[kNNs.length];
@@ -738,12 +739,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	        }
 	        
 	        for ( Thread t : thread ) {
-	        	try {
-	        		if ( t != null ) t.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+        		if ( t != null ) t.join();
 	        }
 			
 //			// FOR EACH IMAGE MATCHES
@@ -969,7 +965,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //					 tRes.add(new ObjectWithDistance( curr.getMatchingLFGroup(), distance));
 				} else {
 					// RANSAC					
-					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, RANSAC_cycles, RANSAC_nHoughMaxForRANSAC, RANSAC_error, tr, RANSAC_minDist, true);
+					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, RANSAC_cycles, RANSAC_nHoughMaxForRANSAC, RANSAC_error, tr, RANSAC_minDist, true, LFCollClassifier.rejectUnConsistent);
 					if ( hyp != null && hyp.size() != 0 ) {
 						TransformationHypothesis bestHyp = hyp.get(0);
 						ArrayList<LocalFeatureMatch> matches = bestHyp.getMatches().getMatches();
@@ -1090,7 +1086,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 					 pQueue.offer( curr.getMatchingLFGroup(), distance*distance );
 				} else {
 				
-					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, RANSAC_cycles, RANSAC_nHoughMaxForRANSAC, RANSAC_error, tr, RANSAC_minDist, true);
+					ArrayList<TransformationHypothesis> hyp = curr.getRANSAC(ht, RANSAC_cycles, RANSAC_nHoughMaxForRANSAC, RANSAC_error, tr, RANSAC_minDist, true, rejectUnConsistent);
 					if ( hyp != null && hyp.size() != 0 ) {
 						TransformationHypothesis bestHyp = hyp.get(0);
 						ArrayList<LocalFeatureMatch> matches = bestHyp.getMatches().getMatches();
@@ -1112,7 +1108,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //		return new PredictedLabelWithSimilars(firstGroup.getLabel(), first.getDist(), res);
 	}
 	
-	public final PredictedLabelWithSimilars classifyWithSimilars(ISimilarityResults[] kNN, double lfConfThreshold ) {
+	public final PredictedLabelWithSimilars classifyWithSimilars(ISimilarityResults[] kNN, double lfConfThreshold ) throws InterruptedException {
 
 		PredictedLabel[] prLabel= null;
 		
@@ -1340,7 +1336,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //	}
 
 	@Override
-	public LinkedList<TestDocumentSingleLabeled> classify(Collection testDocuments, Double lfConfThreshold) {
+	public LinkedList<TestDocumentSingleLabeled> classify(Collection testDocuments, Double lfConfThreshold) throws InterruptedException {
 		double thr = this.getDefaultLFConfThr();
 		if ( lfConfThreshold != null ) thr = lfConfThreshold;
 		LinkedList<TestDocumentSingleLabeled> testList = new LinkedList<TestDocumentSingleLabeled>();
@@ -1371,7 +1367,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 
 	
 	@Override
-	public Collection<TestDocumentSingleLabeled>[] classify( Collection testDocuments, double[] lfConfThr, Collection trainingDocuments) {
+	public Collection<TestDocumentSingleLabeled>[] classify( Collection testDocuments, double[] lfConfThr, Collection trainingDocuments) throws InterruptedException {
 		
 		LinkedList<TestDocumentSingleLabeled>[] testList = new LinkedList[lfConfThr.length];
 		for ( int i=0; i<lfConfThr.length; i++)
@@ -1421,12 +1417,12 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	}
 	
 	@Override
-	public Collection<TestDocumentSingleLabeled>[] classify( Collection testDocuments, double[] lfConfThr) {
+	public Collection<TestDocumentSingleLabeled>[] classify( Collection testDocuments, double[] lfConfThr) throws InterruptedException {
 		return classify(testDocuments, lfConfThr, null);
 	}
 	
 	@Override
-	public LinkedList<TestDocumentSingleLabeled> classify(Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments) {
+	public LinkedList<TestDocumentSingleLabeled> classify(Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments) throws InterruptedException {
 		return classify(testDocuments, (Double) null);
 	}
 

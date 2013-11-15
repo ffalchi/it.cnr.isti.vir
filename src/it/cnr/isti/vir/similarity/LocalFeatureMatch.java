@@ -61,7 +61,7 @@ public class LocalFeatureMatch {
 		return matchingxy;
 	}
 
-        public final float[] getNormXY() {
+    public final float[] getNormXY() {
 		return nxy;
 	}
 
@@ -86,10 +86,10 @@ public class LocalFeatureMatch {
 		super();
 		this.lf = lf;
 		this.lfMatching = matchingLF;
-                xy = lf.getXY();
-                matchingxy = lfMatching.getXY();
-                nxy = lf.getNormXY();
-                matchingnxy = lfMatching.getNormXY();
+        xy = lf.getXY();
+        matchingxy = lfMatching.getXY();
+        nxy = lf.getNormXY();
+        matchingnxy = lfMatching.getNormXY();
 		this.weight = weight;
 		this.index = index;
 	}

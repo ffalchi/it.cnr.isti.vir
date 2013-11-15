@@ -376,13 +376,8 @@ public class Permutation extends AbstractFeature {
 	        	ti++;
 	        }
 	        
-	        for ( ti=0; ti<thread.length; ti++ ) {
-	        	try {
-					thread[ti].join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+	        for ( Thread t : thread ) {
+        		if ( t != null ) t.join();
 	        }
 		
 			

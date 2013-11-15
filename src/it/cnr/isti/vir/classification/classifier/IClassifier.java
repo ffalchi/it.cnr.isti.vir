@@ -21,11 +21,11 @@ import java.util.Collection;
 
 public interface IClassifier {
 
-	public PredictedLabel classify(AbstractFeaturesCollector obj) throws ClassifierException;
+	public PredictedLabel classify(AbstractFeaturesCollector obj) throws ClassifierException, InterruptedException;
 	
-	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector obj) throws ClassifierException;
+	public PredictedLabelWithSimilars classifyWithSimilars(AbstractFeaturesCollector obj) throws ClassifierException, InterruptedException;
 
 	public Collection<TestDocumentSingleLabeled> classify(
-			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments) throws ClassifierException;
+			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments) throws ClassifierException, InterruptedException;
 	
 }

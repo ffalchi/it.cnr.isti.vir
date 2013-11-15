@@ -19,14 +19,14 @@ import java.util.Collection;
 
 public interface ILFClassifier extends IClassifier {
 
-	public PredictedLabel classify(AbstractFeaturesCollector obj, Double lfConfThreshold);
+	public PredictedLabel classify(AbstractFeaturesCollector obj, Double lfConfThreshold) throws InterruptedException;
 	
-	public PredictedLabel[] classify(AbstractFeaturesCollector obj, double[] lfConfThreshold);
+	public PredictedLabel[] classify(AbstractFeaturesCollector obj, double[] lfConfThreshold) throws InterruptedException;
 
-	public Collection<TestDocumentSingleLabeled> classify(Collection<?> testDocuments, Double lfConfThreshold);
+	public Collection<TestDocumentSingleLabeled> classify(Collection<?> testDocuments, Double lfConfThreshold) throws InterruptedException;
 	
-	public Collection<TestDocumentSingleLabeled>[] classify(Collection<?> testDocuments, double[] lfConfThreshold);
+	public Collection<TestDocumentSingleLabeled>[] classify(Collection<?> testDocuments, double[] lfConfThreshold) throws InterruptedException;
 
-	Collection<TestDocumentSingleLabeled>[] classify(Collection<?> testDocuments,	double[] lfConfThr, Collection<?> trainingDocuments);
+	Collection<TestDocumentSingleLabeled>[] classify(Collection<?> testDocuments,	double[] lfConfThr, Collection<?> trainingDocuments) throws InterruptedException;
 	
 }

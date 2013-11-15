@@ -505,7 +505,7 @@ public class KMeans<O extends AbstractFeature> {
 			
 			lastTimeMillis = System.currentTimeMillis();
 			if ( (newDistortion<Double.MAX_VALUE) && (1.0 - newDistortion / currDistortion) < distRedThr) {
-				Log.info("Distortion reduction was less than threashold " + distRedThr );
+				Log.info("Distortion reduction was less than threshold " + distRedThr );
 				break;
 			}
 			

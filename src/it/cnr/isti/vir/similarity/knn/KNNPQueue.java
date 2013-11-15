@@ -66,7 +66,7 @@ public class KNNPQueue<F> {
 		}		
 	}
 	
-	public final void offerAll(Collection<F> coll) {
+	public final void offerAll(Collection<F> coll) throws InterruptedException {
 		if ( ArrayList.class.isInstance(coll)) {
 			offerAll( (ArrayList) coll);
 			return;
@@ -109,7 +109,7 @@ public class KNNPQueue<F> {
     }
 	
 	
-	public final void offerAll(F[] coll) {
+	public final void offerAll(F[] coll) throws InterruptedException {
 		
 		if ( parallel ) {
 			int threadN = ParallelOptions.nThreads;
@@ -126,12 +126,7 @@ public class KNNPQueue<F> {
 	        }
 	        
 	        for ( Thread t : thread ) {
-	        	try {
-	        		if ( t != null ) t.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+        		if ( t != null ) t.join();
 	        }
 		}
 		else
@@ -164,7 +159,7 @@ public class KNNPQueue<F> {
         }                
     }
 	
-	public final void offerAll(ArrayList<F> coll) {
+	public final void offerAll(ArrayList<F> coll) throws InterruptedException {
 		
 		if ( parallel ) {
 			int threadN = ParallelOptions.nThreads;
@@ -181,12 +176,7 @@ public class KNNPQueue<F> {
 	        }
 	        
 	        for ( Thread t : thread ) {
-	        	try {
-	        		if ( t != null ) t.join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+        		if ( t != null ) t.join();
 	        }
 			
 			
@@ -207,13 +197,8 @@ public class KNNPQueue<F> {
 //	        	ti++;
 //	        }
 //	        
-//	        for ( ti=0; ti<threadN; ti++ ) {
-//	        	try {
-//					thread[ti].join();
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+//	        for ( Thread t : thread ) {
+//        		if ( t != null ) t.join();
 //	        }
 		}
 		else

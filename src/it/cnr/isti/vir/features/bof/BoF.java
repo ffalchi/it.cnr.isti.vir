@@ -23,6 +23,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class BoF extends AbstractFeature {
 
@@ -49,16 +50,7 @@ public class BoF extends AbstractFeature {
 
         if ( this.ordered == true ) return;
 
-        //Bubble
-        for (int i = 0; i < bag.length; i++) {
-            for (int j = i; j < bag.length; j++) {
-                if (bag[i] > bag[j]) {
-                    int intTemp = bag[i];
-                    bag[i] = bag[j];
-                    bag[j] = intTemp;
-                }
-            }
-        }
+        Arrays.sort(bag);
 
         this.ordered = true;
 	}

@@ -201,7 +201,7 @@ public class MultipleKNNPQueueID<F>  {
     }
 	
 	// Parallel on the objects
-	public final void offer(Collection<F> coll ) {
+	public final void offer(Collection<F> coll ) throws InterruptedException {
 		int threadN = ParallelOptions.nThreads;
         Thread[] thread = new Thread[threadN];
         int[] group = SplitInGroups.split(knn.length, thread.length);
@@ -216,12 +216,7 @@ public class MultipleKNNPQueueID<F>  {
         }
         
         for ( Thread t : thread ) {
-        	try {
-        		if ( t != null ) t.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+    		if ( t != null ) t.join();
         }
 	}
 	

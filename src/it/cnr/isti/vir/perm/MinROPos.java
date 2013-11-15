@@ -67,7 +67,7 @@ public class MinROPos {
 	}
 	
 	
-	public static AbstractFeaturesCollector[] order(ISimilarity sim, ISimilarity permSim, AbstractFeaturesCollector[] set, int candidatesN, int permLength) {
+	public static AbstractFeaturesCollector[] order(ISimilarity sim, ISimilarity permSim, AbstractFeaturesCollector[] set, int candidatesN, int permLength) throws InterruptedException {
 		AbstractFeaturesCollector[] copySet = set.clone();
 		RandomOperations.shuffle(set);
 		
@@ -255,7 +255,7 @@ public class MinROPos {
 	
 	public static AbstractFeaturesCollector[] orderMinCoeffVar(ISimilarity sim,
 			AbstractFeaturesCollector[] candidates, AbstractFeaturesCollector[] examples,
-			int permLength, int nTriesMax ) {
+			int permLength, int nTriesMax ) throws InterruptedException {
 		
 		
 		// PERMUTATIONS
@@ -311,14 +311,9 @@ public class MinROPos {
 	        }
 	        
 	        // waiting threads
-	        for ( ti=0; ti<thread.length; ti++ ) {
-	        	try {
-					thread[ti].join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	        }			
+	        for ( Thread t : thread ) {
+        		if ( t != null ) t.join();
+	        }		
 	        
 	        // selecting worst
 			for ( int iT=0; iT<nTries; iT++) {
@@ -430,7 +425,7 @@ public class MinROPos {
 	
 	public static AbstractFeaturesCollector[] orderMinROPosVar(ISimilarity sim, ISimilarity permSim,
 			AbstractFeaturesCollector[] candidates, AbstractFeaturesCollector[] examples,
-			int permLength, int nTriesMax ) {
+			int permLength, int nTriesMax ) throws InterruptedException {
 		
 		
 		// for stats
@@ -503,14 +498,9 @@ public class MinROPos {
 	        }
 	        
 	        // waiting threads
-	        for ( ti=0; ti<thread.length; ti++ ) {
-	        	try {
-					thread[ti].join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	        }			
+	        for ( Thread t : thread ) {
+        		if ( t != null ) t.join();
+	        }		
 	        
 	        // selecting worst
 			for ( int iT=0; iT<nTries; iT++) {
@@ -690,7 +680,7 @@ public class MinROPos {
 	
 	public static AbstractFeaturesCollector[] order4(ISimilarity sim,
 			AbstractFeaturesCollector[] candidates, AbstractFeaturesCollector[] examples,
-			int permLength) {
+			int permLength) throws InterruptedException {
 		
 		Log.info("Evaluating Permutations");
 		Permutation[] obj = getPermutations(examples, candidates, sim);	
@@ -802,7 +792,7 @@ public class MinROPos {
 	}
 	
 	
-	public static Permutation[] getPermutations(AbstractFeaturesCollector[] objs, AbstractFeaturesCollector[] ro, ISimilarity sim ) {
+	public static Permutation[] getPermutations(AbstractFeaturesCollector[] objs, AbstractFeaturesCollector[] ro, ISimilarity sim ) throws InterruptedException {
 		Permutation[] res = new Permutation[objs.length];
 //		for (int i = 0; i < objs.length; i++) {
 //			res[i] = new Permutation(objs[i], ro, sim, false);
@@ -821,13 +811,8 @@ public class MinROPos {
         	ti++;
         }
         
-        for ( ti=0; ti<thread.length; ti++ ) {
-        	try {
-				thread[ti].join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        for ( Thread t : thread ) {
+    		if ( t != null ) t.join();
         }
 		return res;
 	}

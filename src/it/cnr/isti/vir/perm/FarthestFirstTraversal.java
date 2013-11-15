@@ -105,7 +105,7 @@ public class FarthestFirstTraversal {
 
 	}
 	
-	public static AbstractFeaturesCollector[] select(ISimilarity sim, FeaturesCollectorsArchives archives, int nMaxObj, int maxNTries, int nCandidatesCycles) throws ArchiveException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+	public static AbstractFeaturesCollector[] select(ISimilarity sim, FeaturesCollectorsArchives archives, int nMaxObj, int maxNTries, int nCandidatesCycles) throws ArchiveException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException, InterruptedException {
 		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[nMaxObj];
 		
 		
@@ -160,18 +160,15 @@ public class FarthestFirstTraversal {
 	        // waiting threads
 	        for ( ti=0; ti<thread.length; ti++ ) {
 	        	if ( thread[ti] == null ) continue;
-	        	try {
-					thread[ti].join();
-					
-					double minDist = runnable[ti].maxMinDist;
-					if ( minDist>maxMinDist ) {
-						maxMinDist=minDist;
-						bestCandidate=runnable[ti].bestCandidate;
-					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
+				thread[ti].join();
+				
+				double minDist = runnable[ti].maxMinDist;
+				if ( minDist>maxMinDist ) {
+					maxMinDist=minDist;
+					bestCandidate=runnable[ti].bestCandidate;
 				}
+
 	        }	
 			/*
 			

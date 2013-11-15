@@ -46,14 +46,14 @@ public class SimilarityCollection implements IkNNExecuter {
 	}
 
 	@Override
-	public synchronized ISimilarityResults getKNNResults(AbstractFeature qObj, int k) {
+	public synchronized ISimilarityResults getKNNResults(AbstractFeature qObj, int k) throws InterruptedException {
 		//KNNObjects knn = new KNNObjects(qObj, k, sim);
 		KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj );
 		knn.offerAll(coll);
 		return knn.getResults();
 	}
 
-	public synchronized ISimilarityResults[] getKNNResults(AbstractFeaturesCollector[] qObj, int k) {
+	public synchronized ISimilarityResults[] getKNNResults(AbstractFeaturesCollector[] qObj, int k) throws InterruptedException {
 		ISimilarityResults[] res = new ISimilarityResults[qObj.length];
 		for ( int i=0; i<res.length; i++) {
 			KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj[i] );

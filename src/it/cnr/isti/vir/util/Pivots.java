@@ -207,7 +207,7 @@ public class Pivots {
 	}
 	
 
-	public static final AbstractFeaturesCollector[] search(FeaturesCollectorsArchive candidatePivots, AbstractFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException, SecurityException, IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+	public static final AbstractFeaturesCollector[] search(FeaturesCollectorsArchive candidatePivots, AbstractFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException, SecurityException, IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException, InterruptedException {
 		return search(new FeaturesCollectorsArchives(candidatePivots), testObjects, sim, nPivots, nTries);
 	}
 	
@@ -239,7 +239,7 @@ public class Pivots {
 		}
 	}
 	
-	public static final AbstractFeaturesCollector[] search(FeaturesCollectorsArchives candidatePivots, AbstractFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException {
+	public static final AbstractFeaturesCollector[] search(FeaturesCollectorsArchives candidatePivots, AbstractFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException, InterruptedException {
 		
 		// creating testObjects.length pairs of objects
 		int[] obj1 = RandomOperations.getRandomIntArray(testObjects.length, 0, testObjects.length-1);
@@ -286,13 +286,8 @@ public class Pivots {
 			        	ti++;
 			        }
 			        
-			        for ( ti=0; ti<thread.length; ti++ ) {
-			        	try {
-							thread[ti].join();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+			        for ( Thread t : thread ) {
+		        		if ( t != null ) t.join();
 			        }
 					
 				}
@@ -368,14 +363,9 @@ public class Pivots {
 	        	ti++;
 	        }
 	        
-	        for ( ti=0; ti<thread.length; ti++ ) {
-	        	try {
-					thread[ti].join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	        }
+	        for ( Thread t : thread ) {
+        		if ( t != null ) t.join();
+	        }	
 		}
 		
 		Log.info("Evaluating best and second best pivots for each objects pair.");
@@ -441,13 +431,8 @@ public class Pivots {
 			        	ti++;
 			        }
 			        
-			        for ( ti=0; ti<thread.length; ti++ ) {
-			        	try {
-							thread[ti].join();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+			        for ( Thread t : thread ) {
+		        		if ( t != null ) t.join();
 			        }
 					
 				}
@@ -500,13 +485,8 @@ public class Pivots {
 			        	ti++;
 			        }
 			        
-			        for ( ti=0; ti<thread.length; ti++ ) {
-			        	try {
-							thread[ti].join();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+			        for ( Thread t : thread ) {
+		        		if ( t != null ) t.join();
 			        }
 					
 				}

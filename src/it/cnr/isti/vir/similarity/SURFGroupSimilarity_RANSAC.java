@@ -11,8 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
-import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.SURFGroup;
 import it.cnr.isti.vir.geom.AffineTransformation;
 import it.cnr.isti.vir.geom.HomographyTransformation;
@@ -24,6 +24,8 @@ import java.util.Hashtable;
 import java.util.Properties;
 
 public class SURFGroupSimilarity_RANSAC extends IGroupSimilarity<SURFGroup> {
+	
+	boolean rejectUnConsistent = false;
 	
 	Class tr = HomographyTransformation.class;
 	int cycles = 1000;
@@ -120,7 +122,7 @@ public class SURFGroupSimilarity_RANSAC extends IGroupSimilarity<SURFGroup> {
 		matches = SURFGroup.getLoweMatches( g1, g2, sqrLoweThr );
 		if ( matches == null || matches.size() < 2 ) return 1.0; 
 		Hashtable<Long, LocalFeaturesMatches> ht = LoweHoughTransform.getLoweHoughTransforms_HT(matches.getMatches(), false, RANSAC_minMaxSR);
-		trArr = matches.getRANSAC( ht, cycles, nHoughMaxForRANSAC, errorPerc, tr, minDist, true);
+		trArr = matches.getRANSAC( ht, cycles, nHoughMaxForRANSAC, errorPerc, tr, minDist, true, rejectUnConsistent);
 		
 		if ( trArr == null || trArr.size() == 0 ) sim = 0.0;
 		else sim = trArr.get(0).getHarmonicMeanOfPercentageMatches();

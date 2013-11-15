@@ -40,9 +40,12 @@ public class RSTTransformation extends HomographyTransformation {
         double sqrvxy = (vx*vx+vy*vy);
         double sqrvuv = (vu*vu+vv*vv);
 
-        double anglexy = Math.asin ( vy / Math.sqrt(sqrvxy) );
-        double angleuv = Math.asin ( vv / Math.sqrt(sqrvuv) );
-
+//        double anglexy = Math.asin ( vy / Math.sqrt(sqrvxy) );
+//        double angleuv = Math.asin ( vv / Math.sqrt(sqrvuv) );
+        
+        double anglexy = Math.atan ( vy / vx );
+        double angleuv = Math.atan ( vv / vu );
+        
         // return { scale, rotation }
         return new double[]{ Math.sqrt( sqrvuv / sqrvxy  ), angleuv-anglexy };
     }

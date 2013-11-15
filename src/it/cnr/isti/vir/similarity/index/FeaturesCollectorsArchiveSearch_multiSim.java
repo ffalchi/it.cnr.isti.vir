@@ -60,7 +60,7 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 	}
 	
 	public synchronized void getKNNs(AbstractFeaturesCollector[] qObj, SimPQueueArr[][] kNNQueue, final ISimilarity[] sim, final boolean onlyID)
-			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
 
 
 		final int parallelBatchSize = 100000;
@@ -93,13 +93,8 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 	        	ti++;
 	        }
 	        
-	        for ( ti=0; ti<thread.length; ti++ ) {
-	        	try {
-					thread[ti].join();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+	        for ( Thread t : thread ) {
+        		if ( t != null ) t.join();
 	        }
 			
 			Log.info((iObj+parallelBatchSize) + "/" + nObj);

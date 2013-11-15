@@ -16,6 +16,7 @@ import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 import it.cnr.isti.vir.util.RandomOperations;
+import it.cnr.isti.vir.util.Sort;
 
 import java.io.BufferedReader;
 import java.io.DataInput;
@@ -703,20 +704,9 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 		BoFLF[] tLFArr = (BoFLF[]) Arrays.copyOf(lfArr, lfArr.length);
     	//pre random reordering
 		RandomOperations.shuffle(tLFArr, eval);
-        //Bubble biggest eval first
-        for (int i = 0; i < eval.length; i++) {
-            for (int j = i; j < eval.length; j++) {
-                if (eval[i] < eval[j]) {
-                	BoFLF temp = tLFArr[i];
-                    tLFArr[i] = tLFArr[j];
-                    tLFArr[j] = temp;
+        
+		Sort.sortDescending(eval, tLFArr);
 
-                    float intTemp = eval[i];
-                    eval[i] = eval[j];
-                    eval[j] = intTemp;
-                }
-            }
-        }
         // bag is now ordered with respect to eval and random
         int targetSize = (int) Math.round(lfArr.length*factor);
 

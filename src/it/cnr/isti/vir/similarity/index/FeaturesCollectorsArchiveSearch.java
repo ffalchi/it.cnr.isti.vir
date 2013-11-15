@@ -27,7 +27,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			AbstractFeaturesCollector[] qObj, int k, final ISimilarity sim)
 			throws SecurityException, IllegalArgumentException, IOException,
 			NoSuchMethodException, InstantiationException,
-			IllegalAccessException, InvocationTargetException {
+			IllegalAccessException, InvocationTargetException, InterruptedException {
 		return getKNN(qObj, k, sim, true);
 	}
 
@@ -35,7 +35,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			AbstractFeaturesCollector[] qObj, int k, final ISimilarity sim)
 			throws SecurityException, IllegalArgumentException, IOException,
 			NoSuchMethodException, InstantiationException,
-			IllegalAccessException, InvocationTargetException {
+			IllegalAccessException, InvocationTargetException, InterruptedException {
 		return getKNN(qObj, k, sim, false);
 	}
 	
@@ -43,7 +43,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			final ISimilarity sim ) throws IOException, SecurityException,
 			NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException,
-			InvocationTargetException {
+			InvocationTargetException, InterruptedException {
 		
 		AbstractFeaturesCollector[] qObjs = {qObj};
 		return getKNN( qObjs, k, sim, true)[0];
@@ -53,7 +53,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
 			NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException,
-			InvocationTargetException {
+			InvocationTargetException, InterruptedException {
 		
 		AbstractFeaturesCollector[] qObjs = {qObj};
 		return getKNN( qObjs, k, sim, onlyID)[0];
@@ -63,7 +63,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			final ISimilarity sim ) throws IOException, SecurityException,
 			NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException,
-			InvocationTargetException {
+			InvocationTargetException, InterruptedException {
 		
 		AbstractFeaturesCollector[] qObjs = {qObj};
 		return getKNN( qObjs, k, sim, true)[0];
@@ -73,7 +73,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
 			NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException,
-			InvocationTargetException {
+			InvocationTargetException, InterruptedException {
 		
 		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
@@ -133,7 +133,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		SimPQueueArr[] kNNQueue,
 		final ISimilarity sim,
 		final boolean onlyID)
-		throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
 
 		synchronized (archive) {
 			boolean parallel = true;
@@ -157,9 +157,17 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				}				
 			
 			} else {
-				final int parallelBatchSize = 100000;
+				
+				int tParallelBatchSize = 100000;
 				
 				int nObj = archive.size();
+				
+				while ( tParallelBatchSize > nObj) {
+					tParallelBatchSize = tParallelBatchSize / 10;
+				}
+				
+				final int parallelBatchSize = tParallelBatchSize;
+				
 				Iterator<AbstractFeaturesCollector> it = archive.iterator();
 				// iterates through multiple batches
 				for (int iObj = 0; iObj < nObj; iObj+=parallelBatchSize ) {
@@ -187,13 +195,8 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			        	ti++;
 			        }
 			        
-			        for ( ti=0; ti<thread.length; ti++ ) {
-			        	try {
-							thread[ti].join();
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+			        for ( Thread t : thread ) {
+		        		if ( t != null ) t.join();
 			        }
 					
 					Log.info((iObj+objects.length) + "/" + nObj);

@@ -402,7 +402,7 @@ public class LocalFeaturesMatches {
         int lastModified = currIDs.length - 1;
         currIDs[lastModified]++;
         if (currIDs[lastModified] == nObjects) {
-            // we have to search the first to reset
+            // we have to search the first to be resetted
             for (int i = lastModified - 1; i >= 0; i--) {
                 if (currIDs[i] < nObjects - currIDs.length + i) {
                     currIDs[i]++;
@@ -417,6 +417,8 @@ public class LocalFeaturesMatches {
         return lastModified;
     }
     
+    
+    // this is necessary for the two steps RANSAC 
     public static ArrayList<TransformationHypothesis>
 		getRANSAC(	ArrayList<TransformationHypothesis> trs,
 					int cycles_deprecated,
@@ -555,7 +557,8 @@ public class LocalFeaturesMatches {
     				double error,
     				Class trClass,
     				double minDist,
-    				boolean onlyFirst) {
+    				boolean onlyFirst,
+    				boolean rejectUnConsistent ) {
     	
 
     	int nPoints = Transformations.getNPointsForEstimation(trClass);
@@ -612,43 +615,36 @@ public class LocalFeaturesMatches {
 
 			//int actualCount = 0;
 
+			int lastModified = 0;
 			if (cycles > total / 2) {
 				int[] index = new int[nPoints];
 				for (int count = 0; count < total; count++) {
 					// we can check all
-					boolean rejected = false;
+					
 					
 					if ( count == 0 ) {
 						// initializing
 						for ( int ti=0; ti<index.length; ti++ ) {
 							index[ti] = ti;
 						}
-						
-						for (int ti = 0; ti < index.length; ti++) {
-							LocalFeatureMatch m = currMatches.get(index[ti]);
-							pSrc[ti] = m.getMatchingNormXY();
-							pDest[ti] = m.getNormXY();
-							rejected = check(pSrc, pDest, ti, minDist, scaleBin, oriBin);
-							if (rejected)
-								break;
-						}
+						lastModified = 0;
+
 					} else {
 	
-						int lastModified = nextIDs(index, size);
-						if (lastModified < 0) continue;
-
-						for (int ti = lastModified; ti < index.length; ti++) {
-							LocalFeatureMatch m = currMatches.get(index[ti]);
-							pSrc[ti] = m.getMatchingNormXY();
-							pDest[ti] = m.getNormXY();
-							rejected = check(pSrc, pDest, ti, minDist, scaleBin, oriBin);
-							if (rejected)
-								break;
-						}
-
+						lastModified = nextIDs(index, size);
+						if (lastModified < 0) break;
 					}
-									
 					
+					// CHECK
+					boolean rejected = false;
+					for (int ti = lastModified; ti < index.length; ti++) {
+						LocalFeatureMatch m = currMatches.get(index[ti]);
+						pSrc[ti] = m.getMatchingNormXY();
+						pDest[ti] = m.getNormXY();
+						if (  !rejected )
+							rejected = reject(pSrc, pDest, ti, minDist, scaleBin, oriBin, rejectUnConsistent);
+					}
+														
 					if (rejected)
 						continue;
 	
@@ -684,7 +680,7 @@ public class LocalFeaturesMatches {
 						LocalFeatureMatch m = currMatches.get(index[n]);
 						pSrc[n] = m.getMatchingNormXY();
 						pDest[n] = m.getNormXY();
-						rejected = check(pSrc, pDest, n, minDist, scaleBin, oriBin);
+						rejected = reject(pSrc, pDest, n, minDist, scaleBin, oriBin, rejectUnConsistent);
 					}
 					if (rejected) continue;
 
@@ -763,7 +759,7 @@ public class LocalFeaturesMatches {
 
     }
 
-    private static boolean check(float[][] pSrc, float[][] pDest, int n, double minDist, byte scaleBin, byte oriBin) {
+    private static boolean reject(float[][] pSrc, float[][] pDest, int n, double minDist, byte scaleBin, byte oriBin, boolean rejectUnConsistent) {
     	// checks point n with previous ones (iDup<n) for consistency
     	for (int iDup = 0; iDup < n; iDup++) {
             if (    (   Math.abs(pDest[iDup][0] - pDest[n][0]) 		< minDist
@@ -775,32 +771,47 @@ public class LocalFeaturesMatches {
                 return true;
             }
 
-    		double[] scaleRot = RSTTransformation.getScaleAndRot(pSrc[iDup], pSrc[n], pDest[iDup], pDest[n]);
-            if ( scaleConsistency( scaleBin, scaleRot[0] ) ) return true;
-            if ( oriConsistency( oriBin, scaleRot[1] ) ) return true;
+            if ( rejectUnConsistent ) {
+            	double[] scaleRot = RSTTransformation.getScaleAndRot(pSrc[iDup], pSrc[n], pDest[iDup], pDest[n]);
+            	if ( scaleConsistencyReject( scaleBin, scaleRot[0] ) ) return true;
+            	if ( oriConsistencyReject( oriBin, scaleRot[1] ) ) return true;
+            }
         }
         return false;
 	}
 
-	private static boolean scaleConsistency(byte scaleBin, double scale ) {
+	private static boolean scaleConsistencyReject(byte scaleBin, double scale ) {
 
 		byte currScaleBin_first = LoweHoughTransform.getScaleRatioBin_firstOfTwo(scale);
-		if (currScaleBin_first != scaleBin&& currScaleBin_first + 1 != scaleBin) {
+		if (	currScaleBin_first != scaleBin 
+				&&
+				currScaleBin_first + 1 != scaleBin
+			) {
 			return true;
 		}
 		return false;
 	}
     
-    private static boolean oriConsistency(byte oriBin, double ori ) {
+    private static boolean oriConsistencyReject(byte oriBin, double ori ) {
 	    byte currOriBin_first = LoweHoughTransform.getOriDiffBin_firstOfTwo( ori );
-	    if (    currOriBin_first != oriBin
-	            && currOriBin_first+1 != oriBin
-	            // in case of cycling
-	            && ( oriBin != 0 || currOriBin_first != LoweHoughTransform.LHT_oriBinN )
-	            ) {
-			return true;
-		}
-		return false;
+//	    if (    currOriBin_first != oriBin
+//	            && currOriBin_first+1 != oriBin
+//	            // in case of cycling
+//	            && ( oriBin != 0 || currOriBin_first != LoweHoughTransform.LHT_oriBinN )
+//	            ) {
+//			return true;
+//		}
+//	    return false;
+	    
+	    // extending search
+	    int curr = currOriBin_first - 2; // wil start from -1
+	    if ( curr < 0 ) curr += LoweHoughTransform.LHT_oriBinN; 
+	    for ( int i=0; i<4; i++ ) {
+	    	curr = ++curr % LoweHoughTransform.LHT_oriBinN;
+	    	if ( curr == oriBin ) return false;
+	    }
+	    
+		return true;
     }
 
 	//    private final static ArrayList<LocalFeatureMatch> getFiltered_L1(ArrayList<LocalFeatureMatch> matches, Transformation t, double error) {

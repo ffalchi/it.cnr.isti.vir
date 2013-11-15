@@ -25,6 +25,8 @@ import java.util.Properties;
 
 public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 	
+	boolean rejectUnConsistent = false;
+	
 	Class tr = HomographyTransformation.class;
 	int cycles = 1000;
 	int nHoughMaxForRANSAC = 10;
@@ -132,7 +134,7 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 			matches = ORBGroup.getLoweMatches( g1, g2, sqrLoweThr );
 		if ( matches == null || matches.size() < 2 ) return 1.0; 
 		Hashtable<Long, LocalFeaturesMatches> ht = LoweHoughTransform.getLoweHoughTransforms_HT(matches.getMatches(), false, RANSAC_minMaxSR);
-		trArr = matches.getRANSAC( ht, cycles, nHoughMaxForRANSAC, errorPerc, tr, minXYDist, true);
+		trArr = matches.getRANSAC( ht, cycles, nHoughMaxForRANSAC, errorPerc, tr, minXYDist, true, rejectUnConsistent);
 		
 		if ( trArr == null || trArr.size() == 0 ) sim = 0.0;
 		else sim = trArr.get(0).getHarmonicMeanOfPercentageMatches();

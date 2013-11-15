@@ -40,10 +40,11 @@ public class SingleLabelEvaluator {
 	 * @param 	classifier		the Classifier to be tested
 	 * @return 					a Confusion Matrix for the current text
 	 * @throws ClassifierException
+	 * @throws InterruptedException 
 	 */
 	public static ConfusionMatrix getConfusionMatrix(
 			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments,
-			IClassifier classifier ) throws ClassifierException
+			IClassifier classifier ) throws ClassifierException, InterruptedException
 	{
 		HashSet<AbstractLabel> temp = new HashSet();
 		
@@ -59,7 +60,7 @@ public class SingleLabelEvaluator {
 	public static ConfusionMatrix getConfusionMatrix(
 			Collection<AbstractFeaturesCollector_Labeled_HasID> testDocuments,
 			IClassifier classifier,
-			Collection<AbstractLabel> labelColl ) throws ClassifierException
+			Collection<AbstractLabel> labelColl ) throws ClassifierException, InterruptedException
 	{
 		
 		Collection<TestDocumentSingleLabeled> testList = classifier.classify(testDocuments );
@@ -146,7 +147,7 @@ public class SingleLabelEvaluator {
 			Collection<AbstractLabel> labelColl,
 			ISimilarityResults[][] res,
 			double[] confThrImg,
-			double[] confThrLF ) {
+			double[] confThrLF ) throws InterruptedException {
 		
 		ConfusionMatrix[][] cm = new ConfusionMatrix[confThrImg.length][confThrLF.length];
 
@@ -171,7 +172,7 @@ public class SingleLabelEvaluator {
 			ILFClassifier classifier,
 			Collection<AbstractLabel> labelColl,
 			double[] confThrImg,
-			double[] confThrLF ) {
+			double[] confThrLF ) throws InterruptedException {
 		
 		ConfusionMatrix[][] cm = new ConfusionMatrix[confThrImg.length][confThrLF.length];
 

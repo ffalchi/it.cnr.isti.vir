@@ -38,6 +38,14 @@ public class KeyPoint {
 	
 	private float[] normxy; 
 	
+	public final float getX() {
+		return xy[0];
+	}
+
+	public final float getY() {
+		return xy[1];
+	}
+	
 	public final float[] getXY() {
 		return xy;
 	}
