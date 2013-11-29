@@ -153,7 +153,7 @@ public class KNNPQueue<F> {
         
         @Override
         public void run() {
-            for (int i=from; i<to; i++) {
+            for (int i=from; i<=to; i++) {
             	knn.offer( coll.get(i) );
             }
         }                
