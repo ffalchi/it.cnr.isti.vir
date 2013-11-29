@@ -138,13 +138,13 @@ public class KNNPQueue<F> {
 	}
 	
 	
-	static class OfferAllColl implements Runnable {
+	static class OfferAllArrayList implements Runnable {
         private final int from;
         private final int to;
-        private final Collection coll;
+        private final ArrayList coll;
         private final KNNPQueue knn;
         
-        OfferAllColl(KNNPQueue knn, int from, int to, Collection coll ) {
+        OfferAllArrayList(KNNPQueue knn, int from, int to, ArrayList coll ) {
             this.from = from;
             this.to = to;
             this.coll = coll;
@@ -153,8 +153,8 @@ public class KNNPQueue<F> {
         
         @Override
         public void run() {
-            for (Object f : coll) {
-            	knn.offer( f );
+            for (int i=from; i<to; i++) {
+            	knn.offer( coll.get(i) );
             }
         }                
     }
@@ -170,7 +170,7 @@ public class KNNPQueue<F> {
 	        	int curr=group[i];
 	        	if ( curr == 0 ) break;
 	        	int to=from+curr-1;
-	        	thread[i] = new Thread( new OfferAllColl(this, from,to,coll) ) ;
+	        	thread[i] = new Thread( new OfferAllArrayList(this, from,to,coll) ) ;
 	        	thread[i].start();
 	        	from=to+1;
 	        }
