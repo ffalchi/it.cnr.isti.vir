@@ -21,6 +21,8 @@ import it.cnr.isti.vir.features.localfeatures.RootSIFT;
 import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
+import it.cnr.isti.vir.features.localfeatures.SIFTPCA;
+import it.cnr.isti.vir.features.localfeatures.SIFTPCAGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 import it.cnr.isti.vir.features.metadata.GPSData;
 import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
@@ -81,7 +83,10 @@ public class FeatureClasses {
 		SAPIRFeature.class,
 		Permutation.class,
 		BRISK.class,
-		BRISKGroup.class
+		BRISKGroup.class,
+		null, // FV.class,
+		SIFTPCA.class,
+		SIFTPCAGroup.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);
