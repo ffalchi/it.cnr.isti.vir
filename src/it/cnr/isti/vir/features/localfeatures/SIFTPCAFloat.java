@@ -25,7 +25,7 @@ public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> {
 	final float[] values; 
 	
 	public final double getMmaxSQRDistValue() {
-		return 1.0;
+		return 2.0;
 	}
 	
 	public SIFTPCAFloat(DataInput str ) throws IOException {
