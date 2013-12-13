@@ -48,6 +48,16 @@ public class L2 {
 		return acc; 
 	}
 	
+	public static double getSquared(float[]f1, float[]f2, double max) {
+		double acc = 0;	    
+	    for (int i = 0; i < 128; i++) {
+			double diff = f1[i] - f2[i];
+			acc += diff * diff;
+	    	if ( acc > max ) return -acc;
+	    }		
+		return acc;
+	}
+	
 	public static double get(float[][] f1, float[][] f2) {
 		double dist = 0;
 		

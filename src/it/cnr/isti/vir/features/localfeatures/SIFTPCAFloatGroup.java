@@ -22,47 +22,46 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
+public class SIFTPCAFloatGroup extends ALocalFeaturesGroup<SIFTPCAFloat> {
 
-	public static final byte version = 2;
+	public static final byte version = 1;
 	
 	public final byte getSerVersion() {
 		return version;
 	}
 	
-	public SIFTPCAGroup(SIFTPCA[] arr) {
+	public SIFTPCAFloatGroup(SIFTPCAFloat[] arr) {
 		super(arr);
 	}
 	
-	public SIFTPCAGroup(SIFTPCA[] arr, AbstractFeaturesCollector fc) {
+	public SIFTPCAFloatGroup(SIFTPCAFloat[] arr, AbstractFeaturesCollector fc) {
 		super(arr, fc);
 	}
 
-	public SIFTPCAGroup(AbstractFeaturesCollector fc) {
+	public SIFTPCAFloatGroup(AbstractFeaturesCollector fc) {
 		super(fc);
 	}
 
-	public SIFTPCAGroup(DataInput in) throws Exception {
+	public SIFTPCAFloatGroup(DataInput in) throws Exception {
 		this(in, null);
 	}
 
 	
-	public SIFTPCAGroup(ByteBuffer in) throws IOException {
+	public SIFTPCAFloatGroup(ByteBuffer in) throws IOException {
 		byte version = in.get();
 		
-		// VERSION 2
 		int nBytes = in.getInt();
 		int nLFs = in.getInt();
-		lfArr = new SIFTPCA[nLFs];
+		lfArr = new SIFTPCAFloat[nLFs];
 		for ( int i = 0; i < nLFs; i++ ) {
-			lfArr[i] = new SIFTPCA(in);
+			lfArr[i] = new SIFTPCAFloat(in);
 			lfArr[i].setLinkedGroup(this);
 		}
 			
 		
 	}
 
-	public SIFTPCAGroup(DataInput in, AbstractFeaturesCollector fc) throws Exception {
+	public SIFTPCAFloatGroup(DataInput in, AbstractFeaturesCollector fc) throws Exception {
 		super(fc);
 		byte version = in.readByte();
 
@@ -71,23 +70,23 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 		byte[] bytes = new byte[nBytes];
 		in.readFully(bytes);
 		ByteBuffer bBuffer = ByteBuffer.wrap(bytes);
-		lfArr = new SIFTPCA[bBuffer.getInt()];
+		lfArr = new SIFTPCAFloat[bBuffer.getInt()];
 		for (int i = 0; i < lfArr.length; i++) {
-			this.lfArr[i] = new SIFTPCA(bBuffer);
+			this.lfArr[i] = new SIFTPCAFloat(bBuffer);
 			lfArr[i].setLinkedGroup(this);
 		}
 
 	}
 	
 
-	public static final double getMinDistance(SIFTPCAGroup lFGroup1,
-			SIFTPCAGroup lFGroup2) {
+	public static final double getMinDistance(SIFTPCAFloatGroup lFGroup1,
+			SIFTPCAFloatGroup lFGroup2) {
 		double min = Double.MAX_VALUE;
 		for (int i1 = 0; i1 < lFGroup1.lfArr.length; i1++) {
-			SIFTPCA s1 = lFGroup1.lfArr[i1];
+			SIFTPCAFloat s1 = lFGroup1.lfArr[i1];
 			for (int i2 = 0; i2 < lFGroup2.lfArr.length; i2++) {
-				SIFTPCA s2 = lFGroup2.lfArr[i2];
-				double currDist = SIFTPCA.getL2SquaredDistance(s1, s2);
+				SIFTPCAFloat s2 = lFGroup2.lfArr[i2];
+				double currDist = SIFTPCAFloat.getL2SquaredDistance(s1, s2);
 				if (currDist < min)
 					min = currDist;
 			}
@@ -108,28 +107,28 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 	}
 */
 
-	static final public double getLoweFactor_avg(ALocalFeaturesGroup<SIFTPCA> sg1,
-			ALocalFeaturesGroup<SIFTPCA> sg2) {
+	static final public double getLoweFactor_avg(ALocalFeaturesGroup<SIFTPCAFloat> sg1,
+			ALocalFeaturesGroup<SIFTPCAFloat> sg2) {
 		if (sg2.size() < 2)
 			return 0;
 		double sum = 0;
-		SIFTPCA[] arr = sg1.lfArr;
+		SIFTPCAFloat[] arr = sg1.lfArr;
 		for (int i = 0; i < arr.length; i++) {
-			sum += SIFTPCAGroup.getLoweFactor(arr[i], sg2);
+			sum += SIFTPCAFloatGroup.getLoweFactor(arr[i], sg2);
 		}
 
 		return (double) sum / sg1.size();
 	}
 
-	static final public double getLoweFactor(SIFTPCA s1, ALocalFeaturesGroup<SIFTPCA> sg) {
+	static final public double getLoweFactor(SIFTPCAFloat s1, ALocalFeaturesGroup<SIFTPCAFloat> sg) {
 		double distsq1 = Integer.MAX_VALUE;
 		double distsq2 = Integer.MAX_VALUE;
 		double dsq = 0;
-		SIFTPCA curr, best = null;
-		SIFTPCA[] arr = sg.lfArr;
+		SIFTPCAFloat curr, best = null;
+		SIFTPCAFloat[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFTPCA.getL2SquaredDistance(s1, curr);
+			dsq = SIFTPCAFloat.getL2SquaredDistance(s1, curr);
 			if (dsq < distsq1) {
 				distsq2 = distsq1;
 				distsq1 = dsq;
@@ -143,19 +142,19 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 		return Math.sqrt(distsq1 / distsq2);
 	}
 
-	static final public double getLowePercMatches(ALocalFeaturesGroup<SIFTPCA> sg1,
-			ALocalFeaturesGroup<SIFTPCA> sg2, double conf) {
+	static final public double getLowePercMatches(ALocalFeaturesGroup<SIFTPCAFloat> sg1,
+			ALocalFeaturesGroup<SIFTPCAFloat> sg2, double conf) {
 		return (double) getLoweNMatches(sg1, sg2, conf) / sg1.size();
 	}
 
-	static final public int getLoweNMatches(ALocalFeaturesGroup<SIFTPCA> sg1,
-			ALocalFeaturesGroup<SIFTPCA> sg2, double conf) {
+	static final public int getLoweNMatches(ALocalFeaturesGroup<SIFTPCAFloat> sg1,
+			ALocalFeaturesGroup<SIFTPCAFloat> sg2, double conf) {
 		if (sg2.size() < 2)
 			return 0;
 		int nMatches = 0;
-		SIFTPCA[] arr = sg1.lfArr;
+		SIFTPCAFloat[] arr = sg1.lfArr;
 		for (int i = 0; i < arr.length; i++) {
-			if (SIFTPCAGroup.getLoweMatch(arr[i], sg2, conf) != null)
+			if (SIFTPCAFloatGroup.getLoweMatch(arr[i], sg2, conf) != null)
 				nMatches++;
 		}
 
@@ -179,13 +178,13 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 	// }
 
 
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFTPCA> sg1, ALocalFeaturesGroup<SIFTPCA> sg2, double dRatioThr) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFTPCAFloat> sg1, ALocalFeaturesGroup<SIFTPCAFloat> sg2, double dRatioThr) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
-		SIFTPCA[] arr = sg1.lfArr;
+		SIFTPCAFloat[] arr = sg1.lfArr;
 		for (int i=0; i<arr.length; i++ ) {
-			SIFTPCA match = SIFTPCAGroup.getLoweMatch(arr[i], sg2, dRatioThr );
+			SIFTPCAFloat match = SIFTPCAFloatGroup.getLoweMatch(arr[i], sg2, dRatioThr );
 			if ( match != null)
 				matches.add( new LocalFeatureMatch( arr[i], match ) );
 		}
@@ -193,13 +192,13 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 		return matches;
 	}	
 	
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFTPCA> sg1, ALocalFeaturesGroup<SIFTPCA> sg2, double dRatioThr, final int maxLFDistSq) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFTPCAFloat> sg1, ALocalFeaturesGroup<SIFTPCAFloat> sg2, double dRatioThr, final int maxLFDistSq) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
-		SIFTPCA[] arr = sg1.lfArr;
+		SIFTPCAFloat[] arr = sg1.lfArr;
 		for (int i=0; i<arr.length; i++ ) {
-			SIFTPCA match = SIFTPCAGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
+			SIFTPCAFloat match = SIFTPCAFloatGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
 			if ( match != null)
 				matches.add( new LocalFeatureMatch( arr[i], match ) );
 		}
@@ -207,16 +206,16 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 		return matches;
 	}	
 
-	static final public SIFTPCA getLoweMatch(SIFTPCA s1, ALocalFeaturesGroup<SIFTPCA> sg,
-			double conf, int maxFDsq) {
-		int distsq1 = Integer.MAX_VALUE;
-		int distsq2 = Integer.MAX_VALUE;
-		int dsq = 0;
-		SIFTPCA curr, best = null;
-		SIFTPCA[] arr = sg.lfArr;
+	static final public SIFTPCAFloat getLoweMatch(SIFTPCAFloat s1, ALocalFeaturesGroup<SIFTPCAFloat> sg,
+			double conf, double maxFDsq) {
+		double distsq1 = Double.MAX_VALUE;
+		double distsq2 = Double.MAX_VALUE;
+		double dsq = 0;
+		SIFTPCAFloat curr, best = null;
+		SIFTPCAFloat[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFTPCA.getL2SquaredDistance(s1, curr, distsq2);
+			dsq = SIFTPCAFloat.getL2SquaredDistance(s1, curr, distsq2);
 			if (dsq < 0)
 				continue;
 			if (dsq < distsq1) {
@@ -243,17 +242,17 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 		return null;
 	}
 
-	static final public SIFTPCA getLoweMatch(SIFTPCA s1, ALocalFeaturesGroup<SIFTPCA> sg,
+	static final public SIFTPCAFloat getLoweMatch(SIFTPCAFloat s1, ALocalFeaturesGroup<SIFTPCAFloat> sg,
 			double conf) {
-		int distsq1 = Integer.MAX_VALUE;
-		int distsq2 = Integer.MAX_VALUE;
-		int dsq = 0;
-		SIFTPCA curr, best = null;
+		double distsq1 = Integer.MAX_VALUE;
+		double distsq2 = Integer.MAX_VALUE;
+		double dsq = 0;
+		SIFTPCAFloat curr, best = null;
 
-		SIFTPCA[] arr = sg.lfArr;
+		SIFTPCAFloat[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = SIFTPCA.getL2SquaredDistance(s1, curr, distsq2);
+			dsq = SIFTPCAFloat.getL2SquaredDistance(s1, curr, distsq2);
 			if (dsq < 0)
 				continue;
 			if (dsq < distsq1) {
@@ -281,23 +280,23 @@ public class SIFTPCAGroup extends ALocalFeaturesGroup<SIFTPCA> {
 
 	@Override
 	public Class getLocalFeatureClass() {
-		return SIFT.class;
+		return SIFTPCAFloat.class;
 	}
 
 
 	@Override
-	public ALocalFeaturesGroup create(SIFTPCA[] arr, AbstractFeaturesCollector fc) {
-		return new SIFTPCAGroup( arr, fc);
+	public ALocalFeaturesGroup create(SIFTPCAFloat[] arr, AbstractFeaturesCollector fc) {
+		return new SIFTPCAFloatGroup( arr, fc);
 	}
 	
-	public static SIFTPCA getMean(Collection<SIFTPCA> coll) {
+	public static SIFTPCAFloat getMean(Collection<SIFTPCAFloat> coll) {
 		if ( coll.size() == 0 ) return null;
-		byte[][] bytes = new byte[coll.size()][];
+		float[][] v = new float[coll.size()][];
 		int i=0;
-		for ( Iterator<SIFTPCA> it = coll.iterator(); it.hasNext(); ) {
-			bytes[i++] = it.next().values;
+		for ( Iterator<SIFTPCAFloat> it = coll.iterator(); it.hasNext(); ) {
+			v[i++] = it.next().values;
 		}
 				
-		return new SIFTPCA(Mean.getMean(bytes));		
+		return new SIFTPCAFloat(Mean.getMean(v));		
 	}
 }

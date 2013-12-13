@@ -22,6 +22,8 @@ import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFTPCA;
+import it.cnr.isti.vir.features.localfeatures.SIFTPCAFloat;
+import it.cnr.isti.vir.features.localfeatures.SIFTPCAFloatGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFTPCAGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 import it.cnr.isti.vir.features.metadata.GPSData;
@@ -86,7 +88,9 @@ public class FeatureClasses {
 		BRISKGroup.class,
 		null, // FV.class,
 		SIFTPCA.class,
-		SIFTPCAGroup.class
+		SIFTPCAGroup.class,
+		SIFTPCAFloat.class,
+		SIFTPCAFloatGroup.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);
