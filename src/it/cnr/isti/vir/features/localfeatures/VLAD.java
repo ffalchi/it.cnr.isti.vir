@@ -137,20 +137,7 @@ public class VLAD extends AbstractFeature {
 	public static final double getDistance(VLAD s1, VLAD s2, double max ) {
 		return getDistance(s1, s2);
 	}
-	
-//	public static final double getDistance(VLAD s1, VLAD s2 ) {
-//		if ( s1.size() != s2.size() ) return 1.0;
-//		
-//		double t = 0;
-//		float[] v1 = s1.values;
-//		float[] v2 = s2.values;
-//		for ( int i=0; i<s1.size(); i++ ) {
-//			double temp = v1[i] - v2[i];
-//			t += temp * temp; 
-//		}
-//		
-//		return Math.sqrt(t)/100.0;
-//	}
+
 
 	public static final double getDistance(VLAD s1, VLAD s2 ) {
 		if ( s1.size() != s2.size() ) return 1.0;
@@ -161,28 +148,10 @@ public class VLAD extends AbstractFeature {
 		for ( int i=0; i<s1.size(); i++ ) {
 			t += v1[i] * v2[i];
 		}
+		double dist = 1.0 - t / 2.0;
 		
-		return 1.0 - t;
-	}	
-	
-//	public static final double getDistance(VLAD s1, VLAD s2, double max ) {
-//		double tMax = max * 4.0;
-//		if ( s1.size() != s2.size() ) return 1.0;
-//		
-//		double t = 0;
-//		float[] v1 = s1.values;
-//		float[] v2 = s2.values;
-//		for ( int i=0; i<s1.size(); i++ ) {
-//			double temp = v1[i] - v2[i];
-//			t += temp * temp; 
-//			
-//			if ( t > tMax ) return -t / 4.0;
-//		}
-//	
-//		return t / 4.0;
-//	}
-//    
-//
-
+		if ( dist < 0 ) dist = 0;
+		return dist;
+	}
 
 }
