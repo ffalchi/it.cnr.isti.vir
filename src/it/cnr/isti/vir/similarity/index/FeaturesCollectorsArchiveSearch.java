@@ -170,7 +170,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				
 				Iterator<AbstractFeaturesCollector> it = archive.iterator();
 				// iterates through multiple batches
-				for (int iObj = 0; iObj < nObj; iObj+=parallelBatchSize ) {
+				for (int iObj = 0; iObj < nObj;  ) {
 					
 					int batchSize = parallelBatchSize;
 					if ( iObj + parallelBatchSize > nObj ) batchSize = nObj-iObj;
@@ -199,7 +199,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		        		if ( t != null ) t.join();
 			        }
 					
-					Log.info((iObj+objects.length) + "/" + nObj);
+					Log.info(iObj + "/" + nObj);
 				}
 			}
 		}
