@@ -148,7 +148,7 @@ public class VLAD extends AbstractFeature {
 		for ( int i=0; i<s1.size(); i++ ) {
 			t += v1[i] * v2[i];
 		}
-		double dist = 1.0 - t / 2.0;
+		double dist =  (1.0 - t) / 2.0;
 		
 		if ( dist < 0.0 ) dist = 0.0;
 		return dist;
