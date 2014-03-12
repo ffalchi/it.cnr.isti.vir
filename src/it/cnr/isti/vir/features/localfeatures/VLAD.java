@@ -142,7 +142,7 @@ public class VLAD extends AbstractFeature {
 	public static final double getDistance(VLAD s1, VLAD s2 ) {
 		if ( s1.size() != s2.size() ) return 1.0;
 		
-		double t = 0;
+		double t = 0.0;
 		float[] v1 = s1.values;
 		float[] v2 = s2.values;
 		for ( int i=0; i<s1.size(); i++ ) {
@@ -150,7 +150,7 @@ public class VLAD extends AbstractFeature {
 		}
 		double dist = 1.0 - t / 2.0;
 		
-		if ( dist < 0 ) dist = 0;
+		if ( dist < 0.0 ) dist = 0.0;
 		return dist;
 	}
 
