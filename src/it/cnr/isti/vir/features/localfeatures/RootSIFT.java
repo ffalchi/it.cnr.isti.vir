@@ -31,14 +31,13 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
 	
 	public Class getGroupClass() { return RootSIFTGroup.class; };
 	
+	
 	public RootSIFT(SIFT sift, RootSIFTGroup givenLinkedGroup) {
 		linkedGroup = givenLinkedGroup;
-		values = new byte[128];
-
-	    for ( int i=0; i<values.length; i++ )
-	    	values[i] = sift.values[i];
-	}	
-	
+		kp = sift.kp;
+		values = RootSIFT.getRootSIFTValues( sift.values );
+	}
+		
 	public RootSIFT(DataInput str ) throws IOException {
 		super(str);
 

@@ -41,6 +41,7 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		this(in, null);
 	}
 
+	
 	public RootSIFTGroup(SIFTGroup siftGroup, AbstractFeaturesCollector fc  ) {
 		int size = siftGroup.lfArr.length;
 		SIFT[] siftArr = siftGroup.lfArr;
@@ -49,6 +50,7 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 			lfArr[i] = new RootSIFT(siftArr[i], this);
 		}
 	}
+	
 	
 	public RootSIFTGroup(ByteBuffer in) throws Exception {
 		byte version = in.get();
