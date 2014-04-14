@@ -183,7 +183,8 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 					}
 					
 					// kNNQueues are performed in parallels
-					final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / ParallelOptions.nThreads);
+					int bnt = ParallelOptions.getNFreeProcessors();
+					final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / (bnt+1) );
 					final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
 					int ti = 0;
 			        Thread[] thread = new Thread[nThread];
@@ -198,7 +199,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			        for ( Thread t : thread ) {
 		        		if ( t != null ) t.join();
 			        }
-					
+			        ParallelOptions.free(bnt);
 					Log.info(iObj + "/" + nObj);
 				}
 			}

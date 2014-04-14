@@ -298,7 +298,8 @@ public class MinROPos {
 			int nTries = Math.min(nTriesMax, tries.length);
 			double[] tCoeffVar = new double[nTries];
 
-			final int nObjsPerThread = (int) Math.ceil((double) nTries / ParallelOptions.nThreads);
+			int bNT = ParallelOptions.getNFreeProcessors();
+			final int nObjsPerThread = (int) Math.ceil((double) nTries / (bNT+1));
 			final int nThread = (int) Math.ceil((double) nTries / nObjsPerThread);
 			int ti = 0;
 	        Thread[] thread = new Thread[nThread];
@@ -314,7 +315,7 @@ public class MinROPos {
 	        for ( Thread t : thread ) {
         		if ( t != null ) t.join();
 	        }		
-	        
+	        ParallelOptions.free(bNT);
 	        // selecting worst
 			for ( int iT=0; iT<nTries; iT++) {
 				if ( tCoeffVar[iT] < minCoeffVar  ) {
@@ -478,7 +479,8 @@ public class MinROPos {
 			int nTries = Math.min(nTriesMax, tries.length);
 			double[] tCoeffVar = new double[nTries];
 
-			final int nObjsPerThread = (int) Math.ceil((double) nTries / ParallelOptions.nThreads);
+			int bnt = ParallelOptions.getNFreeProcessors();
+			final int nObjsPerThread = (int) Math.ceil((double) nTries / (bnt+1) );
 			final int nThread = (int) Math.ceil((double) nTries / nObjsPerThread);
 			int ti = 0;
 			
@@ -501,6 +503,7 @@ public class MinROPos {
 	        for ( Thread t : thread ) {
         		if ( t != null ) t.join();
 	        }		
+	        ParallelOptions.free(bnt);
 	        
 	        // selecting worst
 			for ( int iT=0; iT<nTries; iT++) {
@@ -799,7 +802,8 @@ public class MinROPos {
 //		}	
 		
 		// kNNQueues are performed in parallels
-		final int nObjsPerThread = (int) Math.ceil((double) objs.length / ParallelOptions.nThreads);
+		int bnt = ParallelOptions.getNFreeProcessors();
+		final int nObjsPerThread = (int) Math.ceil((double) objs.length / ( bnt+1) );
 		final int nThread = (int) Math.ceil((double) objs.length / nObjsPerThread);
 		int ti = 0;
         Thread[] thread = new Thread[nThread];
@@ -814,6 +818,7 @@ public class MinROPos {
         for ( Thread t : thread ) {
     		if ( t != null ) t.join();
         }
+        ParallelOptions.free(bnt);
 		return res;
 	}
 }

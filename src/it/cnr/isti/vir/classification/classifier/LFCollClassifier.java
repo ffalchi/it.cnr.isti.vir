@@ -725,7 +725,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 		} else {
 			LocalFeaturesMatches[] cArr = new LocalFeaturesMatches[c.size()];
 			c.toArray(cArr);
-			int threadN = ParallelOptions.nThreads;
+			int threadN = ParallelOptions.getNFreeProcessors() +1 ;
 	        Thread[] thread = new Thread[threadN];
 	        int[] group = SplitInGroups.split(c.size(), thread.length);
 	        int from=0;
@@ -741,7 +741,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	        for ( Thread t : thread ) {
         		if ( t != null ) t.join();
 	        }
-			
+			ParallelOptions.free(threadN-1);
 //			// FOR EACH IMAGE MATCHES
 //			for ( Iterator<LocalFeaturesMatches> it = c.iterator(); it.hasNext();  ) {
 //				

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
+ * Copyright (c) 2013, Fabrizio Falchi and Lucia Vadicamo (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
@@ -14,12 +14,117 @@ package it.cnr.isti.vir.util;
 public class MatrixMath {
 
 	public static double[] times(double[][] matrix, double[] vector) {
-		double[] res = new double[matrix.length];
-		for(int i1=0; i1<matrix.length; i1++) {
-			for(int i2=0; i2<vector.length; i2++) {
-				res[i1] += matrix[i1][i2] * vector[i2];
+		if (matrix[0].length == vector.length) {
+			double[] res = new double[matrix.length];
+			for (int i1 = 0; i1 < matrix.length; i1++) {
+				for (int i2 = 0; i2 < vector.length; i2++) {
+					res[i1] += matrix[i1][i2] * vector[i2];
+
+				}
 			}
+			return res;
+		} else {
+			System.out
+					.println("Error in matrix-vector product: dimensions are not consistent.");
+
+			return null;
 		}
-		return res;
 	}
-}
+
+	// added by Lucia Vadicamo
+	// floatMatrix*floatVector
+	public static float[] times(float[][] matrix, float[] vector) {
+		if (matrix[0].length == vector.length) {
+			float[] res = new float[matrix.length];
+			for (int i1 = 0; i1 < matrix.length; i1++) {
+				for (int i2 = 0; i2 < vector.length; i2++)
+					res[i1] += matrix[i1][i2] * vector[i2];
+			}
+			return res;
+		} else {
+			System.out
+					.println("Error in matrix-vector product: dimensions are not consistent.");
+
+			return null;
+		}
+	}
+
+	// added by Lucia Vadicamo
+	// floatMatrix*doubleVector
+	public static double[] times(float[][] matrix, double[] vector) {
+		if (matrix[0].length == vector.length) {
+			double[] res = new double[matrix.length];
+			for (int i1 = 0; i1 < matrix.length; i1++) {
+				for (int i2 = 0; i2 < vector.length; i2++)
+					res[i1] += matrix[i1][i2] * vector[i2];
+			}
+			return res;
+		} else {
+
+			System.out
+					.println("Error in matrix-vector product: dimensions are not consistent.");
+			return null;
+		}
+	}
+
+	// added by Lucia Vadicamo
+	// doubleMatrix*doubleMatrix
+	public static double[][] times(double[][] matrix1, double[][] matrix2) {
+		if (matrix1[0].length == matrix2.length) {
+			double[][] res = new double[matrix1.length][matrix2[0].length];
+			for (int i1 = 0; i1 < matrix1.length; i1++) {
+				for (int i2 = 0; i2 < matrix2[0].length; i2++) {
+					for (int k = 0; k < matrix2.length; k++)
+						res[i1][i2] += matrix1[i1][k] * matrix2[k][i2];
+				}
+			}
+			return res;
+		} else {
+			System.out
+					.println("Error in matrix product: dimensions are not consistent. ");
+			return null;
+		}
+	}
+
+	// added by Lucia Vadicamo
+	// floatMatrix*floatMatrix
+	public static float[][] times(float[][] matrix1, float[][] matrix2) {
+		if (matrix1[0].length == matrix2.length) {
+			float[][] res = new float[matrix1.length][matrix2[0].length];
+			for (int i1 = 0; i1 < matrix1.length; i1++) {
+				for (int i2 = 0; i2 < matrix2[0].length; i2++) {
+					for (int k = 0; k < matrix2.length; k++)
+						res[i1][i2] += matrix1[i1][k] * matrix2[k][i2];
+				}
+			}
+			return res;
+		} else {
+			System.out
+					.println("Error in matrix product: dimensions are not consistent. ");
+			return null;
+		}
+	}
+
+	// added by Lucia Vadicamo
+	public static long count_occurrences(double[][] m, double val) {
+		long count = 0;
+		for (int i1 = 0; i1 < m.length; i1++)
+			for (int i2 = 0; i2 < m[0].length; i2++) {
+				if (m[i1][i2] == val)
+					count++;
+			}
+		return count;
+	}
+
+	public static long count_occurrences(double[][] m, float val) {
+		long count = 0;
+		for (int i1 = 0; i1 < m.length; i1++)
+			for (int i2 = 0; i2 < m[0].length; i2++) {
+				if ((float) m[i1][i2] == val)
+					count++;
+			}
+		return count;
+	}
+    
+     
+    }

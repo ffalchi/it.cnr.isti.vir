@@ -23,8 +23,6 @@ import it.cnr.isti.vir.id.IDString;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.metric.IMetric;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
-import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.util.Log;
 import it.cnr.isti.vir.util.ParallelOptions;
 
@@ -913,7 +911,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		
 		int size = size();
 		long sizeSqr = (long) size*size;
-		int nThread = ParallelOptions.nThreads;
+		int nThread = ParallelOptions.getNFreeProcessors() +1 ;
 		Log.info_verbose("N of distances to evaluate: " + sizeSqr);
 		Log.info_verbose("Outfile final size: " + sizeSqr*8 / 1024 /1024+ " MegaBytes.");
 		
@@ -948,6 +946,8 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 					e.printStackTrace();
 				}
 	        }
+	        
+	        ParallelOptions.free(nThread-1);
 	       
 	        // saving output
 	        for ( int ii1=oldi1; ii1<i1; ii1++ ) {	        	

@@ -257,7 +257,8 @@ public class Pivots {
 		AbstractFeaturesCollector[] piv = new AbstractFeaturesCollector[nPivots];
 		
 		// kNNQueues are performed in parallels
-		final int nQueriesPerThread = (int) Math.ceil((double) testObjects.length / ParallelOptions.nThreads);
+		int bnt = ParallelOptions.getNFreeProcessors();
+		final int nQueriesPerThread = (int) Math.ceil((double) testObjects.length / (bnt+1));
 		final int nThread = (int) Math.ceil((double) testObjects.length / nQueriesPerThread);
 		
 		Log.info_verbose("nPiv\tid\tgain\textRMin");
@@ -289,7 +290,7 @@ public class Pivots {
 			        for ( Thread t : thread ) {
 		        		if ( t != null ) t.join();
 			        }
-					
+			        
 				}
 				
 				for ( int i=0; i<ooPDist.length; i++) {
@@ -321,7 +322,7 @@ public class Pivots {
 			long ext = (now - start) / (iP+1) * (piv.length-iP-1) / 1000 / 60;
 			Log.info_verbose(iP + "\t" + ((IHasID) best).getID() +"\t"+ avgGain + "\t"+ avgSum + "\t" + ext);
 		}
-		
+		ParallelOptions.free(bnt);
 		return piv;
 		
 	}

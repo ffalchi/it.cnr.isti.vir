@@ -29,7 +29,9 @@ import it.cnr.isti.vir.similarity.SimilarityClasses;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueue_kNN;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
+import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.RandomOperations;
+import it.cnr.isti.vir.util.SplitInGroups;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -47,7 +49,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-public class LFWords<F> {
+public class LFWords<F extends AbstractFeature> {
 
 	protected F[] fArr;
 	protected final ILFSimilarity<F> sim;
@@ -542,12 +544,7 @@ public class LFWords<F> {
 		return hist;
 	}
 
-	 public final int[] getBags_noPivotedFiltering(F[] features) {
-		 int[] bag = new int[features.length];
-		 for (int i1=0; i1<features.length; i1++) {
-			 bag[i1]=getNNIndex(features[i1]);
-		 }return bag;
-	 }
+
 	public final BoFLFSoft[] getBoFLFSoftArr_noPivotedFiltering(final F[] features, final int k, final BoFLFSoftGroup group) {
 		
 		BoFLFSoft[] bag = new BoFLFSoft[features.length];
@@ -558,6 +555,7 @@ public class LFWords<F> {
 	}
 	
 	// PARALLEL !!!
+ 
 /*
 	public final BoFLFSoft[] getBoFLFSoftArr_noPivotedFiltering(final F[] features, final int k, final BoFLFSoftGroup group) {
 				
@@ -591,51 +589,74 @@ public class LFWords<F> {
 	}
 */
 	
-	// PARALLEL !!!
-	 /*
+	// NON PARALLEL
+/*	 public final int[] getBags_noPivotedFiltering(F[] features) {
+		 int[] bag = new int[features.length];
+		 for (int i1=0; i1<features.length; i1++) {
+			 bag[i1]=getNNIndex(features[i1]);
+		 }
+		 return bag;
+	 }
+	*/ 
+	// PARALLEL !!!	
+	
+	static class GetBags implements Runnable {
+		private final int[] bag;
+		private final AbstractFeature[] features;
+        private final int from;
+        private final int to;
+        private final LFWords words;
+        
+		GetBags(LFWords words, int from, int to, int[] bag, AbstractFeature[] features) {
+			this.bag = bag;
+			this.features = features;
+			this.from = from;
+			this.to = to;
+			this.words = words;
+			
+        }
+        
+        @Override
+        public void run() {
+        	for (int i = from; i <= to; i++) {
+        		bag[i] = words.getNNIndex(features[i]);
+        	}
+        }                
+    }
+	
 	public final int[] getBags_noPivotedFiltering(F[] features) {
-		
-		
+				
 		final int[] bag = new int[features.length];
 		
-		// For parallel
-		final int size = features.length;
-		int temp = (int) Math.ceil( size / ParallelOptions.nThreads);
-		if ( temp == 0 ) temp = 1;
-		final int nObjPerThread = temp;
-		ArrayList<Integer> arrList = new ArrayList(features.length);
-		for (int iO = 0; iO<size; iO+=nObjPerThread) {
-			arrList.add(iO);
-		}
-		final F[] finalF = features;
-		Parallel.forEach(arrList, new Function<Integer, Void>() {
-			public Void apply(Integer i) {
-					int max = i+nObjPerThread;
-					if ( max > size )
-						max = size;
-					for (int iO = i; iO<max; iO++) {
-						bag[iO] = getNNIndex(finalF[iO]);
-					}
-					return null;
+		int threadN = ParallelOptions.getNFreeProcessors() +1 ;
+		Thread[] thread = new Thread[threadN];
+        int[] group = SplitInGroups.split(features.length, thread.length);
+        int from=0;
+        for ( int i=0; i<group.length; i++ ) {
+        	int curr=group[i];
+        	if ( curr == 0 ) break;
+        	int to=from+curr-1;
+        	thread[i] = new Thread( new GetBags(this, from,to,bag, features) ) ;
+        	thread[i].start();
+        	from=to+1;
+        }
+        
+		
+		for (Thread t : thread) {
+			if (t != null) {
+				try {
+					t.join();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-		});
-		
-		
-//		ArrayList<F> arrList = new ArrayList(Arrays.asList(features));
-//		Map<F, Integer> results = Parallel.map(arrList, new Function<F, Integer>() {
-//				@Override
-//				public Integer apply(F f) {
-//					return getNNIndex(f);
-//				}
-//			}
-//		);
-//		for (int i = 0; i < features.length; i++) {
-//			bag[i] = results.get(features[i]);
-//		}
+			}
+		}
+		ParallelOptions.free(threadN - 1);
 		
 		return bag;
 	}
-	*/
+	
 	 /*
 	public final int[] getBags_SURF_noPivotedFiltering(F[] features) {
 		
@@ -741,33 +762,9 @@ public class LFWords<F> {
 	}
 	
 	
-	public final int[] getBags(F[] features) {
-//		if ( miFile != null ) {
-//			return getBagsMIFile(features);
-//		}
-		int[] bags = null;
-//		if (sim.getClass().equals(SURFMetric.class)) {
-			// bags = getBags_PivotedFiltering(features);
-			// bags = getBags_PivotedFiltering_Complete(features);
-//			   bags = getBags_SURF_noPivotedFiltering(features);
-			// bags = getBags_noPivotedFiltering(features);
-//		} else {
-			//if ( pArr != null )
-			//	bags = getBags_PivotedFiltering(features);
-			//else 
-//			bags = getBags_PivotedFiltering_Complete(features);
-			bags = getBags_noPivotedFiltering(features);
-//		}
+	public final int[] getBags(F[] features)  {
 
-//		int[] trueBags = null;
-//
-//		// trueBags = getBags_noPivotedFiltering(features);
-//
-//		if (trueBags != null && !Arrays.equals(bags, trueBags)) {
-//			System.err.println("ERROR!");
-//		}
-
-		return bags;
+		return getBags_noPivotedFiltering(features);
 	}
 	
 	public void setRandomPivots(int n) {

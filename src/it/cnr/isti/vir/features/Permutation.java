@@ -283,7 +283,8 @@ public class Permutation extends AbstractFeature {
 		Permutation[] perm = new Permutation[objs.length];
 		
 		// kNNQueues are performed in parallels
-		final int nObjsPerThread = (int) Math.ceil((double) objs.length / ParallelOptions.nThreads);
+		int bookedThreads = ParallelOptions.getNFreeProcessors();
+		final int nObjsPerThread = (int) Math.ceil((double) objs.length / (bookedThreads+1));
 		final int nThread = (int) Math.ceil((double) objs.length / nObjsPerThread);
 		int ti = 0;
         Thread[] thread = new Thread[nThread];
@@ -302,6 +303,7 @@ public class Permutation extends AbstractFeature {
 				e.printStackTrace();
 			}
         }
+        ParallelOptions.free(bookedThreads);
 		
 		return perm;
 	}
@@ -364,7 +366,10 @@ public class Permutation extends AbstractFeature {
 			}
 			
 			// kNNQueues are performed in parallels
-			final int nObjsPerThread = (int) Math.ceil((double) objs.length / ParallelOptions.nThreads);
+			int bookedThreads = ParallelOptions.getNFreeProcessors();
+			
+			
+			final int nObjsPerThread = (int) Math.ceil((double) objs.length / (bookedThreads+1));
 			final int nThread = (int) Math.ceil((double) objs.length / nObjsPerThread);
 			int ti = 0;
 	        Thread[] thread = new Thread[nThread];
@@ -380,7 +385,7 @@ public class Permutation extends AbstractFeature {
         		if ( t != null ) t.join();
 	        }
 		
-			
+	        ParallelOptions.free( bookedThreads);
 			
 			for ( int i=0; i<tResults.length && tResults[i]!=null; i++) {
 				outArchive.add(tResults[i]);

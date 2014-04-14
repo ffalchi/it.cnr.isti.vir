@@ -12,13 +12,47 @@
 package it.cnr.isti.vir.util;
 
 public class ParallelOptions {
-	public static int nThreads = Runtime.getRuntime().availableProcessors();
+	public static int nProcessors = Runtime.getRuntime().availableProcessors();
+	public static int nPInUse = 1;
 	
-	public static final void set( java.util.Properties properties) {
+	static {
+		System.out.println("Using " + nProcessors + " threads");
+	}
+	
+	public static final synchronized void setNProcessors( int n) {
+		nProcessors = n;
+	}
+	public static final synchronized void set( java.util.Properties properties) {
 		String coreStr  = properties.getProperty("core");
 		if ( coreStr != null ) {
-			nThreads =  Integer.parseInt(coreStr);
-			System.out.println("Using " + nThreads + " nThreads");
+			nProcessors =  Integer.parseInt(coreStr);
+			System.out.println("Using " + nProcessors + " threads");
 		}
 	}
+	
+	public static final synchronized int getNFreeProcessors() {
+		return getNFreeProcessors(128);
+	}
+	
+	public static final synchronized int getNFreeProcessors(int max) {
+		
+		int available = nProcessors - nPInUse;
+		
+		if ( available < 0 ) return 0;
+		
+		int res = Math.min(available, max);
+		
+		nPInUse += res;
+		
+		return res;
+	}
+
+	public static final synchronized void free(int n) {
+		nPInUse -= n;
+		int newNProcessors = Runtime.getRuntime().availableProcessors();
+		if ( newNProcessors != nProcessors ) {
+			nProcessors = newNProcessors;
+			System.out.println("Using " + nProcessors + " threads");
+		}
+ 	}
 }

@@ -79,9 +79,9 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 				objects[i] = it.next();
 				iObj++;
 			}
-			
+			int bnt = ParallelOptions.getNFreeProcessors();
 			// kNNQueues are performed in parallels
-			final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue[0].length / ParallelOptions.nThreads);
+			final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue[0].length / (bnt+1) );
 			final int nThread = (int) Math.ceil((double) kNNQueue[0].length / nQueriesPerThread);
 			int ti = 0;
 	        Thread[] thread = new Thread[nThread];
@@ -96,6 +96,7 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 	        for ( Thread t : thread ) {
         		if ( t != null ) t.join();
 	        }
+	        ParallelOptions.free(bnt);
 			
 			Log.info((iObj+parallelBatchSize) + "/" + nObj);
 		}

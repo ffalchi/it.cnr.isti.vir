@@ -568,8 +568,7 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
             	}
             	double ac = a+c;
             	value *= Math.pow(Math.pow(a/(ac), a/(ac))*Math.pow(c/(ac), c/(ac)),ac/2.0);
-            	
-            	
+            	            	
             }
 
         }

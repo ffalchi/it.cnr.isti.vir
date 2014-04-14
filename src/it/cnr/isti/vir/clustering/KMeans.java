@@ -31,6 +31,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class KMeans<O extends AbstractFeature> {
 
@@ -124,7 +127,7 @@ public class KMeans<O extends AbstractFeature> {
 	class KMeanpp implements Runnable {
 		private final int from;
 		private final int to;
-		private final O lastCentroid;
+		private O lastCentroid;
 		private final float[] dFromNNCentroid;
 		private final float[] dFromNNCentroidSQR;
 
@@ -134,6 +137,10 @@ public class KMeans<O extends AbstractFeature> {
 			this.lastCentroid = lastCentroid;
 			this.dFromNNCentroid = dFromNNCentroid;
 			this.dFromNNCentroidSQR = dFromNNCentroidSQR;
+		}
+		
+		public void set(O lastCentroid) {
+			this.lastCentroid = lastCentroid;
 		}
 
 		@Override
@@ -167,14 +174,11 @@ public class KMeans<O extends AbstractFeature> {
 		final float[] dFromNNCentroidSQR = new float[objects.length];
 		Arrays.fill(dFromNNCentroid, Float.MAX_VALUE);
 		
-		for ( int i=1; i<initCentroids.length; i++ ) {
-			if ( i%10 == 0 ) System.out.print(" "+i);
-			
-			
-//			if ( false ) { //serial
-				// for each object 
-			
-			if ( ParallelOptions.nThreads <= 1) {
+
+		int bookedThreads = ParallelOptions.getNFreeProcessors() ;
+		if ( bookedThreads < 1) {
+			for ( int i=1; i<initCentroids.length; i++ ) {
+				if ( i%10 == 0 ) System.out.print(" "+i);
 				for (int iO = 0; iO<objects.length; iO++) {
 					O curr = objects[iO];
 	
@@ -186,65 +190,67 @@ public class KMeans<O extends AbstractFeature> {
 	
 				}
 				
-			} else {
+				double sqSum = 0;
+				for (int iO = 0; iO<objects.length; iO++) {
+					//new centroid will be choosen with squared distance probability
+					sqSum+=dFromNNCentroidSQR[iO];
+				}
+			
 				
-				// kNNQueues are performed in parallels
-				final int nObjsPerThread = (int) Math.ceil((double) objects.length / ParallelOptions.nThreads);
-				final int nThread = (int) Math.ceil((double) objects.length / nObjsPerThread);
-				int ti = 0;
-		        Thread[] thread = new Thread[nThread];
-		        for ( int from=0; from<objects.length; from+=nObjsPerThread) {
+				
+				// selecting next centroid random weighted squared distance
+				double rnd = RandomOperations.getDouble(sqSum);
+				double tempSum = 0;
+				int selected = 0;
+				for ( selected=0; true; selected++ ) {				
+					tempSum += dFromNNCentroidSQR[selected];
+					if ( tempSum >= rnd ) break;
+				}
+				initCentroids[i]=objects[selected];
+				
+			}
+				
+		} else {
+			// kNNQueues are performed in parallels
+			final int nObjsPerThread = (int) Math.ceil((double) objects.length / (bookedThreads+1));
+			final int nThread = (int) Math.ceil((double) objects.length / nObjsPerThread);
+			
+			
+			for ( int i=1; i<initCentroids.length; i++ ) {
+				if ( i%10 == 0 ) System.out.print(" "+i);
+				
+				ExecutorService executor = Executors.newFixedThreadPool(nThread);
+				for ( int from=0; from<objects.length; from+=nObjsPerThread) {
 		        	int to = from+nObjsPerThread-1;
 		        	if ( to >= objects.length ) to = objects.length-1;
-		        	thread[ti] = new Thread( new KMeanpp(initCentroids[i-1], from, to, dFromNNCentroid, dFromNNCentroidSQR) ) ;
-		        	thread[ti].start();
-		        	ti++;
+		        	Runnable worker =  new KMeanpp(initCentroids[i-1], from, to, dFromNNCentroid, dFromNNCentroidSQR) ;
+		        	executor.execute(worker);
 		        }
 		        
-		        for ( ti=0; ti<thread.length; ti++ ) {
-					thread[ti].join();
-		        }
-			}
+		        executor.shutdown();
+		        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		        
+		        
+		        double sqSum = 0;
+				for (int iO = 0; iO<objects.length; iO++) {
+					//new centroid will be choosen with squared distance probability
+					sqSum+=dFromNNCentroidSQR[iO];
+				}		
 				
-//			} else {
-//				final O currCentr = initCentroids[i-1];
-//				
-//				Parallel.forEach(arrList, new Function<Integer, Void>() {
-//					public Void apply(Integer i) {
-//							int max = i+nObjPerThread;
-//							if ( max > objects.size() )
-//								max = objects.size();
-//							for (int iO = i; iO<max; iO++) {
-//								O curr = objects.get(iO);
-//								double dist = sim.distance(curr, currCentr, dFromNNCentroid[iO] );
-//								if ( dist > 0 && dist < dFromNNCentroid[iO]) {
-//									dFromNNCentroid[iO]=dist;
-//								}	
-//							}
-//							return null;
-//						}
-//				});
-//			}
-			
-			double sqSum = 0;
-			for (int iO = 0; iO<objects.length; iO++) {
-				//new centroid will be choosen with squared distance probability
-				sqSum+=dFromNNCentroidSQR[iO];
+				
+				// selecting next centroid random weighted squared distance
+				double rnd = RandomOperations.getDouble(sqSum);
+				double tempSum = 0;
+				int selected = 0;
+				for ( selected=0; true; selected++ ) {				
+					tempSum += dFromNNCentroidSQR[selected];
+					if ( tempSum >= rnd ) break;
+				}
+				initCentroids[i]=objects[selected];
 			}
-		
-			
-			
-			// selecting next centroid random weighted squared distance
-			double rnd = RandomOperations.getDouble(sqSum);
-			double tempSum = 0;
-			int selected = 0;
-			for ( selected=0; true; selected++ ) {				
-				tempSum += dFromNNCentroidSQR[selected];
-				if ( tempSum >= rnd ) break;
-			}
-			initCentroids[i]=objects[selected];
-			
-		}	
+			ParallelOptions.free(bookedThreads);
+		}
+
 		System.out.println( " " + initCentroids.length + "." );
 		centroids = initCentroids;
 	}
@@ -396,7 +402,8 @@ public class KMeans<O extends AbstractFeature> {
 			
 			final int currlastNCentroidChanges = lastNCentroidChanges;		
 			
-			if ( ParallelOptions.nThreads <= 1 ) {
+			int bookedProcessors = ParallelOptions.getNFreeProcessors();
+			if ( bookedProcessors < 1 ) {
 			
 				// checking and assigning centroids to objects
 				for (int iObj = 0; iObj < objects.length; iObj++) {
@@ -466,7 +473,7 @@ public class KMeans<O extends AbstractFeature> {
 				}
 			} else {
 				// kNNQueues are performed in parallels
-				final int nObjsPerThread = (int) Math.ceil((double) objects.length / ParallelOptions.nThreads);
+				final int nObjsPerThread = (int) Math.ceil((double) objects.length / (bookedProcessors+1) );
 				final int nThread = (int) Math.ceil((double) objects.length / nObjsPerThread);
 				int ti = 0;
 		        Thread[] thread = new Thread[nThread];
@@ -481,6 +488,7 @@ public class KMeans<O extends AbstractFeature> {
 		        for ( ti=0; ti<thread.length; ti++ ) {
 					thread[ti].join();
 		        }
+		        ParallelOptions.free(bookedProcessors );
 			}
 			
 			

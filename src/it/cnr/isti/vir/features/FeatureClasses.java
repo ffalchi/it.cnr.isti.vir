@@ -86,7 +86,7 @@ public class FeatureClasses {
 		Permutation.class,
 		BRISK.class,
 		BRISKGroup.class,
-		null, // FV.class,
+		FV.class,
 		SIFTPCA.class,
 		SIFTPCAGroup.class,
 		SIFTPCAFloat.class,

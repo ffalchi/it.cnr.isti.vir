@@ -145,6 +145,14 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
 		return getL2SQDistance(s1,s2,(int) Math.ceil(maxDist*maxSQRDistValue))/maxSQRDistValue;
 	}
 	
+	public static final double getL2Distance(RootSIFT s1, RootSIFT s2) {
+		return Math.sqrt( getL2SQDistance_Norm(s1, s2) );
+	}
+
+	public static final double getL2Distance(RootSIFT s1, RootSIFT s2, int maxDist ) {
+		return Math.sqrt( getL2SQDistance_Norm(s1, s2, maxDist) );
+	}
+	
 	public static final int getL2SQDistance(RootSIFT s1, RootSIFT s2) {
 		return L2.getSquared(s1.values, s2.values);
 	}

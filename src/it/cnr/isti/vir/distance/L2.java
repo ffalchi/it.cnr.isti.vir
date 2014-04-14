@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
+ * Copyright (c) 2013, Fabrizio Falchi and Lucia Vadicamo (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
@@ -16,7 +16,7 @@ public class L2 {
 	public static int getSquared(byte[] v1, byte[] v2) {
 		int dist = 0;	    
 		int dif = 0;		
-	    for (int i = 0; i < 128; i++) {
+	    for (int i = 0; i < v1.length; i++) {
 	    	dif = (int) v1[i] - (int) v2[i];
 	    	dist += dif * dif;
 	    }		
@@ -26,7 +26,7 @@ public class L2 {
 	public static int getSquared(byte[] v1, byte[] v2, int maxDist) {
 		int dist = 0;	    
 		int dif = 0;
-	    for (int i = 0; i < 128; i++) {
+	    for (int i = 0; i < v1.length; i++) {
 	    	dif = (int) v1[i] - (int) v2[i];
 	    	dist += dif * dif;
 	    	if ( dist > maxDist ) return -dist;
@@ -50,7 +50,7 @@ public class L2 {
 	
 	public static double getSquared(float[]f1, float[]f2, double max) {
 		double acc = 0;	    
-	    for (int i = 0; i < 128; i++) {
+	    for (int i = 0; i < f1.length; i++) {
 			double diff = f1[i] - f2[i];
 			acc += diff * diff;
 	    	if ( acc > max ) return -acc;
@@ -58,13 +58,5 @@ public class L2 {
 		return acc;
 	}
 	
-	public static double get(float[][] f1, float[][] f2) {
-		double dist = 0;
-		
-		for ( int i=0; i<f1.length; i++) {
-			dist += get(f1[i], f2[i]);
-		}
-		
-		return dist;
-	}
+
 }

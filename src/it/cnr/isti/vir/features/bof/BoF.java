@@ -69,15 +69,15 @@ public class BoF extends AbstractFeature {
     	return count;
     }
 	
-	public BoF(AbstractFeaturesCollector fcc, LFWords fWords) {
+	public BoF(AbstractFeaturesCollector fcc, LFWords fWords) throws InterruptedException {
 		this( (ALocalFeaturesGroup) fcc.getFeature(fWords.getLocalFeaturesGroupClass()), fWords);
 	}
 	
-	public BoF(ALocalFeaturesGroup group, LFWords fWords) {
+	public BoF(ALocalFeaturesGroup group, LFWords fWords) throws InterruptedException {
 		this( (ALocalFeature[]) group.getLocalFeatures(), fWords);
 	}
 	
-	public BoF(ALocalFeature[] features, LFWords fWords) {
+	public BoF(ALocalFeature[] features, LFWords fWords) throws InterruptedException {
 		this.fWords = fWords;
 		bag = fWords.getBags(features);
 		//bag = fWords.getWeightedBags(features,  1);

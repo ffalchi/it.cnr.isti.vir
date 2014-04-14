@@ -15,7 +15,6 @@ import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
-import it.cnr.isti.vir.similarity.knn.MultipleKNNPQueueID.OfferAll;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.util.ParallelOptions;
@@ -112,7 +111,8 @@ public class KNNPQueue<F> {
 	public final void offerAll(F[] coll) throws InterruptedException {
 		
 		if ( parallel ) {
-			int threadN = ParallelOptions.nThreads;
+			
+			int threadN = ParallelOptions.getNFreeProcessors() +1;
 	        Thread[] thread = new Thread[threadN];
 	        int[] group = SplitInGroups.split(coll.length, thread.length);
 	        int from=0;
@@ -128,6 +128,7 @@ public class KNNPQueue<F> {
 	        for ( Thread t : thread ) {
         		if ( t != null ) t.join();
 	        }
+	        ParallelOptions.free(threadN-1);
 		}
 		else
 		{
@@ -162,7 +163,7 @@ public class KNNPQueue<F> {
 	public final void offerAll(ArrayList<F> coll) throws InterruptedException {
 		
 		if ( parallel ) {
-			int threadN = ParallelOptions.nThreads;
+			int threadN = ParallelOptions.getNFreeProcessors() +1;
 	        Thread[] thread = new Thread[threadN];
 	        int[] group = SplitInGroups.split(coll.size(), thread.length);
 	        int from=0;
@@ -178,7 +179,7 @@ public class KNNPQueue<F> {
 	        for ( Thread t : thread ) {
         		if ( t != null ) t.join();
 	        }
-			
+			ParallelOptions.free(threadN-1);
 			
 //			int threadN = ParallelOptions.nThreads;
 //	        int t;

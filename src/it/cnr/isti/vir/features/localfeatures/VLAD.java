@@ -14,6 +14,7 @@ package it.cnr.isti.vir.features.localfeatures;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.bof.LFWords;
+import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -32,8 +33,9 @@ public class VLAD extends AbstractFeature {
 	@Override
 	public void writeData(DataOutput out) throws IOException {
 		out.writeInt( values.length);
-		for ( int i=0; i<values.length; i++ )
-			out.writeFloat(values[i]);		
+        byte[] b = new byte[Float.BYTES*values.length];
+        FloatByteArrayUtil.convToBytes(values, b, 0);
+        out.write(b);
 	}
 	
 	public void writeData(ByteBuffer buff) throws IOException {
@@ -68,32 +70,87 @@ public class VLAD extends AbstractFeature {
 
 //		if ( size == 0 ) return;
 		
-		values = new float[size];
-		for ( int i=0; i<values.length; i++ ) {
-			values[i] = in.readFloat();
-		}
+//		values = new float[size];
+//		for ( int i=0; i<values.length; i++ ) {
+//			values[i] = in.readFloat();
+//		}
 
-	}
-	
-	
-    public static final  VLAD getVLAD(SIFTGroup features, LFWords<SIFT> fWords) {
-        SIFT[] refs = fWords.getFeatures();
-        SIFT[] lf  = features.getLocalFeatures();
         
-        int size = refs.length * 128;
-        int[] intValues = new int[size];
-        for ( int iLF=0; iLF<lf.length; iLF++ ) {
-        	byte[] curr = lf[iLF].values;
-        	int iW = fWords.getNNIndex(lf[iLF]);
-        	int start = iW * 128;
-        	int end = start + 128;
-        	byte[] ref = refs[iW].values;
-        	
-        	int j=0;
-        	for ( int i=start; i<end; i++, j++ ) {
-        		intValues[i] += curr[j] - ref[j];
-        	}
+        int nBytes = Float.BYTES*size;
+        byte[] bytes = new byte[nBytes];
+		in.readFully(bytes);
+		values = FloatByteArrayUtil.get(bytes, 0, size);
+    }
+
+	
+	
+    public static final  VLAD getVLAD(ALocalFeaturesGroup features, LFWords fWords) {
+    	ALocalFeature[] refs = (ALocalFeature[]) fWords.getFeatures();
+    	ALocalFeature[] lf  = features.getLocalFeatures();
+        
+        boolean siftFlag = ( refs[0] instanceof SIFT );
+        boolean siftpcaFlag = ( refs[0] instanceof SIFTPCA );
+        boolean siftpcafloatFlag = ( refs[0] instanceof SIFTPCAFloat );
+        boolean rootsiftFlag = ( refs[0] instanceof RootSIFT );
+        
+        int d = 128;
+        if ( siftpcaFlag ) {
+        	d = ((SIFTPCA) refs[0]).values.length;
+        } else if ( siftpcafloatFlag ) {
+        	d = ((SIFTPCAFloat) refs[0]).values.length;
         }
+        int size = refs.length * d;
+        int[] intValues = new int[size];
+        
+        
+		if (siftpcafloatFlag) {
+			for (int iLF = 0; iLF < lf.length; iLF++) {
+
+				float[] curr = ((SIFTPCAFloat) lf[iLF]).values;;
+
+				int iW = fWords.getNNIndex(lf[iLF]);
+				int start = iW * d;
+				int end = start + d;
+
+				float[] ref = ((SIFTPCAFloat) refs[iW]).values;
+
+				int j = 0;
+				for (int i = start; i < end; i++, j++) {
+					intValues[i] += curr[j] - ref[j];
+				}
+				
+			}
+		} else {
+			for (int iLF = 0; iLF < lf.length; iLF++) {
+
+				byte[] curr = null;
+				if (siftFlag) {
+					curr = ((SIFT) lf[iLF]).values;
+				} else if (siftpcaFlag) {
+					curr = ((SIFTPCA) lf[iLF]).values;
+				} else if (rootsiftFlag) {
+					curr = ((RootSIFT) lf[iLF]).values;
+				}
+
+				int iW = fWords.getNNIndex(lf[iLF]);
+				int start = iW * d;
+				int end = start + d;
+
+				byte[] ref = null;
+				if (siftFlag) {
+					ref = ((SIFT) refs[iW]).values;
+				} else if (siftpcaFlag) {
+					ref = ((SIFTPCA) refs[iW]).values;
+				} else if (rootsiftFlag) {
+					ref = ((RootSIFT) refs[iW]).values;
+				}
+
+				int j = 0;
+				for (int i = start; i < end; i++, j++) {
+					intValues[i] += curr[j] - ref[j];
+				}
+			}
+		}
  
         
         // Power Normalization 0.5
@@ -125,7 +182,7 @@ public class VLAD extends AbstractFeature {
         return new VLAD(values);
     }
     
-	public static final VLAD getVLAD(ALocalFeaturesGroup group, LFWords words) {
+	public static final VLAD gVLAD(ALocalFeaturesGroup group, LFWords words) {
 		if ( group instanceof SIFTGroup ) {
 			return getVLAD((SIFTGroup) group, words);
 		}

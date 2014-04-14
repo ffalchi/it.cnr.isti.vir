@@ -20,13 +20,19 @@ import java.nio.ByteBuffer;
 
 public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> {
 	
+
 	final float[] values; 
 	
 	public final double getMmaxSQRDistValue() {
 		return 2.0;
 	}
+
+    public float[] getValues() {
+        return values;
+    }
 	
 	public SIFTPCAFloat(DataInput str ) throws IOException {
+            super(str);	
 		int dim = str.readByte();
 
 		values = new float[dim];
@@ -36,11 +42,22 @@ public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> {
 	}
 	
 	public SIFTPCAFloat(ByteBuffer src ) throws IOException {
-		int  dim = src.get();
+                super(src);	
+		int dim = src.get();
 		values = new float[dim];
 		for ( int i=0; i<values.length; i++ ) {
 			values[i] = src.getFloat();
 		}
+	}
+        
+        public SIFTPCAFloat(KeyPoint kp, float[] values) {
+		this(kp, values, null);
+	}
+	
+	public SIFTPCAFloat(KeyPoint kp, float[] values, SIFTPCAFloatGroup group) {
+		this.kp = kp;
+		this.values = values;
+		this.linkedGroup = group;
 	}
 	
 	public SIFTPCAFloat(float[] values) {

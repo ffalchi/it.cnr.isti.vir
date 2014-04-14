@@ -111,7 +111,8 @@ public class FarthestFirstTraversal {
 		
 		
 		int nObjPerCycle = Math.min(maxNTries, archives.size());
-		final int nObjsPerThread = (int) Math.ceil((double) nObjPerCycle / ParallelOptions.nThreads);
+		int bookedNThreads = ParallelOptions.getNFreeProcessors();
+		final int nObjsPerThread = (int) Math.ceil((double) nObjPerCycle / (bookedNThreads+1) );
 		final int nThread = (int) Math.ceil((double) nObjPerCycle / nObjsPerThread);
 		
 		//IFeaturesCollector[] rndOrd = new IFeaturesCollector[nObjPerCycle];
@@ -146,8 +147,8 @@ public class FarthestFirstTraversal {
 			
 			int ti = 0;
 			
-			SubsetBest[] runnable = new SubsetBest[ParallelOptions.nThreads];
-			Thread[] thread = new Thread[ParallelOptions.nThreads];
+			SubsetBest[] runnable = new SubsetBest[nThread];
+			Thread[] thread = new Thread[nThread];
 	        for ( int from=0; from<nObjPerCycle; from+=nObjsPerThread) {
 	        	int to = from+nObjsPerThread-1;
 	        	if ( to >= nObjPerCycle ) to =nObjPerCycle-1;	 
@@ -170,6 +171,8 @@ public class FarthestFirstTraversal {
 				}
 
 	        }	
+	        
+	        
 			/*
 			
 			for( int i=0; i<rndOrd.length && i<nTries; i++) {
@@ -193,7 +196,7 @@ public class FarthestFirstTraversal {
 			}
 			Log.info(tStr);
 		}
-		
+		ParallelOptions.free(bookedNThreads);
 		
 		return res;
 	}

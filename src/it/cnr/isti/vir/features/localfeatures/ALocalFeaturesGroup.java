@@ -50,7 +50,7 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 
 	public abstract byte getSerVersion();
 	
-	protected ALocalFeaturesGroup() {};
+	protected ALocalFeaturesGroup() {} ;
 	
 	protected ALocalFeaturesGroup(AbstractFeaturesCollector fc) {
 		this.linkedFC = fc;

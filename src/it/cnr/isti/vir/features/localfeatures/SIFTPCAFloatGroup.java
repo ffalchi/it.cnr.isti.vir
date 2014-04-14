@@ -56,8 +56,7 @@ public class SIFTPCAFloatGroup extends ALocalFeaturesGroup<SIFTPCAFloat> {
 		for ( int i = 0; i < nLFs; i++ ) {
 			lfArr[i] = new SIFTPCAFloat(in);
 			lfArr[i].setLinkedGroup(this);
-		}
-			
+		}		
 		
 	}
 
