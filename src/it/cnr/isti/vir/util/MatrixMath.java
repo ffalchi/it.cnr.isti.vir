@@ -51,6 +51,7 @@ public class MatrixMath {
 
      
 	// floatMatrix*floatVector
+        
 	public static float[] times(double[][] matrix, float[] vector) {
 		if (matrix[0].length == vector.length) {
 			float[] res = new float[matrix.length];
