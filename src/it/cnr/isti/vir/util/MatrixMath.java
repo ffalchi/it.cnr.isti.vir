@@ -31,7 +31,7 @@ public class MatrixMath {
 		}
 	}
 
-	// added by Lucia Vadicamo
+
 	// floatMatrix*floatVector
 	public static float[] times(float[][] matrix, float[] vector) {
 		if (matrix[0].length == vector.length) {
@@ -49,7 +49,24 @@ public class MatrixMath {
 		}
 	}
 
-	// added by Lucia Vadicamo
+     
+	// floatMatrix*floatVector
+	public static float[] times(double[][] matrix, float[] vector) {
+		if (matrix[0].length == vector.length) {
+			float[] res = new float[matrix.length];
+			for (int i1 = 0; i1 < matrix.length; i1++) {
+				for (int i2 = 0; i2 < vector.length; i2++)
+					res[i1] += matrix[i1][i2] * vector[i2];
+			}
+			return res;
+		} else {
+			System.out.println("Error in matrix-vector product: dimensions are not consistent.");
+
+			return null;
+		}
+	}
+        
+
 	// floatMatrix*doubleVector
 	public static double[] times(float[][] matrix, double[] vector) {
 		if (matrix[0].length == vector.length) {
@@ -67,7 +84,7 @@ public class MatrixMath {
 		}
 	}
 
-	// added by Lucia Vadicamo
+
 	// doubleMatrix*doubleMatrix
 	public static double[][] times(double[][] matrix1, double[][] matrix2) {
 		if (matrix1[0].length == matrix2.length) {
@@ -86,7 +103,7 @@ public class MatrixMath {
 		}
 	}
 
-	// added by Lucia Vadicamo
+
 	// floatMatrix*floatMatrix
 	public static float[][] times(float[][] matrix1, float[][] matrix2) {
 		if (matrix1[0].length == matrix2.length) {
@@ -105,7 +122,7 @@ public class MatrixMath {
 		}
 	}
 
-	// added by Lucia Vadicamo
+
 	public static long count_occurrences(double[][] m, double val) {
 		long count = 0;
 		for (int i1 = 0; i1 < m.length; i1++)
