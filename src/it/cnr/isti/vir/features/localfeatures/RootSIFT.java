@@ -12,6 +12,7 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.distance.L2;
+import it.cnr.isti.vir.features.IUByteValues;
 import it.cnr.isti.vir.util.Mean;
 
 import java.io.BufferedReader;
@@ -21,7 +22,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class RootSIFT extends ALocalFeature<RootSIFTGroup> {
+public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValues {
 
 	static final int vLen = 128;
     private final static float sqrt2 = (float) Math.sqrt(2.0);

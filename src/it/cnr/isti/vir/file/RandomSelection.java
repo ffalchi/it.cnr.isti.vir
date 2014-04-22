@@ -25,10 +25,18 @@ public class RandomSelection {
 		RandomOperations.setSeed(System.currentTimeMillis());
 		
 		
-		//String inDirName = "X:\\CoPhIR\\dat";
-		String inDirName = "X:/CoPhIR/1MExp/dataset/CoPhIR_1M_rnd";
+		//String inDirName = "M:/CoPhIR/dat";
+		//String inDirName = "X:/CoPhIR/1MExp/dataset/CoPhIR_1M_rnd";
+		String inDirName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_rnd";
+		
+		//int n = 10000000;
+		//String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_rnd";
+		
+		//int n = 1000000;
+		//String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_1M_rnd";
+						
 		int n = 10000;
-		String outArchiveName = "T:\\CoPhIR_1M_10k_rnd";
+		String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_10k_rnd";
 		
 		FeaturesCollectorsArchives archives = new FeaturesCollectorsArchives(new File(inDirName), false);
 		

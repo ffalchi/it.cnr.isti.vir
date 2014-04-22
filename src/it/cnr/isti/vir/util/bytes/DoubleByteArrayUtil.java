@@ -3,6 +3,8 @@ package it.cnr.isti.vir.util.bytes;
 public class DoubleByteArrayUtil {
 	//private static final int MASK = 0xff;	
 
+	public static final int BYTES = Double.SIZE / 8;
+	
 	/**
 	 * @param byteArray		source bytes
 	 * @param byteOffset	source offset

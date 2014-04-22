@@ -12,17 +12,22 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.distance.L2;
+import it.cnr.isti.vir.features.IUByteValues;
 
 import java.io.DataInput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Collection;
 
-public class SIFTPCA extends ALocalFeature<SIFTPCAGroup> {
+public class SIFTPCA extends ALocalFeature<SIFTPCAGroup> implements IUByteValues {
 	
 	int dim;
 
 	final byte[] values; 
+	
+	@Override
+	public byte[] getValues() {
+		return values;
+	}
 	
 	public final double getMmaxSQRDistValue() {
 		return 255*255*dim;
@@ -90,6 +95,8 @@ public class SIFTPCA extends ALocalFeature<SIFTPCAGroup> {
 	public static final double getDistance_Norm(SIFTPCA s1, SIFTPCA s2 ) {
 		return Math.sqrt(getL2SquaredDistance(s1,s2)/s1.getMmaxSQRDistValue());
 	}
+
+
 
 	
 

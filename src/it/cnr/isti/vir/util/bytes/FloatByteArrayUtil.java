@@ -13,6 +13,8 @@ package it.cnr.isti.vir.util.bytes;
 
 public class FloatByteArrayUtil {
 	private static final int MASK = 0xff;	
+	
+	public static final int BYTES = Float.SIZE / 8;
 
 	/**
 	 * @param byteArray		source bytes

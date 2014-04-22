@@ -15,6 +15,7 @@ package it.cnr.isti.vir.util.bytes;
 public class LongByteArrayUtil {
 	private static final int MASK = 0xff;
 
+	private static final int BYTES = Long.SIZE / 8;
 	
 	/**
 	 * @param encodedValue	source bytes

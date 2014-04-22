@@ -12,13 +12,15 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.distance.L2;
+import it.cnr.isti.vir.features.IByteValues;
+import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 
 import java.io.DataInput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> {
+public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> implements IFloatValues{
 	
 
 	final float[] values; 
