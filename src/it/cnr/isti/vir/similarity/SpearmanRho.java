@@ -11,14 +11,14 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
-import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.Permutation;
 
 public class SpearmanRho implements ISimilarity<Permutation>{
 
 	private int maxLength = 0;
-	
+	private int maxRef = -1;
 	public SpearmanRho() {};
 	
 	public int getMaxDist() {
@@ -32,6 +32,13 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	public SpearmanRho(int maxLength) {
 		if ( maxLength >= 0)
 			this.maxLength =maxLength;
+	}
+	
+	public SpearmanRho(int maxLength, int maxRef) {
+		if ( maxLength >= 0)
+			this.maxLength =maxLength;
+		if ( maxRef >= 0 ) 
+			this.maxRef = maxRef;
 	}
 	
 	public void setMaxLength(int maxLength) {

@@ -26,6 +26,8 @@ import it.cnr.isti.vir.features.localfeatures.SIFTPCAFloat;
 import it.cnr.isti.vir.features.localfeatures.SIFTPCAFloatGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFTPCAGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
+import it.cnr.isti.vir.features.localfeatures.VLADHamming;
+import it.cnr.isti.vir.features.localfeatures.VLADPlus;
 import it.cnr.isti.vir.features.metadata.GPSData;
 import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
 import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
@@ -90,7 +92,9 @@ public class FeatureClasses {
 		SIFTPCA.class,
 		SIFTPCAGroup.class,
 		SIFTPCAFloat.class,
-		SIFTPCAFloatGroup.class
+		SIFTPCAFloatGroup.class,
+		VLADHamming.class,
+		VLADPlus.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

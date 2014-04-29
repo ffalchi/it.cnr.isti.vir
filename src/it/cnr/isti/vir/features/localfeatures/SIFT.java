@@ -33,6 +33,11 @@ public class SIFT extends ALocalFeature<SIFTGroup> implements IUByteValues {
 	
 	public Class getGroupClass() { return SIFTGroup.class; };
 	
+	@Override
+	public final int getLength() {
+		return VLEN;
+	}
+	
 	public SIFT(DataInput str ) throws IOException {
 		super(str);
 

@@ -13,7 +13,7 @@ package it.cnr.isti.vir.util;
 
 public class MatrixMath {
 
-	public static double[] times(double[][] matrix, double[] vector) {
+	public static final double[] times(double[][] matrix, double[] vector) {
 		if (matrix[0].length == vector.length) {
 			double[] res = new double[matrix.length];
 			for (int i1 = 0; i1 < matrix.length; i1++) {
@@ -33,7 +33,7 @@ public class MatrixMath {
 
 	// added by Lucia Vadicamo
 	// floatMatrix*floatVector
-	public static float[] times(float[][] matrix, float[] vector) {
+	public static final float[] times(float[][] matrix, float[] vector) {
 		if (matrix[0].length == vector.length) {
 			float[] res = new float[matrix.length];
 			for (int i1 = 0; i1 < matrix.length; i1++) {
@@ -51,7 +51,7 @@ public class MatrixMath {
 
 	// added by Lucia Vadicamo
 	// floatMatrix*doubleVector
-	public static double[] times(float[][] matrix, double[] vector) {
+	public static final double[] times(float[][] matrix, double[] vector) {
 		if (matrix[0].length == vector.length) {
 			double[] res = new double[matrix.length];
 			for (int i1 = 0; i1 < matrix.length; i1++) {
@@ -69,7 +69,7 @@ public class MatrixMath {
 
 	// added by Lucia Vadicamo
 	// doubleMatrix*doubleMatrix
-	public static double[][] times(double[][] matrix1, double[][] matrix2) {
+	public static final double[][] times(double[][] matrix1, double[][] matrix2) {
 		if (matrix1[0].length == matrix2.length) {
 			double[][] res = new double[matrix1.length][matrix2[0].length];
 			for (int i1 = 0; i1 < matrix1.length; i1++) {
@@ -88,7 +88,7 @@ public class MatrixMath {
 
 	// added by Lucia Vadicamo
 	// floatMatrix*floatMatrix
-	public static float[][] times(float[][] matrix1, float[][] matrix2) {
+	public static final float[][] times(float[][] matrix1, float[][] matrix2) {
 		if (matrix1[0].length == matrix2.length) {
 			float[][] res = new float[matrix1.length][matrix2[0].length];
 			for (int i1 = 0; i1 < matrix1.length; i1++) {
@@ -106,7 +106,7 @@ public class MatrixMath {
 	}
 
 	// added by Lucia Vadicamo
-	public static long count_occurrences(double[][] m, double val) {
+	public static final long count_occurrences(double[][] m, double val) {
 		long count = 0;
 		for (int i1 = 0; i1 < m.length; i1++)
 			for (int i2 = 0; i2 < m[0].length; i2++) {
@@ -116,7 +116,7 @@ public class MatrixMath {
 		return count;
 	}
 
-	public static long count_occurrences(double[][] m, float val) {
+	public static final long count_occurrences(double[][] m, float val) {
 		long count = 0;
 		for (int i1 = 0; i1 < m.length; i1++)
 			for (int i2 = 0; i2 < m[0].length; i2++) {

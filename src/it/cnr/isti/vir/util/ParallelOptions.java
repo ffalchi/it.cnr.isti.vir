@@ -11,6 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
+
 public class ParallelOptions {
 	public static int nProcessors = Runtime.getRuntime().availableProcessors();
 	public static int nPInUse = 1;
@@ -55,4 +56,56 @@ public class ParallelOptions {
 			System.out.println("Using " + nProcessors + " threads");
 		}
  	}
+	
+	
+//	static class Compute_thread implements Runnable {
+//        private final int from;
+//        private final int to;
+//        
+//
+//        
+//        Compute_p_thread(
+//        		int from, int to,        		
+//
+//        		) {
+//            this.from = from;
+//            this.to = to;
+//
+//        }
+//        
+//        @Override
+//        public void run() {
+//
+//        	for(int t=from; t<=to; t++){
+//            	
+//            }
+//        }                
+//    }
+	
+	
+//    int threadN = ParallelOptions.getNFreeProcessors()+1;
+//    
+//    if ( threadN == 1 ) {
+//		for ( int i=0; i<n; i++ ) {
+//		}
+//    } else {
+//    	// Parallel
+//        Thread[] thread = new Thread[threadN];
+//        int[] group = SplitInGroups.split(T, thread.length);
+//        int from=0;
+//        for ( int i=0; i<group.length; i++ ) {
+//        	int curr=group[i];
+//        	if ( curr == 0 ) break;
+//        	int to=from+curr-1;
+//        	thread[i] = new Thread( new Extract_thread(this, from,to, p, x) ) ;
+//        	thread[i].start();
+//        	from=to+1;
+//        }
+//        
+//        for ( Thread t : thread ) {
+//    		if ( t != null ) t.join();
+//        }
+//        ParallelOptions.free(threadN-1);
+//    }
+	
 }

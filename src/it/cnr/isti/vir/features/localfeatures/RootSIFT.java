@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValues {
 
-	static final int vLen = 128;
+	static final int VLEN = 128;
     private final static float sqrt2 = (float) Math.sqrt(2.0);
 	private static final double maxSQRDistValue = 255 * 255 * 128;
 	
@@ -32,6 +32,15 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValu
 	
 	public Class getGroupClass() { return RootSIFTGroup.class; };
 	
+	@Override
+	public final int getLength() {
+		return VLEN;
+	}
+	
+	@Override
+	public byte[] getValues() {
+		return values;
+	}	
 	
 	public RootSIFT(SIFT sift, RootSIFTGroup givenLinkedGroup) {
 		linkedGroup = givenLinkedGroup;
@@ -42,29 +51,26 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValu
 	public RootSIFT(DataInput str ) throws IOException {
 		super(str);
 
-		values = new byte[vLen];
+		values = new byte[VLEN];
 		str.readFully(values);
 	}
 	
 	public RootSIFT(ByteBuffer src ) throws IOException {
 		super(src);
 
-		values = new byte[vLen];
+		values = new byte[VLEN];
 		src.get(values);
 	}
 	
 	public int getDataByteSize() {
-		return vLen;
+		return VLEN;
 	}
 	
 	public int putDescriptor(byte[] bArr, int bArrI) {
-		System.arraycopy(values, 0, bArr, bArrI, vLen);
-		return bArrI + vLen;
+		System.arraycopy(values, 0, bArr, bArrI, VLEN);
+		return bArrI + VLEN;
 	}
-	
-	public byte[] getValues() {
-		return values;
-	}	
+
 	
 	private RootSIFT(byte[] values) {
 		super((KeyPoint) null, null);

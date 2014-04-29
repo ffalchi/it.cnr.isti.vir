@@ -25,10 +25,16 @@ public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> implements IF
 
 	final float[] values; 
 	
+	@Override
+	public final int getLength() {
+		return values.length;
+	}
+	
 	public final double getMmaxSQRDistValue() {
 		return 2.0;
 	}
 
+	@Override
     public float[] getValues() {
         return values;
     }

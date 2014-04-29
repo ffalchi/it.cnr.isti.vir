@@ -14,10 +14,15 @@ package it.cnr.isti.vir.features.localfeatures;
 import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
+import it.cnr.isti.vir.features.IIntValues;
 import it.cnr.isti.vir.features.bof.LFWords;
+import it.cnr.isti.vir.util.VectorMath;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
+import it.cnr.isti.vir.util.math.Norm;
+import it.cnr.isti.vir.util.math.Normalize;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -28,6 +33,11 @@ public class VLAD extends AbstractFeature implements IFloatValues {
  
 	public AbstractFeaturesCollector linkedFC;
 	float[] values;
+	
+	@Override
+	public final int getLength() {
+		return values.length;
+	}
 	
 	@Override
 	public final float[] getValues() {
@@ -100,25 +110,24 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 
 	
 	
-    public static final  VLAD getVLAD(ALocalFeaturesGroup features, LFWords fWords) {
+    public static final  VLAD getVLAD(ALocalFeaturesGroup features, LFWords fWords) throws Exception {
     	ALocalFeature[] refs = (ALocalFeature[]) fWords.getFeatures();
     	ALocalFeature[] lf  = features.getLocalFeatures();
         
-        boolean bytesValues = ( refs[0] instanceof IByteValues );
-        boolean floatValues = ( refs[0] instanceof IFloatValues );
         
-        int d = 128;
-        if ( bytesValues ) {
-        	d = ((IByteValues) refs[0]).getValues().length;
-        } else if ( floatValues ) {
-        	d = ((IFloatValues) refs[0]).getValues().length;
+        if ( ! (refs[0] instanceof IArrayValues) ) {
+        	throw new Exception( "VLAD can't be computed for " + features.getClass() );
         }
+        
+        int d = ((IArrayValues) refs[0]).getLength(); 
+        
         int size = refs.length * d;
         	
-        float[] values = new float[size];
+        float[] values = null;
         
-		if (floatValues) {
-			
+        if ( refs[0] instanceof IFloatValues ) {
+        	values = new float[size];
+        	
 			if ( lf.length == 0 ) {
 				// NO LOCAL FEATURES WERE FOUND!
 				for ( int i=0; i<size; ) {
@@ -127,35 +136,30 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 						values[i++] = -ref[id];
 					}					
 				}
-			}
+			} else {
 			
-			for (int iLF = 0; iLF < lf.length; iLF++) {
-
-				float[] curr = ((SIFTPCAFloat) lf[iLF]).values;;
-
-				int iW = fWords.getNNIndex(lf[iLF]);
-				int start = iW * d;
-				int end = start + d;
-
-				float[] ref = ((SIFTPCAFloat) refs[iW]).values;
-
-				int j = 0;
-				for (int i = start; i < end; i++, j++) {
-					values[i] += curr[j] - ref[j];
+				for (int iLF = 0; iLF < lf.length; iLF++) {
+	
+					float[] curr = ((IFloatValues) lf[iLF]).getValues();
+	
+					int iW = fWords.getNNIndex(lf[iLF]);
+					int start = iW * d;
+					int end = start + d;
+	
+					float[] ref = ((IFloatValues) refs[iW]).getValues();
+	
+					int j = 0;
+					for (int i = start; i < end; i++, j++) {
+						values[i] += curr[j] - ref[j];
+					}
+					
 				}
-				
 			}
 			
-	        // Power Normalization 0.5
-	        for (int i=0; i<size; i++) {     
-	        	if ( values[i] == 0 ) values[i] = 0.0F;
-	        	else if ( values[i] > 0 )
-	        		values[i] =   (float) Math.sqrt((double) values[i]);
-	        	else 
-	        		values[i] = - (float) Math.sqrt((double) -values[i]);
-	        }
-	        
-		} else {
+			Normalize.sqrt(values);
+			
+		} else if ( refs[0] instanceof IByteValues
+	        		|| refs[0] instanceof IIntValues) {
 			int[] intValues = new int[size];
 			
 			if ( lf.length == 0 ) {
@@ -166,55 +170,40 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 						intValues[i++] = -ref[id];
 					}					
 				}
-			}
+			} else {
 			
-			for (int iLF = 0; iLF < lf.length; iLF++) {
-
-				byte[] curr = ((IByteValues) lf[iLF]).getValues();
-
-				int iW = fWords.getNNIndex(lf[iLF]);
-				int start = iW * d;
-				int end = start + d;
-
-				byte[] ref = ((IByteValues) refs[iW]).getValues();
-
-				int j = 0;
-				for (int i = start; i < end; i++, j++) {
-					intValues[i] += curr[j] - ref[j];
+				for (int iLF = 0; iLF < lf.length; iLF++) {
+	
+					byte[] curr = ((IByteValues) lf[iLF]).getValues();
+	
+					int iW = fWords.getNNIndex(lf[iLF]);
+					int start = iW * d;
+					int end = start + d;
+	
+					byte[] ref = ((IByteValues) refs[iW]).getValues();
+	
+					int j = 0;
+					for (int i = start; i < end; i++, j++) {
+						intValues[i] += curr[j] - ref[j];
+					}
+					
 				}
-				
-
 			}
 			
-	        // Power Normalization 0.5
-	        for (int i=0; i<size; i++) {     
-	        	if ( intValues[i] == 0 ) values[i] = 0.0F;
-	        	else if ( intValues[i] > 0 )
-	        		values[i] =   (float) Math.sqrt((double) intValues[i]);
-	        	else 
-	        		values[i] = - (float) Math.sqrt((double) -intValues[i]);
-	        }
+			values = Normalize.getSQRT_float(intValues);
+			//values = Normalize.getPower_float(intValues, 0.2);
+			//values = VectorMath.getFloats(intValues);
+							        
+		} else {
+        	throw new Exception( "VLAD can't be computed for " + features.getClass() );
 		}
-
-		// L2 Normalization
-        double sum2 = 0;
-        for (int i=0; i<size; i++) {
-        	sum2 += (values[i]*values[i]);
-        }
         
-        if ( sum2 > 0.0 ) {
-	        double sqrtsum2 = Math.sqrt(sum2);    
-	        for (int i=0; i<size; i++) {
-	        	values[i] = (float) (values[i] / sqrtsum2 );	        	
-	        }        
-        } else {
-        	values = null;
-        }
+        Normalize.l2(values);
         
         return new VLAD(values);
     }
     
-	public static final VLAD gVLAD(ALocalFeaturesGroup group, LFWords words) {
+	public static final VLAD gVLAD(ALocalFeaturesGroup group, LFWords words) throws Exception {
 		if ( group instanceof SIFTGroup ) {
 			return getVLAD((SIFTGroup) group, words);
 		}

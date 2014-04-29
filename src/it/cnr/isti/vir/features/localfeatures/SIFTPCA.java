@@ -25,6 +25,11 @@ public class SIFTPCA extends ALocalFeature<SIFTPCAGroup> implements IUByteValues
 	final byte[] values; 
 	
 	@Override
+	public int getLength() {
+		return dim;
+	}
+	
+	@Override
 	public byte[] getValues() {
 		return values;
 	}
@@ -96,10 +101,5 @@ public class SIFTPCA extends ALocalFeature<SIFTPCAGroup> implements IUByteValues
 		return Math.sqrt(getL2SquaredDistance(s1,s2)/s1.getMmaxSQRDistValue());
 	}
 
-
-
-	
-
-	
 	
 }
