@@ -11,6 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
+//test 
+
 public class MatrixMath {
 
 	public static double[] times(double[][] matrix, double[] vector) {
@@ -51,7 +53,6 @@ public class MatrixMath {
 
      
 	// floatMatrix*floatVector
-        
 	public static float[] times(double[][] matrix, float[] vector) {
 		if (matrix[0].length == vector.length) {
 			float[] res = new float[matrix.length];
