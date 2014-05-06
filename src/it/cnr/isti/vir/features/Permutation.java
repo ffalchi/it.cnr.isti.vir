@@ -33,9 +33,11 @@ public class Permutation extends AbstractFeature {
 
 	
 	byte version = 2;
+	
 	// RO ids ordered
 	int[] ordRO = null;
 	int nRO;
+	
 	// RO ids array with relative position
 	int[] roPosition = null;
 	
@@ -119,14 +121,14 @@ public class Permutation extends AbstractFeature {
     			in.readFully(arr);
     			ByteBuffer buffer = ByteBuffer.wrap(arr);
     			for ( int i=0; i<nRO; i++) {
-    				roPosition[i] = buffer.getShort();
+    				ordRO[i] = buffer.getShort();
     			}
 			} else {
 				byte[] arr = new byte[nRO*4];
     			in.readFully(arr);
     			ByteBuffer buffer = ByteBuffer.wrap(arr);
     			for ( int i=0; i<nRO; i++) {
-    				roPosition[i] = buffer.getInt();
+    				ordRO[i] = buffer.getInt();
     			}
 			}
     	} else if (type != 0 ) {
@@ -202,6 +204,9 @@ public class Permutation extends AbstractFeature {
 		ordRO = null;
 	}
 	
+	/**
+	 * @return Array of Reference Objects positions with respect to the object.
+	 */
 	public int[] getROPositions() {
 		if ( roPosition == null ) {
 			convertToPositions();
@@ -409,10 +414,20 @@ public class Permutation extends AbstractFeature {
 	}
 	
 	
+	/**
+	 * Reduce the number of Reference Objects to newNRO
+	 * discarding information abot the others.
+	 * 
+	 * @param newNRO
+	 */
 	public void reduceToNRO(int newNRO) {
 		if ( newNRO >= nRO ) return;
-		if ( ordRO == null ) this.convertToOrdered();
-		 
+		
+		boolean converted = false;
+		if ( ordRO == null) {
+			this.convertToOrdered();
+			converted = true;
+		}
 		int destPos = 0;
 		
 		for (int origPos = 0; origPos<ordRO.length; origPos++) {
@@ -422,6 +437,10 @@ public class Permutation extends AbstractFeature {
 		}
 		
 		ordRO = Arrays.copyOf(ordRO, destPos);
+		
+		nRO = newNRO;
+		
+		if ( converted ) this.convertToPositions();
 	}
 	  
 
@@ -537,8 +556,25 @@ public class Permutation extends AbstractFeature {
 		return java.util.Arrays.hashCode(ordRO);
 	}
 
-	public int[] getOrdRO(int permLength, Integer excluded) {
+	
+	/**
+	 * @return A copy of the Reference Objects IDs ordered
+	 * according to the similarity with respect to the object 
+	 */
+	public int[] getOrdRO()  {
 		if ( ordRO == null) this.convertToOrdered(); 
+		return ordRO.clone();
+	}
+	
+	/**
+	 * @param permLength
+	 * @param excluded
+	 * @return Reference Objects IDs in order of similarity with respect to the object.
+	 */
+	public int[] getOrdRO(int permLength, Integer excluded) {
+		if ( ordRO == null) {
+			this.convertToOrdered(); 
+		}
 		int[] res = new int[permLength];
 		int iRes = 0;
 		for(int i=0; iRes<permLength; i++) {
