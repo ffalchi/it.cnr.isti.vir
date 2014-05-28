@@ -12,7 +12,7 @@
 package it.cnr.isti.vir.pca;
 
 import it.cnr.isti.vir.util.MatrixMath;
-import it.cnr.isti.vir.util.VectorMath;
+import it.cnr.isti.vir.util.math.VectorMath;
 
 import java.util.List;
 

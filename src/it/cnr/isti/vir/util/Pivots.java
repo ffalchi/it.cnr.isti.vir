@@ -37,7 +37,7 @@ public class Pivots {
 		int size=intDist.length;
 		
 		// Random reordering
-		LinkedList<Integer> list = new LinkedList(RandomOperations.getRandomOrderedIntegers(size));
+		LinkedList<Integer> list = new LinkedList(RandomOperations.getOrderedIntegersAL(size));
 		
 		ArrayList<Integer> orderedList = new ArrayList<Integer>(size);
 		
@@ -124,7 +124,7 @@ public class Pivots {
 		int size=intDist.length;
 		
 		// Random ordering
-		LinkedList<Integer> list = new LinkedList(RandomOperations.getRandomOrderedIntegers(size));
+		LinkedList<Integer> list = new LinkedList(RandomOperations.getOrderedIntegersAL(size));
 		
 		ArrayList<Integer> res = new ArrayList<Integer>(size);
 		
@@ -242,8 +242,8 @@ public class Pivots {
 	public static final AbstractFeaturesCollector[] search(FeaturesCollectorsArchives candidatePivots, AbstractFeaturesCollector[] testObjects, IMetric sim, int nPivots, int nTries) throws ArchiveException, InterruptedException {
 		
 		// creating testObjects.length pairs of objects
-		int[] obj1 = RandomOperations.getRandomIntArray(testObjects.length, 0, testObjects.length-1);
-		int[] obj2 = RandomOperations.getRandomIntArray(testObjects.length, 0, testObjects.length-1);
+		int[] obj1 = RandomOperations.getInts(testObjects.length, 0, testObjects.length-1);
+		int[] obj2 = RandomOperations.getInts(testObjects.length, 0, testObjects.length-1);
 		
 		// distances in the pivoted space between pairs of objects
 		float[] ooPDist = new float[testObjects.length];

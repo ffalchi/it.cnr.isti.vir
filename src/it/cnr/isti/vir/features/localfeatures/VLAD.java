@@ -19,10 +19,10 @@ import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
 import it.cnr.isti.vir.features.bof.LFWords;
-import it.cnr.isti.vir.util.VectorMath;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Norm;
 import it.cnr.isti.vir.util.math.Normalize;
+import it.cnr.isti.vir.util.math.VectorMath;
 
 import java.io.DataInput;
 import java.io.DataOutput;

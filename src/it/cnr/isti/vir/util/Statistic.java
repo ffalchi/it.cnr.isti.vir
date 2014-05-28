@@ -11,6 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
+import it.cnr.isti.vir.util.math.VectorMath;
+
 import java.util.Arrays;
 
 public class Statistic {

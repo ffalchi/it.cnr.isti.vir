@@ -54,8 +54,8 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 
 	@Override
 	public double distance(Permutation f1, Permutation f2, double max) {
-		if ( maxLength == 0 ) return sfd(f1.getROPositions(), f2.getROPositions(), (int) Math.ceil( max ));
-		return sfd_l(f1.getROPositions(), f2.getROPositions(), (int) Math.ceil( max ), maxLength);
+		if ( maxLength == 0 ) return sfd(f1.getROPositions(), f2.getROPositions(), (long) Math.ceil( max ));
+		return sfd_l(f1.getROPositions(), f2.getROPositions(), (long) Math.ceil( max ), maxLength);
 	}
 
 	
@@ -81,20 +81,20 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 		return new FeatureClassCollector( Permutation.class );
 	}
 
-	public static int sfd(int[] pos1, int[] pos2) {
+	public static long sfd(int[] pos1, int[] pos2) {
 		
-		int sum = 0;
+		long sum = 0;
 		for ( int i=0; i<pos1.length; i++) {
-			int temp = pos1[i] - pos2[i];
+			long temp = pos1[i] - pos2[i];
 			sum += temp*temp;
 		}
 		return sum;
 	}
 	
-	public static int sfd(int[] pos1, int[] pos2, int max) {
-		int sum = 0;
+	public static long sfd(int[] pos1, int[] pos2, long max) {
+		long sum = 0;
 		for ( int i=0; i<pos1.length; i++) {
-			int temp = pos1[i] - pos2[i];
+			long temp = pos1[i] - pos2[i];
 			sum += temp*temp;
 			if ( sum > max ) return -sum;
 		}
@@ -109,14 +109,18 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	 */
 	public static double sfd_l(int[] pos1, int[] pos2, int permLength) {
 	
-		int sum = 0;
+		long sum = 0;
 		for ( int i=0; i<pos1.length; i++) {
 			int t1 = pos1[i];
 			int t2 = pos2[i];
 			if ( t1 >= permLength &&  t2 >= permLength) continue;
 			if ( t1 > permLength ) t1 = permLength;
 			if ( t2 > permLength ) t2 = permLength;
-			int temp = t1 - t2;
+			long temp = t1 - t2;
+			
+			if ( sum + temp*temp < 0 ) {
+				System.out.println("ERROR");
+			}
 			sum += temp*temp;
 		}
 		return sum;
@@ -129,18 +133,19 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	 * @param permLength max permutation length
 	 * @return
 	 */
-	public static double  sfd_l(int[] pos1, int[] pos2, int max, int permLength) {
+	public static double  sfd_l(int[] pos1, int[] pos2, long max, int permLength) {
 		
-		int sum = 0;
+		long sum = 0;
 		for ( int i=0; i<pos1.length; i++) {
 			int t1 = pos1[i];
 			int t2 = pos2[i];
 			if ( t1 >= permLength &&  t2 >= permLength) continue;
 			if ( t1 > permLength ) t1 = permLength;
 			if ( t2 > permLength ) t2 = permLength;
-			int temp = t1 - t2;
+			long temp = t1 - t2;
 			sum += temp*temp;
-			if ( sum > max ) return -sum;
+			if ( sum > max )
+				return -sum;
 		}
 		return sum;
 	}

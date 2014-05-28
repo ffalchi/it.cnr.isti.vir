@@ -1,6 +1,5 @@
 package it.cnr.isti.vir.util.math;
 
-import it.cnr.isti.vir.util.VectorMath;
 
 public class Norm {
 

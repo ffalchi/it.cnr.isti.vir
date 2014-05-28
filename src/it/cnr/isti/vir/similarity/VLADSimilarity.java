@@ -42,12 +42,12 @@ public class VLADSimilarity implements ISimilarity<VLAD> {
 
 	@Override
 	public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2) {
-		return distance((VLAD) f1.getFeature(VLAD.class), (VLAD) f2.getFeature(VLAD.class));
+		return distance(f1.getFeature(VLAD.class), f2.getFeature(VLAD.class));
 	}
 
 	@Override
 	public double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max) {
-		return distance((VLAD) f1.getFeature(VLAD.class), (VLAD) f2.getFeature(VLAD.class), max);
+		return distance(f1.getFeature(VLAD.class), f2.getFeature(VLAD.class), max);
 	}
 
 	@Override

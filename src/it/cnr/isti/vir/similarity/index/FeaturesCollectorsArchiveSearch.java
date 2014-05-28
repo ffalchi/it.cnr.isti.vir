@@ -8,9 +8,14 @@ import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
+import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
+import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.Log;
 import it.cnr.isti.vir.util.ParallelOptions;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
@@ -69,7 +74,8 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		return getKNN( qObjs, k, sim, true)[0];
 	}
 	
-	public ISimilarityResults[] getKNN(AbstractFeaturesCollector[] qObj, int k,
+	public ISimilarityResults[] getKNN(
+			AbstractFeaturesCollector[] qObj, int k,
 			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
 			NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException,
@@ -129,13 +135,14 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 	}
 	
 	public synchronized void getKNN(
-		AbstractFeaturesCollector[] qObj,
-		SimPQueueArr[] kNNQueue,
-		final ISimilarity sim,
-		final boolean onlyID)
-		throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
-
+			AbstractFeaturesCollector[] qObj,
+			SimPQueueArr[] kNNQueue,
+			final ISimilarity sim,
+			final boolean onlyID) 
+			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
+		
 		synchronized (archive) {
+			
 			boolean parallel = true;
 			if (!parallel) {
 				int iObj = 0;
@@ -158,7 +165,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			
 			} else {
 				
-				int tParallelBatchSize = 100000;
+				int tParallelBatchSize = 10000;
 				
 				int nObj = archive.size();
 				
@@ -202,6 +209,84 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			        ParallelOptions.free(bnt);
 					Log.info(iObj + "/" + nObj);
 				}
+			}
+		}
+	}
+	
+	public synchronized void saveKNN(
+			AbstractFeaturesCollector[] qObj,
+			ISimilarity sim,
+			int k,
+			int batchNObjs,
+			String outFNPrefix )
+			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
+
+		String sep = ",";
+		
+		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
+		for (int i = 0; i < kNNQueue.length; i++) {
+			kNNQueue[i] = new SimPQueueArr(k);
+		}
+		
+		synchronized (archive) {
+				
+			
+			int nObj = archive.size();
+			
+		
+			Iterator<AbstractFeaturesCollector> it = archive.iterator();
+			// iterates through multiple batches
+			for (int iObj = 0; iObj < nObj;  ) {
+				
+				int batchSize = batchNObjs;
+				if ( iObj + batchNObjs > nObj ) batchSize = nObj-iObj;
+				AbstractFeaturesCollector[] objects = new AbstractFeaturesCollector[batchSize];
+				
+				// reading objects in batch
+				for ( int i=0; i<objects.length; i++  ) {
+					objects[i] = it.next();
+					iObj++;
+				}
+				
+				// kNNQueues are performed in parallels
+				int bnt = ParallelOptions.getNFreeProcessors();
+				final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / (bnt+1) );
+				final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
+				int ti = 0;
+		        Thread[] thread = new Thread[nThread];
+		        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
+		        	int to = from+nQueriesPerThread-1;
+		        	if ( to >= qObj.length ) to =qObj.length-1;
+		        	thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, from, to, objects, true) ) ;
+		        	thread[ti].start();
+		        	ti++;
+		        }
+		        
+		        for ( Thread t : thread ) {
+	        		if ( t != null ) t.join();
+		        }
+		        ParallelOptions.free(bnt);
+				Log.info(iObj + "/" + nObj);
+				
+				//Log.info("Saving");
+				File csvFile = csvFile = new File( outFNPrefix + "_" + iObj + "n.csv");
+				ISimilarityResults[] res = new ISimilarityResults[kNNQueue.length];
+				for (int i = 0; i < kNNQueue.length; i++) {
+					res[i] = kNNQueue[i].getResults();
+				}
+				BufferedWriter csvOut = new BufferedWriter( new FileWriter(csvFile) );
+				for ( int i=0; i<res.length; i++ ) {
+					res[i].setQuery(qObj[i]);
+					
+					csvOut.write(""+((IHasID) qObj[i]).getID().toString() +"");
+					for (Iterator<ObjectWithDistance> it2 = res[i].iterator(); it2.hasNext(); ) {
+						ObjectWithDistance curr = it2.next();
+						csvOut.write(sep + ((IHasID) curr.obj).getID()+ sep +curr.dist +"");
+					}				
+					csvOut.write("\n");
+				}	
+				
+				csvOut.close();
 			}
 		}
 

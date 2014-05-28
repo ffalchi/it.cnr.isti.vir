@@ -35,10 +35,14 @@ public class RandomSelection {
 		//int n = 1000000;
 		//String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_1M_rnd";
 						
-		int n = 30000000;
-		String outArchiveName = "W:/CoPhIR/subsets/CoPhIR_30M";
+		//int n = 30000000;
+		//String outArchiveName = "W:/CoPhIR/subsets/CoPhIR_30M";
 		
-		if ( args != null) {
+		int n = 100;
+		String outArchiveName = "W:/CoPhIR/Groundtruth/CoPhIR_Queries_100";
+		
+		
+		if ( args != null && args.length > 0 ) {
 			inDirName = args[0];
 			outArchiveName = args[1];
 			n = Integer.parseInt(args[2]);
@@ -50,7 +54,7 @@ public class RandomSelection {
 		Log.info(archives.size() + " objects in the archives");
 		
 		Log.info("Selecting random objects.");
-		int[] randomSelected = RandomOperations.getDistinctIntArray(n, 0, archives.size()-1 );
+		int[] randomSelected = RandomOperations.getDistinctInts(n, 0, archives.size()-1 );
 		Log.info("Ordering random objects.");
 		Arrays.sort(randomSelected);
 		

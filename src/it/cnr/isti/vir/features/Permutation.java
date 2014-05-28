@@ -46,15 +46,15 @@ public class Permutation extends AbstractFeature {
 	}
 
 	
-	public Permutation(AbstractFeaturesCollector obj, AbstractFeature[] ro, ISimilarity sim  ) {
+	public Permutation(AbstractFeaturesCollector obj, AbstractFeaturesCollector[] ro, ISimilarity sim  ) {
 		this(obj, ro, sim, ro.length, true);
 	}
 
-	public Permutation(AbstractFeaturesCollector obj, AbstractFeature[] ro, ISimilarity sim, boolean roPosition ) {
+	public Permutation(AbstractFeaturesCollector obj, AbstractFeaturesCollector[] ro, ISimilarity sim, boolean roPosition ) {
 		this(obj, ro, sim, ro.length, roPosition);
 	}
 	
-	public Permutation(AbstractFeaturesCollector obj, AbstractFeature[] ro, ISimilarity sim, int pLength, boolean roPosition) {
+	public Permutation(AbstractFeaturesCollector obj, AbstractFeaturesCollector[] ro, ISimilarity sim, int pLength, boolean roPosition) {
 		
 		nRO = ro.length;
 		SimPQueueArr<Integer> pQueue = new SimPQueueArr<Integer>(pLength);

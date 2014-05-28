@@ -94,7 +94,8 @@ public class FeatureClasses {
 		SIFTPCAFloat.class,
 		SIFTPCAFloatGroup.class,
 		VLADHamming.class,
-		VLADPlus.class
+		VLADPlus.class,
+		Floats.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);
