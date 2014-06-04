@@ -11,7 +11,6 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
-//test 
 
 public class MatrixMath {
 
