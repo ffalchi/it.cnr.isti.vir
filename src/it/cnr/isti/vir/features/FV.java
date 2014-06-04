@@ -20,12 +20,18 @@ import java.nio.ByteBuffer;
 
 
 /**
- * <img src="\Users\lucia\Documents\NetBeansProjects\Lucia\LV_Fhisher\Info\fvToHTML-0.png" /> <p>
- * <img src="C:\Users\lucia\Documents\NetBeansProjects\Lucia\LV_Fhisher\Info\fvToHTML-1.png" />
+
+ * <img src="\Users\lucia\Documents\NetBeansProjects\Info\fvToHTML-0.png" /> <p>
+ * <img src="\Users\lucia\Documents\NetBeansProjects\Info\fvToHTML-1.png" />
  * 
  *@author Lucia Vadicamo
  */
 public class FV extends AbstractFeature{
+
+    public static FV getFV(float[][] sift_pca, Gmm gmm, boolean power_norm, boolean compute_w_part, boolean compute_mu_part, boolean compute_sigma_part) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     public AbstractFeaturesCollector linkedFC;
     double[] values;
     
