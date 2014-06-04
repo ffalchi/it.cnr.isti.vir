@@ -36,7 +36,8 @@ public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> implements IF
 	public SIFTPCAFloat(DataInput str ) throws IOException {
             super(str);	
 		int dim = str.readByte();
-
+                // LEGACY
+                if ( dim < 0 ) dim &= 0xff;
 		values = new float[dim];
 		for ( int i=0; i<values.length; i++ ) {
 			values[i] = str.readFloat();
@@ -46,6 +47,8 @@ public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> implements IF
 	public SIFTPCAFloat(ByteBuffer src ) throws IOException {
                 super(src);	
 		int dim = src.get();
+                // LEGACY
+                if ( dim < 0 ) dim &= 0xff;
 		values = new float[dim];
 		for ( int i=0; i<values.length; i++ ) {
 			values[i] = src.getFloat();
