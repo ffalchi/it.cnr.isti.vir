@@ -12,6 +12,7 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.distance.Hamming;
+import it.cnr.isti.vir.features.ILongBinaryValues;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.bytes.LongByteArrayUtil;
 
@@ -22,7 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class ORB extends ALocalFeature<ORBGroup> {
+public class ORB extends ALocalFeature<ORBGroup> implements ILongBinaryValues {
 
 	public static final int NLONG = 4;
 	public static final int BYTES_LENGTH = NLONG * Long.SIZE / Byte.SIZE;
@@ -85,43 +86,42 @@ public class ORB extends ALocalFeature<ORBGroup> {
 	}
 
 
-	public static ORB getMean(Collection<ORB> coll) {
-		
-		if ( coll.size() == 0 ) return null;
-		
-		int[] bitSum = new int[NLONG*Long.SIZE];
-		
-		for ( Iterator<ORB> it = coll.iterator(); it.hasNext(); ) {
-			long[] currVec = it.next().data;
-			int iBitSum = 0;
-			for ( int iLong=0; iLong<currVec.length; iLong++ ) {
-				// for each bit
-				long mask = 1; 
-				for ( int i=0; i<64; i++) {
-					if ( (currVec[iLong] & mask) != 0 ) bitSum[iBitSum]++;
-					iBitSum++;
-					mask = mask << 1;
-				}
-			}
-		}
-		
-		long[] newValues = new long[NLONG];
-		
-		int threshold = coll.size() / 2;
-		long oneLong = 1;
-		for ( int i=0; i<bitSum.length; i++ ) {
-			if ( bitSum[i] > threshold
-					||
-				 (	bitSum[i] == threshold
-				 	&&
-				 	RandomOperations.getBoolean() )
-				 	) {
-				newValues[i/64] ^= (oneLong << i%64 );
-			}
-
-		}
-		return new ORB( null, newValues );
-	}
+//	public static ORB getMean(Collection<ORB> coll) {
+//		
+//		if ( coll.size() == 0 ) return null;
+//		
+//		int[] bitSum = new int[NLONG*Long.SIZE];
+//		
+//		for ( Iterator<ORB> it = coll.iterator(); it.hasNext(); ) {
+//			long[] currVec = it.next().data;
+//			int iBitSum = 0;
+//			for ( int iLong=0; iLong<currVec.length; iLong++ ) {
+//				// for each bit
+//				long mask = 1; 
+//				for ( int i=0; i<64; i++) {
+//					if ( (currVec[iLong] & mask) != 0 ) bitSum[iBitSum]++;
+//					iBitSum++;
+//					mask = mask << 1;
+//				}
+//			}
+//		}
+//		
+//		long[] newValues = new long[NLONG];
+//		
+//		int threshold = coll.size() / 2;
+//		long oneLong = 1;
+//		for ( int i=0; i<bitSum.length; i++ ) {
+//			if ( bitSum[i] > threshold
+//					||
+//				 (	bitSum[i] == threshold
+//				 	&&
+//				 	RandomOperations.getBoolean() )
+//				 	) {
+//				newValues[i/64] ^= (oneLong << i%64 );
+//			}
+//		}
+//		return new ORB( null, newValues );
+//	}
 	
 		
 	public static float getDistance_Norm(ORB o1, ORB o2) {
@@ -171,6 +171,19 @@ public class ORB extends ALocalFeature<ORBGroup> {
 		return new ORB(this.kp, newData);
 	}
 
+	@Override
+	public int getLength() {
+		return NLONG;
+	}
 
+	@Override
+	public long[] getElements() {
+		return data;
+	}
+
+	@Override
+	public int getNBits() {
+		return BITS_LENGTH;
+	}
 
 }

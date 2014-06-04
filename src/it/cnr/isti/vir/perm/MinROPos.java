@@ -431,8 +431,8 @@ public class MinROPos {
 		
 		// for stats
 		Log.info("Evaluating data intrinsic dimensionality");
-		int[] ord1 = RandomOperations.getRandomOrderedInts(examples.length);
-		int[] ord2 = RandomOperations.getRandomOrderedInts(examples.length);
+		int[] ord1 = RandomOperations.getOrderedInts(examples.length);
+		int[] ord2 = RandomOperations.getOrderedInts(examples.length);
 		double dataIntrinsicDim = getIntrisincDimensionality(examples, ord1, ord2, sim);
 		
 		Log.info("Data intrinsic dimensionality: " + dataIntrinsicDim );

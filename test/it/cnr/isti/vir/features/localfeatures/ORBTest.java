@@ -1,7 +1,7 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
+import it.cnr.isti.vir.util.bytes.LongBinaryUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -45,7 +45,7 @@ public class ORBTest {
 		for ( int i=0; i<10000; i++) {
 			coll.add(f.getRandomPerturbated(8));
 		}
-		ORB mean = ORB.getMean(coll);
+		ORB mean = new ORB( null, LongBinaryUtil.getMean( coll) );
 		assertEquals(f, mean);
 	}
 

@@ -7,8 +7,8 @@ public class SortTest {
 
 	@Test
 	public void test() {
-		int[] random1 = RandomOperations.getRandomOrderedInts(1000);
-		int[] random2 = RandomOperations.getRandomOrderedInts(1000);
+		int[] random1 = RandomOperations.getOrderedInts(1000);
+		int[] random2 = RandomOperations.getOrderedInts(1000);
 		Sort.sortAscending( random1, random2 ); 
 		
 		boolean sorted = true;

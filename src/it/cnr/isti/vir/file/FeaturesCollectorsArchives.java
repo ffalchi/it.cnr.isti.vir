@@ -217,6 +217,7 @@ public class FeaturesCollectorsArchives {
 		for (int i = 0; i < archive.length; i++) {
 			Log.info_verbose("... searching in archive " + archive[i].getfile());
 			FeaturesCollectorsArchiveSearch_multiSim search = new FeaturesCollectorsArchiveSearch_multiSim(archive[i]);
+			
 			search.getKNNs(qObj, kNNQueue, sim, onlyID);
 		}
 

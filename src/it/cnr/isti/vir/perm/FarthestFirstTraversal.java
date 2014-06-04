@@ -133,7 +133,7 @@ public class FarthestFirstTraversal {
 
 			if ( nObjPerCycle != archives.size() && (iRes-1) % nCandidatesCycles == 0) {
 				// at each cycle we randomly select nObjPerCycle objects from the dataset
-				int[] rIDs = RandomOperations.getDistinctIntArray(nObjPerCycle, 0, archives.size()-1);
+				int[] rIDs = RandomOperations.getDistinctInts(nObjPerCycle, 0, archives.size()-1);
 				Arrays.sort(rIDs);
 				for ( int i=0; i<rIDs.length; i++) {
 					candidates[i] = archives.get(rIDs[i]);

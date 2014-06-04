@@ -72,22 +72,6 @@ public class SIFTMetric implements IMetric<SIFT>, ILocalFeaturesMetric<SIFT>, IM
 		distCount++;
 		return SIFT.getDistance_Norm( f1, f2, max);
 	}
-//
-//	@Override
-//	public final double distance(IFeature f1, IFeature f2) {
-//		double dist = SIFT.getDistance_Norm(((SIFT) f1.getFeature(SIFT.class)), ((SIFT) f2.getFeature(SIFT.class)));		
-//		distCount++;
-//		
-//		return dist;
-//	}
-//	
-//	@Override
-//	public final double distance(IFeature f1, IFeature f2, double max) {
-//		double dist = SIFT.getDistance_Norm((SIFT) f1.getFeature(SIFT.class), (SIFT) f2.getFeature(SIFT.class), max);		
-//		distCount++;
-//		
-//		return dist;
-//	}
 	
 	@Override
 	public SIFT getMean(Collection<SIFT> coll) {

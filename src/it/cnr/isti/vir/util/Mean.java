@@ -62,7 +62,7 @@ public  class Mean {
 		
 		float[] newVec = new float[dim];
 		for ( int iD=0; iD<dim; iD++) {
-			newVec[iD] = (float) tempVec[iD] / n;
+			newVec[iD] = (float) tempVec[iD] / (float)  n;
 		}
 				
 		return newVec;

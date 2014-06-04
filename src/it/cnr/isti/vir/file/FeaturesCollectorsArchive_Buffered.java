@@ -54,6 +54,9 @@ public class FeaturesCollectorsArchive_Buffered {
 	File offsetFile;
 	File idFile;
 	
+	public final int size() {
+		return ids.size();
+	}
 	
 	public static  FeaturesCollectorsArchive_Buffered create(File file ) throws Exception {
 		return new FeaturesCollectorsArchive_Buffered(file, IDString.class, FeaturesCollectorArr.class );
@@ -97,7 +100,7 @@ public class FeaturesCollectorsArchive_Buffered {
 		add(fcClass.getConstructor(AbstractFeature.class, AbstractID.class).newInstance(f, id));
 	}	
 
-	public void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
+	public synchronized void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
 
 		int currPos = positions.size();
 		positions.add(out.size());

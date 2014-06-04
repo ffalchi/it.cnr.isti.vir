@@ -46,7 +46,11 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 				//System.out.println(iQ);
 				for ( AbstractFeaturesCollector obj : objs ) {
 					for ( int iS=0; iS<sim.length;iS++) {
-						double dist = sim[iS].distance(q[iQ], obj, knn[iS][iQ].excDistance );
+						double dist;
+						if ( knn[iS][iQ].excDistance != Double.MAX_VALUE )
+							dist = sim[iS].distance(q[iQ], obj, knn[iS][iQ].excDistance );
+						else 
+							dist = sim[iS].distance(q[iQ], obj );
 						if ( dist >= 0) {
 							if ( onlyID)
 								knn[iS][iQ].offer(((IHasID) obj).getID(), dist);
@@ -63,13 +67,13 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
 
 
-		final int parallelBatchSize = 100000;
+		final int parallelBatchSize = 10000;
 		
 		int nObj = archive.size();
 		Iterator<AbstractFeaturesCollector> it = archive.iterator();
 		
 		// iterates through multiple batches
-		for (int iObj = 0; iObj < nObj; iObj+=parallelBatchSize ) {
+		for (int iObj = 0; iObj < nObj; ) {
 			int batchSize = parallelBatchSize;
 			if ( iObj + parallelBatchSize > nObj ) batchSize = nObj-iObj;
 			AbstractFeaturesCollector[] objects = new AbstractFeaturesCollector[batchSize];
@@ -98,7 +102,7 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 	        }
 	        ParallelOptions.free(bnt);
 			
-			Log.info((iObj+parallelBatchSize) + "/" + nObj);
+			Log.info((iObj) + "/" + nObj);
 		}
 				
 	}

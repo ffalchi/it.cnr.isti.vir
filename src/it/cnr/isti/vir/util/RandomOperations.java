@@ -86,7 +86,7 @@ public class RandomOperations {
 		return arr;
 	}
 	
-	public static int[] getRandomIntArray(int size, int min, int max) {
+	public static int[] getInts(int size, int min, int max) {
 		int[] arr = new int[size];
 		for ( int i=0; i<arr.length; i++) {
 			arr[i]=getInt(min, max);
@@ -94,7 +94,7 @@ public class RandomOperations {
 		return arr;
 	}
 	
-	public static int[] getDistinctIntArray(int size, int min, int max) {
+	public static int[] getDistinctInts(int size, int min, int max) {
 		HashSet<Integer> hSet = new HashSet(2*size);
 		int[] arr = new int[size];
 		for ( int i=0; i<arr.length; i++) {
@@ -113,7 +113,7 @@ public class RandomOperations {
 	 * @param max	Inclusive max
 	 * @return
 	 */
-	public static int[] getDistinctIntArray(int size, int max) {
+	public static int[] getDistinctInts(int size, int max) {
 		HashSet<Integer> hSet = new HashSet(2*size);
 		int[] arr = new int[size];
 		for ( int i=0; i<arr.length; i++) {
@@ -135,10 +135,41 @@ public class RandomOperations {
 		return arr;
 	}
 	
-	public static float[] getFloatArray(int size) {
+	/**
+	 * Returns uniformly distributed floats between 0.0 and 1.0
+	 * @param size
+	 * @return 
+	 */
+	public static float[] getUniformlyDistributedFloats(int size) {
 		float[] arr = new float[size];
 		for ( int i=0; i<arr.length; i++) {
 			arr[i]=r.nextFloat();
+		}
+		return arr;
+	}
+	
+	/**
+	 * Returns Gaussian "normally" distributed floats between 0.0 and 1.0
+	 * @param size
+	 * @return 
+	 */
+	public static float[] getGaussianFloats(int size) {
+		float[] arr = new float[size];
+		for ( int i=0; i<arr.length; i++) {
+			arr[i]= (float) r.nextGaussian();
+		}
+		return arr;
+	}
+	
+	/**
+	 * Returns Gaussian "normally" distributed doubles between 0.0 and 1.0
+	 * @param size
+	 * @return 
+	 */
+	public static double[] getGaussianDoubles(int size) {
+		double[] arr = new double[size];
+		for ( int i=0; i<arr.length; i++) {
+			arr[i]= r.nextGaussian();
 		}
 		return arr;
 	}
@@ -217,7 +248,7 @@ public class RandomOperations {
 		assert ( n > givenList.size() );
 		LinkedList outList = new LinkedList();
 		
-		ArrayList<Integer> random = getRandomOrderedIntegers(givenList.size());
+		ArrayList<Integer> random = getOrderedIntegersAL(givenList.size());
 		
 		for (Iterator<Integer> it=random.iterator(); it.hasNext() && outList.size() < n;) {
 			outList.add(givenList.get(it.next()));
@@ -232,7 +263,7 @@ public class RandomOperations {
 		LinkedList list1 = new LinkedList();
 		LinkedList list2 = new LinkedList();
 		
-		ArrayList<Integer> random = getRandomOrderedIntegers(givenList.size());
+		ArrayList<Integer> random = getOrderedIntegersAL(givenList.size());
 		
 		for (Iterator<Integer> it=random.iterator(); it.hasNext();) {
 			if ( list1.size() < n ) list1.add(givenList.get(it.next()));
@@ -248,7 +279,7 @@ public class RandomOperations {
 	 * @param maxValue	[not included]
 	 * @return
 	 */
-	public static final int[] getRandomOrderedInts(int maxValue) {
+	public static final int[] getOrderedInts(int maxValue) {
 		ArrayList<Integer> list = new ArrayList<Integer>(maxValue);
 		for ( int i=0; i<maxValue; i++ ) {
 			list.add(i);
@@ -266,7 +297,7 @@ public class RandomOperations {
 	}
 
 	
-	public static final ArrayList<Integer> getRandomOrderedIntegers(int maxValue) {
+	public static final ArrayList<Integer> getOrderedIntegersAL(int maxValue) {
 		ArrayList<Integer> list = new ArrayList<Integer>(maxValue);
 		for ( int i=0; i<maxValue; i++ ) {
 			list.add(i);
@@ -369,7 +400,7 @@ public class RandomOperations {
 	public static final long[] getPerturbated(long[] orig, int nBitsPerturbated) {
 		long[] res = orig.clone();
 		int nBits = Long.SIZE * orig.length;
-		int[] pert = RandomOperations.getDistinctIntArray(nBitsPerturbated, nBits-1);
+		int[] pert = RandomOperations.getDistinctInts(nBitsPerturbated, nBits-1);
 		
 		for(int bit : pert) {
 			int pos = bit/Long.SIZE;

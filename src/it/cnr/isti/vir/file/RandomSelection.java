@@ -25,9 +25,9 @@ public class RandomSelection {
 		RandomOperations.setSeed(System.currentTimeMillis());
 		
 		
-		//String inDirName = "M:/CoPhIR/dat";
+		String inDirName = "M:/CoPhIR/dat";
 		//String inDirName = "X:/CoPhIR/1MExp/dataset/CoPhIR_1M_rnd";
-		String inDirName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_rnd";
+		//String inDirName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_rnd";
 		
 		//int n = 10000000;
 		//String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_rnd";
@@ -35,8 +35,18 @@ public class RandomSelection {
 		//int n = 1000000;
 		//String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_1M_rnd";
 						
-		int n = 10000;
-		String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_10k_rnd";
+		//int n = 30000000;
+		//String outArchiveName = "W:/CoPhIR/subsets/CoPhIR_30M";
+		
+		int n = 100;
+		String outArchiveName = "W:/CoPhIR/Groundtruth/CoPhIR_Queries_100";
+		
+		
+		if ( args != null && args.length > 0 ) {
+			inDirName = args[0];
+			outArchiveName = args[1];
+			n = Integer.parseInt(args[2]);
+		}
 		
 		FeaturesCollectorsArchives archives = new FeaturesCollectorsArchives(new File(inDirName), false);
 		
@@ -44,7 +54,7 @@ public class RandomSelection {
 		Log.info(archives.size() + " objects in the archives");
 		
 		Log.info("Selecting random objects.");
-		int[] randomSelected = RandomOperations.getDistinctIntArray(n, 0, archives.size()-1 );
+		int[] randomSelected = RandomOperations.getDistinctInts(n, 0, archives.size()-1 );
 		Log.info("Ordering random objects.");
 		Arrays.sort(randomSelected);
 		
@@ -57,5 +67,6 @@ public class RandomSelection {
 		
 		Log.info("Created archives of " + outArchive.size() + " elements randomly seleceted.");
 		outArchive.close();
+		archives.close();
 	}
 }

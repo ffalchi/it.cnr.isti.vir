@@ -19,7 +19,7 @@ import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.util.MatrixMath;
 import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.SplitInGroups;
-import it.cnr.isti.vir.util.VectorMath;
+import it.cnr.isti.vir.util.math.VectorMath;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

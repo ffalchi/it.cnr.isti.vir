@@ -768,7 +768,7 @@ public class LFWords<F extends AbstractFeature> {
 	}
 	
 	public void setRandomPivots(int n) {
-		ArrayList<Integer> rnd = RandomOperations.getRandomOrderedIntegers(size);
+		ArrayList<Integer> rnd = RandomOperations.getOrderedIntegersAL(size);
 		pArr = createFArr(n);
 		for ( int i=0; i<n; i++ ) {
 			pArr[i] = fArr[rnd.get(i)];

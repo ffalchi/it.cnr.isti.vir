@@ -14,8 +14,10 @@ package it.cnr.isti.vir.similarity.metric;
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.ILongBinaryValues;
 import it.cnr.isti.vir.features.localfeatures.ORB;
 import it.cnr.isti.vir.features.localfeatures.ORBGroup;
+import it.cnr.isti.vir.util.bytes.LongBinaryUtil;
 
 import java.util.Collection;
 import java.util.Properties;
@@ -75,7 +77,8 @@ public class ORBMetric implements IMetric<ORB>, ILocalFeaturesMetric<ORB>, IMean
 	
 	@Override
 	public ORB getMean(Collection<ORB> coll) {
-		return ORB.getMean(coll);
+		if ( coll.size() == 0 ) return null;
+		return new ORB( null, LongBinaryUtil.getMean( coll) );
 	}
 	
 	@Override

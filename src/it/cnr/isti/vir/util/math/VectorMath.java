@@ -9,11 +9,11 @@
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package it.cnr.isti.vir.util;
+package it.cnr.isti.vir.util.math;
 
 public class VectorMath {
 
-	public static double[] subtraction(double[] v1, double[] v2) {
+	public static final double[] subtraction(double[] v1, double[] v2) {
 		int nD = v1.length;
 		double[] res = new double[nD];
 		for (int iD = 0; iD < nD; iD++) {
@@ -22,21 +22,77 @@ public class VectorMath {
 		return res;
 	}
 
-	public static float sum(float[] v) {
-		int nD = v.length;
-		double res = 0;
-		for (int iD = 0; iD < nD; iD++)
-			res += v[iD];
-		return (float) res;
+	public static final float[] subtraction(float[] v1, float[] v2) {
+		int nD = v1.length;
+		float[] res = new float[nD];
+		for (int iD = 0; iD < nD; iD++) {
+			res[iD] = v1[iD] - v2[iD];
+		}
+		return res;
 	}
 	
-	public static double sum(double[] v) {
+	public static final double mean(float[] v) {
+		return sum(v) / (double) v.length;
+	}
+	
+	public static final double sum(float[] v) {
 		int nD = v.length;
 		double res = 0;
 		for (int iD = 0; iD < nD; iD++)
 			res += v[iD];
 		return res;
 	}
+	
+	public static final double mean(double[] v) {
+		return sum(v) / (double) v.length;
+	}
+	
+	public static final double sum(double[] v) {
+		int nD = v.length;
+		double res = 0;
+		for (int iD = 0; iD < nD; iD++)
+			res += v[iD];
+		return res;
+	}
+	
+	public static final void multiply(float[] v, float c) {
+		int nD = v.length;
+		for (int iD = 0; iD < nD; iD++) {
+			v[iD] *= c;
+		}
+	}
+
+	public static final float[] getFloats(int[] values ) {
+		float[] res = new float[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = values[i];
+		}
+		return res;		
+	}
+	
+	public static final float[] getFloats(double[] values ) {
+		float[] res = new float[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = (float) values[i];
+		}
+		return res;		
+	}
+
+	public static final double[] getDoubles(int[] values ) {
+		double[] res = new double[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = values[i];
+		}
+		return res;		
+	}
+	
+	public static final double[] getDoubles(float[] values ) {
+		double[] res = new double[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = values[i];
+		}
+		return res;		
+	}	
 	
 }
 
