@@ -11,8 +11,8 @@ public class DoubleByteArrayUtil {
 	 * @return
 	 */
 	public static final double get(byte encodedValue[], int byteOffset) {
-		int intValue = IntByteArrayUtil.get(encodedValue, byteOffset);
-		return Double.longBitsToDouble(intValue);
+		long longValue = LongByteArrayUtil.get(encodedValue, byteOffset);
+		return Double.longBitsToDouble(longValue);
 	}
 	
 	/**
