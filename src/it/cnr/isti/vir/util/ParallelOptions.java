@@ -22,6 +22,7 @@ public class ParallelOptions {
 	
 	public static final synchronized void setNProcessors( int n) {
 		nProcessors = n;
+		System.out.println("Using " + nProcessors + " threads");
 	}
 	public static final synchronized void set( java.util.Properties properties) {
 		String coreStr  = properties.getProperty("core");
