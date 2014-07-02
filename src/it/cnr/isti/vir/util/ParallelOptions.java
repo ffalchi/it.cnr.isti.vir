@@ -50,11 +50,6 @@ public class ParallelOptions {
 
 	public static final synchronized void free(int n) {
 		nPInUse -= n;
-		int newNProcessors = Runtime.getRuntime().availableProcessors();
-		if ( newNProcessors != nProcessors ) {
-			nProcessors = newNProcessors;
-			System.out.println("Using " + nProcessors + " threads");
-		}
  	}
 	
 	

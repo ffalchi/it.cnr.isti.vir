@@ -9,7 +9,6 @@ import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
-import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.Log;
 import it.cnr.isti.vir.util.ParallelOptions;
 
@@ -18,6 +17,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
@@ -218,7 +218,8 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			ISimilarity sim,
 			int k,
 			int batchNObjs,
-			String outFNPrefix )
+			String outFNPrefix,
+			int[] nObjs)
 			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
 
 		String sep = ",";
@@ -228,18 +229,26 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			kNNQueue[i] = new SimPQueueArr(k);
 		}
 		
+		int[] ordNObjs = nObjs.clone();
+		Arrays.sort(ordNObjs);
+		int iNObjs = 0;
+		
 		synchronized (archive) {
-				
 			
 			int nObj = archive.size();
-			
-		
+					
 			Iterator<AbstractFeaturesCollector> it = archive.iterator();
+			
+			
+			
 			// iterates through multiple batches
 			for (int iObj = 0; iObj < nObj;  ) {
 				
 				int batchSize = batchNObjs;
+				
 				if ( iObj + batchNObjs > nObj ) batchSize = nObj-iObj;
+				if ( iObj + batchNObjs > ordNObjs[iNObjs] ) batchSize = ordNObjs[iNObjs]-iObj;
+				
 				AbstractFeaturesCollector[] objects = new AbstractFeaturesCollector[batchSize];
 				
 				// reading objects in batch
@@ -268,25 +277,30 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		        ParallelOptions.free(bnt);
 				Log.info(iObj + "/" + nObj);
 				
-				//Log.info("Saving");
-				File csvFile = csvFile = new File( outFNPrefix + "_" + iObj + "n.csv");
-				ISimilarityResults[] res = new ISimilarityResults[kNNQueue.length];
-				for (int i = 0; i < kNNQueue.length; i++) {
-					res[i] = kNNQueue[i].getResults();
-				}
-				BufferedWriter csvOut = new BufferedWriter( new FileWriter(csvFile) );
-				for ( int i=0; i<res.length; i++ ) {
-					res[i].setQuery(qObj[i]);
-					
-					csvOut.write(""+((IHasID) qObj[i]).getID().toString() +"");
-					for (Iterator<ObjectWithDistance> it2 = res[i].iterator(); it2.hasNext(); ) {
-						ObjectWithDistance curr = it2.next();
-						csvOut.write(sep + ((IHasID) curr.obj).getID()+ sep +curr.dist +"");
-					}				
-					csvOut.write("\n");
-				}	
 				
-				csvOut.close();
+				
+				if ( iObj >= ordNObjs[iNObjs] || iObj == nObj) {
+					Log.info("Saving");
+					iNObjs++;
+					File csvFile = csvFile = new File( outFNPrefix + "_" + iObj + "n.csv");
+					ISimilarityResults[] res = new ISimilarityResults[kNNQueue.length];
+					for (int i = 0; i < kNNQueue.length; i++) {
+						res[i] = kNNQueue[i].getResults();
+					}
+					BufferedWriter csvOut = new BufferedWriter( new FileWriter(csvFile) );
+					for ( int i=0; i<res.length; i++ ) {
+						res[i].setQuery(qObj[i]);
+						
+						csvOut.write(""+((IHasID) qObj[i]).getID().toString() +"");
+						for (Iterator<ObjectWithDistance> it2 = res[i].iterator(); it2.hasNext(); ) {
+							ObjectWithDistance curr = it2.next();
+							csvOut.write(sep + ((IHasID) curr.obj).getID()+ sep +curr.dist +"");
+						}				
+						csvOut.write("\n");
+					}	
+					
+					csvOut.close();
+				}
 			}
 		}
 
