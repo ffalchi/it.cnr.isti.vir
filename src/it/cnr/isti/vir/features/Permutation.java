@@ -31,14 +31,15 @@ import java.util.Iterator;
 
 public class Permutation extends AbstractFeature {
 
+	// the positions in the permutation lists start from 0
 	
 	byte version = 2;
 	
-	// RO ids ordered
+	// each element report the ID of the RO at the given position
 	int[] ordRO = null;
 	int nRO;
 	
-	// RO ids array with relative position
+	// each element report the position of the given RO ID
 	int[] roPosition = null;
 	
 	public int getNRO(){
@@ -200,7 +201,7 @@ public class Permutation extends AbstractFeature {
 		
 		if ( roPosition != null ) return;
 		
-		roPosition = convertToOrdROPositions(ordRO, nRO);
+		roPosition = convertToROPositions(ordRO, nRO);
 		ordRO = null;
 	}
 	
@@ -215,12 +216,7 @@ public class Permutation extends AbstractFeature {
 	}
 	
 	
-	public static int[] convertToOrdROPositions(int[] ordRO, int nRO) {
-//		for ( int i=0; i<ordRO.length; i++) {
-//			if ( ordRO[i] > max ) {
-//				max = ordRO[i];
-//			}
-//		}
+	public static int[] convertToROPositions(int[] ordRO, int nRO) {
 		
 		int[] res = new int[nRO];
 		if ( ordRO.length != res.length ) Arrays.fill(res, -1);
@@ -232,7 +228,7 @@ public class Permutation extends AbstractFeature {
 	
 	public static int[] convertToOrdRO(int[] roPosition) {
 		
-		// conunting occurences
+		// counting occurrences
 		int count = 0; 
 		for ( int i=0; i<roPosition.length; i++) {
 			if ( roPosition[i] >= 0 ) {
@@ -419,9 +415,12 @@ public class Permutation extends AbstractFeature {
 	 * discarding information abot the others.
 	 * 
 	 * @param newNRO
+	 * @throws Exception 
 	 */
-	public void reduceToNRO(int newNRO) {
-		if ( newNRO >= nRO ) return;
+	public final void reduceToNRO(int newNRO) {
+		if ( newNRO == nRO ) return;
+		
+		//if ( newNRO > nRO ) throw new Exception("newNRO > nRO");
 		
 		boolean converted = false;
 		if ( ordRO == null) {

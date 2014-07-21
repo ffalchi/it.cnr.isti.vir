@@ -736,6 +736,11 @@ public class BoFLFGroup extends ALocalFeaturesGroup<BoFLF> {
 	}
 	
 	
+	/**
+	 * @param factor	reduction factor (between 0 and 1)
+	 * @param idf
+	 * @return
+	 */
 	public BoFLFGroup getReducedByTFID(float factor, float[] idf ) {
 		if ( lfArr.length <= 1 ) return this;
 		

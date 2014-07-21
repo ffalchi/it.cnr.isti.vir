@@ -18,7 +18,7 @@ import it.cnr.isti.vir.features.Permutation;
 public class SpearmanRho implements ISimilarity<Permutation>{
 
 	private int maxLength = 0;
-	private int maxRef = -1;
+//	private int maxRef = -1;
 	public SpearmanRho() {};
 	
 	public int getMaxDist() {
@@ -34,12 +34,12 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 			this.maxLength =maxLength;
 	}
 	
-	public SpearmanRho(int maxLength, int maxRef) {
-		if ( maxLength >= 0)
-			this.maxLength =maxLength;
-		if ( maxRef >= 0 ) 
-			this.maxRef = maxRef;
-	}
+//	public SpearmanRho(int maxLength, int maxRef) {
+//		if ( maxLength >= 0)
+//			this.maxLength =maxLength;
+//		if ( maxRef >= 0 ) 
+//			this.maxRef = maxRef;
+//	}
 	
 	public void setMaxLength(int maxLength) {
 		this.maxLength =maxLength;
@@ -48,12 +48,20 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	
 	@Override
 	public double distance(Permutation f1, Permutation f2) {
+//		if ( maxRef > 0 ) {
+//			f1.reduceToNRO(maxRef);
+//			f2.reduceToNRO(maxRef);
+//		}
 		if ( maxLength == 0 ) return sfd(f1.getROPositions(), f2.getROPositions());
 		return sfd_l(f1.getROPositions(), f2.getROPositions(), maxLength);
 	}
 
 	@Override
 	public double distance(Permutation f1, Permutation f2, double max) {
+//		if ( maxRef > 0 ) {
+//			f1.reduceToNRO(maxRef);
+//			f2.reduceToNRO(maxRef);
+//		}
 		if ( maxLength == 0 ) return sfd(f1.getROPositions(), f2.getROPositions(), (long) Math.ceil( max ));
 		return sfd_l(f1.getROPositions(), f2.getROPositions(), (long) Math.ceil( max ), maxLength);
 	}

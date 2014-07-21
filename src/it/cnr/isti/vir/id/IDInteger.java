@@ -40,7 +40,7 @@ public class IDInteger extends AbstractID {
 	}
 
 	@Override
-	public void writeData(DataOutput out) throws IOException {
+	public final void writeData(DataOutput out) throws IOException {
 		out.writeInt(id);		
 	}
 	

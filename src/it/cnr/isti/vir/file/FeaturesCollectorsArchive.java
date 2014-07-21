@@ -167,7 +167,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		out.writeInt(version);
 		FeaturesCollectors.writeClass(fcClass, out);
 		//featuresClasses.writeData(out);
-		IDClasses.writeClass(idClass, out);
+		IDClasses.writeClass_Int(idClass, out);
 	}
 
 	protected static final Constructor<? extends AbstractFeaturesCollector> getFCConstructor(Class<? extends AbstractFeaturesCollector> c)
@@ -507,7 +507,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			Class fcClass = FeaturesCollectors.readClass(in);
 			Constructor fcClassConstructor = getFCConstructor(fcClass);
 			new FeatureClassCollector(in);
-			IDClasses.readClass(in);
+			IDClasses.readClass_Int(in);
 
 			arr = new ArrayList();
 			while (in.available() != 0) {
@@ -524,7 +524,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 			FeatureClassCollector featuresClasses = new FeatureClassCollector(
 					in); // FeaturesCollectors.getClass( file.readInt() );
-			Class idClass = IDClasses.readClass(in);
+			Class idClass = IDClasses.readClass_Int(in);
 
 			RandomAccessFile rndFile = new RandomAccessFile(file, "rw");
 			rndFile.seek(indexOffSet);
@@ -553,7 +553,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		FeaturesCollectors.readClass(in);
 		if ( version < 3)
 			new FeatureClassCollector(in);
-		IDClasses.readClass(in);
+		IDClasses.readClass_Int(in);
 	}
 	
 	public FeaturesCollectorsArchive open(File file, boolean readIDs) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
@@ -570,7 +570,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException {
 
-		System.out.println("Opening FeaturesCollectorsArchive: " + file.getAbsolutePath());
+		//System.out.println("Opening FeaturesCollectorsArchive: " + file.getAbsolutePath());
 		if ( !file.exists()) {
 			throw new IOException("The file ["+ file.getAbsolutePath() +"] was not found");
 		}
@@ -599,7 +599,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			} else {
 				// nothing is written
 			}
-			idClass = IDClasses.readClass(rndFile);
+			idClass = IDClasses.readClass_Int(rndFile);
 
 			
 			
@@ -722,14 +722,14 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			// featureCollectorConstructor =
 			// featuresCollectorClass.getConstructor(DataInput.class);
 
-			idClass = IDClasses.readClass(rndFile);
+			idClass = IDClasses.readClass_Int(rndFile);
 
 			// file.seek(file.length()-8);
 			// long indexOffSet = file.readLong();
 			rndFile.seek(indexOffSet);
 			int size = rndFile.readInt();
-			System.out.println("--> The archive contains " + size);
-			System.out.println("--> Features Collector Class: " + fcClass);
+			//System.out.println("--> The archive contains " + size);
+			//System.out.println("--> Features Collector Class: " + fcClass);
 			//System.out.println("--> Features to consider are: " + featuresClasses);
 
 			// Reading offsets
@@ -765,7 +765,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				idPosMap = null;
 			}
 		}
-		System.out.println(getInfo());
+		//System.out.println(getInfo());
 	}
 
 	public static final String getIDFileName(File file) {

@@ -13,9 +13,9 @@ package it.cnr.isti.vir.similarity.results;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
-import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.file.ArchiveException;
@@ -28,6 +28,7 @@ import it.cnr.isti.vir.id.IHasID;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -188,8 +189,8 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 	}
 
 
-	@Override
-	public void writeIDData(DataOutputStream out) throws IOException {
+	public void writeIDData_old(DataOutputStream out) throws IOException {
+		
 		// QUERY ID
 		AbstractID id = null;
 		if ( AbstractID.class.isInstance(query))
@@ -203,18 +204,47 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		out.writeInt(coll.size());
 		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
 			ObjectWithDistance<E> obj = itThis.next();
-			obj.writeIDData(out);
+			obj.writeIDFloat(out);
 		}
 	}
 	
+	public void writeIDData(DataOutputStream out) throws IOException {
+		
+		// QUERY ID
+		AbstractID qID = null;
+		if ( AbstractID.class.isInstance(query))
+			qID = (AbstractID) query;	
+		else
+			qID = ((IHasID) query).getID();
+		
+		// Write ID Class
+		IDClasses.writeClass( qID.getClass(), out );
+
+		// Write Query ID 
+		qID.writeData(out);
+		
+		// Result size
+		out.writeInt(coll.size());
+		
+		// Reslts
+		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
+			ObjectWithDistance<E> obj = itThis.next();
+			obj.writeIDFloat(out);
+		}
+		
+	}
+	
 	public SimilarityResults(DataInputStream in ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		int idType = in.readInt();
+//		int idType = in.readInt();
 		// work around for old Cophir
 //		if ( idType != 1001 ) { 
 //			throw new IOException("IDType error!");
 //		}
-		query = (E) new IDInteger(in);
-		//query = (E) IDClasses.readData(in);
+		
+		Constructor<? extends AbstractID> idc = IDClasses.readClass(in).getConstructor(DataInputStream.class);
+		
+		query = (E) idc.newInstance(in);
+
 		int size = in.readInt();
 		coll = new ArrayList(size);
 		
@@ -222,6 +252,23 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 			coll.add(new ObjectWithDistance(in));
 		}
 	}
+	
+//	public SimilarityResults(DataInputStream in  ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+//		int idType = in.readInt();
+//		// work around for old Cophir
+////		if ( idType != 1001 ) { 
+////			throw new IOException("IDType error!");
+////		}
+//		
+//		query = (E) new IDInteger(in);
+//		//query = (E) IDClasses.readData(in);
+//		int size = in.readInt();
+//		coll = new ArrayList(size);
+//		
+//		for (int i=0; i<size; i++) {
+//			coll.add(new ObjectWithDistance(in));
+//		}
+//	}
 	
 	public static SimilarityResults[] readArray(DataInputStream in ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		LinkedList<SimilarityResults> list = new LinkedList<SimilarityResults>();

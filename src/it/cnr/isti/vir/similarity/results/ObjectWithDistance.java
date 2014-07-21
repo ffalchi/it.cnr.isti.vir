@@ -18,6 +18,7 @@ import it.cnr.isti.vir.id.IHasID;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 
@@ -79,6 +80,14 @@ public class ObjectWithDistance<ObjectClass> implements Comparable<ObjectWithDis
 		return true;
 	}
 
+	public ObjectWithDistance(DataInput in, Constructor<? extends AbstractID> c) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		//obj = (ObjectClass) IDClasses.readData(in);
+		//int idType = in.readInt();
+		//obj = (ObjectClass) IDClasses.getClass(idType).getConstructor(DataInput.class).newInstance(in);
+		obj = (ObjectClass) c.newInstance(in);
+		dist = in.readFloat();
+	}
+	
 	public ObjectWithDistance(DataInput in) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		//obj = (ObjectClass) IDClasses.readData(in);
 		int idType = in.readInt();
@@ -86,17 +95,16 @@ public class ObjectWithDistance<ObjectClass> implements Comparable<ObjectWithDis
 		dist = in.readDouble();
 	}
 	
-	public void writeIDData(DataOutput out) throws IOException {
-		AbstractID id = null;
+	public void writeIDFloat(DataOutput out) throws IOException {
 		//ID
+		AbstractID id = null;
 		if ( AbstractID.class.isInstance(obj))
 			id = (AbstractID) obj;	
 		else
 			id = ((IHasID) obj).getID();
-		out.writeInt(IDClasses.getClassID(id.getClass()));
+		
 		id.writeData(out);
-		//Distance
-		out.writeDouble(dist);	
+		out.writeFloat( (float) dist);
 	}
 
 	public ObjectWithDistance<AbstractID> getIDObjectWithDistance() {

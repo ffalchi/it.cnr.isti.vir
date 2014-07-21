@@ -9,11 +9,15 @@ import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
+import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.Log;
 import it.cnr.isti.vir.util.ParallelOptions;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -281,25 +285,42 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				
 				if ( iObj >= ordNObjs[iNObjs] || iObj == nObj) {
 					Log.info("Saving");
-					iNObjs++;
-					File csvFile = csvFile = new File( outFNPrefix + "_" + iObj + "n.csv");
-					ISimilarityResults[] res = new ISimilarityResults[kNNQueue.length];
-					for (int i = 0; i < kNNQueue.length; i++) {
-						res[i] = kNNQueue[i].getResults();
-					}
-					BufferedWriter csvOut = new BufferedWriter( new FileWriter(csvFile) );
-					for ( int i=0; i<res.length; i++ ) {
-						res[i].setQuery(qObj[i]);
-						
-						csvOut.write(""+((IHasID) qObj[i]).getID().toString() +"");
-						for (Iterator<ObjectWithDistance> it2 = res[i].iterator(); it2.hasNext(); ) {
-							ObjectWithDistance curr = it2.next();
-							csvOut.write(sep + ((IHasID) curr.obj).getID()+ sep +curr.dist +"");
-						}				
-						csvOut.write("\n");
-					}	
+					iNObjs++;					
 					
-					csvOut.close();
+					boolean binaryFlag = false;
+					
+					if ( binaryFlag == true ) {
+						File binaryFile = new File( outFNPrefix + "_" + iObj + "n.res.dat");
+						DataOutputStream binaryOut = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(binaryFile)));
+						
+						for (int i = 0; i < kNNQueue.length; i++) {
+							SimilarityResults currRes = (SimilarityResults) kNNQueue[i].getResults();
+							currRes.setQuery(qObj[i]);
+							currRes.writeIDData(binaryOut);							
+						}
+						
+						binaryOut.close();
+					} else {
+						
+						File csvFile = csvFile = new File( outFNPrefix + "_" + iObj + "n.csv");
+						ISimilarityResults[] res = new ISimilarityResults[kNNQueue.length];
+						for (int i = 0; i < kNNQueue.length; i++) {
+							res[i] = kNNQueue[i].getResults();
+						}
+						BufferedWriter csvOut = new BufferedWriter( new FileWriter(csvFile) );
+						for ( int i=0; i<res.length; i++ ) {
+							res[i].setQuery(qObj[i]);
+							
+							csvOut.write(""+((IHasID) qObj[i]).getID().toString() +"");
+							for (Iterator<ObjectWithDistance> it2 = res[i].iterator(); it2.hasNext(); ) {
+								ObjectWithDistance curr = it2.next();
+								csvOut.write(sep + ((IHasID) curr.obj).getID()+ sep +curr.dist +"");
+							}				
+							csvOut.write("\n");
+						}	
+						
+						csvOut.close();
+					}
 				}
 			}
 		}

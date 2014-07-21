@@ -20,7 +20,7 @@ import java.util.Hashtable;
 
 public class IDClasses  {
 	
-	private enum IDClasses_ID {
+	public enum IDClasses_ID {
 		IDINTEGER(IDInteger.class, (byte) 0),
 		IDLONG(IDLong.class, (byte) 1),
 		IDSTRING(IDString.class, (byte) 2);
@@ -118,10 +118,18 @@ public class IDClasses  {
 		}
 	}
 	
-	public static Class<? extends AbstractID> readClass(DataInput in) throws IOException {
+	public static Class<? extends AbstractID> readClass_Int(DataInput in) throws IOException {
 		return getClass(in.readInt());
 	}
+	
+	public static Class<? extends AbstractID> readClass(DataInput in) throws IOException {
+		return getClass( in.readByte());
+	}
 
+	public static void writeClass_Int(Class<? extends AbstractID> c, DataOutput out) throws IOException {
+		out.writeInt(getClassID(c));
+	}
+	
 	public static void writeClass(Class<? extends AbstractID> c, DataOutput out) throws IOException {
 		out.writeInt(getClassID(c));
 	}
