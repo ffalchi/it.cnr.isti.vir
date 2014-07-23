@@ -45,8 +45,8 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 	}
 	
 	public void setMaxLength(int maxLength) {
-		this.maxLength = maxLength;
-		if ( maxLength < 0) maxLength = 0;
+		this.maxLength = maxLength;//righe da invertire?
+		if ( maxLength < 0) maxLength = 0;//righe da invertire?
 	}
 	
 	@Override
@@ -126,7 +126,7 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 		for ( int i=0; i<idMax; i++ ) {
 			// first position is reported as 0
 			// the same for depth
-			int depth = Math.max(pos1[i], pos1[2]);
+			int depth = Math.max(pos1[i],pos2[i]);
 			intersectionIncr[depth]++;
 		}
 		
@@ -158,7 +158,7 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 			// first position is reported as 0
 			// the same for depth
 			if ( pos1[i] < permLength && pos2[i] < permLength )  {
-				int depth = Math.max(pos1[i], pos1[2]);
+				int depth = Math.max(pos1[i], pos2[i]);
 				intersectionIncr[depth]++;
 			}
 		}
