@@ -44,6 +44,10 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 			this.maxLength =maxLength;
 	}
 	
+	public void setP(double p ) {
+		this.p = p;
+	}
+	
 	public void setMaxLength(int maxLength) {
 		this.maxLength = maxLength;
 		if ( maxLength < 0) maxLength = 0;
@@ -98,15 +102,25 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 		
 		double acc =0;
 		int intersection = 0;
-		// the weight of depth=1 will be 1.0
-		double w = (1/p);
-		for ( int d=0; d<intersectionIncr.length; d++ ) {
-			intersection += intersectionIncr[d];
-			w *= p;
-			acc += w * ( intersection / (d+1) );
+		
+		if ( p<1 ) {
+			// the weight of depth=1 will be 1.0
+			double w = (1/p);
+			for ( int d=0; d<intersectionIncr.length; d++ ) {
+				intersection += intersectionIncr[d];
+				w *= p;
+				acc += w * ( intersection / (double) (d+1) );
+			}
+			return (1-p)*acc;
+		} else {
+			for ( int d=0; d<intersectionIncr.length; d++ ) {
+				intersection += intersectionIncr[d];
+				acc += ( intersection / (double) (d+1) );
+			}
+			return acc/intersectionIncr.length;
 		}
 		
-		return (1-p)*acc;
+		
 	}
 	
 	/**
@@ -126,7 +140,7 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 		for ( int i=0; i<idMax; i++ ) {
 			// first position is reported as 0
 			// the same for depth
-			int depth = Math.max(pos1[i], pos1[2]);
+			int depth = Math.max(pos1[i], pos2[i]);
 			intersectionIncr[depth]++;
 		}
 		
@@ -148,6 +162,8 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 	
 		assert pos1.length == pos2.length;
 		
+		if ( pos1.length == permLength ) return d(pos1, pos2);
+		
 		int idMax = pos1.length;
 		
 		// store the increment of intersection at various depth
@@ -158,7 +174,7 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 			// first position is reported as 0
 			// the same for depth
 			if ( pos1[i] < permLength && pos2[i] < permLength )  {
-				int depth = Math.max(pos1[i], pos1[2]);
+				int depth = Math.max(pos1[i], pos2[i]);
 				intersectionIncr[depth]++;
 			}
 		}
