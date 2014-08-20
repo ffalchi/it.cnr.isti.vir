@@ -11,6 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
+import java.util.Arrays;
+
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.Permutation;
@@ -25,6 +27,9 @@ import it.cnr.isti.vir.similarity.metric.IMetric;
  * ACM TOIS, Vol. 28, No. 4, Article 20, November 2010
  * 
  * RBD = 1 - RBO
+ * 
+ * in the following depth starts from 0 while d in the paper starts from 1
+ * 
  */
 public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Permutation> {
 
@@ -32,21 +37,44 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 
 	private long dCount = 0;
 	
-	private double p = 0.999;
+	private double p;// = 0.999;
+	
+	private double[] w;// = {1.0};
+	
+	private double maxRBO;
 
-	public RankBiasedDistance() {};
-	public RankBiasedDistance(double p) {
+	//public RankBiasedDistance() {};
+	
+	public RankBiasedDistance(double p, int maxDepth) {
 		this.p = p;
+		setWeights( maxDepth );
 	};
 	
-	public RankBiasedDistance(int maxLength) {
-		if ( maxLength >= 0)
-			this.maxLength =maxLength;
+	
+	private final synchronized void setWeights( int maxDepth ) {
+		w = new double[maxDepth];
+		w[maxDepth-1] = Math.pow(p, maxDepth) / ( maxDepth+1);
+		for ( int di=maxDepth-2; di>=0; di--) {
+			w[di] = w[di+1] + Math.pow(p, di) / (di+1);
+		}
+		
+		for ( int i=0; i<w.length; i++ ) {
+			maxRBO += w[i];
+		}
+
 	}
 	
-	public void setP(double p ) {
-		this.p = p;
-	}
+//	public RankBiasedDistance(int maxLength) {
+//		if ( maxLength >= 0)
+//			this.maxLength =maxLength;
+//	}
+	
+//	public void setParameters(double p, int maxDepth ) {
+//		if ( this.p != p || maxDepth != w.length ) {
+//			this.p = p;
+//			setWeights( maxDepth );
+//		}
+//	}
 	
 	public void setMaxLength(int maxLength) {
 		this.maxLength = maxLength;
@@ -98,29 +126,65 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 	 * @param intersectionIncr
 	 * @return
 	 */
-	public static double rbo(double p, byte[] intersectionIncr) {
+//	public static double rbo(double p, byte[] intersectionIncr) {
+//		
+//		double acc =0;
+//		int intersection = 0;
+//		
+//		if ( p<1 ) {
+//			// the weight of depth=1 will be 1.0
+//			double w = (1/p);
+//			for ( int d=0; d<intersectionIncr.length; d++ ) {
+//				intersection += intersectionIncr[d];
+//				w *= p;
+//				acc += w * ( intersection / (double) (d+1) );
+//			}
+//			return (1-p)*acc;
+//		} else {
+//			for ( int d=0; d<intersectionIncr.length; d++ ) {
+//				intersection += intersectionIncr[d];
+//				acc += ( intersection / (double) (d+1) );
+//			}
+//			return acc/intersectionIncr.length;
+//		}
+//			
+//	}
+	/**
+	 * @param pos1
+	 * @param pos2
+	 * @return
+	 */
+	public double rbo(int[] pos1, int[] pos2) {
+		assert pos1.length == pos2.length;
 		
-		double acc =0;
-		int intersection = 0;
-		
-		if ( p<1 ) {
-			// the weight of depth=1 will be 1.0
-			double w = (1/p);
-			for ( int d=0; d<intersectionIncr.length; d++ ) {
-				intersection += intersectionIncr[d];
-				w *= p;
-				acc += w * ( intersection / (double) (d+1) );
-			}
-			return (1-p)*acc;
-		} else {
-			for ( int d=0; d<intersectionIncr.length; d++ ) {
-				intersection += intersectionIncr[d];
-				acc += ( intersection / (double) (d+1) );
-			}
-			return acc/intersectionIncr.length;
+		int idMax = pos1.length;
+		double rbo = 0.0;
+		for ( int i=0; i<idMax; i++ ) {
+			// first position is reported as 0
+			// the same for depth
+			int depth = Math.max(pos1[i], pos2[i]);
+			rbo+= w[depth];
 		}
 		
+		return rbo / maxRBO;
 		
+	}
+	
+	public double rbo_l(int[] pos1, int[] pos2, int permLength) {
+		assert pos1.length == pos2.length;
+		
+		int idMax = pos1.length;
+		double rbo = 0.0;
+		for ( int i=0; i<idMax; i++ ) {
+			// first position is reported as 0
+			// the same for depth
+			int depth = Math.max(pos1[i], pos2[i]);
+			if ( depth < permLength )  {
+				rbo+= w[depth];
+			}
+		}
+		
+		return rbo / maxRBO;		
 	}
 	
 	/**
@@ -129,28 +193,24 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 	 * @return
 	 */
 	public double d(int[] pos1, int[] pos2) {
-		assert pos1.length == pos2.length;
-		
-		int idMax = pos1.length;
-		
-		// store the increment of intersection at various depth
-		// at each depth the increment can be 0,1 or 2
-		byte[] intersectionIncr = new byte[idMax];
-		
-		for ( int i=0; i<idMax; i++ ) {
-			// first position is reported as 0
-			// the same for depth
-			int depth = Math.max(pos1[i], pos2[i]);
-			intersectionIncr[depth]++;
-		}
-		
-		return 1.0 - rbo(p, intersectionIncr);
+//		assert pos1.length == pos2.length;
+//		
+//		int idMax = pos1.length;
+//		
+//		// store the increment of intersection at various depth
+//		// at each depth the increment can be 0,1 or 2
+//		byte[] intersectionIncr = new byte[idMax];
+//		
+//		for ( int i=0; i<idMax; i++ ) {
+//			// first position is reported as 0
+//			// the same for depth
+//			int depth = Math.max(pos1[i], pos2[i]);
+//			intersectionIncr[depth]++;
+//		}
+//		
+		return 1.0 - rbo(pos1, pos2);
 	}
-	
-	public double d(int[] pos1, int[] pos2, long max) {
-		// TO DO !!!
-		return d(pos1, pos2);
-	}
+
 	
 	/**
 	 * @param obj1
@@ -160,26 +220,26 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 	 */
 	public double d_l(int[] pos1, int[] pos2, int permLength) {
 	
-		assert pos1.length == pos2.length;
-		
-		if ( pos1.length == permLength ) return d(pos1, pos2);
-		
-		int idMax = pos1.length;
-		
-		// store the increment of intersection at various depth
-		// at each depth the increment can be 0,1 or 2
-		byte[] intersectionIncr = new byte[permLength];
-		
-		for ( int i=0; i<idMax; i++ ) {
-			// first position is reported as 0
-			// the same for depth
-			if ( pos1[i] < permLength && pos2[i] < permLength )  {
-				int depth = Math.max(pos1[i], pos2[i]);
-				intersectionIncr[depth]++;
-			}
-		}
-		
-		return 1.0 - rbo(p, intersectionIncr);
+//		assert pos1.length == pos2.length;
+//		
+//		if ( pos1.length == permLength ) return d(pos1, pos2);
+//		
+//		int idMax = pos1.length;
+//		
+//		// store the increment of intersection at various depth
+//		// at each depth the increment can be 0,1 or 2
+//		byte[] intersectionIncr = new byte[permLength];
+//		
+//		for ( int i=0; i<idMax; i++ ) {
+//			// first position is reported as 0
+//			// the same for depth
+//			if ( pos1[i] < permLength && pos2[i] < permLength )  {
+//				int depth = Math.max(pos1[i], pos2[i]);
+//				intersectionIncr[depth]++;
+//			}
+//		}
+//		
+		return 1.0 - rbo_l(pos1, pos2, permLength);
 	}
 
 	/**
@@ -192,6 +252,11 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 	public double  d_l(int[] pos1, int[] pos2, long max, int permLength) {
 		// TO DO !!!
 		return d_l(pos1, pos2, permLength );
+	}
+	
+	public double d(int[] pos1, int[] pos2, long max) {
+		// TO DO !!!
+		return d(pos1, pos2);
 	}
 
 }
