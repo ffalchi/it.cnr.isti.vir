@@ -1,19 +1,18 @@
 package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
-import it.cnr.isti.vir.distance.L2;
+import it.cnr.isti.vir.distance.L1;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.Floats;
-import it.cnr.isti.vir.features.localfeatures.SIFT;
+import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 
 import java.util.Collection;
 import java.util.Properties;
 
-public class FloatsL2Metric  implements IMetric<Floats>, IMeanEvaluator<Floats> {
+public class FloatsL2Metric  implements IMetric<FloatsLF>, IMeanEvaluator<FloatsLF> {
 
 	private static long distCount = 0;
-	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(Floats.class);
+	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(FloatsLF.class);
 	
 	public final long getDistCount() {
 		return distCount;
@@ -39,28 +38,28 @@ public class FloatsL2Metric  implements IMetric<Floats>, IMeanEvaluator<Floats> 
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
-		return distance( f1.getFeature(Floats.class), f2.getFeature(Floats.class));
+		return distance( f1.getFeature(FloatsLF.class), f2.getFeature(FloatsLF.class));
 	}
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
-		return distance( f1.getFeature(Floats.class), f2.getFeature(Floats.class), max);
+		return distance( f1.getFeature(FloatsLF.class), f2.getFeature(FloatsLF.class), max);
 	}
 	
 	@Override
-	public final double distance(Floats f1, Floats f2) {
-		return L2.get(f1.getValues(), f2.getValues());	
+	public final double distance(FloatsLF f1, FloatsLF f2) {
+		return L1.get(f1.getValues(), f2.getValues());	
 	}
 	
 	@Override
-	public final double distance(Floats f1, Floats f2, double max) {
+	public final double distance(FloatsLF f1, FloatsLF f2, double max) {
 		// TODO 
-		return L2.get(f1.getValues(), f2.getValues() );
+		return L1.get(f1.getValues(), f2.getValues() );
 	}
 
 	@Override
-	public Floats getMean(Collection<Floats> coll) {
-		return Floats.getMean(coll);
+	public FloatsLF getMean(Collection<FloatsLF> coll) {
+		return FloatsLF.getMean(coll);
 	}
 	
 }

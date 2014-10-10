@@ -43,7 +43,7 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	
 	public void setMaxLength(int maxLength) {
 		this.maxLength =maxLength;
-		if ( maxLength < 0) maxLength = 0;
+		if ( this.maxLength < 0) this.maxLength = 0;
 	}
 	
 	@Override

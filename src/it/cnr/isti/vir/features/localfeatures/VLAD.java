@@ -158,8 +158,9 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 			
 			Normalize.sqrt(values);
 			
-		} else if ( refs[0] instanceof IByteValues
-	        		|| refs[0] instanceof IIntValues) {
+		} else if ( 	refs[0] instanceof IByteValues
+	        		|| 	refs[0] instanceof IIntValues) {
+			
 			int[] intValues = new int[size];
 			
 			if ( lf.length == 0 ) {

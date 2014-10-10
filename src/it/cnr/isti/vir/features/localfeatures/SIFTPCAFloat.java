@@ -61,7 +61,7 @@ public class SIFTPCAFloat extends ALocalFeature<SIFTPCAFloatGroup> implements IF
 		}
 	}
         
-        public SIFTPCAFloat(KeyPoint kp, float[] values) {
+    public SIFTPCAFloat(KeyPoint kp, float[] values) {
 		this(kp, values, null);
 	}
 	
