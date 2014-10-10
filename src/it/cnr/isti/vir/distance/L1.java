@@ -81,4 +81,13 @@ public class L1 {
 	    }		
 		return dist;
 	}
+	
+	public static double get(float[] v1, float[] v2, double maxDist) {
+		float dist = 0;
+	    for (int i = 0; i < v1.length; i++) {
+	    	dist += Math.abs((double) v1[i] - v2[i]);
+	    	if ( dist > maxDist ) return -dist;
+	    }		
+		return dist;
+	}
 }

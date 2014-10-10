@@ -53,7 +53,6 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 	public FeaturesCollectorArr(AbstractFeature f, AbstractID id, AbstractLabel cl) {
 		this.id=id;
 		this.cl=cl;
-		int size = 1;
 		feature = new AbstractFeature[1];
 		feature[0]=f;
 		if ( feature[0] instanceof ALocalFeaturesGroup ) {

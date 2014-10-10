@@ -91,13 +91,13 @@ public class Floats extends AbstractFeature implements IFloatValues {
 	
 	public static Floats getMean(Collection<Floats> coll) {
 		if ( coll.size() == 0 ) return null;
-		float[][] bytes = new float[coll.size()][];
+		float[][] values = new float[coll.size()][];
 		int i=0;
 		for ( Iterator<Floats> it = coll.iterator(); it.hasNext(); ) {
-			bytes[i++] = it.next().values;
+			values[i++] = it.next().values;
 		}
 				
-		return new Floats(Mean.getMean(bytes));		
+		return new Floats(Mean.getMean(values));		
 	}
 
 	public void reduceToDim(int dim) throws Exception {
