@@ -1,7 +1,7 @@
 package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
-import it.cnr.isti.vir.distance.L1;
+import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.FloatsLF;
@@ -9,7 +9,7 @@ import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import java.util.Collection;
 import java.util.Properties;
 
-public class FloatsLFL1Metric  implements IMetric<FloatsLF>, IMeanEvaluator<FloatsLF> {
+public class FloatsLFL2Metric  implements IMetric<FloatsLF>, IMeanEvaluator<FloatsLF> {
 
 	private static long distCount = 0;
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(FloatsLF.class);
@@ -18,11 +18,11 @@ public class FloatsLFL1Metric  implements IMetric<FloatsLF>, IMeanEvaluator<Floa
 		return distCount;
 	}
 	
-	public FloatsLFL1Metric(Properties properties) {
+	public FloatsLFL2Metric(Properties properties) {
 		
 	}
 	
-	public FloatsLFL1Metric() {
+	public FloatsLFL2Metric() {
 		
 	}
 	
@@ -48,13 +48,13 @@ public class FloatsLFL1Metric  implements IMetric<FloatsLF>, IMeanEvaluator<Floa
 	
 	@Override
 	public final double distance(FloatsLF f1, FloatsLF f2) {
-		return L1.get(f1.getValues(), f2.getValues());	
+		return L2.get(f1.getValues(), f2.getValues() );	
 	}
 	
 	@Override
 	public final double distance(FloatsLF f1, FloatsLF f2, double max) {
 		// TODO 
-		return L1.get(f1.getValues(), f2.getValues() );
+		return L2.get(f1.getValues(), f2.getValues() );
 	}
 
 	@Override

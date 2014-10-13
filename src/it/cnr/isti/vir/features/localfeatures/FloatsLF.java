@@ -11,10 +11,6 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
-import it.cnr.isti.vir.distance.L1;
-import it.cnr.isti.vir.distance.L2;
-import it.cnr.isti.vir.features.Floats;
-import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.util.Mean;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
@@ -33,10 +29,6 @@ public class FloatsLF extends ALocalFeature<FloatsLFGroup> implements IFloatValu
 	@Override
 	public final int getLength() {
 		return values.length;
-	}
-	
-	public final double getMmaxSQRDistValue() {
-		return 2.0;
 	}
 
 	@Override
@@ -110,19 +102,6 @@ public class FloatsLF extends ALocalFeature<FloatsLFGroup> implements IFloatValu
 	public Class<FloatsLFGroup> getGroupClass() {
 		return FloatsLFGroup.class;
 	}
-	
-	public static final double getL1Distance(FloatsLF s1, FloatsLF s2) {
-		return L1.get(s1.values, s2.values);
-	}
-	
-
-	public static final double getL1Distance(FloatsLF s1, FloatsLF s2, double maxDist ) {
-		return L1.get(s1.values, s2.values, maxDist);
-	}
-	
-	public static final double getDistance_Norm(FloatsLF s1, FloatsLF s2 ) {
-		return Math.sqrt(getL1Distance(s1,s2)/s1.getMmaxSQRDistValue());
-	}
 
 	public static FloatsLF getMean(Collection<FloatsLF> coll) {
 		if ( coll.size() == 0 ) return null;
@@ -133,8 +112,6 @@ public class FloatsLF extends ALocalFeature<FloatsLFGroup> implements IFloatValu
 		}
 				
 		return new FloatsLF(Mean.getMean(values));		
-	}
-
-	
+	}	
 	
 }
