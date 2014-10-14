@@ -98,10 +98,26 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	}
 	
 	
+	/**
+	 * This static method create a FeaturesCollectorsArchive that uses
+	 * IDString and FeaturesCollectorArr for storing features.
+	 * 
+	 * @param The file in which the archive will be created
+	 * @return The created archive
+	 * @throws Exception
+	 */
 	public static  FeaturesCollectorsArchive create(File file ) throws Exception {
 		return new FeaturesCollectorsArchive(file, IDString.class, FeaturesCollectorArr.class );
 	}
 	
+	/**
+	 * This static method create a FeaturesCollectorsArchive that uses
+	 * the given ID class and FeaturesCollectorArr for storing features.
+	 * @param file
+	 * @param idclass
+	 * @return
+	 * @throws Exception
+	 */
 	public static  FeaturesCollectorsArchive create(File file, Class<? extends AbstractID> idclass ) throws Exception {
 		return new FeaturesCollectorsArchive(file, idclass, FeaturesCollectorArr.class );
 	}
@@ -242,252 +258,13 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return arr;
 	}
 
-//	public final ArrayList<AbstractFeaturesCollector> getAll() throws IOException,
-//			SecurityException, NoSuchMethodException, IllegalArgumentException,
-//			InstantiationException, IllegalAccessException,
-//			InvocationTargetException {
-//		DataInputStream in = new DataInputStream(new BufferedInputStream(
-//				new FileInputStream(f)));
-//		ArrayList<AbstractFeaturesCollector> arr = new ArrayList(size());
-//
-//		if (in.readLong() != fileID) {
-//			System.err
-//					.println("The file does not appear to be a FeatureArchive");
-//		}
-//
-//		int fileVersion = in.readInt();
-//
-//		if (fileVersion > 1) {
-//			Class<? extends AbstractFeaturesCollector> fcClass = FeaturesCollectors.readClass(in);
-//			Constructor<? extends AbstractFeaturesCollector> fcClassConstructor = getFCConstructor(fcClass);
-//			new FeatureClassCollector(in);
-//			IDClasses.readClass(in);
-//
-//			arr = new ArrayList();
-//			while (in.available() != 0) {
-//				if (fcClassConstructor == null) {
-//					arr.add(FeaturesCollectors.readData(in));
-//				} else {
-//					arr.add((AbstractFeaturesCollector) fcClassConstructor
-//							.newInstance(in));
-//				}
-//
-//			}
-//		} else {
-//			// old IO
-//			long indexOffSet = in.readLong();
-//
-//			FeatureClassCollector featuresClasses = new FeatureClassCollector(
-//					in); // FeaturesCollectors.getClass( file.readInt() );
-//			Class<? extends AbstractID> idClass = IDClasses.readClass(in);
-//
-//			for (int i = 0; i < ids.size(); i++) {
-//				arr.add(FeaturesCollectors.readData(in));
-//			}
-//		}
-//
-//		return arr;
-//	}
 	
-//	public synchronized ISimilarityResults[] getKNN_IDs(AbstractFeaturesCollector[] qObj, int k, final ISimilarity sim ) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-//		return getKNN(qObj, k, sim, true);
-//	}
-//
-//	public synchronized ISimilarityResults[] getKNN(AbstractFeaturesCollector[] qObj, int k, final ISimilarity sim ) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-//		return getKNN(qObj, k, sim, false);
-//	}	
-//
-//	public ISimilarityResults[] getKNN(AbstractFeaturesCollector[] qObj, int k,
-//			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
-//			NoSuchMethodException, IllegalArgumentException,
-//			InstantiationException, IllegalAccessException,
-//			InvocationTargetException {
-//		
-//	}
-
-//	public synchronized void getKNNs(AbstractFeaturesCollector[] qObj, SimPQueueArr[][] kNNQueue, final ISimilarity[] sim, final boolean onlyID)
-//			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-//
-//
-//		FeaturesCollectorsArchiveSearch_multiSim search = new FeaturesCollectorsArchiveSearch_multiSim(this);
-//		search.getKNNs(qObj, kNNQueue, sim, onlyID);
-//				
-//	}
-//
-//	public synchronized void getKNN(AbstractFeaturesCollector[] qObj, SimPQueueArr[] kNNQueue, final ISimilarity sim, final boolean onlyID)
-//		throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-//			FeaturesCollectorsArchiveSearch search = new FeaturesCollectorsArchiveSearch(this);
-//			search.getKNN(qObj, kNNQueue, sim, onlyID);
-//	}
-	
-
-	
-//	public synchronized void getKNN(AbstractFeaturesCollector[] qObj, SimPQueueArr[] kNNQueue, final ISimilarity sim, final boolean onlyID)
-//			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-//
-//		boolean parallel = true;
-//		if (!parallel) {
-//			int iObj = 0;
-//			for (AbstractFeaturesCollector fc : this) {
-//
-//				for (int i = 0; i < kNNQueue.length; i++) {
-//					double dist = sim.distance(qObj[i], fc,  kNNQueue[i].excDistance );
-//					if ( dist < 0 ) continue;
-//					if ( onlyID)
-//						kNNQueue[i].offer(((IHasID) fc).getID(), dist );
-//					else 
-//						kNNQueue[i].offer(fc, dist);
-//				}
-//
-//				if ( (iObj+1) % 100 == 0 ) {
-//					System.out.println( (iObj+1) + " of " + this.size() + " processed.");
-//				}
-//				iObj++;
-//			}				
-//		
-//		} else {
-//			final int parallelBatchSize = 100000;
-//			
-//			int nObj = this.size();
-//			Iterator<AbstractFeaturesCollector> it = this.iterator();
-//			// iterates through multiple batches
-//			for (int iObj = 0; iObj < nObj; iObj+=parallelBatchSize ) {
-//				
-//				int batchSize = parallelBatchSize;
-//				if ( iObj + parallelBatchSize > nObj ) batchSize = nObj-iObj;
-//				AbstractFeaturesCollector[] objects = new AbstractFeaturesCollector[batchSize];
-//				
-//				// reading objects in batch
-//				for ( int i=0; i<objects.length; i++  ) {
-//					objects[i] = it.next();
-//					iObj++;
-//				}
-//				
-//				// kNNQueues are performed in parallels
-//				final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / ParallelOptions.nThreads);
-//				final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
-//				int ti = 0;
-//		        Thread[] thread = new Thread[nThread];
-//		        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
-//		        	int to = from+nQueriesPerThread-1;
-//		        	if ( to >= qObj.length ) to =qObj.length-1;
-//		        	thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, from,to,objects, onlyID) ) ;
-//		        	thread[ti].start();
-//		        	ti++;
-//		        }
-//		        
-//    for ( Thread t : thread ) {
-//		if ( t != null ) t.join();
-//    }
-//				
-//				Log.info((iObj+objects.length) + "/" + nObj);
-//			}
-//		}
-//				
-//
-//	}
-	
-	
-//	public synchronized void getKNN(AbstractFeaturesCollector[] qObj, SimPQueueArr[] kNNQueue, final ISimilarity sim, final boolean onlyID)
-//			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-//		DataInputStream in = new DataInputStream(new BufferedInputStream(
-//				new FileInputStream(f)));
-//		
-//		if (in.readLong() != fileID) {
-//			// System.err.println("The file does not appear to be a FeatureArchive");
-//		}
-//
-//		int fileVersion = in.readInt();
-//		
-//		final int nObj = positions.size();
-//		
-//		if (fileVersion > 1) {
-//			Class fcClass = FeaturesCollectors.readClass(in);
-//			Constructor fcClassConstructor = getFCConstructor(fcClass);
-//			new FeatureClassCollector(in);
-//			IDClasses.readClass(in);
-//
-//			boolean parallel = true;
-//			if (!parallel) {
-//				
-//				for (int iObj = 0; iObj < nObj; iObj++) {
-//					// while( in.available() != 0) {IFeaturesCollector fc =
-//					AbstractFeaturesCollector fc = null;
-//					if (fcClassConstructor == null) {
-//						fc = FeaturesCollectors.readData(in);
-//					} else {
-//						fc = (AbstractFeaturesCollector) fcClassConstructor.newInstance(in);
-//					}
-//
-//					for (int i = 0; i < kNNQueue.length; i++) {
-//						double dist = sim.distance(qObj[i], fc,  kNNQueue[i].excDistance );
-//						if ( dist < 0 ) continue;
-//						if ( onlyID)
-//							kNNQueue[i].offer(((IHasID) fc).getID(), dist );
-//						else 
-//							kNNQueue[i].offer(fc, dist);
-//					}
-//
-//					if ( (iObj+1) % 100 == 0 ) {
-//						System.out.println( (iObj+1) + " of " + nObj + " processed.");
-//					}
-//				}				
-//			
-//			} else {
-//				final int parallelBatchSize = 100000;
-//				
-//				
-//				// iterates through multiple batches
-//				for (int iObj = 0; iObj < nObj; iObj+=parallelBatchSize ) {
-//					int batchSize = parallelBatchSize;
-//					if ( iObj + parallelBatchSize > nObj ) batchSize = nObj-iObj;
-//					AbstractFeaturesCollector[] objects = new AbstractFeaturesCollector[batchSize];
-//					
-//					// reading objects in batch
-//					for ( int i=0; i<objects.length; i++  ) {
-//						AbstractFeaturesCollector fc = null;
-//						if (fcClassConstructor == null) {
-//							fc = FeaturesCollectors.readData(in);
-//						} else {
-//							fc = (AbstractFeaturesCollector) fcClassConstructor.newInstance(in);
-//						}
-//						objects[i] = fc;
-//					}
-//					
-//					// kNNQueues are performed in parallels
-//					final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / ParallelOptions.nThreads);
-//					final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
-//					int ti = 0;
-//			        Thread[] thread = new Thread[nThread];
-//			        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
-//			        	int to = from+nQueriesPerThread-1;
-//			        	if ( to >= qObj.length ) to =qObj.length-1;
-//			        	thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, from,to,objects, onlyID) ) ;
-//			        	thread[ti].start();
-//			        	ti++;
-//			        }
-//			        
-//				    for ( Thread t : thread ) {
-//						if ( t != null ) t.join();
-//				    }
-//					
-//					Log.info((iObj+parallelBatchSize) + "/" + nObj);
-//				}
-//				
-//			}
-//		}
-//	}
-	
-//	public synchronized ISimilarityResults getKNN(AbstractFeaturesCollector qObj, int k,
-//			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
-//			NoSuchMethodException, IllegalArgumentException,
-//			InstantiationException, IllegalAccessException,
-//			InvocationTargetException {
-//		
-//		AbstractFeaturesCollector[] qObjs = {qObj};
-//		return getKNN( qObjs, k, sim, onlyID)[0];
-//	}
-
+	public static final ArrayList<AbstractFeaturesCollector> getAll(File file) throws Exception {
+		FeaturesCollectorsArchive fca = new FeaturesCollectorsArchive(file);
+		
+		return fca.getAll();
+	}
+/*
 	public static final ArrayList<AbstractFeaturesCollector> getAll(File file)
 			throws IOException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, InstantiationException,
@@ -540,7 +317,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 		return arr;
 	}
-
+*/
 	public final AbstractID getIdAt(int i) {
 		return ids.get(i);
 	}
