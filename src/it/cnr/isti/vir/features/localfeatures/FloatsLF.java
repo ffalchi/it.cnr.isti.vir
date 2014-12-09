@@ -12,8 +12,8 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.features.IFloatValues;
-import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Mean;
+import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.bytes.IntByteArrayUtil;
 
 import java.io.DataInput;
