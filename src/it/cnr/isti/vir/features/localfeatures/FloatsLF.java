@@ -14,6 +14,7 @@ package it.cnr.isti.vir.features.localfeatures;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Mean;
+import it.cnr.isti.vir.util.bytes.IntByteArrayUtil;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -31,32 +32,28 @@ public class FloatsLF extends ALocalFeature<FloatsLFGroup> implements IFloatValu
 		return values.length;
 	}
 
-	@Override
+    @Override
     public float[] getValues() {
         return values;
     }
-	
-	public FloatsLF(DataInput str ) throws IOException {
-            super(str);	
-		int dim = str.readByte();
-                // LEGACY
-                if ( dim < 0 ) dim &= 0xff;
-		values = new float[dim];
-		for ( int i=0; i<values.length; i++ ) {
-			values[i] = str.readFloat();
-		}
-	}
-	
-	public FloatsLF(ByteBuffer src ) throws IOException {
-                super(src);	
-		int dim = src.get();
-                // LEGACY
-                if ( dim < 0 ) dim &= 0xff;
-		values = new float[dim];
-		for ( int i=0; i<values.length; i++ ) {
-			values[i] = src.getFloat();
-		}
-	}
+
+    public FloatsLF(DataInput str) throws IOException {
+        super(str);
+        int dim = str.readInt();
+        values = new float[dim];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = str.readFloat();
+        }
+    }
+
+    public FloatsLF(ByteBuffer src) throws IOException {
+        super(src);
+        int dim = src.getInt();
+        values = new float[dim];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = src.getFloat();
+        }
+    }
         
         public FloatsLF(KeyPoint kp, float[] values) {
 		this(kp, values, null);
@@ -74,11 +71,11 @@ public class FloatsLF extends ALocalFeature<FloatsLFGroup> implements IFloatValu
 	}
 
 	public int getDataByteSize() {
-		return values.length*4 +1;
+		return values.length*4 +4;
 	}
 	
 	public int putDescriptor(byte[] bArr, int bArrI) {
-		bArr[bArrI++]  = (byte) values.length;
+		bArrI=IntByteArrayUtil.convToBytes(values.length, bArr, bArrI);//
 		return FloatByteArrayUtil.convToBytes(values, bArr, bArrI);
 	}
 
