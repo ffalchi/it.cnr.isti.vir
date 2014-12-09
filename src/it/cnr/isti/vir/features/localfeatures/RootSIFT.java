@@ -13,7 +13,7 @@ package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.IUByteValues;
-import it.cnr.isti.vir.util.Mean;
+import it.cnr.isti.vir.util.math.Mean;
 
 import java.io.BufferedReader;
 import java.io.DataInput;

@@ -15,7 +15,7 @@ import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
-import it.cnr.isti.vir.util.Mean;
+import it.cnr.isti.vir.util.math.Mean;
 
 import java.util.ArrayList;
 import java.util.Collections;

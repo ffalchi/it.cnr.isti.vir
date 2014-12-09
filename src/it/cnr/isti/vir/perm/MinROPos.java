@@ -40,14 +40,38 @@ public class MinROPos {
 	 */
 	public static void main(String[] args) throws Exception {
 		
+		ParallelOptions.setNProcessors(8);
+		
 		ISimilarity permSim = new SpearmanFootrule(0);
+
+
+//		String archiveFileName = "M:/Exp-out/Pivots/CoPhIR_100k_rnd.dat";
+//		// each step tries
+//		nTries = 10;
+//		// candidates
+//		int initNRO = 80000;
+//		// permLength
+//		int ki=100;
+//		String outFileName = "M:/Exp-out/Pivots/minROPos_100k_"+initNRO+"_["+ki+"_"+nTries+"t]";
+		
+
+		//String archiveFileName = "M:/Exp-out/Pivots/CoPhIR_100k_rnd.dat";
+		String archiveFileName = "CoPhIR_100k_rnd.dat";
+		// each step tries
+		nTries = 10;
+		// candidates
+		int initNRO = 40000;
+		// permLength
+		int ki=100;
+		//String outFileName = "M:/Exp-out/Pivots/minROPos_100k_"+initNRO+"_["+ki+"_"+nTries+"t]";
+		String outFileName = "minROPos_100k_"+initNRO+"_["+ki+"_"+nTries+"t]";
 		
 		//  TO DO 
-		String archiveFileName = "X:/CoPhIR/rnd/CoPhIR_100k_rnd";
-		nTries = 10;		
-		int initNRO = 10000;
-		int ki=100;
-		String outFileName = "X:/CoPhIR/RO/f/f_100k_1k_100_["+ki+"_"+nTries+"t]";
+//		String archiveFileName = "X:/CoPhIR/rnd/CoPhIR_100k_rnd";
+//		nTries = 10;		
+//		int initNRO = 10000;
+//		int ki=100;
+//		String outFileName = "X:/CoPhIR/RO/f/f_100k_1k_100_["+ki+"_"+nTries+"t]";
 		
 //		// test
 //		String archiveFileName = "X:/CoPhIR/1MExp/dataset_subset/CoPhIR_1M_100k_rnd";
@@ -441,6 +465,7 @@ public class MinROPos {
 		Permutation[] obj = getPermutations(examples, candidates, sim);
 		for ( Permutation o : obj ) o.convertToOrdered();
 		
+		Log.info("Permutations were evaluated.");
 		AbstractFeaturesCollector[] tCand = candidates.clone();
 		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[tCand.length];
 		int iRes = 0;
@@ -466,6 +491,8 @@ public class MinROPos {
 		
 		Log.info("nCand\tID\tavg\tcoeffVar\tcoeffOfVariationROOcc");
 		
+    	double[] tCoeffVar = new double[nTries];
+		
 		while (iRes < res.length-permLength) {
 			double minCoeffVar = Double.MAX_VALUE;
 			int delPos = -1;
@@ -477,7 +504,7 @@ public class MinROPos {
 			RandomOperations.shuffle(tries);
 
 			int nTries = Math.min(nTriesMax, tries.length);
-			double[] tCoeffVar = new double[nTries];
+			Arrays.fill(tCoeffVar, 0);
 
 			int bnt = ParallelOptions.getNFreeProcessors();
 			final int nObjsPerThread = (int) Math.ceil((double) nTries / (bnt+1) );
@@ -790,6 +817,7 @@ public class MinROPos {
 		public void run() {
 			for (int iO = from; iO<=to; iO++) {
 				res[iO] = new Permutation(objs[iO], ro, sim);
+				if ( (iO-from) % 1000 == 0) Log.info("["+ from + "-" + to + "]: " +  (iO-from) + "/" + (to-from) );
 			}
 		}
 	}
@@ -812,7 +840,7 @@ public class MinROPos {
         	if ( to >= objs.length ) to =objs.length-1;
         	thread[ti] = new Thread( new PermThread(ro, sim, objs, from,to, res) ) ;
         	thread[ti].start();
-        	ti++;
+        	ti++;        	
         }
         
         for ( Thread t : thread ) {

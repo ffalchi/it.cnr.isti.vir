@@ -15,6 +15,8 @@ import it.cnr.isti.vir.features.bof.BoF;
 import it.cnr.isti.vir.features.localfeatures.BRISK;
 import it.cnr.isti.vir.features.localfeatures.BRISKGroup;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
+import it.cnr.isti.vir.features.localfeatures.FREAK;
+import it.cnr.isti.vir.features.localfeatures.FREAKGroup;
 import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
 import it.cnr.isti.vir.features.localfeatures.ORB;
@@ -99,7 +101,9 @@ public class FeatureClasses {
 		VLADPlus.class,
 		Floats.class,
 		FloatsLF.class,
-		FloatsLFGroup.class
+		FloatsLFGroup.class,
+		FREAK.class,
+		FREAKGroup.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

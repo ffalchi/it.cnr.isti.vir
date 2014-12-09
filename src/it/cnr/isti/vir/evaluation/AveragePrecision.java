@@ -29,7 +29,7 @@ public class AveragePrecision {
 	 * Area below the average precision curve
 	 */
 	public static double getAveragePrecision(ISimilarityResults results, HashSet positiveIDs, HashSet ambiguosIDs, AbstractID qID ) {
-		ArrayList<AbstractID> ids = new ArrayList();
+		ArrayList<AbstractID> ids = new ArrayList<AbstractID>();
 		for ( Iterator<ObjectWithDistance> it = results.iterator(); it.hasNext(); ) {
 		    ObjectWithDistance curr = it.next();
 		    AbstractID currID = ((IHasID) curr.getObj()).getID();

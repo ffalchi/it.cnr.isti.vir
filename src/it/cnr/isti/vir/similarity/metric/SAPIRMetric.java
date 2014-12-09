@@ -21,7 +21,7 @@ import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
 import it.cnr.isti.vir.features.mpeg7.vd.EdgeHistogram;
 import it.cnr.isti.vir.features.mpeg7.vd.HomogeneousTexture;
 import it.cnr.isti.vir.features.mpeg7.vd.ScalableColor;
-import it.cnr.isti.vir.util.Mean;
+import it.cnr.isti.vir.util.math.Mean;
 
 import java.util.Collection;
 import java.util.Iterator;

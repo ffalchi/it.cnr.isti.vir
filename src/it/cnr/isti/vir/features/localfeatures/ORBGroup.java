@@ -52,8 +52,8 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	
 	
 	public ORBGroup(ByteBuffer in ) throws IOException {
-		in.get(); 		// version
-		in.getInt(); 	// nBytes
+		byte version = in.get(); 
+		int nBytes = in.getInt(); 
 		int nLFs = in.getInt();
 		lfArr = new ORB[nLFs];
 		for ( int i = 0; i < nLFs; i++ ) {

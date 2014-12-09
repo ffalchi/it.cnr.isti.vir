@@ -102,6 +102,7 @@ public class OxfordBuildingReader implements IObjectsReader<FeaturesCollectorArr
 		    float area = (float) (2*Math.PI/Math.sqrt(4*a*c-b*b));
 		    
 		    float scale  = (float) Math.sqrt(area);
+		    
 		    KeyPoint kp = new KeyPoint(x, y, Float.NaN, scale);
 		    float[] xy = {x, y};
 			arr[i] = new BoFLF(bag, kp, group);

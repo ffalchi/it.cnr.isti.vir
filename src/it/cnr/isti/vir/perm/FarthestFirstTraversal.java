@@ -51,9 +51,13 @@ public class FarthestFirstTraversal {
 		int nCandidatesCycles = 100;
 		String outFileName = "X:/CoPhIR/RO/fft/fft-106M-"+nMaxObj+"-"+nTries+"t";
 		
+
+		
+		
+		
 		FeaturesCollectorsArchives archives = new FeaturesCollectorsArchives(archivesFileName, false);
 		SAPIRMetric sim = new SAPIRMetric(); 
-		Log.info(archives.size() + " were found.");
+		Log.info(archives.size() + " archives were found.");
 		AbstractFeaturesCollector[] res = select(sim, archives, nMaxObj, nTries, nCandidatesCycles);
 		
 		double minInterDist = SimilarityUtil.getMinInterDistance(res, sim);

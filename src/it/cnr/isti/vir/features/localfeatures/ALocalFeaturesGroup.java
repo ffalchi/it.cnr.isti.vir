@@ -441,7 +441,7 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 	}
 
 	public final void writeData(DataOutput out) throws IOException {
-		// VERSION
+		// Version
 		out.writeByte(this.getSerVersion());
 		
 		byte[][] bytes = new byte[lfArr.length][];
@@ -453,8 +453,9 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 			size += b.length;
 		}
 		
-		// bytes length
+		// Length in Bytes
 		out.writeInt(size + 4);
+		
 		// number of LFs
 		out.writeInt(lfArr.length);
 		

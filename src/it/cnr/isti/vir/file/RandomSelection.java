@@ -29,6 +29,9 @@ public class RandomSelection {
 		//String inDirName = "X:/CoPhIR/1MExp/dataset/CoPhIR_1M_rnd";
 		//String inDirName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_rnd";
 		
+		int n = 200000;
+		String outArchiveName = "S:/rnd/CoPhIR_200k_rnd.dat";
+		
 		//int n = 10000000;
 		//String outArchiveName = "W:/CoPhIR/CoPhIR-RND/CoPhIR_10M_rnd";
 		
@@ -38,8 +41,8 @@ public class RandomSelection {
 		//int n = 30000000;
 		//String outArchiveName = "W:/CoPhIR/subsets/CoPhIR_30M";
 		
-		int n = 100;
-		String outArchiveName = "W:/CoPhIR/Groundtruth/CoPhIR_Queries_100";
+		//int n = 100;
+		//String outArchiveName = "W:/CoPhIR/Groundtruth/CoPhIR_Queries_100";
 		
 		
 		if ( args != null && args.length > 0 ) {

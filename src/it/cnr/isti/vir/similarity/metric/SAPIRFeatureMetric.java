@@ -15,7 +15,7 @@ import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.mpeg7.SAPIRFeature;
-import it.cnr.isti.vir.util.Mean;
+import it.cnr.isti.vir.util.math.Mean;
 
 import java.util.Collection;
 import java.util.Iterator;

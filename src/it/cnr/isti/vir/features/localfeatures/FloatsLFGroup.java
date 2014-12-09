@@ -14,7 +14,7 @@ package it.cnr.isti.vir.features.localfeatures;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
-import it.cnr.isti.vir.util.Mean;
+import it.cnr.isti.vir.util.math.Mean;
 
 import java.io.DataInput;
 import java.io.IOException;
