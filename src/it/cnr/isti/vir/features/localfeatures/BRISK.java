@@ -12,6 +12,7 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.distance.Hamming;
+import it.cnr.isti.vir.features.ILongBinaryValues;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.bytes.LongByteArrayUtil;
 
@@ -22,7 +23,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class BRISK extends ALocalFeature<BRISKGroup> {
+public class BRISK extends ALocalFeature<BRISKGroup> implements ILongBinaryValues{
 
 	public static final int NLONG = 8;
 	public static final int BYTES_LENGTH = NLONG * Long.SIZE / Byte.SIZE;
@@ -168,6 +169,21 @@ public class BRISK extends ALocalFeature<BRISKGroup> {
 	public BRISK getRandomPerturbated(int nBits) {
 		long[] newData = RandomOperations.getPerturbated(data, nBits);
 		return new BRISK(this.kp, newData);
+	}
+        
+        @Override
+	public int getLength() {
+		return NLONG;
+	}
+
+	@Override
+	public long[] getElements() {
+		return data;
+	}
+
+	@Override
+	public int getNBits() {
+		return BITS_LENGTH;
 	}
 
 }
