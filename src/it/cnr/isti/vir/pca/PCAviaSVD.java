@@ -15,9 +15,6 @@ import it.cnr.isti.vir.util.Log;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.*;
 import org.ejml.ops.SingularOps;
-/**
- * @author Lucia Vadicamo
- */
 
 public class PCAviaSVD {
     /** Vector of empirical means.   */
@@ -104,6 +101,23 @@ public class PCAviaSVD {
         return pcaMatrix;      
         
     }
+    
+ /**
+ * @return Principal components matrix 
+ * @throws Exception
+ */
+public double[][] getPcaMatrix() throws Exception {
+        int D=principalComponentsMatrix.numRows;
+               
+        double[][] pcaMatrix=new double[D][D];
+        for(int i1=0; i1<D;i1++)
+            for(int i2=0; i2<D;i2++)
+                pcaMatrix[i1][i2]= principalComponentsMatrix.get(i1, i2);
+        
+        return pcaMatrix;      
+        
+    
+ }
     
     
 }
