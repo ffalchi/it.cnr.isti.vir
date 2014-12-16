@@ -11,7 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.pca;
 
-import it.cnr.isti.vir.util.Log;
+import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.util.Statistic;
 
 import java.util.ArrayList;

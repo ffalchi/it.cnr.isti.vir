@@ -13,12 +13,14 @@ package it.cnr.isti.vir.similarity.knn;
 
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
-import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.SplitInGroups;
+import it.cnr.isti.vir.util.TimeManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -101,12 +103,45 @@ public class KNNPQueue<F> {
         
         @Override
         public void run() {
-            for (int i = from; i <= to; i++) {
-            	knn.offer( arrColl[i]);
+           
+       		TimeManager tM = new TimeManager();
+               for (int i=from; i<=to; i++) {
+               	if ( tM.hasToOutput() ) {
+               		Log.info_verbose("\t"+"KNNPQueue OfferAll thread [" + from + "," + to + "] at " + (double)(i-from)/(to-from)*100.0 + "%");
+               	}
+               	knn.offer( arrColl[i] );
             }
+
         }                
     }
 	
+	
+	static class OfferAllArrayList implements Runnable {
+        private final int from;
+        private final int to;
+        private final ArrayList coll;
+        private final KNNPQueue knn;
+        
+        OfferAllArrayList(KNNPQueue knn, int from, int to, ArrayList coll ) {
+            this.from = from;
+            this.to = to;
+            this.coll = coll;
+            this.knn = knn;
+        }
+        
+        @Override
+        public void run() {
+
+       		TimeManager tM = new TimeManager();
+            for (int i=from; i<=to; i++) {
+            	if ( tM.hasToOutput() ) {
+          			Log.info_verbose("\t"+"KNNPQueue OfferAll thread [" + from + "," + to + "] at " + (double)(i-from)/(to-from)*100.0 + "%");
+          		}
+               	knn.offer( coll.get(i) );
+            }
+        	
+        }                
+    }
 	
 	public final void offerAll(F[] coll) throws InterruptedException {
 		
@@ -138,27 +173,7 @@ public class KNNPQueue<F> {
 		}
 	}
 	
-	
-	static class OfferAllArrayList implements Runnable {
-        private final int from;
-        private final int to;
-        private final ArrayList coll;
-        private final KNNPQueue knn;
-        
-        OfferAllArrayList(KNNPQueue knn, int from, int to, ArrayList coll ) {
-            this.from = from;
-            this.to = to;
-            this.coll = coll;
-            this.knn = knn;
-        }
-        
-        @Override
-        public void run() {
-            for (int i=from; i<=to; i++) {
-            	knn.offer( coll.get(i) );
-            }
-        }                
-    }
+
 	
 	public final void offerAll(ArrayList<F> coll) throws InterruptedException {
 		
@@ -181,26 +196,6 @@ public class KNNPQueue<F> {
 	        }
 			ParallelOptions.free(threadN-1);
 			
-//			int threadN = ParallelOptions.nThreads;
-//	        int t;
-//	        if ( coll.size() % threadN == 0 ) {
-//	        	t = coll.size() / threadN;       
-//	        } else {
-//	        	t = coll.size() / (threadN-1);  
-//	        }
-//	        int ti = 0;
-//	        Thread[] thread = new Thread[threadN];
-//	        for ( int from=0; from<coll.size(); from+=t) {
-//	        	int to = from+t-1;
-//	        	if ( to >= coll.size() ) to = coll.size()-1;
-//	        	thread[ti] = new Thread( new OfferAllColl(this, from,to,coll) ) ;
-//	        	thread[ti].start();
-//	        	ti++;
-//	        }
-//	        
-//	        for ( Thread t : thread ) {
-//        		if ( t != null ) t.join();
-//	        }
 		}
 		else
 		{

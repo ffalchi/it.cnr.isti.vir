@@ -25,13 +25,17 @@ import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 public class TransformationHypothesis implements Comparable {
 
     private final AbstractTransformation trNorm;
-//    private final Transformation trDeNorm;
     private final LocalFeaturesMatches matches;
     private Double perMatches = null;
     private Double perMatchesOnMatching = null;
     private Double maxPercentageMatches = null;
 
 
+    public TransformationHypothesis( AbstractTransformation tr, LocalFeaturesMatches matches ) {
+        this.trNorm = tr;
+        this.matches = matches;
+    }
+    
     public AbstractTransformation getTrDeNorm() {
         return trNorm.getDeNormalized(matches.getLFGroup(), matches.getMatchingLFGroup());
     }
@@ -40,10 +44,7 @@ public class TransformationHypothesis implements Comparable {
         return matches;
     }
 
-    public TransformationHypothesis( AbstractTransformation tr, LocalFeaturesMatches matches ) {
-        this.trNorm = tr;
-        this.matches = matches;
-    }
+
 
     public Double getMaxPercentageMatches() {
         if ( maxPercentageMatches == null ) initPercentageMatches();

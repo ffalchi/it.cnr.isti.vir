@@ -12,6 +12,7 @@
 package it.cnr.isti.vir.file;
 
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.similarity.ISimilarity;
@@ -19,7 +20,6 @@ import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
 import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch_multiSim;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
-import it.cnr.isti.vir.util.Log;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -40,6 +40,10 @@ public class FeaturesCollectorsArchives {
 	int size;
 	int[] archiveStartIndex;
 	
+	
+	public static FeaturesCollectorsArchives getFromSingleArchive(String archiveFName) throws SecurityException, IllegalArgumentException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+		return new FeaturesCollectorsArchives( new FeaturesCollectorsArchive( archiveFName ) );
+	}
 	
 	public FeaturesCollectorsArchives(String archiveDirName, boolean readIDs) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		this(new File(archiveDirName), readIDs);

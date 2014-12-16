@@ -17,14 +17,18 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.FeaturesCollectors;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IDString;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
+import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
 import it.cnr.isti.vir.similarity.metric.IMetric;
-import it.cnr.isti.vir.util.Log;
-import it.cnr.isti.vir.util.ParallelOptions;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
+import it.cnr.isti.vir.similarity.results.SimilarityResults;
+import it.cnr.isti.vir.util.WorkingPath;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -127,11 +131,11 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	}
 
 	public FeaturesCollectorsArchive(String fileName ) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
-		this(new File(fileName));
+		this(WorkingPath.getFile(fileName));
 	}
 	
 	public FeaturesCollectorsArchive(String fileName, boolean readIDs ) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
-		this(new File(fileName), readIDs);
+		this(WorkingPath.getFile(fileName), readIDs);
 	}
 
 	public FeaturesCollectorsArchive(File file ) throws IOException,
@@ -463,7 +467,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 						ids = new ArrayList(Arrays.asList(IDClasses.readArray(idInput, size, idClass)));
 						System.out.println("done");
 	
-						System.out.print("Creating IDs HashTable... ");
+						System.out.print("Reading IDs HashTable... ");
 						size = positions.size();
 						for (int i = 0; i < size; i++) {
 							// idOffsetMap.put(ids.get(i), positions.get(i));
@@ -765,5 +769,47 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		tStr += "--> has features collector: " + fcClass + "\n";
 		tStr += "--> has ID: " + idClass + "\n";
 		return tStr;
+	}
+
+	public ArrayList<AbstractFeaturesCollector> get(ArrayList<AbstractID> queries) throws ArchiveException {
+		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();
+		for ( AbstractID q : queries) {
+			res.add(this.get(q));
+		}
+		return res;
+	}
+	
+	public synchronized SimilarityResults[] getKNN(Collection<AbstractFeaturesCollector> qObj,
+			int k, final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, InterruptedException {
+		AbstractFeaturesCollector[] tArr = new AbstractFeaturesCollector[qObj.size()];
+		qObj.toArray(tArr);
+		return getKNN(tArr, k, sim, onlyID);
+	}
+	
+	public synchronized SimilarityResults[] getKNN(AbstractFeaturesCollector[] qObj,
+			int k, final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, InterruptedException {
+
+		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
+		for (int i = 0; i < kNNQueue.length; i++) {
+			kNNQueue[i] = new SimPQueueArr(k);
+		}
+
+		Log.info_verbose("... searching in archive " + this.getfile());
+		FeaturesCollectorsArchiveSearch search = new FeaturesCollectorsArchiveSearch(this);
+		search.getKNN(qObj, kNNQueue, sim, onlyID);
+
+		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
+		for (int i = 0; i < kNNQueue.length; i++) {
+			res[i] = kNNQueue[i].getResults();
+			res[i].setQuery(qObj[i]);
+		}
+
+		return res;
 	}
 }

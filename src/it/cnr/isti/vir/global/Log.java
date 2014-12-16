@@ -9,7 +9,9 @@
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package it.cnr.isti.vir.util;
+package it.cnr.isti.vir.global;
+
+import java.util.Properties;
 
 public class Log {
 
@@ -21,7 +23,7 @@ public class Log {
 		return debug;
 	}
 
-	public static void setDebug(boolean debug) {
+	public static synchronized void setDebug(boolean debug) {
 		Log.debug = debug;
 	}
 
@@ -29,15 +31,30 @@ public class Log {
 		return verbose;
 	}
 
-	public static void setVerbose(boolean verbose) {
+	public static synchronized void setVerbose(boolean verbose) {
 		Log.verbose = verbose;
 	}
 
-	public static void info(String str) {
+	public static synchronized void info(String str) {
 		System.out.println(str);
 	}
 	
-	public static void info_verbose(String str) {
+	public static synchronized void info_verbose(String str) {
 		if ( verbose ) System.out.println(str);
 	}
+
+	public static synchronized void set(Properties properties) {
+		String tVerbose = properties.getProperty("Log.verbose");
+		if (tVerbose!=null && tVerbose!="") {
+			verbose = Boolean.parseBoolean(tVerbose);
+			info("Log.verbose was set to " + verbose);
+		}
+		
+		String tDebug = properties.getProperty("Log.debug");
+		if (tDebug!=null && tDebug!="") {
+			debug = Boolean.parseBoolean(tDebug);
+			info("Log.debug was set to " + debug);
+		}
+	}
+
 }

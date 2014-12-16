@@ -2,11 +2,11 @@ package it.cnr.isti.vir.similarity.index;
 
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
-import it.cnr.isti.vir.util.Log;
-import it.cnr.isti.vir.util.ParallelOptions;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

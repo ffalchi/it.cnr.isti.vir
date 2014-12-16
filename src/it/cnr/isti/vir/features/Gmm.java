@@ -15,9 +15,9 @@ import it.cnr.isti.vir.features.localfeatures.SIFTPCAFloat;
 import it.cnr.isti.vir.features.localfeatures.SIFTPCAFloatGroup;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.util.MatrixMath;
-import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.SplitInGroups;
 import it.cnr.isti.vir.util.math.VectorMath;
 

@@ -13,13 +13,13 @@ package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive_Buffered;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
-import it.cnr.isti.vir.util.Log;
-import it.cnr.isti.vir.util.ParallelOptions;
 
 import java.io.DataInput;
 import java.io.DataOutput;

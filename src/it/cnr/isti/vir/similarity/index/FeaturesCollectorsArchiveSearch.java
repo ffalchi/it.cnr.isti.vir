@@ -3,6 +3,8 @@ package it.cnr.isti.vir.similarity.index;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
@@ -10,8 +12,8 @@ import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
-import it.cnr.isti.vir.util.Log;
-import it.cnr.isti.vir.util.ParallelOptions;
+import it.cnr.isti.vir.util.TimeManager;
+import it.cnr.isti.vir.util.string.Percentage;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -169,19 +171,23 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			
 			} else {
 				
-				int tParallelBatchSize = 10000;
+				int tParallelBatchSize = 1000;
 				
 				int nObj = archive.size();
 				
-				while ( tParallelBatchSize > nObj) {
-					tParallelBatchSize = tParallelBatchSize / 10;
+				while ( tParallelBatchSize > nObj/2) {
+					tParallelBatchSize = nObj / 10;
 				}
 				
 				final int parallelBatchSize = tParallelBatchSize;
 				
 				Iterator<AbstractFeaturesCollector> it = archive.iterator();
 				// iterates through multiple batches
+				TimeManager tm = new TimeManager();
 				for (int iObj = 0; iObj < nObj;  ) {
+					
+					if ( tm.hasToOutput() ) Log.info_verbose("\t"+ iObj + "/" + nObj + "\t" + Percentage.getString(iObj, nObj));
+					
 					
 					int batchSize = parallelBatchSize;
 					if ( iObj + parallelBatchSize > nObj ) batchSize = nObj-iObj;
@@ -211,7 +217,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		        		if ( t != null ) t.join();
 			        }
 			        ParallelOptions.free(bnt);
-					Log.info(iObj + "/" + nObj);
+					
 				}
 			}
 		}

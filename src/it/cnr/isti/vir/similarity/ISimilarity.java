@@ -18,7 +18,7 @@ import java.io.DataInputStream;
 
 
 public interface ISimilarity<F> {
-
+	
 	public double distance( F f1, F f2);
 
 	public double distance( F f1, F f2, double max);

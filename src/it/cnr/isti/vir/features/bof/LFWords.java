@@ -24,12 +24,12 @@ import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.similarity.ILFSimilarity;
 import it.cnr.isti.vir.similarity.SimilarityClasses;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueue_kNN;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
-import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.SplitInGroups;
 
@@ -127,6 +127,30 @@ public class LFWords<F extends AbstractFeature> {
 		return getIDF( new FeaturesCollectorsArchives( new FeaturesCollectorsArchive[]{archive}), n );
 	}
 	
+	public static float[] getIDF_inferringNWords(FeaturesCollectorsArchives archives ) throws ArchiveException {
+	
+		int n = getNumberOfWords(archives);
+		
+		return getIDF(archives, n);
+	}
+	
+	public static int getNumberOfWords(FeaturesCollectorsArchives archives ) throws ArchiveException {
+		int maxIDWord = -1;
+		for ( int i=0; i<archives.getNArchives(); i++) {
+			FeaturesCollectorsArchive archive = archives.getArchive(i);
+			for (AbstractFeaturesCollector curr : archive  ) {
+				BoFLFGroup currBoF = (BoFLFGroup) curr.getFeature(BoFLFGroup.class);
+				BoFLF[] arr = currBoF.getLocalFeatures();
+				for (int ib = 0; ib < arr.length; ib++) {
+					int currBag = arr[ib].bag;
+					if ( currBag > maxIDWord)
+						maxIDWord = currBag;
+				}
+			}
+		}
+		return maxIDWord+1;
+	}
+	
 	public static float[] getIDF(FeaturesCollectorsArchives archives, int n ) throws ArchiveException {
 		float[] res = new float[n];
 		int[] t = new int[n];
@@ -155,6 +179,7 @@ public class LFWords<F extends AbstractFeature> {
 		}
 		return res;
 	}
+	
 	/*
 	public float[] getIDF_byClass( FeaturesCollectorsArchives archives, HashMap<IDString, AbstractLabel> idClass ) throws ArchiveException {
 		

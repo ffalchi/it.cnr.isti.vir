@@ -11,6 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.geom.AbstractTransformation;
 import it.cnr.isti.vir.geom.AffineTransformation;
@@ -34,13 +35,8 @@ public class LocalFeaturesMatches {
 
 	private long hashCode;
 	
-//	int nHoughMaxForRANSAC = 50;
     protected ArrayList<LocalFeatureMatch> matchesColl;
 
-//	public LocalFeaturesMatches(Collection<LocalFeatureMatch> matches) {
-//		super();
-//		this.matches = matches;
-//	}
     public LocalFeatureMatch get(int i) {
     	return matchesColl.get(i);
     }
@@ -52,10 +48,26 @@ public class LocalFeaturesMatches {
     public ALocalFeaturesGroup getMatchingLFGroup() {
         return matchesColl.get(0).lfMatching.getLinkedGroup();
     }
-
+    
+    public synchronized ALocalFeature[] getSourceMatchingLF() {
+    	ALocalFeature[] res = new ALocalFeature[matchesColl.size()];
+    	int i=0;
+    	for ( LocalFeatureMatch match : matchesColl ) {
+    		res[i++] = match.lf;
+    	}
+    	return res;
+    }
+    
+    public synchronized ALocalFeature[] getDestinationLF() {
+    	ALocalFeature[] res = new ALocalFeature[matchesColl.size()];
+    	int i=0;
+    	for ( LocalFeatureMatch match : matchesColl ) {
+    		res[i++] = match.lf;
+    	}
+    	return res;
+    }
+    
     public BufferedImage overPrintBox(BufferedImage img, float[][] givenBox, Color color) {
-
-        //BufferedImage outImg = new BufferedImage( img.getWidth(), img.getHeight(), BufferedImage.TYPE_3BYTE_BGR );
 
         Graphics2D graphics2D = img.createGraphics();
 
@@ -398,6 +410,7 @@ public class LocalFeaturesMatches {
 ////		System.out.println(best.toString());
 //
 //	}
+    
     public int nextIDs(int[] currIDs, int nObjects) {
         int lastModified = currIDs.length - 1;
         currIDs[lastModified]++;
@@ -550,24 +563,34 @@ public class LocalFeaturesMatches {
 
     }
 
+    /**
+     * @param ht					LocalFeaturesMatches in bins
+     * @param cycles				number of cycles
+     * @param nHoughMaxForRANSAC	number of best bins to consider
+     * @param error					max relative distance
+     * @param trClass				trasformation to be searched
+     * @param minDist				min distance between matches
+     * @param onlyBest				if true, the algorithm returns only the best hypothesis
+     * @param rejectUnConsistent	if true, unconsistent matches set are rejected
+     * @return
+     */
     public ArrayList<TransformationHypothesis>
     	getRANSAC(	Hashtable<Long, LocalFeaturesMatches> ht,
-    				int cycles_deprecated,
+    				int cycles,
     				int nHoughMaxForRANSAC,
     				double error,
     				Class trClass,
     				double minDist,
-    				boolean onlyFirst,
+    				boolean onlyBest,
     				boolean rejectUnConsistent ) {
     	
 
     	int nPoints = Transformations.getNPointsForEstimation(trClass);
     	
-		int cycles = cycles_deprecated;
-//        int cycles = (int) getNHypothesizes( 0.25, nPoints ) + 1;
+//      int cycles = (int) getNHypothesizes( 0.25, nPoints ) + 1;
 		
         int maxNPointsFound = 0;
-        if ( !onlyFirst ) {
+        if ( !onlyBest ) {
         	maxNPointsFound = -1;
         }
         
@@ -619,8 +642,7 @@ public class LocalFeaturesMatches {
 			if (cycles > total / 2) {
 				int[] index = new int[nPoints];
 				for (int count = 0; count < total; count++) {
-					// we can check all
-					
+					// we can check all					
 					
 					if ( count == 0 ) {
 						// initializing
@@ -635,24 +657,21 @@ public class LocalFeaturesMatches {
 						if (lastModified < 0) break;
 					}
 					
-					// CHECK
+					// Check if the set of matches is strong enough for trasformation evaluation
 					boolean rejected = false;
 					for (int ti = lastModified; ti < index.length; ti++) {
 						LocalFeatureMatch m = currMatches.get(index[ti]);
 						pSrc[ti] = m.getMatchingNormXY();
 						pDest[ti] = m.getNormXY();
-						if (  !rejected )
-							rejected = reject(pSrc, pDest, ti, minDist, scaleBin, oriBin, rejectUnConsistent);
-					}
-														
-					if (rejected)
-						continue;
+						if ( !rejected ) rejected = reject(pSrc, pDest, ti, minDist, scaleBin, oriBin, rejectUnConsistent);
+					}														
+					if (rejected) continue;
 	
-					//actualCount++;
 					// searching for Transformation that maps imgSrc in imgDest
 					AbstractTransformation t = Transformations.getTransformation(trClass, pSrc, pDest);
-					if (t == null)
-						continue;
+					if (t == null) 	continue;
+					
+					// filtering the matches according to the evaluated trasformation
 					LocalFeaturesMatches tempFiltered = getFiltered_L2(currMatches, t, errorSquare, maxNPointsFound);
 	
 					if (tempFiltered.size() > nPoints && (bestFilteredMatches == null || tempFiltered.size() > bestFilteredMatches.size())) {
@@ -699,7 +718,7 @@ public class LocalFeaturesMatches {
 			}
 			if (bestFilteredMatches != null) {
 				if ( maxNPointsFound >= 0 ) {
-					// this is searching onlyl for best Hypothesis
+					// this is searching only for best Hypothesis
 					if ( bestFilteredMatches.size() > maxNPointsFound ) {
 						maxNPointsFound = bestFilteredMatches.size();
 						res.add(new TransformationHypothesis(bestTr, bestFilteredMatches));
@@ -759,7 +778,19 @@ public class LocalFeaturesMatches {
 
     }
 
-    private static boolean reject(float[][] pSrc, float[][] pDest, int n, double minDist, byte scaleBin, byte oriBin, boolean rejectUnConsistent) {
+    /**
+     * This method is used to avoid weak match sets in evaluating the trasformation
+     * 
+     * @param pSrc					source points
+     * @param pDest					destination keypoints
+     * @param n						index of the match to be considered
+     * @param minDist				min distance between matching pairs
+     * @param scaleBin				expected scale bin
+     * @param oriBin				expected orientation bin
+     * @param rejectUnConsistent	if true, not consistent (scale and ori) matches are rejeceted
+     * @return
+     */
+    private static final boolean reject(float[][] pSrc, float[][] pDest, int n, double minDist, byte scaleBin, byte oriBin, boolean rejectUnConsistent) {
     	// checks point n with previous ones (iDup<n) for consistency
     	for (int iDup = 0; iDup < n; iDup++) {
             if (    (   Math.abs(pDest[iDup][0] - pDest[n][0]) 		< minDist
@@ -841,6 +872,8 @@ public class LocalFeaturesMatches {
 //
 //        return good;
 //    }
+    
+   
     private final static LocalFeaturesMatches getFiltered_L2(LocalFeaturesMatches matches, AbstractTransformation t, double errorSquare) {
     	return getFiltered_L2(matches, t, errorSquare, -1);
     }

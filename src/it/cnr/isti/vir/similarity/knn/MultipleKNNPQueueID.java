@@ -12,11 +12,11 @@
 package it.cnr.isti.vir.similarity.knn;
 
 import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.similarity.metric.IMetric;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
-import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.Reordering;
 import it.cnr.isti.vir.util.SplitInGroups;
 

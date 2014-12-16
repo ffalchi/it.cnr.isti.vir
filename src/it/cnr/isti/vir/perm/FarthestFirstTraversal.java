@@ -15,11 +15,11 @@ import it.cnr.isti.vir.clustering.Centroids;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.metric.SAPIRMetric;
-import it.cnr.isti.vir.util.Log;
-import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.SimilarityUtil;
 

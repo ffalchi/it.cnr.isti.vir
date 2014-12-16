@@ -27,6 +27,7 @@ import it.cnr.isti.vir.geom.HomographyTransformation;
 import it.cnr.isti.vir.geom.RSTTransformation;
 import it.cnr.isti.vir.geom.TransformationHypothesis;
 import it.cnr.isti.vir.geom.Transformations;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
 import it.cnr.isti.vir.similarity.LoweHoughTransform;
@@ -40,7 +41,6 @@ import it.cnr.isti.vir.similarity.pqueues.SimPQueue_kNN;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
-import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.SplitInGroups;
 
 import java.util.ArrayList;

@@ -18,7 +18,6 @@ import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.knn.KNNPQueue;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
-import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,6 +52,12 @@ public class SimilarityCollection implements IkNNExecuter {
 		return knn.getResults();
 	}
 
+	public synchronized ISimilarityResults[] getKNNResults(Collection<AbstractFeaturesCollector> qObj, int k) throws InterruptedException {
+		AbstractFeaturesCollector[] temp = new AbstractFeaturesCollector[qObj.size()];
+		qObj.toArray(temp);
+		return getKNNResults( temp, k);
+	}
+	
 	public synchronized ISimilarityResults[] getKNNResults(AbstractFeaturesCollector[] qObj, int k) throws InterruptedException {
 		ISimilarityResults[] res = new ISimilarityResults[qObj.length];
 		for ( int i=0; i<res.length; i++) {

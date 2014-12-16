@@ -14,8 +14,8 @@ package it.cnr.isti.vir.readers;
 import it.cnr.isti.vir.features.mpeg7.SAPIRObject;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive_Buffered;
+import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.id.IDInteger;
-import it.cnr.isti.vir.util.Log;
 
 import java.io.File;
 import java.io.FilenameFilter;

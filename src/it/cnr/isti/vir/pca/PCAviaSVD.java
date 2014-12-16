@@ -11,7 +11,8 @@
  ******************************************************************************/
 
 package it.cnr.isti.vir.pca;
-import it.cnr.isti.vir.util.Log;
+import it.cnr.isti.vir.global.Log;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.*;
 import org.ejml.ops.SingularOps;

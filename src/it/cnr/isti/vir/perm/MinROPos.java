@@ -16,14 +16,14 @@ import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.Permutation;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.SpearmanFootrule;
 import it.cnr.isti.vir.similarity.SpearmanRho;
 import it.cnr.isti.vir.similarity.metric.SAPIRMetric;
-import it.cnr.isti.vir.util.Log;
 import it.cnr.isti.vir.util.Nulls;
-import it.cnr.isti.vir.util.ParallelOptions;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.Statistic;
 

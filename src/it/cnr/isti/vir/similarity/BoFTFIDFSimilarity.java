@@ -22,6 +22,8 @@ import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
+import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
+import it.cnr.isti.vir.global.Log;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -54,13 +56,16 @@ public class BoFTFIDFSimilarity implements ISimilarity<BoFLFGroup>, IRequiresIDF
 		if ( archiveForIDFStr != null ) {
 			String nWordsStr = properties.getProperty("BoFTFIDFSimilarity.nWords");
 			if ( nWordsStr == null ) {
-				throw new SimilarityOptionException("BoFTFIDFSimilarity.nWords not found in properties");
+				Log.info("Evaluating IDF on " + archiveForIDFStr + " inferring number of Words");
+				idf = LFWords.getIDF_inferringNWords(FeaturesCollectorsArchives.getFromSingleArchive(archiveForIDFStr));
+				Log.info("Evaluating IDF " + idf.length + " were found.");
 			} else {
 				int nWords = Integer.parseInt(nWordsStr);
-				LFWords fakeWords = new LFWords(nWords);
-				System.out.println("Evaluating IDF");
-				idf = fakeWords.getIDF(new FeaturesCollectorsArchive(archiveForIDFStr));			
-			}			
+				Log.info("Evaluating IDF on " + archiveForIDFStr);
+				idf = LFWords.getIDF(new FeaturesCollectorsArchive(archiveForIDFStr), nWords);			
+			}
+		} else {
+			Log.info("BoFTFIDFSimilarity was created without TF beacuse BoFTFIDFSimilarity.archiveForIDF was not found in properties.");
 		}
 		
 		
