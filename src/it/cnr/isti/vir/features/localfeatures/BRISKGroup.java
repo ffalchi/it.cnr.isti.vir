@@ -123,7 +123,7 @@ public class BRISKGroup extends ALocalFeaturesGroup<BRISK> {
 	
 
 	public static BRISKGroup getRandom() {
-		BRISK[] lfArr = new BRISK[RandomOperations.getInt(1000)];
+		BRISK[] lfArr = new BRISK[RandomOperations.getInt(1001)];
 		
 		return new BRISKGroup(lfArr);
 	}

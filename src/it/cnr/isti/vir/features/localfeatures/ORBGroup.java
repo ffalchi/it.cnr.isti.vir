@@ -123,7 +123,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	
 
 	public static ORBGroup getRandom() {
-		ORB[] lfArr = new ORB[RandomOperations.getInt(1000)];
+		ORB[] lfArr = new ORB[RandomOperations.getInt(1001)];
 		
 		return new ORBGroup(lfArr);
 	}

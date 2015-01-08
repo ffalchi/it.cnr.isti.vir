@@ -121,7 +121,7 @@ public class FREAKGroup extends ALocalFeaturesGroup<FREAK> {
 	
 
 	public static FREAKGroup getRandom() {
-		FREAK[] lfArr = new FREAK[RandomOperations.getInt(1000)];
+		FREAK[] lfArr = new FREAK[RandomOperations.getInt(1001)];
 		
 		return new FREAKGroup(lfArr);
 	}

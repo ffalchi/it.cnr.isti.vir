@@ -45,6 +45,10 @@ public class FeaturesCollectorsArchives {
 		return new FeaturesCollectorsArchives( new FeaturesCollectorsArchive( archiveFName ) );
 	}
 	
+	/**
+	 * @param archiveDirName
+	 * @param readIDs			specify if IDs are needed
+	 */
 	public FeaturesCollectorsArchives(String archiveDirName, boolean readIDs) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		this(new File(archiveDirName), readIDs);
 	}
@@ -234,6 +238,9 @@ public class FeaturesCollectorsArchives {
 
 		return res;
 	}
+	
+	
+	
 
 	
 }

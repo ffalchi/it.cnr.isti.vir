@@ -19,18 +19,47 @@ import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
 import it.cnr.isti.vir.features.bof.LFWords;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.pca.PrincipalComponents;
+import it.cnr.isti.vir.util.WorkingPath;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
-import it.cnr.isti.vir.util.math.Norm;
 import it.cnr.isti.vir.util.math.Normalize;
-import it.cnr.isti.vir.util.math.VectorMath;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Properties;
 
 public class VLAD extends AbstractFeature implements IFloatValues {
- 
+
+	public static LFWords ref = null;
+	
+	public static LFWords getReferences() {
+		return ref;
+	}
+
+	public static void setReferences(LFWords ref) {
+		VLAD.ref = ref;
+	}
+
+	public static void setReferences(File file) throws Exception {
+		setReferences( new LFWords(file) );
+		Log.info_verbose("VLAD References were set using " + file.getAbsolutePath());
+	}
+	
+	public static PrincipalComponents getPCAProjection() {
+		return pca;
+	}
+
+	public static void setPCAProjection(PrincipalComponents pca) {
+		VLAD.pca = pca;
+	}
+
+
+	public static PrincipalComponents pca = null;
+	
 	public AbstractFeaturesCollector linkedFC;
 	float[] values;
 	
@@ -49,6 +78,19 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 		return values.length;
 	}
 	
+	public final void init(Properties prop) throws Exception {
+		String refFileName = prop.getProperty("VLAD.references");
+		if ( refFileName != null ) {
+			setReferences(WorkingPath.getFile(refFileName));
+		}
+		
+		String pcaFileName = prop.getProperty("VLAD.PCA");
+		if ( pcaFileName != null ) {
+			setReferences(WorkingPath.getFile(pcaFileName));
+		}
+		
+		
+	}
 	
 	@Override
 	public void writeData(DataOutput out) throws IOException {
@@ -108,7 +150,12 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 	}
 
 
-	
+	public static final VLAD getVLAD(ALocalFeaturesGroup features ) throws Exception {
+		if ( ref == null ) {
+			return getVLAD(features, ref);
+		} 
+		throw new Exception("No references have been defined for VLAD");
+	}
 	
     public static final  VLAD getVLAD(ALocalFeaturesGroup features, LFWords fWords) throws Exception {
     	ALocalFeature[] refs = (ALocalFeature[]) fWords.getFeatures();
@@ -204,12 +251,14 @@ public class VLAD extends AbstractFeature implements IFloatValues {
         return new VLAD(values);
     }
     
+    
+    /*
 	public static final VLAD gVLAD(ALocalFeaturesGroup group, LFWords words) throws Exception {
 		if ( group instanceof SIFTGroup ) {
 			return getVLAD((SIFTGroup) group, words);
 		}
 		return null;
-	}
+	}*/
 	
 	
 

@@ -290,8 +290,8 @@ public class HomographyTransformation extends AbstractTransformation {
     // http://stackoverflow.com/questions/10667834/trying-to-understand-the-affine-transform/
     public boolean isNice_Other()
     {
-    	
-        double det = values[0] * values[4] - values[3] * values[2];
+    	// orientation not reversing
+        double det = values[0] * values[4] - values[3] * values[1];
         if (det < 0)
           return false;
 

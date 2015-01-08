@@ -102,6 +102,13 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValu
 		return 0;
 	}
 	
+	/**
+	 * This is the core of the RootSIFT 
+	 * 
+	 * @param value
+	 * @param sum
+	 * @return
+	 */
 	public final static int getRootSIFTValue( int value, int sum ) {
 		return (int)
 			(

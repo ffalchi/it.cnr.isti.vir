@@ -36,6 +36,10 @@ public class TransformationHypothesis implements Comparable {
         this.matches = matches;
     }
     
+    public AbstractTransformation getTransformation() {
+    	return trNorm;
+    }
+    
     public AbstractTransformation getTrDeNorm() {
         return trNorm.getDeNormalized(matches.getLFGroup(), matches.getMatchingLFGroup());
     }
@@ -43,8 +47,6 @@ public class TransformationHypothesis implements Comparable {
     public LocalFeaturesMatches getMatches() {
         return matches;
     }
-
-
 
     public Double getMaxPercentageMatches() {
         if ( maxPercentageMatches == null ) initPercentageMatches();

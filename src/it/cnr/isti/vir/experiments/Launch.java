@@ -126,7 +126,7 @@ public class Launch {
 	        System.out.println("\n--------------------------------");
 	        System.out.format("%s with properties file %s ended%n", c.getName() , propertyFileName);
 	        System.out.println("DateTime: " + DateTime.now());
-	        System.out.println("TotalTime: " +  Time.getString(endTime-startTime) );
+	        System.out.println("TotalTime: " +  Time.getString_millis(endTime-startTime) );
 	        System.out.println("--------------------------------");
 	        
 	        // production code should handle these exceptions more gracefully

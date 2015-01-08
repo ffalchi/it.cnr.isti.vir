@@ -13,6 +13,7 @@ package it.cnr.isti.vir.util;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -60,7 +61,8 @@ public class RandomOperations {
 	}
 	
 	/**
-	 * @param max inclusive max int
+	 * Returns random int (0 inclusive, max exclusive)
+	 * @param exclusive max int
 	 * @return
 	 */
 	public static final int getInt( int max) {
@@ -108,13 +110,19 @@ public class RandomOperations {
 		return arr;
 	}
 	
+	
+	
+
 	/**
+	 * Returns size ints betweeon 0 (inclusive) and max (exclusive)
+	 * 
 	 * @param size
-	 * @param max	Inclusive max
+	 * @param max
 	 * @return
 	 */
 	public static int[] getDistinctInts(int size, int max) {
 		HashSet<Integer> hSet = new HashSet(2*size);
+
 		int[] arr = new int[size];
 		for ( int i=0; i<arr.length; i++) {
 			int temp = getInt( max);
@@ -174,74 +182,102 @@ public class RandomOperations {
 		return arr;
 	}
 	
+
+	/**
+	 * Fisher–Yates shuffle
+	 * @param arr
+	 */
 	public static final void shuffle(Object[] arr) {
-		//--- Shuffle by exchanging each element randomly
-		for (int i=0; i<arr.length; i++) {
-		    int randomPosition = r.nextInt(arr.length);
-		    Object temp = arr[i];
-		    arr[i] = arr[randomPosition];
-		    arr[randomPosition] = temp;
-		}
+
+	    for (int i = arr.length - 1; i > 0; i--)
+	    {
+	      int index = r.nextInt(i + 1);
+	      // Simple swap
+	      Object a = arr[index];
+	      arr[index] = arr[i];
+	      arr[i] = a;
+	    }
 	}
 	
+	/**
+	 * Fisher–Yates shuffle
+	 * @param arr
+	 */
 	public static final void shuffle(int[] arr) {
-		//--- Shuffle by exchanging each element randomly
-		for (int i=0; i<arr.length; i++) {
-		    int randomPosition = r.nextInt(arr.length);
-		    int temp = arr[i];
-		    arr[i] = arr[randomPosition];
-		    arr[randomPosition] = temp;
-		}
+		for (int i = arr.length - 1; i > 0; i--)
+	    {
+	      int index = r.nextInt(i + 1);
+	      // Simple swap
+	      int a = arr[index];
+	      arr[index] = arr[i];
+	      arr[i] = a;
+	    }
 	}
 	
+	/**
+	 * Fisher–Yates shuffle
+	 * @param arr
+	 */
 	public static final void shuffle(Object[] arr1, Object[] arr2) {
-		//--- Shuffle by exchanging each element randomly
-		for (int i=0; i<arr1.length; i++) {
-		    int randomPosition = r.nextInt(arr1.length);
-		    Object temp = arr1[i];
-		    arr1[i] = arr1[randomPosition];
-		    arr1[randomPosition] = temp;
-		    temp = arr2[i];
-		    arr2[i] = arr2[randomPosition];
-		    arr2[randomPosition] = temp;
+	    for (int i = arr1.length - 1; i > 0; i--)
+	    {
+	      int index = r.nextInt(i + 1);
+	      
+	      Object a = arr1[index];
+	      arr1[index] = arr1[i];
+	      arr1[i] = a;
+	      
+	      a = arr2[index];
+	      arr2[index] = arr2[i];
+	      arr2[i] = a;
 		}
 	}
 	
+	/**
+	 * Fisher–Yates shuffle
+	 * @param arr
+	 */
 	public static final void shuffle(Object[] arr1, int[] arr2) {
-		//--- Shuffle by exchanging each element randomly
-		for (int i=0; i<arr1.length; i++) {
-		    int randomPosition = r.nextInt(arr1.length);
-		    Object temp = arr1[i];
-		    arr1[i] = arr1[randomPosition];
-		    arr1[randomPosition] = temp;
-		    int intTemp = arr2[i];
-		    arr2[i] = arr2[randomPosition];
-		    arr2[randomPosition] = intTemp;
+	    for (int i = arr1.length - 1; i > 0; i--)
+	    {
+	      int index = r.nextInt(i + 1);
+	      
+	      Object a = arr1[index];
+	      arr1[index] = arr1[i];
+	      arr1[i] = a;
+	      
+	      int a2 = arr2[index];
+	      arr2[index] = arr2[i];
+	      arr2[i] = a2;
 		}
 	}
 	
+	/**
+	 * Fisher–Yates shuffle
+	 * @param arr1
+	 * @param arr2
+	 */
 	public static final void shuffle(Object[] arr1, float[] arr2) {
-		//--- Shuffle by exchanging each element randomly
-		for (int i=0; i<arr1.length; i++) {
-		    int randomPosition = r.nextInt(arr1.length);
-		    Object temp = arr1[i];
-		    arr1[i] = arr1[randomPosition];
-		    arr1[randomPosition] = temp;
-		    float t = arr2[i];
-		    arr2[i] = arr2[randomPosition];
-		    arr2[randomPosition] = t;
+	    for (int i = arr1.length - 1; i > 0; i--)
+	    {
+	      int index = r.nextInt(i + 1);
+	      
+	      Object a = arr1[index];
+	      arr1[index] = arr1[i];
+	      arr1[i] = a;
+	      
+	      float a2 = arr2[index];
+	      arr2[index] = arr2[i];
+	      arr2[i] = a2;
 		}
 	}
 	
+	/**
+	 * Java shuffle
+	 * @param arr
+	 */
 	public static final void shuffle(ArrayList arr) {
-		//--- Shuffle by exchanging each element randomly
-		int size = arr.size();
-		for (int i=0; i<size; i++) {
-		    int randomPosition = r.nextInt(size);
-		    Object temp = arr.get(i);
-		    arr.set(i, arr.get(randomPosition));
-		    arr.set(randomPosition, temp);
-		}
+		Collections.shuffle(arr);
 	}
 	
 	public static final LinkedList getNRandomObjectList( LinkedList givenList, int n ) {
@@ -360,6 +396,23 @@ public class RandomOperations {
 		}
 		return res;
 	}
+	
+	/**
+	 * Get complete integers between min (inclusive) and max (exclusive)
+	 * random ordered.
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	public static final int[] getRandomOrderedInts(int min, int max) {
+		int[] res = new int[max-min];
+		int curr = min;
+		for ( int i=0; i<res.length; i++) {
+			res[i] = curr++;
+		}
+		shuffle(res);
+		return res;
+	}
 
 	public static boolean getBoolean() {
 		return r.nextBoolean();
@@ -400,7 +453,7 @@ public class RandomOperations {
 	public static final long[] getPerturbated(long[] orig, int nBitsPerturbated) {
 		long[] res = orig.clone();
 		int nBits = Long.SIZE * orig.length;
-		int[] pert = RandomOperations.getDistinctInts(nBitsPerturbated, nBits-1);
+		int[] pert = RandomOperations.getDistinctInts(nBitsPerturbated, nBits);
 		
 		for(int bit : pert) {
 			int pos = bit/Long.SIZE;

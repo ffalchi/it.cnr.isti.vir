@@ -186,7 +186,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				TimeManager tm = new TimeManager();
 				for (int iObj = 0; iObj < nObj;  ) {
 					
-					if ( tm.hasToOutput() ) Log.info_verbose("\t"+ iObj + "/" + nObj + "\t" + Percentage.getString(iObj, nObj));
+					if ( tm.hasToOutput() ) Log.info_verbose(tm.getProgressString(iObj, nObj));
 					
 					
 					int batchSize = parallelBatchSize;

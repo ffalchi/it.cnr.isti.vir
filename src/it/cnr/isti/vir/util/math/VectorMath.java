@@ -55,11 +55,54 @@ public class VectorMath {
 		return res;
 	}
 	
+	public static final double scalarProduct( double[] a, double[] b) {
+		double res = 0;
+		
+		for ( int i=0; i<a.length; i++) {
+			res += a[i] * b[i];
+		}
+		
+		return res;		
+	}
+	
+	public static final float scalarProduct( float[] a, float[] b) {
+		float res = 0;
+		
+		for ( int i=0; i<a.length; i++) {
+			res += a[i] * b[i];
+		}
+		
+		return res;		
+	}
+	
 	public static final void multiply(float[] v, float c) {
 		int nD = v.length;
 		for (int iD = 0; iD < nD; iD++) {
 			v[iD] *= c;
 		}
+	}
+	
+	public static final void multiply(double[] v, double c) {
+		int nD = v.length;
+		for (int iD = 0; iD < nD; iD++) {
+			v[iD] *= c;
+		}
+	}
+	
+	public static final float[] getFloats_UBytes(byte[] values ) {
+		float[] res = new float[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = (values[i] + 128);
+		}
+		return res;		
+	}
+
+	public static final float[] getFloats(byte[] values ) {
+		float[] res = new float[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = values[i];
+		}
+		return res;		
 	}
 
 	public static final float[] getFloats(int[] values ) {
@@ -77,7 +120,23 @@ public class VectorMath {
 		}
 		return res;		
 	}
+	
+	public static final double[] getDoubles_UBytes(byte[] values ) {
+		double[] res = new double[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = (values[i] + 128);
+		}
+		return res;		
+	}
 
+	public static final double[] getDoubles(byte[] values ) {
+		double[] res = new double[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = values[i];
+		}
+		return res;		
+	}
+	
 	public static final double[] getDoubles(int[] values ) {
 		double[] res = new double[values.length];
 		for ( int i=0; i<values.length; i++) {
@@ -92,7 +151,14 @@ public class VectorMath {
 			res[i] = values[i];
 		}
 		return res;		
+	}
+
+	public static final void add(double[] a, double[] b) {
+		for ( int i=0; i<a.length; i++) {
+			a[i] += b[i];
+		}
 	}	
-	
+
+		
 }
 

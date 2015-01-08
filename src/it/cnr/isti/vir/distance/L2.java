@@ -38,6 +38,18 @@ public class L2 {
 		return  Math.sqrt(getSquared(f1,f2));
 	}
 
+	public static double get(double[]f1, double[]f2) {
+		return  Math.sqrt(getSquared(f1,f2));
+	}
+	
+	public static double getSquared(double[]f1, double[]f2) {
+		double acc = 0;
+		for ( int j=0; j<f1.length; j++) {
+			double diff = f1[j] - f2[j];
+			acc += diff * diff;
+		}
+		return acc; 
+	}
 	
 	public static double getSquared(float[]f1, float[]f2) {
 		double acc = 0;

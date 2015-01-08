@@ -15,10 +15,12 @@ import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
+import it.cnr.isti.vir.similarity.results.SimilarityResults;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -67,10 +69,40 @@ public class PrecisionRecall {
 		}
 	}
 
-	/*
-	 * Average Precision
-	 * Area below the average precision curve
+	/**
+	 * @param res					Array of results (including quueryID)
+	 * @param gTruth				HashMap of QueryID and Expected Results
+	 * @return
 	 */
+	public static Collection<PrecisionRecall> getPrecisionRecalls(ISimilarityResults[] res,  HashMap<AbstractID,ArrayList<AbstractID>> gTruth ) {
+		
+		ArrayList<PrecisionRecall> prs = new ArrayList<PrecisionRecall>(res.length);
+		
+		double apSum = 0; 
+		
+		// for each results list
+		for ( int i=0; i<res.length; i++) {
+			// results
+			SimilarityResults cRes = (SimilarityResults) res[i];
+			
+			// query
+			AbstractID query = ((IHasID) cRes.getQuery()).getID();
+			
+			// expected results
+			HashSet expectedResults = new HashSet(gTruth.get(query));
+			
+			prs.add( PrecisionRecall.getPrecisionRecall(cRes, expectedResults, query) );
+			
+		}
+		
+		return prs;
+	}
+	
+
+	public static PrecisionRecall getPrecisionRecall(ISimilarityResults results, HashSet positiveIDs, AbstractID qID ) {
+		return getPrecisionRecall(results, positiveIDs, null, qID);
+	}
+	
 	public static PrecisionRecall getPrecisionRecall(ISimilarityResults results, HashSet positiveIDs, HashSet ambiguosIDs, AbstractID qID ) {
 		ArrayList<AbstractID> ids = new ArrayList();
 		for ( Iterator<ObjectWithDistance> it = results.iterator(); it.hasNext(); ) {
@@ -81,17 +113,16 @@ public class PrecisionRecall {
 		  return getPrecisionRecall(ids, positiveIDs, ambiguosIDs, qID);
 	}
 	
-	/*
-	 * Average Precision
-	 * Area below the average precision curve
-	 */
+	public static PrecisionRecall getPrecisionRecall(Collection<AbstractID> results, HashSet positiveIDs, AbstractID qID ) {
+		return getPrecisionRecall(results, positiveIDs, null, qID);
+	}
+	
 	public static  PrecisionRecall getPrecisionRecall(Collection<AbstractID> results, HashSet positiveIDs, HashSet ambiguosIDs, AbstractID qID ) {
+		
 		  double old_recall = 0.0;
 		  double old_precision = 1.0;
-		  double ap = 0.0;
 		  
 		  int intersect_size = 0;
-		  //int i = 0;
 		  int j = 0;
 		  
 		  PrecisionRecall res = new PrecisionRecall();
@@ -106,8 +137,6 @@ public class PrecisionRecall {
 		    double recall = intersect_size / (double) positiveIDs.size();
 		    double precision = intersect_size / (j + 1.0);
 
-		    ap += (recall - old_recall)*((old_precision + precision)/2.0);
-
 		    if ( recall != old_recall || precision != old_precision )
 		    	res.add(precision, recall);
 		    
@@ -119,6 +148,7 @@ public class PrecisionRecall {
 		    if ( recall == 1.0 ) {
 		    	break;
 		    }
+		    
 		  }
 		  return res;
 	}
@@ -131,6 +161,13 @@ public class PrecisionRecall {
 		return tStr;
 	}
 	
+
+	
+	/**
+	 * @param prs			Collection of PrecisionRecall
+	 * @param nSampling		Number of recall samplig
+	 * @return
+	 */
 	public static PrecisionRecall getAvg(Collection<PrecisionRecall> prs, int nSampling) {
 		PrecisionRecall res = new PrecisionRecall();
 
@@ -149,22 +186,22 @@ public class PrecisionRecall {
 		} 
 		return res;
 	}
+
+	
 	
 	public double getAveragePrecision() {
 		  PrecisionRecallPoint before = new PrecisionRecallPoint(1.0,0);
 		  
 		  double ap = 0;
 		  for ( PrecisionRecallPoint pr : points ) {
-			  ap += 
-					  (pr.recall - before.recall)
+			  ap +=   (pr.recall - before.recall)
 					  *
 					  (pr.precision + before.precision)
 					  / 2.0;
+			  if ( pr.recall == 1.0 ) break;
 			  before = pr;
 		  }
-		  
-		  
+		  		  
 		  return ap;
 	}
-
 }

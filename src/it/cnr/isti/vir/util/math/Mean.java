@@ -11,9 +11,19 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util.math;
 
+import it.cnr.isti.vir.features.IArrayValues;
+import it.cnr.isti.vir.features.IByteValues;
+import it.cnr.isti.vir.features.IDoubleValues;
+import it.cnr.isti.vir.features.IFloatValues;
+import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.IUByteValues;
+
+import java.util.Collection;
+
 
 public  class Mean {
 
+	
 	public static byte[] getMean(byte[][] data) {
 		final int dim = data[0].length;
 		final int n = data.length;
@@ -105,4 +115,78 @@ public  class Mean {
 		return avg / count;
 	}
 	
+	
+
+	public static final double[] getMeans(Collection<? extends IArrayValues> coll) throws Exception {
+		if ( coll.size() == 0 ) return null;
+		IArrayValues firstObj = coll.iterator().next();
+		
+		if ( firstObj instanceof IDoubleValues)
+			return getMeans_fromDoubles( (Collection<IDoubleValues>) coll );
+		
+		if ( firstObj instanceof IFloatValues)
+			return getMeans_fromFloats( (Collection<IFloatValues>) coll );
+		
+		if ( firstObj instanceof IIntValues)
+			return getMeans_fromInts( (Collection<IIntValues>) coll );
+		
+		if ( firstObj instanceof IByteValues)
+			return getMeans_fromBytes( (Collection<IByteValues>) coll );
+
+		if ( firstObj instanceof IUByteValues)
+			return getMeans_fromUBytes( (Collection<IUByteValues>) coll );
+		
+		throw new Exception("Collection objet type was unknown");
+				
+	}
+	
+	private static final double[] getMeans_fromDoubles(Collection<IDoubleValues> coll) {
+		double[] res = new double[coll.iterator().next().getLength()];
+		
+		for ( IDoubleValues curr : coll ) {
+			VectorMath.add(res, curr.getValues());
+		}
+		VectorMath.multiply(res, 1/coll.size());
+		return res;
+	}
+	
+	private static final double[] getMeans_fromFloats(Collection<IFloatValues> coll) {
+		double[] res = new double[coll.iterator().next().getLength()];
+		
+		for ( IFloatValues curr : coll ) {
+			VectorMath.add(res,  VectorMath.getDoubles(curr.getValues()));
+		}
+		VectorMath.multiply(res, 1/coll.size());
+		return res;
+	}
+	
+	private static final double[] getMeans_fromInts(Collection<IIntValues> coll) {
+		double[] res = new double[coll.iterator().next().getLength()];
+		
+		for ( IIntValues curr : coll ) {
+			VectorMath.add(res,  VectorMath.getDoubles(curr.getValues()));
+		}
+		VectorMath.multiply(res, 1/coll.size());
+		return res;
+	}
+	
+	private static final double[] getMeans_fromBytes(Collection<IByteValues> coll) {
+		double[] res = new double[coll.iterator().next().getLength()];
+		
+		for ( IByteValues curr : coll ) {
+			VectorMath.add(res,  VectorMath.getDoubles(curr.getValues()));
+		}
+		VectorMath.multiply(res, 1/coll.size());
+		return res;
+	}
+	
+	private static final double[] getMeans_fromUBytes(Collection<IUByteValues> coll) {
+		double[] res = new double[coll.iterator().next().getLength()];
+		
+		for ( IUByteValues curr : coll ) {
+			VectorMath.add(res,  VectorMath.getDoubles_UBytes(curr.getValues()));
+		}
+		VectorMath.multiply(res, 1/coll.size());
+		return res;
+	}
 }

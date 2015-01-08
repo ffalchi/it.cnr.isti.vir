@@ -17,6 +17,8 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.FeaturesCollectors;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.AbstractID;
@@ -28,6 +30,8 @@ import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
 import it.cnr.isti.vir.similarity.metric.IMetric;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
+import it.cnr.isti.vir.util.RandomOperations;
+import it.cnr.isti.vir.util.TimeManager;
 import it.cnr.isti.vir.util.WorkingPath;
 
 import java.io.BufferedInputStream;
@@ -812,4 +816,110 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 		return res;
 	}
+	
+	public FeaturesCollectorsArchive shuffle(File outFile) throws Exception {
+		
+		return shuffle(this, outFile);
+
+	}
+	
+
+	/**
+	 * Shuffle objects in inArchive creating an archive at outFile.
+	 * 
+	 * @param in
+	 * @param outFile
+	 * @return
+	 * @throws Exception 
+	 */
+	public static FeaturesCollectorsArchive shuffle(FeaturesCollectorsArchive inArchive, File outFile) throws Exception {
+		FeaturesCollectorsArchive res = inArchive.getSameType(outFile);
+		
+		int size = inArchive.size();
+	    int[] ids = RandomOperations.getRandomOrderedInts(0, size);
+	    
+	    TimeManager tm = new TimeManager();
+	    for (int i=0; i<size; i++) {
+	    	res.add(inArchive.get(ids[i]));
+	    	if ( tm.hasToOutput() ) {
+	    		Log.info_verbose(tm.getProgressString(i, size));
+	    	}
+	    }
+		
+		return res;
+	}
+	
+	/**
+	 * Shuffle objects in inArchive creating an archive at outFile.
+	 * 
+	 * @param in
+	 * @param outFile
+	 * @return
+	 * @throws Exception 
+	 */
+	public static void shuffle(FeaturesCollectorsArchives inArchives, File outFile) throws Exception {
+		FeaturesCollectorsArchive first = inArchives.getArchive(0);
+		FeaturesCollectorsArchive_Buffered bufferedOut
+			= FeaturesCollectorsArchive_Buffered.create(outFile,  first.getIDClass(), first.getFcClass() );
+				
+		int size = inArchives.size();
+
+		int[] ids = RandomOperations.getRandomOrderedInts(0, size);
+	    
+	    TimeManager tm = new TimeManager();
+	    for (int i=0; i<size; i++) {
+	    	//System.out.println(i + "\t" + ids[i]);
+	    	bufferedOut.add(inArchives.get(ids[i]));
+	    	if ( tm.hasToOutput() ) {
+	    		Log.info_verbose(tm.getProgressString(i, size));
+	    	}
+	    }
+		
+	    bufferedOut.close();
+	}
+	
+	public int getNumberOfLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass) {
+			
+		int res = 0;
+		int i=0;
+		Log.info_verbose("Counting elements of " + lfGroupClass + " in the archive.");
+		
+		TimeManager tm = new TimeManager();	
+		for ( AbstractFeaturesCollector curr : this ) {
+			i++;
+			res += curr.getFeature(lfGroupClass).size();
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose("\t" + res + " lf\t" + tm.getProgressString(i, this.size()));
+			}
+		}
+		Log.info_verbose(res + " Local Features were found"  );
+		return res;
+	}
+	
+	public Collection<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, double prob) {
+		Log.info_verbose("Getting random elements of " + lfGroupClass + " with probability " + prob);
+		
+		int i=0;
+		
+		ArrayList<ALocalFeature> res = new ArrayList<ALocalFeature>();
+		TimeManager tm = new TimeManager();
+		for ( AbstractFeaturesCollector currFC : this ) {
+			i++;
+			ALocalFeaturesGroup currGroup = currFC.getFeature(lfGroupClass);
+ 
+			for ( ALocalFeature currLF : currGroup.lfArr ) {
+				if ( RandomOperations.trueORfalse(prob)) {
+					res.add(currLF);
+				}				
+			}
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose("\t" + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
+			}
+		}
+		
+		Log.info_verbose( res.size() + " local features were randomly selected");
+		
+		return res;
+	}
+	
 }
