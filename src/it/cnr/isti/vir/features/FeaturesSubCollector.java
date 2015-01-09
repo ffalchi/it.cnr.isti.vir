@@ -60,6 +60,11 @@ public class FeaturesSubCollector extends AbstractFeaturesCollector {
 		}
 		return true;
 	}
+	
+
+	public FeaturesSubCollector() {
+		this.regionFC = null;
+	}
 
 	public FeaturesSubCollector(AbstractFeaturesCollector[] regionFC) {
 		this.regionFC = regionFC;
@@ -76,6 +81,7 @@ public class FeaturesSubCollector extends AbstractFeaturesCollector {
 	}
 	
 	public int size() {
+		if ( regionFC == null) return 0;
 		return regionFC.length;
 	}
 	
@@ -114,8 +120,11 @@ public class FeaturesSubCollector extends AbstractFeaturesCollector {
 
 	@Override
 	public void add(AbstractFeature f) {
-		// TODO Auto-generated method stub
-		
+//		AbstractFeaturesCollector[] old = regionFC;
+//		regionFC = new AbstractFeaturesCollector[old.length+1];
+//		System.arraycopy(old, 0, regionFC, 0, old.length);
+//		regionFC[regionFC.length-1]=fc;
+		// TO DO !!!
 	}
 
 	@Override
@@ -139,4 +148,14 @@ public class FeaturesSubCollector extends AbstractFeaturesCollector {
 		return true;
 	}
 	
+	@Override
+	public void discard( Class<? extends AbstractFeature> c ) throws FeaturesCollectorException {
+		throw new FeaturesCollectorException("Method not implemented");
+	}
+	
+	
+	@Override
+	public AbstractFeaturesCollector createWithSameInfo(AbstractFeature f ) {
+		return new FeaturesSubCollector();
+	}
 }

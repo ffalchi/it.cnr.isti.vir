@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
 public class Percentage {
 
 
-	static final DecimalFormat number_format = new DecimalFormat("#.###", LocaleParameters.symbols);
+	static final DecimalFormat number_format = new DecimalFormat("#", LocaleParameters.symbols);
 	
 	public static final String getString(int i, int n) {
 		double perc = (double) i / n * 100.0;
@@ -16,7 +16,7 @@ public class Percentage {
 	}
 	
 	public static final String getProgressString(int curr, int total) {
-		return curr + "/" + total + "\t" + Percentage.getString(curr, total);
+		return curr + "/" + total + " " + Percentage.getString(curr, total);
 	}
 
 }

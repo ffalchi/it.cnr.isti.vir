@@ -3,6 +3,7 @@ package it.cnr.isti.vir.pca;
 import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.util.ArrayValuesConversion;
 import it.cnr.isti.vir.util.math.VectorMath;
+import it.cnr.isti.vir.util.string.ToString;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -25,8 +26,16 @@ public class PrincipalComponents {
 	private int nEV; 	// number of EV
 	private int oDim;	// original dim
 	
-	private int nComp = -1;
+	private int projDim = -1;
 	
+	public int getProjDim() {
+		return projDim;
+	}
+
+	public void setProjDim(int projDim) {
+		this.projDim = projDim;
+	}
+
 	static final int classID = 0x1A646C05;
 	
 	static final int version = 0;
@@ -37,31 +46,31 @@ public class PrincipalComponents {
 		nEV = eigenVectors.length;
 		oDim = eigenVectors[0].length;
 		
-		nComp = oDim;
+		projDim = oDim;
 	}
 	
-	public PrincipalComponents read(File file) throws Exception {
+	public static PrincipalComponents read(File file) throws Exception {
 		DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file))); 
 		
-		if ( in.read() != classID ) {
+		if ( in.readInt() != classID ) {
 			throw new Exception(file.getAbsolutePath() + " does not contain a PCAProjection");
 		}
 		
-		int givenVersion = in.read();
+		int givenVersion = in.readInt();
 		
-		nEV = in.read();
-		oDim = in.read();
-		nComp = oDim;
+		int nEV = in.readInt();
+		int oDim = in.readInt();
+		int nComp = oDim;
 		
-		means = new double[oDim];
+		double[] means = new double[oDim];
 		for ( int i=0; i<oDim; i++) {
 			means[i] = in.readDouble();
 		}
 		
-		eigenVectors = new double[nEV][oDim];
+		double[][] eigenVectors = new double[nEV][oDim];
 		for ( int ir=0; ir<nEV; ir++) {
 			for ( int ic=0; ic<oDim; ic++) {
-				eigenVectors[nEV][oDim] = in.readDouble();
+				eigenVectors[ir][ic] = in.readDouble();
 			}
 		}
 		
@@ -78,7 +87,7 @@ public class PrincipalComponents {
 		
 		out.writeInt(nEV);
 		out.writeInt(oDim);
-		nComp = oDim;
+		projDim = oDim;
 		
 		for ( int i=0; i<oDim; i++) {
 			out.writeDouble(means[i]);
@@ -93,6 +102,18 @@ public class PrincipalComponents {
 		out.close();
 	}
 	
+	public float[] project_float(IArrayValues given) throws Exception {
+		return project_float( ArrayValuesConversion.getDoubles(given) );
+	}
+	
+	public float[] project_float(IArrayValues given, int n) throws Exception {
+		return project_float( ArrayValuesConversion.getDoubles(given), n );
+	}
+
+	public float[] project_float(double[] given) {
+		return project_float(given, projDim);
+	}
+	
 	public double[] project(IArrayValues given) throws Exception {
 		return project( ArrayValuesConversion.getDoubles(given) );
 	}
@@ -102,7 +123,19 @@ public class PrincipalComponents {
 	}
 
 	public double[] project(double[] given) {
-		return project(given, nComp);
+		return project(given, projDim);
+	}
+	
+	public final float[] project_float(double[] given, int nComp) {
+		float[] res = new float[nComp];
+		
+		double[] vNorm = VectorMath.subtraction(given, means);
+		
+		for ( int i=0; i<nComp; i++) {
+			res[i] = (float) VectorMath.scalarProduct(eigenVectors[i], vNorm);
+		}
+		
+		return res;
 	}
 	
 	public final double[] project(double[] given, int nComp) {
@@ -129,5 +162,26 @@ public class PrincipalComponents {
 		
 		return res;
 	}
+	
+	public final float[] projectBack_float(double[] given ) {
+		float[] res = new float[oDim];
+		for ( int i=0; i<oDim; i++ ) {
+			for ( int j=0; j<given.length; j++ ) {
+				res[i] += given[j] * eigenVectors[j][i];
+			}
+		}
+		
+		VectorMath.add(res, means);
+		
+		return res;
+	}
 
+	public String toString() {
+		String tStr = "";
+		
+		tStr += "eigenVectors:\n" + ToString.getString(eigenVectors);
+		tStr += "means:\n" + ToString.getString(means);
+		
+		return tStr;
+	}
 }

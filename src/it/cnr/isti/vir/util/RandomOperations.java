@@ -70,6 +70,8 @@ public class RandomOperations {
 	}
 	
 	public static final boolean trueORfalse(double yesRate) {
+		if ( yesRate >= 1.0 ) return true;
+		if ( yesRate <= 0.0 ) return false;
 		double value = r.nextDouble(); // random value between 0 and 1.0
 		return value <= yesRate;
 	}

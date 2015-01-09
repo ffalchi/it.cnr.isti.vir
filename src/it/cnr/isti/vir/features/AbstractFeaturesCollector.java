@@ -26,7 +26,9 @@ public abstract class AbstractFeaturesCollector extends AbstractFeature {
 	public abstract void add( AbstractFeature f ) throws FeaturesCollectorException ;
 
 	public abstract void discardAllBut(FeatureClassCollector featuresClasses) throws FeaturesCollectorException;
-
+	
+	public abstract void discard(Class<? extends AbstractFeature> c)  throws FeaturesCollectorException;
+	
 	public abstract Collection<AbstractFeature> getFeatures();
 	
 	public abstract boolean contains(Class<AbstractFeature> c);
@@ -38,5 +40,20 @@ public abstract class AbstractFeaturesCollector extends AbstractFeature {
 		return true;
 	}
 	
-	
+	/**
+	 * Creates a new empty Features Collector of the same type
+	 * 
+	 * @return
+	 */
+	public AbstractFeaturesCollector getEmptyWithSameInfo( ) {
+		return createWithSameInfo(null);
+	};
+
+	/**
+	 * Creates a new Features Collector of the same type adding the given feature
+	 * 
+	 * @param f
+	 * @return
+	 */
+	public abstract AbstractFeaturesCollector createWithSameInfo(AbstractFeature f);
 }

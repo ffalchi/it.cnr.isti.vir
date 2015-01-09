@@ -14,6 +14,7 @@ package it.cnr.isti.vir.features.mpeg7;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.FeatureCollector;
 import it.cnr.isti.vir.features.FeaturesCollectorException;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.ColorStructure;
@@ -251,8 +252,16 @@ public class SAPIRObject extends AbstractFeaturesCollector implements IHasID {
 	}
 
 
+	@Override
+	public void discard(Class<? extends AbstractFeature> c)
+			throws FeaturesCollectorException {
+		throw new FeaturesCollectorException("Method not implemented");
+	}
 
 
-	
+	@Override
+	public AbstractFeaturesCollector createWithSameInfo( AbstractFeature f ) {
+		return null;
+	}
 
 }

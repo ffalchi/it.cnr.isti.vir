@@ -11,6 +11,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.Properties;
+
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.similarity.ISimilarity;
 
@@ -40,4 +43,13 @@ public class SimilarityUtil {
 		return sumInterDist / (fc.length*fc.length);
 	}
 
+	public static final Object getObject(String option, Properties properties) throws Exception {
+		return getObject(
+				PropertiesUtils.getClass(properties, "similarity"), properties );
+	}
+	
+	public static final Object getObject(Class c, Properties properties) throws IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+		return c.getConstructor(java.util.Properties.class).newInstance(properties);
+	}
+	
 }

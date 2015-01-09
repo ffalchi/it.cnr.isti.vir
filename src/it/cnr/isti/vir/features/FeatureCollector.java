@@ -76,15 +76,21 @@ public class FeatureCollector extends AbstractFeaturesCollector_Labeled_HasID {
 	
 	
 	@Override
-	public AbstractFeature getFeature(Class featureClass) {
-		return f;
+	public <T extends AbstractFeature> T getFeature(Class<T> featureClass) {
+		return (T) f;
 	}
 
 	@Override
-	public void add(AbstractFeature f) {
-		
+	public void add(AbstractFeature f) throws FeaturesCollectorException {
+		throw new FeaturesCollectorException("Method not implemented");
 	}
 
+	@Override
+	public void discard(Class<? extends AbstractFeature> c)
+			throws FeaturesCollectorException {
+		throw new FeaturesCollectorException("Method not implemented");
+	}
+	
 	@Override
 	public void discardAllBut(FeatureClassCollector featuresClasses) throws FeaturesCollectorException {
 		throw new FeaturesCollectorException("Method not implemented");
@@ -150,6 +156,10 @@ public class FeatureCollector extends AbstractFeaturesCollector_Labeled_HasID {
 		l = label;
 	}
 
+	@Override
+	public AbstractFeaturesCollector createWithSameInfo( AbstractFeature f ) {
+		return new FeatureCollector(f, id, l);
+	}
 	
 	
 

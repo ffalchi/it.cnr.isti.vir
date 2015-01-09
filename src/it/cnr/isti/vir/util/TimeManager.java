@@ -68,6 +68,6 @@ public class TimeManager {
 	}
 	
 	public String getProgressString(int curr, int tot) {
-		return curr + "/" + tot + "\t" + Percentage.getString(curr, tot) + "\t" + "ETC " + getExtimatedTimeToComplete_STR(curr, tot);
+		return curr + "/" + tot + " " + Percentage.getString(curr, tot) + " " + "ETC " + getExtimatedTimeToComplete_STR(curr, tot);
 	}
 }

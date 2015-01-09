@@ -13,6 +13,8 @@ package it.cnr.isti.vir.util.math;
 
 public class VectorMath {
 
+	
+	
 	public static final double[] subtraction(double[] v1, double[] v2) {
 		int nD = v1.length;
 		double[] res = new double[nD];
@@ -153,7 +155,34 @@ public class VectorMath {
 		return res;		
 	}
 
+	/**
+	 * Sums values in b to a.
+	 * @param a
+	 * @param b
+	 */
 	public static final void add(double[] a, double[] b) {
+		for ( int i=0; i<a.length; i++) {
+			a[i] += b[i];
+		}
+	}
+	
+	/**
+	 * Sums values in b to a.
+	 * @param a
+	 * @param b
+	 */
+	public static final void add(double[] a, float[] b) {
+		for ( int i=0; i<a.length; i++) {
+			a[i] += b[i];
+		}
+	}	
+	
+	/**
+	 * Sums values in b to a.
+	 * @param a
+	 * @param b
+	 */
+	public static final void add(float[] a, double[] b) {
 		for ( int i=0; i<a.length; i++) {
 			a[i] += b[i];
 		}

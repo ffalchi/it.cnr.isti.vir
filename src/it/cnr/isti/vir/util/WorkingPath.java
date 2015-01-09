@@ -24,4 +24,8 @@ public class WorkingPath {
 		else return  new File(parent, fileName);
 	} 
 	
+	static public String getAbsolutePath( String fileName ) {
+		return getFile(fileName).getAbsolutePath();
+	} 
+	
 }

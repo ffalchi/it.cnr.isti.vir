@@ -12,6 +12,7 @@
 package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
+import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.classification.LabelClasses;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.id.AbstractID;
@@ -102,7 +103,10 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 	public void writeData(DataOutput out) throws IOException {
 		IDClasses.writeData(id, out);
 		LabelClasses.writeData(cl, out);
-		out.writeByte( (byte) feature.length);
+		if ( feature==null) 
+			out.writeByte( 0 );
+		else
+			out.writeByte( (byte) feature.length);
 		for ( int i=0; i<feature.length; i++) {
 			FeatureClasses.writeData(out, feature[i]);
 		}
@@ -127,14 +131,14 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 	}
 
 	@Override
-	public AbstractFeature getFeature(Class featureClass) {
+	public <T extends AbstractFeature> T getFeature(Class<T> featureClass) {
 		for ( int i=0; i<feature.length; i++) {
 			if ( feature[i] == null ) {
 				System.err.println("Feature null!!!!");
 				continue;
 			}
 			if ( featureClass.equals(feature[i].getClass())) {
-				return feature[i];
+				return (T) feature[i];
 			}
 		}
 		return null;
@@ -220,7 +224,7 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 	}
 
 	@Override
-	public boolean contains(Class c) {
+	public boolean contains(Class<AbstractFeature> c) {
 		for ( int i=0; i<feature.length; i++) {
 			if ( feature[i].getClass().equals(c)) {
 				return true;
@@ -268,7 +272,9 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 		return tStr;
 	}
 
-
-	
+	@Override
+	public AbstractFeaturesCollector createWithSameInfo( AbstractFeature f  ) {
+		return new FeaturesCollectorArr( f, id, cl);
+	}
 	
 }

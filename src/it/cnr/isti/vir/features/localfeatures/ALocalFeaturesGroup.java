@@ -499,4 +499,12 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 		
 	}
 	
+	public static Class<ALocalFeaturesGroup> getGroupClass(Class<? extends ALocalFeature> lfClass) throws ClassNotFoundException {
+		
+		String lfName = lfClass.getName();
+		String groupName = lfName +"Group";
+		
+		return (Class<ALocalFeaturesGroup>) Class.forName(groupName);
+	}
+	
 }

@@ -11,17 +11,17 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.mpeg7;
 
-import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.FeaturesCollectorException;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.FeaturesCollectorException;
 import it.cnr.isti.vir.features.mpeg7.vd.LireColorLayout;
 import it.cnr.isti.vir.features.mpeg7.vd.LireEdgeHistogram;
 import it.cnr.isti.vir.features.mpeg7.vd.LireScalableColor;
+import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.id.IHasID;
-import it.cnr.isti.vir.id.AbstractID;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -197,5 +197,14 @@ public class LireObject extends AbstractFeaturesCollector implements IHasID {
 		return tempHash;
 	}
 	
-
+	@Override
+	public void discard(Class<? extends AbstractFeature> c)
+			throws FeaturesCollectorException {
+		throw new FeaturesCollectorException("Method not implemented");
+	}
+	
+	@Override
+	public AbstractFeaturesCollector createWithSameInfo( AbstractFeature f ) {
+		return null;
+	}
 }

@@ -896,7 +896,14 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return res;
 	}
 	
-	public Collection<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, double prob) {
+	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, int maxNObjs ) {
+		int nLF_archive = getNumberOfLocalFeatures(lfGroupClass);
+		double prob = maxNObjs / (double) nLF_archive;
+		if ( prob > 1.0 ) prob = 1.0;
+		return getRandomLocalFeatures(lfGroupClass, prob);
+	}
+	
+	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, double prob) {
 		Log.info_verbose("Getting random elements of " + lfGroupClass + " with probability " + prob);
 		
 		int i=0;
@@ -906,14 +913,45 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		for ( AbstractFeaturesCollector currFC : this ) {
 			i++;
 			ALocalFeaturesGroup currGroup = currFC.getFeature(lfGroupClass);
- 
+			if ( currGroup == null ) continue;
+			
 			for ( ALocalFeature currLF : currGroup.lfArr ) {
 				if ( RandomOperations.trueORfalse(prob)) {
 					res.add(currLF);
 				}				
 			}
 			if ( tm.hasToOutput() ) {
-				Log.info_verbose("\t" + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
+				Log.info_verbose(" - " + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
+			}
+		}
+		
+		Log.info_verbose( res.size() + " local features were randomly selected");
+		
+		return res;
+	}
+	
+	public ArrayList<AbstractFeature> getRandomFeatures(Class<? extends AbstractFeature> featureClass, int maxNObjs ) {
+		double prob = maxNObjs / (double) size();
+		if ( prob > 1.0 ) prob = 1.0;
+		return getRandomFeatures(featureClass, prob);
+	}
+	
+	public ArrayList<AbstractFeature> getRandomFeatures(Class<? extends AbstractFeature> featureClass, double prob) {
+		Log.info_verbose("Getting random elements of " + featureClass + " with probability " + prob);
+		
+		int i=0;
+		
+		ArrayList<AbstractFeature> res = new ArrayList<AbstractFeature>();
+		TimeManager tm = new TimeManager();
+		for ( AbstractFeaturesCollector currFC : this ) {
+			i++;
+			AbstractFeature currF = currFC.getFeature(featureClass);
+			if ( RandomOperations.trueORfalse(prob)) {
+				res.add(currF);
+			}				
+			
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose(" - " + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
 			}
 		}
 		
