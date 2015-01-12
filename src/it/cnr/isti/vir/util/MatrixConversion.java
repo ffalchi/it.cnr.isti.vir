@@ -87,4 +87,78 @@ public class MatrixConversion {
 		return matrix;
 	}
 	
+	
+	public static final float[][] getFloats(Collection<? extends IArrayValues> coll) throws Exception {
+		if ( coll.size() == 0 ) return null;
+		IArrayValues firstObj = coll.iterator().next();
+		
+		if ( firstObj instanceof IDoubleValues)
+			return getFloats_fromDoubles( (Collection<IDoubleValues>) coll );
+		
+		if ( firstObj instanceof IFloatValues)
+			return getFloats_fromFloats( (Collection<IFloatValues>) coll );
+		
+		if ( firstObj instanceof IIntValues)
+			return getFloats_fromInts( (Collection<IIntValues>) coll );
+		
+		if ( firstObj instanceof IByteValues)
+			return getFloats_fromBytes( (Collection<IByteValues>) coll );
+
+		if ( firstObj instanceof IUByteValues)
+			return getFloats_fromUBytes( (Collection<IUByteValues>) coll );
+		
+		throw new Exception("Collection objet type was unknown");
+				
+	}
+		
+	private static final float[][] getFloats_fromFloats(Collection<IFloatValues> coll) {
+		float[][] matrix = new float[coll.size()][];
+		int i=0;
+
+		for ( IFloatValues curr : coll ) {
+			matrix[i] = curr.getValues();
+		}
+		return matrix;
+	}
+	
+	private static final float[][] getFloats_fromDoubles(Collection<IDoubleValues> coll) {
+		float[][] matrix = new float[coll.size()][];
+		int i=0;
+
+		for ( IDoubleValues curr : coll ) {
+			matrix[i] = VectorMath.getFloats(curr.getValues());
+		}
+		return matrix;
+	}
+	
+	private static final float[][] getFloats_fromInts(Collection<IIntValues> coll) {
+		float[][] matrix = new float[coll.size()][];
+		int i=0;
+
+		for ( IIntValues curr : coll ) {
+			matrix[i] = VectorMath.getFloats(curr.getValues());
+		}
+		return matrix;
+	}
+	
+	private static final float[][] getFloats_fromBytes(Collection<IByteValues> coll) {
+		float[][] matrix = new float[coll.size()][];
+		int i=0;
+
+		for ( IByteValues curr : coll ) {
+			matrix[i] = VectorMath.getFloats(curr.getValues());
+		}
+		return matrix;
+	}
+	
+	
+	private static final float[][] getFloats_fromUBytes(Collection<IUByteValues> coll) {
+		float[][] matrix = new float[coll.size()][];
+		int i=0;
+
+		for ( IByteValues curr : coll ) {
+			matrix[i] = VectorMath.getFloats_UBytes(curr.getValues());
+		}
+		return matrix;
+	}
 }
