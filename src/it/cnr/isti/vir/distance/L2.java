@@ -12,8 +12,8 @@
 package it.cnr.isti.vir.distance;
 
 public class L2 {
-
-	public static int getSquared(byte[] v1, byte[] v2) {
+	
+	public static final int getSquared(byte[] v1, byte[] v2) {
 		int dist = 0;	    
 		int dif = 0;		
 	    for (int i = 0; i < v1.length; i++) {
@@ -23,7 +23,7 @@ public class L2 {
 		return dist;
 	}
 	
-	public static int getSquared(byte[] v1, byte[] v2, int maxDist) {
+	public static final int getSquared(byte[] v1, byte[] v2, int maxDist) {
 		int dist = 0;	    
 		int dif = 0;
 	    for (int i = 0; i < v1.length; i++) {
@@ -34,15 +34,7 @@ public class L2 {
 		return dist;
 	}
 	
-	public static double get(float[]f1, float[]f2) {
-		return  Math.sqrt(getSquared(f1,f2));
-	}
-
-	public static double get(double[]f1, double[]f2) {
-		return  Math.sqrt(getSquared(f1,f2));
-	}
-	
-	public static double getSquared(double[]f1, double[]f2) {
+	public static final double getSquared(double[]f1, double[]f2) {
 		double acc = 0;
 		for ( int j=0; j<f1.length; j++) {
 			double diff = f1[j] - f2[j];
@@ -51,7 +43,17 @@ public class L2 {
 		return acc; 
 	}
 	
-	public static double getSquared(float[]f1, float[]f2) {
+	public static final double getSquared(double[]f1, double[]f2, double max) {
+		double acc = 0;
+		for ( int j=0; j<f1.length; j++) {
+			double diff = f1[j] - f2[j];
+			acc += diff * diff;
+			if ( acc > max ) return -acc;
+		}
+		return acc; 
+	}
+	
+	public static final double getSquared(float[]f1, float[]f2) {
 		double acc = 0;
 		for ( int j=0; j<f1.length; j++) {
 			double diff = f1[j] - f2[j];
@@ -60,7 +62,7 @@ public class L2 {
 		return acc; 
 	}
 	
-	public static double getSquared(float[]f1, float[]f2, double max) {
+	public static final double getSquared(float[]f1, float[]f2, double max) {
 		double acc = 0;	    
 	    for (int i = 0; i < f1.length; i++) {
 			double diff = f1[i] - f2[i];
@@ -70,5 +72,37 @@ public class L2 {
 		return acc;
 	}
 	
+	
+	public static final double get(byte[]f1, byte[]f2) {
+		return  Math.sqrt(getSquared(f1,f2));
+	}
+	
+	public static final double get(float[]f1, float[]f2) {
+		return  Math.sqrt(getSquared(f1,f2));
+	}
+
+	public static final double get(double[]f1, double[]f2) {
+		return  Math.sqrt(getSquared(f1,f2));
+	}
+
+	public static final double get(byte[]f1, byte[]f2, int max) {
+		int temp = getSquared(f1,f2, max*max);
+		
+		if (temp <0) {
+			return -Math.sqrt(-temp);
+		} else {
+			return Math.sqrt(temp);
+		}
+	}
+	
+	public static final double get(float[]f1, float[]f2, double max) {
+		double temp = getSquared(f1,f2, max*max);
+		
+		if (temp <0) {
+			return -Math.sqrt(-temp);
+		} else {
+			return Math.sqrt(temp);
+		}
+	}
 
 }
