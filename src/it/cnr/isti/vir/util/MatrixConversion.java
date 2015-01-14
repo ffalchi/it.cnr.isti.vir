@@ -42,6 +42,7 @@ public class MatrixConversion {
 
 		for ( IFloatValues curr : coll ) {
 			matrix[i] = VectorMath.getDoubles(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
@@ -52,6 +53,7 @@ public class MatrixConversion {
 
 		for ( IDoubleValues curr : coll ) {
 			matrix[i] = curr.getValues();
+			i++;
 		}
 		return matrix;
 	}
@@ -62,6 +64,7 @@ public class MatrixConversion {
 
 		for ( IIntValues curr : coll ) {
 			matrix[i] = VectorMath.getDoubles(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
@@ -72,6 +75,7 @@ public class MatrixConversion {
 
 		for ( IByteValues curr : coll ) {
 			matrix[i] = VectorMath.getDoubles(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
@@ -83,6 +87,7 @@ public class MatrixConversion {
 
 		for ( IByteValues curr : coll ) {
 			matrix[i] = VectorMath.getDoubles_UBytes(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
@@ -117,6 +122,7 @@ public class MatrixConversion {
 
 		for ( IFloatValues curr : coll ) {
 			matrix[i] = curr.getValues();
+			i++;
 		}
 		return matrix;
 	}
@@ -127,6 +133,7 @@ public class MatrixConversion {
 
 		for ( IDoubleValues curr : coll ) {
 			matrix[i] = VectorMath.getFloats(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
@@ -137,6 +144,7 @@ public class MatrixConversion {
 
 		for ( IIntValues curr : coll ) {
 			matrix[i] = VectorMath.getFloats(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
@@ -147,6 +155,7 @@ public class MatrixConversion {
 
 		for ( IByteValues curr : coll ) {
 			matrix[i] = VectorMath.getFloats(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
@@ -158,6 +167,7 @@ public class MatrixConversion {
 
 		for ( IByteValues curr : coll ) {
 			matrix[i] = VectorMath.getFloats_UBytes(curr.getValues());
+			i++;
 		}
 		return matrix;
 	}
