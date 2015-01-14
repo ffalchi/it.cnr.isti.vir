@@ -11,6 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.global;
 
+import it.cnr.isti.vir.util.TimeManager;
+
 import java.util.Properties;
 
 public class Log {
@@ -18,7 +20,9 @@ public class Log {
 	static public boolean debug = true;
 	
 	static public boolean verbose = true;
-		
+	
+	static public String indent = " - ";
+	
 	public static boolean isDebug() {
 		return debug;
 	}
@@ -38,9 +42,35 @@ public class Log {
 	public static synchronized void info(String str) {
 		System.out.println(str);
 	}
+
+	public static synchronized void info_indent(String str) {
+		System.out.println(indent +str);
+	}
+	
+	public static synchronized void info_noNewLine(String str) {
+		System.out.print(str);
+	}
 	
 	public static synchronized void info_verbose(String str) {
 		if ( verbose ) System.out.println(str);
+	}
+	
+	public static synchronized void info_verbose_noNewLine(String str) {
+		if ( verbose ) System.out.print(str);
+	}
+	
+	public static synchronized void info_verbose_progress(TimeManager tm, int curr, int tot) {
+		if ( verbose ) {
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose_indent(tm.getProgressString(curr, tot));
+			}
+		}
+	}
+	
+	public static synchronized void info_verbose_indent(String str) {
+		if ( verbose ) {
+			System.out.println(indent + str);
+		}
 	}
 
 	public static synchronized void set(Properties properties) {

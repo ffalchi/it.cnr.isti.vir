@@ -69,8 +69,7 @@ public class FloatsLFL2Metric  implements IMetric<FloatsLF>, ILocalFeaturesMetri
 	
 	@Override
 	public final double distance(FloatsLF f1, FloatsLF f2, double max) {
-		// TODO 
-		return L2.get(f1.getValues(), f2.getValues() );
+		return L2.get(f1.getValues(), f2.getValues(), max );
 	}
 
 	@Override

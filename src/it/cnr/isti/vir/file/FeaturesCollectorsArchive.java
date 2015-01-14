@@ -841,9 +841,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	    TimeManager tm = new TimeManager();
 	    for (int i=0; i<size; i++) {
 	    	res.add(inArchive.get(ids[i]));
-	    	if ( tm.hasToOutput() ) {
-	    		Log.info_verbose(tm.getProgressString(i, size));
-	    	}
+	    	Log.info_verbose_progress(tm, i, size);
 	    }
 		
 		return res;
@@ -870,9 +868,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	    for (int i=0; i<size; i++) {
 	    	//System.out.println(i + "\t" + ids[i]);
 	    	bufferedOut.add(inArchives.get(ids[i]));
-	    	if ( tm.hasToOutput() ) {
-	    		Log.info_verbose(tm.getProgressString(i, size));
-	    	}
+	    	Log.info_verbose_progress(tm, i, size);
 	    }
 		
 	    bufferedOut.close();
@@ -897,9 +893,11 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	}
 	
 	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, int maxNObjs ) {
+		if ( maxNObjs < 0 ) return getRandomLocalFeatures(lfGroupClass, 1.0);
+		
 		int nLF_archive = getNumberOfLocalFeatures(lfGroupClass);
 		double prob = maxNObjs / (double) nLF_archive;
-		if ( prob > 1.0 ) prob = 1.0;
+		if ( prob > 1.0  ) prob = 1.0;
 		return getRandomLocalFeatures(lfGroupClass, prob);
 	}
 	
@@ -946,6 +944,16 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		for ( AbstractFeaturesCollector currFC : this ) {
 			i++;
 			AbstractFeature currF = currFC.getFeature(featureClass);
+			
+			if ( currF == null ) {
+				if ( currFC instanceof IHasID) {
+					Log.info_indent( "fc " + i + "[id: " + ((IHasID)currFC).getID() + "] does not contain requested feature");
+				} else {
+					Log.info_indent( "fc " + i +" does not contain requeste feature");
+				}
+			
+			}
+			
 			if ( RandomOperations.trueORfalse(prob)) {
 				res.add(currF);
 			}				
@@ -955,7 +963,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			}
 		}
 		
-		Log.info_verbose( res.size() + " local features were randomly selected");
+		Log.info_verbose( res.size() + " features were randomly selected");
 		
 		return res;
 	}

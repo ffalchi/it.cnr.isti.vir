@@ -3,7 +3,6 @@ package it.cnr.isti.vir.pca;
 import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.util.ArrayValuesConversion;
 import it.cnr.isti.vir.util.math.VectorMath;
-import it.cnr.isti.vir.util.string.ToString;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -177,10 +176,14 @@ public class PrincipalComponents {
 	}
 
 	public String toString() {
-		String tStr = "";
+		String tStr = 
+				"PC contains:\n" +
+				" - " + means.length + " mean values and " +
+				" - " + eigenVectors.length + " eigenvectors of dimensionality " + eigenVectors[0].length + "\n";
 		
-		tStr += "eigenVectors:\n" + ToString.getString(eigenVectors);
-		tStr += "means:\n" + ToString.getString(means);
+		
+		//tStr += "eigenVectors:\n" + ToString.getString(eigenVectors);
+		//tStr += "means:\n" + ToString.getString(means);
 		
 		return tStr;
 	}

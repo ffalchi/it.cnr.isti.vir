@@ -55,6 +55,8 @@ public class PCAProject {
 		
 		PrincipalComponents pc = PrincipalComponents.read(pcFile);
 		
+		Log.info(pc.toString());
+		
 		pc.setProjDim(dim);
 		
 		Log.info( in.getInfo() );
@@ -66,8 +68,7 @@ public class PCAProject {
 
 			for ( AbstractFeaturesCollector fc : in ) {
 				count++;
-				if ( tm.hasToOutput() )
-					Log.info_verbose(tm.getProgressString(count, in.size()));
+				Log.info_verbose_progress(tm, count, in.size());
 				
 				ALocalFeaturesGroup currGroup = fc.getFeature(lfGroupClass);
 				ALocalFeature[] currLFs = currGroup.lfArr;

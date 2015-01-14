@@ -19,6 +19,7 @@ import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.similarity.ILFSimilarity;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.util.RandomOperations;
+import it.cnr.isti.vir.util.TimeManager;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -51,6 +52,18 @@ public class KMeans<O extends AbstractFeature> {
 	private int[] centroidChangedIndexes;
 	private boolean[] centroidChanged;
 	private boolean[] clusterChanged;
+	
+	private TimeManager tm = new TimeManager();
+	private int maxMinPerIteration = Integer.MAX_VALUE;
+	public int getMaxMinPerIteration() {
+		return maxMinPerIteration;
+	}
+
+	public void setMaxMinPerIteration(int maxMinPerIteration) {
+		this.maxMinPerIteration = maxMinPerIteration;
+		Log.info_verbose("kMeans maxMinPerIteration was set to: " + maxMinPerIteration); 
+	}
+
 	
 	private static final int eqCentroidsChange_Max = 100;
 	
@@ -164,7 +177,7 @@ public class KMeans<O extends AbstractFeature> {
 		
 		RandomOperations.setSeed(System.currentTimeMillis());
 		
-		System.out.print("Performing k-means++:\n   ");
+		Log.info("Performing k-means++:");
 		O[] initCentroids = (O[]) Array.newInstance(objects[0].getClass(), k);	
 		
 		// first centroid is taken randomly
@@ -178,7 +191,8 @@ public class KMeans<O extends AbstractFeature> {
 		int bookedThreads = ParallelOptions.getNFreeProcessors() ;
 		if ( bookedThreads < 1) {
 			for ( int i=1; i<initCentroids.length; i++ ) {
-				if ( i%10 == 0 ) System.out.print(" "+i);
+				Log.info_verbose_progress(tm, i, initCentroids.length);
+				
 				for (int iO = 0; iO<objects.length; iO++) {
 					O curr = objects[iO];
 	
@@ -217,7 +231,7 @@ public class KMeans<O extends AbstractFeature> {
 			
 			
 			for ( int i=1; i<initCentroids.length; i++ ) {
-				if ( i%10 == 0 ) System.out.print(" "+i);
+				Log.info_verbose_progress(tm, i, initCentroids.length);
 				
 				ExecutorService executor = Executors.newFixedThreadPool(nThread);
 				for ( int from=0; from<objects.length; from+=nObjsPerThread) {
@@ -250,8 +264,8 @@ public class KMeans<O extends AbstractFeature> {
 			}
 			ParallelOptions.free(bookedThreads);
 		}
-
-		System.out.println( " " + initCentroids.length + "." );
+		
+		//Log.info_verbose_indent( "done." );
 		centroids = initCentroids;
 	}
 	
@@ -391,6 +405,7 @@ public class KMeans<O extends AbstractFeature> {
 		assignedCentroid = new int[objects.length];
 		centroidDistance = new float[objects.length];
 		
+		
 		for (int iterations=0; nCentroidsChanges>0; iterations++ ){
 			
 			Arrays.fill(clusterChanged, false);
@@ -514,6 +529,12 @@ public class KMeans<O extends AbstractFeature> {
 			lastTimeMillis = System.currentTimeMillis();
 			if ( (newDistortion<Double.MAX_VALUE) && (1.0 - newDistortion / currDistortion) < distRedThr) {
 				Log.info("Distortion reduction was less than threshold " + distRedThr );
+				break;
+			}
+			
+			
+			if  ( tm.getTime_min() >= maxMinPerIteration ) {
+				Log.info("Execution time limit of " + maxMinPerIteration + " was reached." );
 				break;
 			}
 			

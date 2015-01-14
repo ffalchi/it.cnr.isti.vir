@@ -57,8 +57,7 @@ public class RootSIFTConvert {
 				" to RootSIFTs in " + outRootSIFTArchive.getAbsolutePath() );
 		for ( AbstractFeaturesCollector fc : ina ) {
 			count++;
-			if ( tm.hasToOutput() )
-				Log.info_verbose(tm.getProgressString(count, ina.size()));
+			Log.info_verbose_progress(tm, count, ina.size());
 			SIFTGroup sifts = fc.getFeature(SIFTGroup.class);
 			RootSIFTGroup rootSIFTs = new RootSIFTGroup(sifts, fc);
 			fc.discard(SIFTGroup.class);

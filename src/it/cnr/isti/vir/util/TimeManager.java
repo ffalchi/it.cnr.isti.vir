@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class TimeManager {
 
-	public static long standardMinInterval = 1000; // millis
+	public static long standardMinInterval = 10000; // millis
 	
 	public long start;
 	public long last;
@@ -26,9 +26,38 @@ public class TimeManager {
 		this.minInterval = minInterval;
 	}
 	
+	public long getTime() {
+		return System.currentTimeMillis()-start;
+	}
+	
+	public long getTime_sec() {
+		return getTime() / 1000;
+	}
+	
+	public int getTime_min() {
+		return (int) (getTime_sec() / 60);
+	}
+
+	public int getTime_h() {
+		return getTime_min() / 60	;
+	}
+	
 	public boolean hasToOutput() {
 		long curr = System.currentTimeMillis();
 		if ( (curr-last) > minInterval ) {
+			last = curr;
+			return true;
+		}
+		return false;
+	}
+	
+	public void resetOutputTimer() {
+		last = start;
+	}
+	
+	public boolean hasToOutput_long(int nTimes) {
+		long curr = System.currentTimeMillis();
+		if ( (curr-last) > minInterval*nTimes ) {
 			last = curr;
 			return true;
 		}

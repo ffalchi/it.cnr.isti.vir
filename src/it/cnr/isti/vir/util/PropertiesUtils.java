@@ -3,7 +3,6 @@ package it.cnr.isti.vir.util;
 import it.cnr.isti.vir.global.Log;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 public class PropertiesUtils {
@@ -18,7 +17,19 @@ public class PropertiesUtils {
 	
 	public static final File getFile(Properties prop, String propertyName) throws Exception {
 		String str = prop.getProperty(propertyName);
-		if ( str == null ) throw new Exception(propertyName + " was not found in properties");
+		if ( str == null ) {
+			throw new Exception(propertyName + " was not found in properties.");
+		}
+		Log.info_verbose(propertyName + "=" + str);
+		return WorkingPath.getFile(str);
+	}
+	
+	public static final File getFile_orNull(Properties prop, String propertyName) throws Exception {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) {
+			Log.info(propertyName + " was not found in properties. Null will be returned.");
+			return null;
+		}
 		Log.info_verbose(propertyName + "=" + str);
 		return WorkingPath.getFile(str);
 	}
@@ -37,9 +48,30 @@ public class PropertiesUtils {
 		return Integer.parseInt(str);
 	}
 	
+	public static final int getInt_orDefault(Properties prop, String propertyName, int def) throws Exception {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) {
+			Log.info(propertyName + " was not found in properties. Using deafult value " + def);
+			return def;
+		}
+		Log.info_verbose(propertyName + "=" + str);
+		return Integer.parseInt(str);
+	}
+	
+	
 	public static final double getDouble(Properties prop, String propertyName) throws Exception {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) throw new Exception(propertyName + " was not found in properties");
+		Log.info_verbose(propertyName + "=" + str);
+		return Double.parseDouble(str);
+	}
+	
+	public static final double getDouble_orDefault(Properties prop, String propertyName, double def) throws Exception {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) {
+			Log.info(propertyName + " was not found in properties. Using deafult value " + def);
+			return def;
+		}
 		Log.info_verbose(propertyName + "=" + str);
 		return Double.parseDouble(str);
 	}
