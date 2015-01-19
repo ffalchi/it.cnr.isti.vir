@@ -915,7 +915,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			
 			for ( ALocalFeature currLF : currGroup.lfArr ) {
 				if ( RandomOperations.trueORfalse(prob)) {
-					res.add(currLF);
+					res.add(currLF.unlinkLFGroup());
 				}				
 			}
 			if ( tm.hasToOutput() ) {
@@ -955,7 +955,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			}
 			
 			if ( RandomOperations.trueORfalse(prob)) {
-				res.add(currF);
+				res.add(currF.unlinkFC());
 			}				
 			
 			if ( tm.hasToOutput() ) {

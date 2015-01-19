@@ -28,6 +28,8 @@ public abstract class AbstractFeature {
 		return linkedFC;
 	}
 
-
-	
+	public AbstractFeature unlinkFC() {
+		linkedFC = null;
+		return this;
+	}	
 }

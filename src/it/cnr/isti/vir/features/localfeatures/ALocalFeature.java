@@ -92,13 +92,13 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 		this.linkedGroup = linkedGroup;
 	}
 		
-	public ALocalFeature unlink() {
+	public ALocalFeature unlinkLFGroup() {
 		linkedGroup = null;
 		return this;
 	}
 	
 	public ALocalFeature getUnlinked() {
-		return this.clone().unlink();
+		return this.clone().unlinkLFGroup();
 	}
 		
 	public ALocalFeature clone() {
