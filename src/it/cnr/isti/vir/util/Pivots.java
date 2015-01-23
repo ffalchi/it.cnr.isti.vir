@@ -259,7 +259,7 @@ public class Pivots {
 		AbstractFeaturesCollector[] piv = new AbstractFeaturesCollector[nPivots];
 		
 		// kNNQueues are performed in parallels
-		int bnt = ParallelOptions.getNFreeProcessors();
+		int bnt = ParallelOptions.reserveNFreeProcessors();
 		final int nQueriesPerThread = (int) Math.ceil((double) testObjects.length / (bnt+1));
 		final int nThread = (int) Math.ceil((double) testObjects.length / nQueriesPerThread);
 		

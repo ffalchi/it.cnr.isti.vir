@@ -322,7 +322,7 @@ public class MinROPos {
 			int nTries = Math.min(nTriesMax, tries.length);
 			double[] tCoeffVar = new double[nTries];
 
-			int bNT = ParallelOptions.getNFreeProcessors();
+			int bNT = ParallelOptions.reserveNFreeProcessors();
 			final int nObjsPerThread = (int) Math.ceil((double) nTries / (bNT+1));
 			final int nThread = (int) Math.ceil((double) nTries / nObjsPerThread);
 			int ti = 0;
@@ -506,7 +506,7 @@ public class MinROPos {
 			int nTries = Math.min(nTriesMax, tries.length);
 			Arrays.fill(tCoeffVar, 0);
 
-			int bnt = ParallelOptions.getNFreeProcessors();
+			int bnt = ParallelOptions.reserveNFreeProcessors();
 			final int nObjsPerThread = (int) Math.ceil((double) nTries / (bnt+1) );
 			final int nThread = (int) Math.ceil((double) nTries / nObjsPerThread);
 			int ti = 0;
@@ -830,7 +830,7 @@ public class MinROPos {
 //		}	
 		
 		// kNNQueues are performed in parallels
-		int bnt = ParallelOptions.getNFreeProcessors();
+		int bnt = ParallelOptions.reserveNFreeProcessors();
 		final int nObjsPerThread = (int) Math.ceil((double) objs.length / ( bnt+1) );
 		final int nThread = (int) Math.ceil((double) objs.length / nObjsPerThread);
 		int ti = 0;

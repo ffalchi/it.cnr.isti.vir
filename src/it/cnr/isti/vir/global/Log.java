@@ -59,6 +59,11 @@ public class Log {
 		if ( verbose ) System.out.print(str);
 	}
 	
+	/**
+	 * @param tm	Initialized time manager
+	 * @param curr	Current number of items processed
+	 * @param tot	Total number of items to process
+	 */
 	public static synchronized void info_verbose_progress(TimeManager tm, int curr, int tot) {
 		if ( verbose ) {
 			if ( tm.hasToOutput() ) {

@@ -1,6 +1,10 @@
 package it.cnr.isti.vir.pca;
 
 import it.cnr.isti.vir.features.IArrayValues;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.localfeatures.FloatsLF;
+import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
 import it.cnr.isti.vir.util.ArrayValuesConversion;
 import it.cnr.isti.vir.util.math.VectorMath;
 
@@ -186,5 +190,15 @@ public class PrincipalComponents {
 		//tStr += "means:\n" + ToString.getString(means);
 		
 		return tStr;
+	}
+	
+	public FloatsLFGroup project(ALocalFeaturesGroup givenGroup) throws Exception {
+		FloatsLF[] projected = new FloatsLF[givenGroup.size()];
+		ALocalFeature[] arr = givenGroup.lfArr;
+		for ( int i=0; i<arr.length; i++ ) {
+			projected[i] = new FloatsLF( project_float( (IArrayValues) arr[i])); 
+		}
+		FloatsLFGroup projectedGroup = new FloatsLFGroup(projected);
+		return projectedGroup;
 	}
 }

@@ -470,7 +470,7 @@ public final class Gmm {
 			setTmp_p();
 
 		// for each
-		int threadN = ParallelOptions.getNFreeProcessors() + 1;
+		int threadN = ParallelOptions.reserveNFreeProcessors() + 1;
 
 		if (threadN == 1) {
 			// Serial
@@ -691,7 +691,7 @@ public final class Gmm {
 		sigma = new double[k * d];
 
 		// for each gaussian
-		int threadN = ParallelOptions.getNFreeProcessors() + 1;
+		int threadN = ParallelOptions.reserveNFreeProcessors() + 1;
 		Thread[] thread = new Thread[threadN];
 		Integer[] nz_arr = new Integer[threadN];
 		int[] group = SplitInGroups.split(k, thread.length);

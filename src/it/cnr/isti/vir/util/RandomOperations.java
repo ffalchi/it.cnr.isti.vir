@@ -119,7 +119,7 @@ public class RandomOperations {
 	 * Returns size ints betweeon 0 (inclusive) and max (exclusive)
 	 * 
 	 * @param size
-	 * @param max
+	 * @param max	exclusive
 	 * @return
 	 */
 	public static int[] getDistinctInts(int size, int max) {
@@ -282,6 +282,30 @@ public class RandomOperations {
 		Collections.shuffle(arr);
 	}
 	
+	public static final <T> T[] getRandomObjects( T[] given, int n ) {
+		if ( n>=given.length) return given;
+		T[] res = (T[]) java.lang.reflect.Array.newInstance(given.getClass().getComponentType(), n);
+		int[] rnd = RandomOperations.getDistinctInts(n, given.length);
+		for (int i=0; i<n; i++) {
+			res[i]=given[rnd[i]];
+		}
+				
+		return res;
+	}
+	
+	public static final ArrayList getRandomObjects( ArrayList given, double prob ) {
+		//ArrayList res = new ArrayList((int) (given.size() * prob));
+		ArrayList res = new ArrayList((int) (given.size() * prob));
+		
+		for (Iterator it=given.iterator(); it.hasNext();) {
+			Object curr = it.next();
+			if( RandomOperations.trueORfalse(prob))
+				res.add(curr);
+		}		
+		
+		return res;
+	}
+	
 	public static final LinkedList getNRandomObjectList( LinkedList givenList, int n ) {
 		assert ( n > givenList.size() );
 		LinkedList outList = new LinkedList();
@@ -317,13 +341,13 @@ public class RandomOperations {
 	 * @param maxValue	[not included]
 	 * @return
 	 */
-	public static final int[] getOrderedInts(int maxValue) {
-		ArrayList<Integer> list = new ArrayList<Integer>(maxValue);
-		for ( int i=0; i<maxValue; i++ ) {
+	public static final int[] getOrderedInts(int n) {
+		ArrayList<Integer> list = new ArrayList<Integer>(n);
+		for ( int i=0; i<n; i++ ) {
 			list.add(i);
 		}
 		
-		int[] orderedList = new int[maxValue];
+		int[] orderedList = new int[n];
 		for ( int i=0; i<orderedList.length; i++ ){
 			int nextInt = r.nextInt( list.size() );
 			Integer next = list.get(nextInt);
@@ -335,14 +359,14 @@ public class RandomOperations {
 	}
 
 	
-	public static final ArrayList<Integer> getOrderedIntegersAL(int maxValue) {
-		ArrayList<Integer> list = new ArrayList<Integer>(maxValue);
-		for ( int i=0; i<maxValue; i++ ) {
+	public static final ArrayList<Integer> getOrderedIntegersAL(int n) {
+		ArrayList<Integer> list = new ArrayList<Integer>(n);
+		for ( int i=0; i<n; i++ ) {
 			list.add(i);
 		}
 		
-		ArrayList<Integer> orderedList = new ArrayList<Integer>(maxValue);
-		while( orderedList.size() < maxValue ) {
+		ArrayList<Integer> orderedList = new ArrayList<Integer>(n);
+		while( orderedList.size() < n ) {
 			int nextInt = r.nextInt( list.size() );
 			Integer next = list.get(nextInt);
 			orderedList.add(next);

@@ -29,6 +29,11 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 	
 	public abstract int putDescriptor(byte[] byteArr, int offset);
 	
+	public ALocalFeature<LFGroup> removeKP() {
+		kp = null;
+		return this;
+	}
+	
 	public final byte[] getBytes() {
 		int byteSize = 1;
 		byteSize += getDataByteSize();

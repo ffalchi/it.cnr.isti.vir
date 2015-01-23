@@ -202,7 +202,7 @@ public class MultipleKNNPQueueID<F>  {
 	
 	// Parallel on the objects
 	public final void offer(Collection<F> coll ) throws InterruptedException {
-		int threadN = ParallelOptions.getNFreeProcessors()+1;
+		int threadN = ParallelOptions.reserveNFreeProcessors()+1;
         Thread[] thread = new Thread[threadN];
         int[] group = SplitInGroups.split(knn.length, thread.length);
         int from=0;

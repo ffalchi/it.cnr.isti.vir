@@ -115,7 +115,7 @@ public class FarthestFirstTraversal {
 		
 		
 		int nObjPerCycle = Math.min(maxNTries, archives.size());
-		int bookedNThreads = ParallelOptions.getNFreeProcessors();
+		int bookedNThreads = ParallelOptions.reserveNFreeProcessors();
 		final int nObjsPerThread = (int) Math.ceil((double) nObjPerCycle / (bookedNThreads+1) );
 		final int nThread = (int) Math.ceil((double) nObjPerCycle / nObjsPerThread);
 		

@@ -5,7 +5,9 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.Floats;
 import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.bof.LFWords;
-import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
+import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
+import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.global.Log;
@@ -19,19 +21,22 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class VLADConvert {
+public class SIFT2VLAD {
 
-	public static final String className = "VLADConvert";
+	public static final String className = "SIFT2VLAD";
 	
 	public static void usage() {
 		System.out.println("Usage: " + className + "<properties filename>.properties");
 		System.out.println();
 		System.out.println("Properties file must contain:");
-		System.out.println("- "+className+".lfArchive=<input LF archive>");
-		System.out.println("- "+className+".dictionary=<input dictionaries directory>");
-		System.out.println("- "+className+".vladArchive=<output directory>");
+		System.out.println("- "+className+".siftArchive=<file name>");
+		System.out.println("- "+className+".RootSIFT_PC=<centroids>");
+		System.out.println("- "+className+".RootSIFT_PC_n=<n principal components>");
+		System.out.println("- "+className+".centroids=<centroids>");
+		System.out.println("- "+className+".outArchive=<file name>");
 		System.out.println("- ["+className+".VLADPC=<PCA principal components for VLAD>]");
 		System.out.println("- ["+className+".VLADPC_n=<n principal components>]");
+		
 		System.exit(0);
 	}
 	
@@ -47,26 +52,32 @@ public class VLADConvert {
 	
 	public static void launch(Properties prop) throws Exception {
 		
-		File lfArchive_file = PropertiesUtils.getFile( prop, className+".lfArchive");
-		File dictionary_file = PropertiesUtils.getFile(prop, className+".dictionary");
-		File bowArchive_file = PropertiesUtils.getFile(prop, className+".vladArchive");
-		File vladPC_file = PropertiesUtils.getFile_orNull(prop, className+".vladPC_file");
+		File lfArchive_file = PropertiesUtils.getFile( prop, className+".siftArchive");
+		File rootSIFT_PC_file = PropertiesUtils.getFile(prop, className+".RootSIFT_PC");
+		int rootSIFTPC_N = PropertiesUtils.getInt(prop, className+".RootSIFT_PC_n");
+		File dictionary_file = PropertiesUtils.getFile(prop, className+".centroids");
+		File bowArchive_file = PropertiesUtils.getFile(prop, className+".outArchive");
+		File vladPC_file = PropertiesUtils.getFile_orNull(prop, className+".VLADPC");
 		int vladPC_n = -1;
 		if (vladPC_file != null ) {
 			vladPC_n = PropertiesUtils.getInt(prop, className+".VLADPC_n");
 		}
 		
-		createVLAD(lfArchive_file, dictionary_file, bowArchive_file, vladPC_file, vladPC_n );		
+		createVLAD(lfArchive_file, rootSIFT_PC_file, dictionary_file, bowArchive_file, vladPC_file, rootSIFTPC_N, vladPC_n );		
 	}
 	
 
-	public static void createVLAD(File lfArchive_file, File dictionary_file, File bowArchive_file, File vladPC_file, int vladPC_n ) throws Exception {
-
+	public static void createVLAD(
+			File lfArchive_file, File rootSIFT_PC_file,
+			File dictionary_file, File bowArchive_file, File vladPC_file,
+			int rootSIFTPC_N, int vladPC_n) throws Exception {
 		
 		FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive(lfArchive_file );
-
+		
+		PrincipalComponents rootSIFT_PC = PrincipalComponents.read(rootSIFT_PC_file);
+		rootSIFT_PC.setProjDim(rootSIFTPC_N);
+		
 		LFWords words = new LFWords(dictionary_file);
-		Class<ALocalFeaturesGroup> lfGroup_class =  (Class<ALocalFeaturesGroup>) words.getLocalFeaturesGroupClass();
 		
 		Log.info("\t" + dictionary_file.getAbsolutePath() + "\t" + words.size());
 		
@@ -74,23 +85,25 @@ public class VLADConvert {
 		
 		FeaturesCollectorsArchive outArchive = inArchive.getSameType( bowArchive_file );
 		
-		PrincipalComponents pc = null;
+		PrincipalComponents vlad_PC = null;
 		if ( vladPC_file != null ) { 
-			PrincipalComponents.read(vladPC_file);
-			if ( vladPC_n > 0 ) pc.setProjDim(vladPC_n);
+			vlad_PC = PrincipalComponents.read(vladPC_file);
+			if ( vladPC_n > 0 ) vlad_PC.setProjDim(vladPC_n);
 		}
 		TimeManager timeManager = new  TimeManager();
 		for (Iterator<AbstractFeaturesCollector> it = inArchive.iterator(); it.hasNext(); ) {
 			AbstractFeaturesCollector curr = it.next();
 			
-			ALocalFeaturesGroup lfs = curr.getFeature(lfGroup_class);
+			SIFTGroup sifts = curr.getFeature(SIFTGroup.class);
+			RootSIFTGroup rootSIFT = new RootSIFTGroup(sifts, null);
+			FloatsLFGroup rootSIFTPCA = rootSIFT_PC.project(rootSIFT);
 			
+			VLAD vlad = VLAD.getVLAD(rootSIFTPCA, words);
 			
-			VLAD vlad = VLAD.getVLAD(lfs, words);
-			if (pc != null ) {
+			if (vlad_PC == null ) {
 				outArchive.add(vlad, ((IHasID) curr).getID() );
 			} else {
-				Floats f = new Floats(pc.project_float( (IArrayValues) vlad));
+				Floats f = new Floats(vlad_PC.project_float( (IArrayValues) vlad));
 				outArchive.add(f, ((IHasID) curr).getID() );
 			}
 			

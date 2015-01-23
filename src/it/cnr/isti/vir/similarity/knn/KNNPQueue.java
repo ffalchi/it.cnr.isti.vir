@@ -147,7 +147,7 @@ public class KNNPQueue<F> {
 		
 		if ( parallel ) {
 			
-			int threadN = ParallelOptions.getNFreeProcessors() +1;
+			int threadN = ParallelOptions.reserveNFreeProcessors() +1;
 	        Thread[] thread = new Thread[threadN];
 	        int[] group = SplitInGroups.split(coll.length, thread.length);
 	        int from=0;
@@ -178,7 +178,7 @@ public class KNNPQueue<F> {
 	public final void offerAll(ArrayList<F> coll) throws InterruptedException {
 		
 		if ( parallel ) {
-			int threadN = ParallelOptions.getNFreeProcessors() +1;
+			int threadN = ParallelOptions.reserveNFreeProcessors() +1;
 	        Thread[] thread = new Thread[threadN];
 	        int[] group = SplitInGroups.split(coll.size(), thread.length);
 	        int from=0;

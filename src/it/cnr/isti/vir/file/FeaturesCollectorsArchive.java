@@ -396,11 +396,11 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				if (!offsetFile.exists())
 					System.out.println("Offsets file not found.");
 				else if (file.lastModified() > offsetFile.lastModified())
-					System.out.println("offsetFile file out of date will be delete and rebuilt");
+					System.out.println("offset file is out of date. Rebuilding...");
 				if (!idFile.exists())
 					System.out.println("IDs file not found.");
 				else if (file.lastModified() > idFile.lastModified())
-					System.out.println("IDs file file out of date will be delete and rebuilt");
+					System.out.println("IDs file is out of date. Rebuilding...");
 				
 				
 				// Reading all
@@ -696,7 +696,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		
 		int size = size();
 		long sizeSqr = (long) size*size;
-		int nThread = ParallelOptions.getNFreeProcessors() +1 ;
+		int nThread = ParallelOptions.reserveNFreeProcessors() +1 ;
 		Log.info_verbose("N of distances to evaluate: " + sizeSqr);
 		Log.info_verbose("Outfile final size: " + sizeSqr*8 / 1024 /1024+ " MegaBytes.");
 		
@@ -874,6 +874,10 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	    bufferedOut.close();
 	}
 	
+	/**
+	 * @param lfGroupClass	Class of the requested local features group
+	 * @return
+	 */
 	public int getNumberOfLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass) {
 			
 		int res = 0;
@@ -893,15 +897,19 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	}
 	
 	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, int maxNObjs ) {
-		if ( maxNObjs < 0 ) return getRandomLocalFeatures(lfGroupClass, 1.0);
+		return getRandomLocalFeatures(lfGroupClass, maxNObjs, false);
+	}
+	
+	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, int maxNObjs, boolean removeKeyPoint ) {
+		if ( maxNObjs < 0 ) return getRandomLocalFeatures(lfGroupClass, 1.0, removeKeyPoint);
 		
 		int nLF_archive = getNumberOfLocalFeatures(lfGroupClass);
 		double prob = maxNObjs / (double) nLF_archive;
 		if ( prob > 1.0  ) prob = 1.0;
-		return getRandomLocalFeatures(lfGroupClass, prob);
+		return getRandomLocalFeatures(lfGroupClass, prob, removeKeyPoint);
 	}
 	
-	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, double prob) {
+	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, double prob, boolean removeKeyPoint) {
 		Log.info_verbose("Getting random elements of " + lfGroupClass + " with probability " + prob);
 		
 		int i=0;
@@ -915,7 +923,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			
 			for ( ALocalFeature currLF : currGroup.lfArr ) {
 				if ( RandomOperations.trueORfalse(prob)) {
-					res.add(currLF.unlinkLFGroup());
+					if ( removeKeyPoint ) res.add(currLF.unlinkLFGroup().removeKP());
 				}				
 			}
 			if ( tm.hasToOutput() ) {

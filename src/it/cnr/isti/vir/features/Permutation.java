@@ -284,7 +284,7 @@ public class Permutation extends AbstractFeature {
 		Permutation[] perm = new Permutation[objs.length];
 		
 		// kNNQueues are performed in parallels
-		int bookedThreads = ParallelOptions.getNFreeProcessors();
+		int bookedThreads = ParallelOptions.reserveNFreeProcessors();
 		final int nObjsPerThread = (int) Math.ceil((double) objs.length / (bookedThreads+1));
 		final int nThread = (int) Math.ceil((double) objs.length / nObjsPerThread);
 		int ti = 0;
@@ -367,7 +367,7 @@ public class Permutation extends AbstractFeature {
 			}
 			
 			// kNNQueues are performed in parallels
-			int bookedThreads = ParallelOptions.getNFreeProcessors();
+			int bookedThreads = ParallelOptions.reserveNFreeProcessors();
 			
 			
 			final int nObjsPerThread = (int) Math.ceil((double) objs.length / (bookedThreads+1));

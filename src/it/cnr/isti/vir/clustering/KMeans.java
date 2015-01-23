@@ -158,7 +158,6 @@ public class KMeans<O extends AbstractFeature> {
 
 		@Override
 		public void run() {
-			// each query is processed on an independent thread
 			for (int iO = from; iO<=to; iO++) {
 				O curr = objects[iO];
 
@@ -175,26 +174,29 @@ public class KMeans<O extends AbstractFeature> {
 	
 	public final void kMeansPP(int k) throws InterruptedException {
 		
-		RandomOperations.setSeed(System.currentTimeMillis());
+		int nObjs_kMPP = k*10;
+		if ( nObjs_kMPP > objects.length) nObjs_kMPP=objects.length;
+		Log.info("kMeans++ will use " + nObjs_kMPP + " randomly selected objects");
+		O[] objects_kMPP = (O[]) RandomOperations.getRandomObjects(objects, nObjs_kMPP);
 		
 		Log.info("Performing k-means++:");
-		O[] initCentroids = (O[]) Array.newInstance(objects[0].getClass(), k);	
+		O[] initCentroids = (O[]) Array.newInstance(objects_kMPP[0].getClass(), k);	
 		
 		// first centroid is taken randomly
-		initCentroids[0]= (O) objects[RandomOperations.getInt(0, objects.length)];
+		initCentroids[0]= (O) objects_kMPP[RandomOperations.getInt(0, objects_kMPP.length)];
 		
-		final float[] dFromNNCentroid = new float[objects.length];
-		final float[] dFromNNCentroidSQR = new float[objects.length];
+		final float[] dFromNNCentroid = new float[objects_kMPP.length];
+		final float[] dFromNNCentroidSQR = new float[objects_kMPP.length];
 		Arrays.fill(dFromNNCentroid, Float.MAX_VALUE);
 		
 
-		int bookedThreads = ParallelOptions.getNFreeProcessors() ;
+		int bookedThreads = ParallelOptions.reserveNFreeProcessors() ;
 		if ( bookedThreads < 1) {
 			for ( int i=1; i<initCentroids.length; i++ ) {
 				Log.info_verbose_progress(tm, i, initCentroids.length);
 				
-				for (int iO = 0; iO<objects.length; iO++) {
-					O curr = objects[iO];
+				for (int iO = 0; iO<objects_kMPP.length; iO++) {
+					O curr = objects_kMPP[iO];
 	
 					float dist = (float) sim.distance(curr, initCentroids[i-1], dFromNNCentroid[iO] );
 					if ( dist >= 0 && dist < dFromNNCentroid[iO]) {
@@ -205,7 +207,7 @@ public class KMeans<O extends AbstractFeature> {
 				}
 				
 				double sqSum = 0;
-				for (int iO = 0; iO<objects.length; iO++) {
+				for (int iO = 0; iO<objects_kMPP.length; iO++) {
 					//new centroid will be choosen with squared distance probability
 					sqSum+=dFromNNCentroidSQR[iO];
 				}
@@ -220,23 +222,23 @@ public class KMeans<O extends AbstractFeature> {
 					tempSum += dFromNNCentroidSQR[selected];
 					if ( tempSum >= rnd ) break;
 				}
-				initCentroids[i]=objects[selected];
+				initCentroids[i]=objects_kMPP[selected];
 				
 			}
 				
 		} else {
 			// kNNQueues are performed in parallels
-			final int nObjsPerThread = (int) Math.ceil((double) objects.length / (bookedThreads+1));
-			final int nThread = (int) Math.ceil((double) objects.length / nObjsPerThread);
+			final int nObjsPerThread = (int) Math.ceil((double) objects_kMPP.length / (bookedThreads+1));
+			final int nThread = (int) Math.ceil((double) objects_kMPP.length / nObjsPerThread);
 			
 			
 			for ( int i=1; i<initCentroids.length; i++ ) {
 				Log.info_verbose_progress(tm, i, initCentroids.length);
 				
 				ExecutorService executor = Executors.newFixedThreadPool(nThread);
-				for ( int from=0; from<objects.length; from+=nObjsPerThread) {
+				for ( int from=0; from<objects_kMPP.length; from+=nObjsPerThread) {
 		        	int to = from+nObjsPerThread-1;
-		        	if ( to >= objects.length ) to = objects.length-1;
+		        	if ( to >= objects_kMPP.length ) to = objects_kMPP.length-1;
 		        	Runnable worker =  new KMeanpp(initCentroids[i-1], from, to, dFromNNCentroid, dFromNNCentroidSQR) ;
 		        	executor.execute(worker);
 		        }
@@ -246,7 +248,7 @@ public class KMeans<O extends AbstractFeature> {
 		        
 		        
 		        double sqSum = 0;
-				for (int iO = 0; iO<objects.length; iO++) {
+				for (int iO = 0; iO<objects_kMPP.length; iO++) {
 					//new centroid will be choosen with squared distance probability
 					sqSum+=dFromNNCentroidSQR[iO];
 				}		
@@ -260,7 +262,7 @@ public class KMeans<O extends AbstractFeature> {
 					tempSum += dFromNNCentroidSQR[selected];
 					if ( tempSum >= rnd ) break;
 				}
-				initCentroids[i]=objects[selected];
+				initCentroids[i]=objects_kMPP[selected];
 			}
 			ParallelOptions.free(bookedThreads);
 		}
@@ -417,7 +419,7 @@ public class KMeans<O extends AbstractFeature> {
 			
 			final int currlastNCentroidChanges = lastNCentroidChanges;		
 			
-			int bookedProcessors = ParallelOptions.getNFreeProcessors();
+			int bookedProcessors = ParallelOptions.reserveNFreeProcessors();
 			if ( bookedProcessors < 1 ) {
 			
 				// checking and assigning centroids to objects

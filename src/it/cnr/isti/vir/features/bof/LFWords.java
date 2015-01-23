@@ -653,7 +653,7 @@ public class LFWords<F extends AbstractFeature> {
 				
 		final int[] bag = new int[features.length];
 		
-		int threadN = ParallelOptions.getNFreeProcessors() +1 ;
+		int threadN = ParallelOptions.reserveNFreeProcessors() +1 ;
 		Thread[] thread = new Thread[threadN];
         int[] group = SplitInGroups.split(features.length, thread.length);
         int from=0;

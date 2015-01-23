@@ -32,11 +32,17 @@ public class ParallelOptions {
 		}
 	}
 	
-	public static final synchronized int getNFreeProcessors() {
-		return getNFreeProcessors(128);
+	public static final synchronized int reserveNFreeProcessors() {
+		int available = nProcessors - nPInUse;
+		
+		if ( available < 0 ) return 0;
+		
+		nPInUse += available;
+		
+		return available;
 	}
 	
-	public static final synchronized int getNFreeProcessors(int max) {
+	public static final synchronized int reserveNFreeProcessors(int max) {
 		
 		int available = nProcessors - nPInUse;
 		

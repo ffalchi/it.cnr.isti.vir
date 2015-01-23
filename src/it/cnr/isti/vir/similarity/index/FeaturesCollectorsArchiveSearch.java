@@ -199,7 +199,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 					}
 					
 					// kNNQueues are performed in parallels
-					int bnt = ParallelOptions.getNFreeProcessors();
+					int bnt = ParallelOptions.reserveNFreeProcessors();
 					final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / (bnt+1) );
 					final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
 					int ti = 0;
@@ -267,7 +267,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				}
 				
 				// kNNQueues are performed in parallels
-				int bnt = ParallelOptions.getNFreeProcessors();
+				int bnt = ParallelOptions.reserveNFreeProcessors();
 				final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / (bnt+1) );
 				final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
 				int ti = 0;

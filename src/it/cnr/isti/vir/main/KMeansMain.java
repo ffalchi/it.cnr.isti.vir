@@ -10,7 +10,6 @@ import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.similarity.ILFSimilarity;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.util.PropertiesUtils;
-import it.cnr.isti.vir.util.TimeManager;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -55,8 +54,8 @@ public class KMeansMain {
 	public static void launch(Properties prop) throws Exception {
 		
 		File dataFile  = PropertiesUtils.getFile(prop, "kMeans.data");
-		int k = PropertiesUtils.getInt_maxIfNotExists(prop, "kMeans.k");
-		int maxNObjs = PropertiesUtils.getInt(prop, "kMeans.maxNObjs");
+		int k = PropertiesUtils.getInt(prop, "kMeans.k");
+		int maxNObjs = PropertiesUtils.getInt_maxIfNotExists(prop, "kMeans.maxNObjs");
 		String outAbsolutePath = PropertiesUtils.getAbsolutePath(prop, "kMeans.outFileName");
 		ISimilarity sim = (ISimilarity) PropertiesUtils.instantiateObjectWithProperties(prop, "kMeans.similarity");
 		boolean medoid = PropertiesUtils.getIfExistsDefFalse(prop, "kMeans.medoid");
@@ -78,7 +77,7 @@ public class KMeansMain {
 		
 		ArrayList<AbstractFeature> list;
 		if ( fGroupClass != null ) {
-			list = (ArrayList) archive.getRandomLocalFeatures(fGroupClass, maxNObjs);
+			list = (ArrayList) archive.getRandomLocalFeatures(fGroupClass, maxNObjs, true);
 		} else {
 			list = archive.getRandomFeatures(fClass, maxNObjs);
 		}
