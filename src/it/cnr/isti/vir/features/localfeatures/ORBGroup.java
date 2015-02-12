@@ -130,8 +130,8 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 	
 	static final public ORB getLoweMatch(ORB s1, ALocalFeaturesGroup<ORB> sg,
 			double conf, int maxFDsq) {
-		int distsq1 = Integer.MAX_VALUE;
-		int distsq2 = Integer.MAX_VALUE;
+		int dist1 = Integer.MAX_VALUE;
+		int dist2 = Integer.MAX_VALUE;
 		int dsq = 0;
 		ORB curr, best = null;
 		ORB[] arr = sg.lfArr;
@@ -140,26 +140,26 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 			dsq = ORB.getDistance(s1, curr);
 			if (dsq < 0)
 				continue;
-			if (dsq < distsq1) {
-				distsq2 = distsq1;
-				distsq1 = dsq;
+			if (dsq < dist1) {
+				dist2 = dist1;
+				dist1 = dsq;
 				best = curr;
-			} else if (dsq < distsq2) {
-				distsq2 = dsq;
+			} else if (dsq < dist2) {
+				dist2 = dsq;
 			}
 		}
 
 		// System.out.print(bestSIFT.scale + "\t");
 		// if ( bestSIFT.scale > 4 ) return null;
-		if (distsq1 > maxFDsq)
+		if (dist1 > maxFDsq)
 			return null;
-		if (distsq2 == 0)
+		if (dist2 == 0)
 			return null;
 		/*
 		 * Check whether closest distance is less than ratio threshold of
 		 * second.
 		 */
-		if ((double) distsq1 / (double) distsq2 < conf)
+		if ((double) dist1 / (double) dist2 < conf)
 			return best;
 		return null;
 	}

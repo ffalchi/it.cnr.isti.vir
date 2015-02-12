@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * @author Fabrizio Falchi
@@ -29,19 +30,35 @@ public class PrincipalComponents {
 	private int nEV; 	// number of EV
 	private int oDim;	// original dim
 	
-	private int projDim = -1;
+	private int projDim;
+	
+	public int getNPC() {
+		return nEV;
+	}
 	
 	public int getProjDim() {
 		return projDim;
 	}
 
 	public void setProjDim(int projDim) {
-		this.projDim = projDim;
+		if (projDim < 0 ) projDim = nEV;
+		else this.projDim = projDim;
 	}
 
 	static final int classID = 0x1A646C05;
 	
 	static final int version = 0;
+	
+	public PrincipalComponents getReduced(int nDim) {
+		double[][] newEV = Arrays.copyOf(eigenVectors, nDim);
+		
+		return new PrincipalComponents(newEV, means);
+	}
+	
+	public PrincipalComponents(double[][] eigenVectors, double[] mean, int projDim) {
+		this(eigenVectors, mean);
+		this.projDim = projDim;
+	}
 	
 	public PrincipalComponents(double[][] eigenVectors, double[] mean) {
 		this.eigenVectors = eigenVectors;
@@ -49,7 +66,7 @@ public class PrincipalComponents {
 		nEV = eigenVectors.length;
 		oDim = eigenVectors[0].length;
 		
-		projDim = oDim;
+		projDim = nEV;
 	}
 	
 	public static PrincipalComponents read(File file) throws Exception {
@@ -77,7 +94,7 @@ public class PrincipalComponents {
 			}
 		}
 		
-		return new PrincipalComponents(eigenVectors, means);		
+		return	new PrincipalComponents(eigenVectors, means, nEV);		
 		
 	}
 	
@@ -90,7 +107,7 @@ public class PrincipalComponents {
 		
 		out.writeInt(nEV);
 		out.writeInt(oDim);
-		projDim = oDim;
+		projDim = nEV;
 		
 		for ( int i=0; i<oDim; i++) {
 			out.writeDouble(means[i]);
@@ -201,4 +218,5 @@ public class PrincipalComponents {
 		FloatsLFGroup projectedGroup = new FloatsLFGroup(projected);
 		return projectedGroup;
 	}
+	
 }

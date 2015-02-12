@@ -507,4 +507,6 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 		return (Class<ALocalFeaturesGroup>) Class.forName(groupName);
 	}
 	
+	
+	
 }

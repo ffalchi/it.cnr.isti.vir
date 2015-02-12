@@ -33,17 +33,17 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 	double errorPerc = 0.1;
 	double minXYDist = 0.1;
 	double[] RANSAC_minMaxSR;
-	int maxFDistSq = Integer.MAX_VALUE;
+	int maxFDist = Integer.MAX_VALUE;
 	
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORBGroup.class);
 	
-	private final double sqrLoweThr;
+	private final double loweThr;
 	
 	public ORBGroupSimilarity_RANSAC( Properties properties) throws SimilarityOptionException {
 		super(properties);
 		String value = properties.getProperty("loweThr");
-		sqrLoweThr = Double.parseDouble(value);
-		System.out.println("sqrLoweThr: " +  sqrLoweThr );
+		loweThr = Double.parseDouble(value);
+		System.out.println("loweThr: " +  loweThr );
 		
 		value = properties.getProperty("RANSAC_tr");
 		if ( value != null ) {
@@ -59,11 +59,11 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 			System.out.println("RANSAC TR: " +  tr );
 		}
 		
-		value = properties.getProperty("maxFDistSq");
+		value = properties.getProperty("maxFDist");
 		if ( value != null) {
 			double tValue = Double.parseDouble(value);
-			maxFDistSq = (int) Math.floor(tValue * tValue );
-			System.out.println("maxFDistSq: " + maxFDistSq);
+			maxFDist = (int) Math.floor(tValue);
+			System.out.println("maxFDist: " + maxFDist);
 		}
 		
 		value = properties.getProperty("RANSAC_cycles");
@@ -101,13 +101,18 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 		}
 	}
 	
+	public ORBGroupSimilarity_RANSAC() {
+		this.loweThr = 1.0;
+		this.maxFDist = 35;
+	}
+	
 	public ORBGroupSimilarity_RANSAC(double loweThr) {
-		this.sqrLoweThr = loweThr*loweThr;
+		this.loweThr = loweThr;
 	}
 	
 	public ORBGroupSimilarity_RANSAC(String opt, double loweThr) throws Exception {
 		super(opt);
-		this.sqrLoweThr = loweThr*loweThr;
+		this.loweThr = loweThr;
 	}
 
 	@Override
@@ -128,10 +133,10 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 		LocalFeaturesMatches matches = null;
 		ArrayList<TransformationHypothesis> trArr = null;
 		
-		if ( maxFDistSq != Integer.MAX_VALUE )
-			matches = ORBGroup.getLoweMatches( g1, g2, sqrLoweThr, maxFDistSq );
+		if ( maxFDist != Integer.MAX_VALUE )
+			matches = ORBGroup.getLoweMatches( g1, g2, loweThr, maxFDist );
 		else
-			matches = ORBGroup.getLoweMatches( g1, g2, sqrLoweThr );
+			matches = ORBGroup.getLoweMatches( g1, g2, loweThr );
 		if ( matches == null || matches.size() < 2 ) return 1.0; 
 		Hashtable<Long, LocalFeaturesMatches> ht = LoweHoughTransform.getLoweHoughTransforms_HT(matches.getMatches(), false, RANSAC_minMaxSR);
 		trArr = matches.getRANSAC( ht, cycles, nHoughMaxForRANSAC, errorPerc, tr, minXYDist, true, rejectUnConsistent);
@@ -150,7 +155,7 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 	}
 	
 	public String toString() {
-		return super.toString() + " sqrConfThr=" + sqrLoweThr + " ";
+		return super.toString() + " sqrConfThr=" + loweThr + " ";
 	}
 	
 }

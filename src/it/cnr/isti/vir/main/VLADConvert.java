@@ -49,14 +49,14 @@ public class VLADConvert {
 		
 		File lfArchive_file = PropertiesUtils.getFile( prop, className+".lfArchive");
 		File dictionary_file = PropertiesUtils.getFile(prop, className+".dictionary");
-		File bowArchive_file = PropertiesUtils.getFile(prop, className+".vladArchive");
+		File vladArchive_file = PropertiesUtils.getFile(prop, className+".vladArchive");
 		File vladPC_file = PropertiesUtils.getFile_orNull(prop, className+".vladPC_file");
 		int vladPC_n = -1;
 		if (vladPC_file != null ) {
 			vladPC_n = PropertiesUtils.getInt(prop, className+".VLADPC_n");
 		}
 		
-		createVLAD(lfArchive_file, dictionary_file, bowArchive_file, vladPC_file, vladPC_n );		
+		createVLAD(lfArchive_file, dictionary_file, vladArchive_file, vladPC_file, vladPC_n );		
 	}
 	
 

@@ -256,7 +256,7 @@ public final class Gmm {
 			Collection<AbstractFeature> afColl = curr.getFeatures();
 			if (!afColl.isEmpty()) {
 				Class<? extends AbstractFeature> fClass = afColl.iterator().next().getClass();
-
+				
 				if ((ALocalFeaturesGroup.class).isAssignableFrom(fClass)) {// group case
 					ALocalFeaturesGroup group = ((ALocalFeaturesGroup) curr.getFeature(fClass));
 					arrValues.addAll(group.getCollection());

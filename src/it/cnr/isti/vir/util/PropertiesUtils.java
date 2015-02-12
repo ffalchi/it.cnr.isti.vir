@@ -7,6 +7,11 @@ import java.util.Properties;
 
 public class PropertiesUtils {
 	
+	public static boolean contains(Properties prop, String propertyName) {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) return false;
+		else return true;
+	}
 
 	public static String getAbsolutePath(Properties prop, String propertyName) throws Exception {
 		String str = prop.getProperty(propertyName);
