@@ -227,6 +227,7 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 	}
 	
 	public final int size() {
+		if ( lfArr == null ) return 0;
 		return lfArr.length;
 	}
 	

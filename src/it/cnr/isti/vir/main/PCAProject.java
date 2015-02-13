@@ -26,7 +26,7 @@ public class PCAProject {
 		System.out.println("Properties file must contain:");
 		System.out.println("- PCAProject.inArchive=<archive file name>");
 		System.out.println("- PCAProject.outArchive=<archive file name>");
-		System.out.println("- PCA.PC<principal components file>");
+		System.out.println("- PCA.PC=<principal components file>");
 		System.out.println("- PCAProject.dim");
 		System.out.println("- PCA.FeatureClass=<file name for PCA output>");
 		System.exit(0);
