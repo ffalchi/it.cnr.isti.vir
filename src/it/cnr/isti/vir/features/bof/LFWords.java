@@ -1238,6 +1238,19 @@ public class LFWords<F extends AbstractFeature> {
 		}
 		return nnIndex;
 	}
+	
+	public final double getNNDistance(F feature) {
+		double nnDist = sim.distance(feature, fArr[0]);
+		int nnIndex = 0;
+		for (int i2 = 1; i2 < size; i2++) {
+			double temp = sim.distance(feature, fArr[i2], nnDist);
+			if (temp >= 0 && temp < nnDist) {
+				nnIndex = i2;
+				nnDist = temp;
+			}
+		}
+		return nnDist;
+	}
 
 	/*
 	public final int getNNIndex_SURF(F feature) {

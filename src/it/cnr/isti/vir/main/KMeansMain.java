@@ -38,6 +38,7 @@ public class KMeansMain {
 		System.out.println("- [kMeans.distRedThr=<" + distRedThr_def + " default>]");
 		System.out.println("- [kMeans.nIterations=< 1 default>");
 		System.out.println("- [kMeans.maxMinPerIteration=<minutes>]");
+		System.out.println("- [kMeans.minDistortionOutFileName=<File Name>]");
 		System.exit(0);
 	}
 	
@@ -70,6 +71,8 @@ public class KMeansMain {
 			fGroupClass = ((ILFSimilarity) sim).getRequestedFeatureGroupClass();
 		}
 		Log.info("Requested features group: " + fGroupClass);
+		
+		File minDistortionOutFile  = PropertiesUtils.getFile_orNull(prop, "kMeans.minDistortionOutFileName");
 		
 		FeaturesCollectorsArchive archive = new FeaturesCollectorsArchive( dataFile );
 		
@@ -118,6 +121,11 @@ public class KMeansMain {
 		}
 
 		System.out.println("Minimun distortion: " + minDistortion);
+		
+		if ( minDistortionOutFile != null ) {
+			// TO DO!!!
+		}
+		
 		File outFile = new File(outAbsolutePath);
 		Files.copy(bestOutFile.toPath(), outFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		
