@@ -23,7 +23,7 @@ public class FeaturesSelection {
 		System.out.println("- inArchiveFileName=<archive file name>");
 		System.out.println("- outArchiveFileName=<file name>");
 		System.out.println("- featureClass=<class of the feature>");
-		System.out.println("- maxNFeatrues=<n>");
+		System.out.println("- maxNFeatures=<n>");
 		System.exit(0);
 	}
 	
@@ -32,19 +32,19 @@ public class FeaturesSelection {
 		if ( args.length != 1) {
 			usage();
 		} else {
-			Launch.launch(KMeansMain.class.getName(), args[0]);
+			Launch.launch(FeaturesSelection.class.getName(), args[0]);
 		}
 		
 	}
 	
 	public static void launch(Properties prop) throws Exception {
-		// maxNFeatrues
-		int maxNFeatrues = PropertiesUtils.getInt(prop, "maxNFeatrues");
+		// maxNFeatures
+		int maxNFeatures = PropertiesUtils.getInt(prop, "maxNFeatures");
 		
 		// Input Archive
 		File inFile  = PropertiesUtils.getFile(prop, "inArchiveFileName");
 		FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive( inFile );
-		
+	
 		// Output Archive
 		File outFile  = PropertiesUtils.getFile(prop, "outArchiveFileName");
 		FeaturesCollectorsArchive outArchive = inArchive.getSameType(outFile);
@@ -58,7 +58,7 @@ public class FeaturesSelection {
 			Log.info("Group class has been set to: " + cGroup);
 			int nLF_archive = inArchive.getNumberOfLocalFeatures(cGroup);
 			Log.info( inFile.getAbsolutePath() + " contains " + nLF_archive + " " + c +"\n");
-			double prob = maxNFeatrues / (double) nLF_archive;
+			double prob = maxNFeatures / (double) nLF_archive;
 			if ( prob > 1.0 || prob < 0) prob = 1.0;
 			
 			int counter = 0;
@@ -83,7 +83,7 @@ public class FeaturesSelection {
 			
 			
 		} else {
-			double prob = maxNFeatrues / (double) inArchive.size();
+			double prob = maxNFeatures / (double) inArchive.size();
 			if ( prob > 1.0 || prob < 0) prob = 1.0;
 			
 			int counter = 0;
