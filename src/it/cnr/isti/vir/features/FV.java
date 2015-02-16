@@ -24,14 +24,8 @@ import java.nio.ByteBuffer;
  * <img src="\Users\lucia\Documents\NetBeansProjects\Info\fvToHTML-0.png" /> <p>
  * <img src="\Users\lucia\Documents\NetBeansProjects\Info\fvToHTML-1.png" />
  * 
- *@author Lucia Vadicamo
  */
 public class FV extends AbstractFeature{
-
-    public static FV getFV(float[][] sift_pca, Gmm gmm, boolean power_norm, boolean compute_w_part, boolean compute_mu_part, boolean compute_sigma_part) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     public AbstractFeaturesCollector linkedFC;
     double[] values;
     
@@ -83,16 +77,16 @@ public class FV extends AbstractFeature{
     
     public FV(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
         int size = in.readInt();
-        
         int nBytes = Double.BYTES*size;
         byte[] bytes = new byte[nBytes];
-		in.readFully(bytes);
-		values = DoubleByteArrayUtil.get(bytes, 0, size);
+        in.readFully(bytes);
+        values = DoubleByteArrayUtil.get(bytes, 0, size);
+        //linkedFC = fc; ??
     }
     
 
     /**
-     *  Compute Fisher vector given the local descriptors (after PCA dimensionality reduction) and
+     * Compute Fisher vector given the local descriptors (real-valued) and
      * the Gmm parameters (mixture weight, mean and covariance matrix)
      *
      * @param x
@@ -100,33 +94,33 @@ public class FV extends AbstractFeature{
      * @param compute_mu_part
      * @param compute_w_part
      * @param power_norm
-     * @param compute_sigma_part
+     * @param compute_sigmaSqr_part
      * @return 
      * @throws Exception
      *
      */
     
-    public static final   FV getFV(double[][] x, Gmm gmm, boolean power_norm,   boolean compute_w_part, boolean compute_mu_part,boolean compute_sigma_part) throws Exception{
+    public static final   FV getFV(double[][] x, Gmm gmm, boolean power_norm,   boolean compute_w_part, boolean compute_mu_part,boolean compute_sigmaSqr_part) throws Exception{
         if(compute_w_part){
             if(compute_mu_part)
-                if(compute_sigma_part)
+                if(compute_sigmaSqr_part)
                     return(getFV_wms(x, gmm, power_norm)) ;
                 else
                     return(getFV_wm(x, gmm, power_norm));
             else{
-                if(compute_sigma_part)
+                if(compute_sigmaSqr_part)
                     return(getFV_ws(x, gmm, power_norm));
                 else
                     return(getFV_w(x, gmm, power_norm));
             }
         }else{
             if(compute_mu_part)
-                if(compute_sigma_part)
+                if(compute_sigmaSqr_part)
                     return(getFV_ms(x, gmm, power_norm))  ;
                 else
                     return(getFV_m(x, gmm, power_norm));
             else{
-                if(compute_sigma_part)
+                if(compute_sigmaSqr_part)
                     return(getFV_s(x, gmm, power_norm))  ;
                 else
                     return null;
@@ -136,13 +130,13 @@ public class FV extends AbstractFeature{
     
 
  
-    public static final   FV getFV_w(double[][] x2, Gmm gmm, boolean power_norm) throws Exception{    
+    public static final   FV getFV_w(double[][] x, Gmm gmm, boolean power_norm) throws Exception{    
         int k=gmm.getK();
         double[] w=gmm.getW();//dimesion k
         
-        int T=x2.length; //sample size
+        int T=x.length; //sample size
        
-        double[][] p= gmm.compute_p(x2);
+        double[][] p= gmm.compute_p(x);
         
         double[] fv=new double[k];
         
@@ -172,24 +166,6 @@ public class FV extends AbstractFeature{
             fv[i]=fv_i;            
         }
         
-//        for(int i=0; i<k; i++){
-//            for (int t=0; t<T; t++){
-//            	double p_ti=p[t][i];
-//                if((float)p_ti!=0.f){
-//                    S0[i]+=p_ti;
-//                }
-//            }
-//            double sqrt_wi=Math.sqrt(w[i]);
-//            double fv_i=(S0[i]/T-w[i])/sqrt_wi;
-//            
-//            if(power_norm)
-//                fv_i= Math.signum(fv_i)*Math.sqrt(Math.abs(fv_i));
-//            
-//            l2sum+=fv_i*fv_i;
-//            fv[i]=fv_i;
-//            
-//        }
-        
         //l2 normalization
         
         if(l2sum!=0){
@@ -210,10 +186,8 @@ public class FV extends AbstractFeature{
         int k=gmm.getK();
         double[] w=gmm.getW();//dimesion k
         double[] mu=gmm.getMu();//dimesion k*d
-        double[] sigma=gmm.getSigma();//dimesion k*d
-        
+        double[] sigmaSqr=gmm.getSigmaSqr();//dimesion k*d
         int T=x.length; //sample size
-        
         double[][] p= gmm.compute_p(x);
         
         double[] fv=new double[k*d];
@@ -250,7 +224,7 @@ public class FV extends AbstractFeature{
             
             for(int j=0; j<d; j++){
                 int h=i_col+j;
-                double fv_h=(S1[h]-S0[i]*mu[h])/(Math.sqrt(sigma[h])*sqrt_wi_T);
+                double fv_h=(S1[h]-S0[i]*mu[h])/(Math.sqrt(sigmaSqr[h])*sqrt_wi_T);
                 
                 if(power_norm)
                     fv_h= Math.signum(fv_h)*Math.sqrt(Math.abs(fv_h));
@@ -280,7 +254,7 @@ public class FV extends AbstractFeature{
         int k=gmm.getK();
         double[] w=gmm.getW();//dimesion k
         double[] mu=gmm.getMu();//dimesion k*d
-        double[] sigma=gmm.getSigma();//dimesion k*d
+        double[] sigmaSqr=gmm.getSigmaSqr();//dimesion k*d
         
         int T=x.length; //sample size
         
@@ -316,8 +290,8 @@ public class FV extends AbstractFeature{
             for(int j=0; j<d; j++){
                 int h=i_col+j;
                 double mu_h=mu[h];
-                double sigma_h=sigma[h];
-                double fv_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigma_h)*S0[i])/(sqrt_2wi_T*sigma_h);
+                double sigmaSqr_h=sigmaSqr[h];
+                double fv_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigmaSqr_h)*S0[i])/(sqrt_2wi_T*sigmaSqr_h);
                 if(power_norm){
                     fv_h= Math.signum(fv_h)*Math.sqrt(Math.abs(fv_h));
                 }
@@ -350,7 +324,7 @@ public class FV extends AbstractFeature{
         int k=gmm.getK();
         double[] w=gmm.getW();//dimesion k
         double[] mu=gmm.getMu();//dimesion k*d
-        double[] sigma=gmm.getSigma();//dimesion k*d
+        double[] sigmaSqr=gmm.getSigmaSqr();//dimesion k*d
         double T=x.length; //sample size
         
         double[][] p= gmm.compute_p(x);
@@ -390,7 +364,7 @@ public class FV extends AbstractFeature{
             for(int j=0; j<d; j++){
                 int h=i_col+j;
                 
-                double fvM_h=(S1[h]-S0[i]*mu[h])/(Math.sqrt(sigma[h])*sqrt_wi_T);
+                double fvM_h=(S1[h]-S0[i]*mu[h])/(Math.sqrt(sigmaSqr[h])*sqrt_wi_T);
                 if(power_norm)
                     fvM_h= Math.signum(fvM_h)*Math.sqrt(Math.abs(fvM_h));
                 
@@ -429,7 +403,7 @@ public class FV extends AbstractFeature{
         int k=gmm.getK();
         double[] w=gmm.getW();//dimesion k
         double[] mu=gmm.getMu();//dimesion k*d
-        double[] sigma=gmm.getSigma();//dimesion k*d
+        double[] sigmaSqr=gmm.getSigmaSqr();//dimesion k*d
         
         int T=x.length; //sample size
         
@@ -473,8 +447,8 @@ public class FV extends AbstractFeature{
             for(int j=0; j<d; j++){
                 int h=i_col+j;
                 double mu_h=mu[h];
-                double sigma_h=sigma[h];
-                double fvS_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigma_h)*S0[i])/(sqrt_2wi_T*sigma_h);
+                double sigmaSqr_h=sigmaSqr[h];
+                double fvS_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigmaSqr_h)*S0[i])/(sqrt_2wi_T*sigmaSqr_h);
           
                 if(power_norm)
                     fvS_h= Math.signum(fvS_h)*Math.sqrt(Math.abs(fvS_h));
@@ -514,7 +488,7 @@ public class FV extends AbstractFeature{
         int k=gmm.getK();
         double[] w=gmm.getW();//dimesion k
         double[] mu=gmm.getMu();//dimesion k*d
-        double[] sigma=gmm.getSigma();//dimesion k*d
+        double[] sigmaSqr=gmm.getSigmaSqr();//dimesion k*d
         
         int T=x.length; //sample size
         
@@ -550,9 +524,9 @@ public class FV extends AbstractFeature{
             for(int j=0; j<d; j++){
                 int h=i_col+j;
                 double mu_h=mu[h];
-                double sigma_h=sigma[h];
-                double fvM_h=(S1[h]-S0[i]*mu_h)/(Math.sqrt(sigma_h)*sqrt_wi_T);
-                double fvS_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigma_h)*S0[i])/(sqrt_2wi_T*sigma_h);
+                double sigmaSqr_h=sigmaSqr[h];
+                double fvM_h=(S1[h]-S0[i]*mu_h)/(Math.sqrt(sigmaSqr_h)*sqrt_wi_T);
+                double fvS_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigmaSqr_h)*S0[i])/(sqrt_2wi_T*sigmaSqr_h);
                 if(power_norm){
                     fvM_h= Math.signum(fvM_h)*Math.sqrt(Math.abs(fvM_h));
                     fvS_h= Math.signum(fvS_h)*Math.sqrt(Math.abs(fvS_h));
@@ -597,7 +571,7 @@ public class FV extends AbstractFeature{
        int k=gmm.getK();
        double[] w=gmm.getW();//dimesion k
        double[] mu=gmm.getMu();//dimesion k*d
-       double[] sigma=gmm.getSigma();//dimesion k*d
+       double[] sigmaSqr=gmm.getSigmaSqr();//dimesion k*d
        
        int T=x.length; //sample size
        
@@ -643,9 +617,9 @@ public class FV extends AbstractFeature{
             for(int j=0; j<d; j++){
                 int h=i_col+j;
                  double mu_h=mu[h];
-                double sigma_h=sigma[h];
-                double fvM_h=(S1[h]-S0[i]*mu_h)/(Math.sqrt(sigma_h)*sqrt_wi_T);
-                double fvS_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigma_h)*S0[i])/(sqrt_2wi_T*sigma_h);
+                double sigmaSqr_h=sigmaSqr[h];
+                double fvM_h=(S1[h]-S0[i]*mu_h)/(Math.sqrt(sigmaSqr_h)*sqrt_wi_T);
+                double fvS_h=(S2[h]-2*mu_h*S1[h]+(mu_h*mu_h-sigmaSqr_h)*S0[i])/(sqrt_2wi_T*sigmaSqr_h);
                 if(power_norm){
                     fvM_h= Math.signum(fvM_h)*Math.sqrt(Math.abs(fvM_h));
                     fvS_h= Math.signum(fvS_h)*Math.sqrt(Math.abs(fvS_h));

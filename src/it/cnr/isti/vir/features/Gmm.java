@@ -13,8 +13,8 @@ package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
-import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
+import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.util.MatrixConversion;
 import it.cnr.isti.vir.util.MatrixMath;
@@ -29,7 +29,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -71,11 +70,11 @@ public final class Gmm {
 	 * Variances of the mixture (dimension: k*d) <br>
 	 * <p>
 	 * <img src=
-	 * "http://latex.codecogs.com/gif.latex?\text{sigma}=(\sigma_1,\dots,\sigma_k),\quad{\sigma_i}\,\mbox{is\,the\,diagonal\,of\,i-th\,Gaussian\,covar
+	 * "http://latex.codecogs.com/gif.latex?\text{sigmaSqr}=(\sigma_1,\dots,\sigma_k),\quad{\sigma_i}\,\mbox{is\,the\,diagonal\,of\,i-th\,Gaussian\,covar
 	 * i a n c e \ , m a t r i x } " border="0"/>
 	 *
 	 */
-	private double[] sigma;
+	private double[] sigmaSqr;
 	/**
 	 *
 	 * <img src=
@@ -87,7 +86,7 @@ public final class Gmm {
 	/**
 	 * The minimum allowable value for the variances
 	 */
-	static final double min_sigma = (float) Math.pow(10, -10); // used in compute_param
+	static final double min_sigmaSqr = (float) Math.pow(10, -10); // used in compute_param
 
 	public int getD() {
 		return d;
@@ -105,8 +104,8 @@ public final class Gmm {
 		return mu;
 	}
 
-	public double[] getSigma() {
-		return sigma;
+	public double[] getSigmaSqr() {
+		return sigmaSqr;
 	}
 
 	/**
@@ -149,7 +148,7 @@ public final class Gmm {
 	 * <td>means of the mixture</td>
 	 * </tr>
 	 * <tr>
-	 * <td>sigma</td>
+	 * <td>sigmaSqr</td>
 	 * <td>float*k*d</td>
 	 * <td>diagonal elements of the covariance matrices</td>
 	 * </tr>
@@ -158,16 +157,8 @@ public final class Gmm {
 	 * @param filename
 	 * @param byteorder
 	 *            ByteOrder.LITTLE_ENDIAN or ByteOrder.BIG_ENDIAN
-	 * @throws java.io.IOException
-	 * @throws java.lang.NoSuchMethodException
-	 * @throws java.lang.InstantiationException
-	 * @throws java.lang.IllegalAccessException
-	 * @throws java.lang.reflect.InvocationTargetException
 	 */
-	public Gmm(String filename, ByteOrder byteorder) throws IOException,
-			SecurityException, NoSuchMethodException, IllegalArgumentException,
-			InstantiationException, IllegalAccessException,
-			InvocationTargetException, Exception {
+	public Gmm(String filename, ByteOrder byteorder) throws Exception {
 
 		if (!filename.endsWith(".gmm"))
 			throw new Exception("Error opening the file" + filename+ "--->Invalid file extension ");
@@ -178,9 +169,9 @@ public final class Gmm {
 			throw new IOException("Error: the file [" + file.getAbsolutePath()+ "] was not found");
 		}
 
-		System.out.println("Opening GMM parameter file: "+ file.getAbsolutePath());
+		Log.info("Opening GMM parameter file: "+ file.getAbsolutePath());
 		BufferedInputStream bf = new BufferedInputStream(new FileInputStream(file));
-		System.out.print("Reading GMM...");
+		Log.info("Reading GMM...");
 		try {
 			int dim = bf.available();
 			byte[] data = new byte[dim];
@@ -191,13 +182,13 @@ public final class Gmm {
 			k = buffer.getInt();
 			w = new double[k];
 			mu = new double[k * d];
-			sigma = new double[k * d];
+			sigmaSqr = new double[k * d];
 			for (int ind = 0; ind < k; ind++) {
 				w[ind] = buffer.getFloat();
 			}
 			for (int ind = 0; ind < k * d; ind++) {
 				mu[ind] = buffer.getFloat();
-				sigma[ind] = buffer.getFloat(4 * (2 + k + k * d + ind));
+				sigmaSqr[ind] = buffer.getFloat(4 * (2 + k + k * d + ind));
 			}
 
 			setTmp_p();// initialization of the useful quantity temp_p
@@ -208,7 +199,7 @@ public final class Gmm {
 		}
 		bf.close();
 
-		System.out.println(" done");
+		Log.info(" done");
 	}
 
 	/**
@@ -226,7 +217,7 @@ public final class Gmm {
 	 * <p>
 	 * Too small values of the variance can lead to instabilities in the
 	 * Gaussian computations, so the variance of each Gaussian is enforced to be
-	 * no smaller then min_sigma=1E-{10}.
+	 * no smaller then min_sigmaSqr=1E-{10}.
 	 * 
 	 * @param learningPoint
 	 *            sample used in EM algorithm
@@ -234,19 +225,10 @@ public final class Gmm {
 	 *            values used for initialization of GMM means
 	 * @param sig
 	 *            value used for initialization of covariance matrices
-	 * @throws java.lang.NoSuchMethodException
-	 * @throws java.lang.InstantiationException
-	 * @throws java.lang.reflect.InvocationTargetException
-	 * @throws java.lang.IllegalAccessException
-	 * @throws java.io.IOException
-	 * @throws it.cnr.isti.vir.file.ArchiveException
 	 *
 	 */
 	public Gmm(FeaturesCollectorsArchive learningPoint, LFWords<AbstractFeature> centroid,
-			float sig) throws SecurityException, NoSuchMethodException,
-			IllegalArgumentException, InstantiationException,
-			IllegalAccessException, InvocationTargetException, IOException,
-			ArchiveException, Exception {
+			float sigSqr) throws  Exception {
 
 		d = 0;
 		// ArrayList<float[]> arr = new ArrayList();
@@ -311,10 +293,10 @@ public final class Gmm {
 		float wi = 1.0f / k;
 		Arrays.fill(w, wi);
 
-		// initialize sigma (diagonal covariance matrices)
-		sigma = new double[d * k];
-		Arrays.fill(sigma, sig);
-		System.out.println("Sigma at initialization= " + sig);
+		// initialize sigmaSqr (diagonal covariance matrices)
+		sigmaSqr = new double[d * k];
+		Arrays.fill(sigmaSqr, sigSqr);
+		Log.info("Sigma squared at initialization= " + sigSqr);
 
 		// start EM algorithm
 
@@ -347,7 +329,7 @@ public final class Gmm {
 			old_key = key;
 			key = VectorMath.sum(mu);
 
-			System.out.println("Sum(mu) iter n." + iter + ": " + old_key+ " --> " + key);
+			Log.info_verbose("Sum(mu) iter n." + iter + ": " + old_key+ " --> " + key);
 			if (Math.abs(key - old_key) < 0.05)// if(key==old_key)
 				break;
 			tmp_p = null;
@@ -373,8 +355,8 @@ public final class Gmm {
 			for (int j = 0; j < d; j++) {
 				int ji = i_col + j;
 				double mu_ji = mu[ji];
-				double sigma_ji = sigma[ji];
-				tmp_sum += Math.log(sigma_ji) + (mu_ji * mu_ji) / sigma_ji;
+				double sigmaSqr_ji = sigmaSqr[ji];
+				tmp_sum += Math.log(sigmaSqr_ji) + (mu_ji * mu_ji) / sigmaSqr_ji;
 			}
 			tmp_p[i] = log2pi + Math.log(w[i]) - 0.5 * tmp_sum;
 		}
@@ -387,14 +369,14 @@ public final class Gmm {
 		private final double[][] x;
 		private final int d;
 		private final double[] mu;
-		private final double[] sigma;
+		private final double[] sigmaSqr;
 		private final double[] tmp_p;
 		private final int k;
 
 		Compute_p_thread(Gmm luncher, int from, int to, double[][] p,
 				double[][] x
 		// int d, int k,
-		// float[] mu, float[] sigma, double[] tmp_p
+		// float[] mu, float[] sigmaSqr, double[] tmp_p
 		) {
 			this.from = from;
 			this.to = to;
@@ -403,7 +385,7 @@ public final class Gmm {
 			this.d = luncher.d;
 			this.k = luncher.k;
 			this.mu = luncher.mu;
-			this.sigma = luncher.sigma;
+			this.sigmaSqr = luncher.sigmaSqr;
 			this.tmp_p = luncher.tmp_p;
 
 		}
@@ -416,17 +398,17 @@ public final class Gmm {
 				double[] pt = p[t];
 				double[] xt = x[t];
 
-				compute_p_elem(pt, xt, mu, sigma, tmp_p, d, k);
+				compute_p_elem(pt, xt, mu, sigmaSqr, tmp_p, d, k);
 			}
 		}
 	}
 
 	private static final void compute_p_elem(double[] pt, double[] xt,
-			double[] mu, double[] sigma, double[] tmp_p, int d, int k) {
+			double[] mu, double[] sigmaSqr, double[] tmp_p, int d, int k) {
 		double tmp_sum = 0;
 		for (int j = 0; j < d; j++) {
 			double x_tj = xt[j];
-			tmp_sum += (0.5 * x_tj - mu[j]) * x_tj / sigma[j];
+			tmp_sum += (0.5 * x_tj - mu[j]) * x_tj / sigmaSqr[j];
 		}
 		double tmp_logSum = pt[0] = tmp_p[0] - tmp_sum;
 
@@ -436,7 +418,7 @@ public final class Gmm {
 			tmp_sum = 0;
 			for (int j = 0; j < d; j++) {
 				double x_jt = xt[j];
-				tmp_sum += (0.5 * x_jt - mu[i_col + j]) * x_jt/ sigma[i_col + j];
+				tmp_sum += (0.5 * x_jt - mu[i_col + j]) * x_jt/ sigmaSqr[i_col + j];
 			}
 
 			pt[i] = tmp_p[i] - tmp_sum;
@@ -475,7 +457,7 @@ public final class Gmm {
 		if (threadN == 1) {
 			// Serial
 			for (int t = 0; t <= T; t++) {
-				compute_p_elem(p[t], x[t], mu, sigma, tmp_p, d, k);
+				compute_p_elem(p[t], x[t], mu, sigmaSqr, tmp_p, d, k);
 			}
 		} else {
 			// Parallel
@@ -529,7 +511,7 @@ public final class Gmm {
 		int T = x.length;
 
 		long nzero = MatrixMath.count_occurrences(p, 0.0f);// long nzero=MatrixMath.count_occurrences(p,0.0);
-		System.out.println("number of 0 posterior probabilities(float): "+ nzero + "/(" + k * T + ")=" + nzero * 100.0 / (k * T) + "%");
+		Log.info_verbose("number of 0 posterior probabilities(float): "+ nzero + "/(" + k * T + ")=" + nzero * 100.0 / (k * T) + "%");
 
 		float[] w_tmp = new float[k];
 		for (int t = 0; t < T; t++) {
@@ -550,7 +532,7 @@ public final class Gmm {
 
 		for (int i = 0; i < k; i++)
 			if (w_tmp[i] == 0.0f) {
-				System.out.println("centroid " + i + " is empty..");
+				Log.info_verbose("centroid " + i + " is empty..");
 				int i2 = i;
 				boolean control = true;
 				for (int j = 0; j < k - 1; j++) {// jump case i2=(i+k*generator)%k=i;
@@ -566,12 +548,12 @@ public final class Gmm {
 							"could not find centroid to split, very bad input data!");
 
 				int i2_col = i2 * d;
-				double val = sigma[i2_col];
+				double val = sigmaSqr[i2_col];
 				int split_dim = 0;// splitting dimension (the one with highest variance)
 				for (int j = 1; j < d; j++) {
-					double sigma_ji2 = sigma[i2_col + j];
-					if (sigma_ji2 > val) {
-						val = sigma_ji2;
+					double sigmaSqr_ji2 = sigmaSqr[i2_col + j];
+					if (sigmaSqr_ji2 > val) {
+						val = sigmaSqr_ji2;
 						split_dim = j;
 					}
 				}
@@ -591,8 +573,8 @@ public final class Gmm {
 					}
 				}
 
-				System.out.println("split" + i2 + " at dim " + split_dim
-						+ " (variance " + sigma[i2_col + split_dim]
+				Log.info_verbose("split" + i2 + " at dim " + split_dim
+						+ " (variance " + sigmaSqr[i2_col + split_dim]
 						+ "). Transferred" + nt + "/" + nnz + " pts)");
 				w_tmp[i2] = -1;// no future splitting
 			}
@@ -607,7 +589,7 @@ public final class Gmm {
 		private final int d;
 		private final double[] mu;
 		private final double[] mu_old;
-		private final double[] sigma;
+		private final double[] sigmaSqr;
 		private final double[] w;
 		private final double[] tmp_p;
 		private final int k;
@@ -625,7 +607,7 @@ public final class Gmm {
 			this.d = luncher.d;
 			this.k = luncher.k;
 			this.mu = luncher.mu;
-			this.sigma = luncher.sigma;
+			this.sigmaSqr = luncher.sigmaSqr;
 			this.tmp_p = luncher.tmp_p;
 			this.T = x.length;
 			this.mu_old = mu_old;
@@ -646,17 +628,17 @@ public final class Gmm {
 						int ji = i_col + j;
 						// contribution to mu
 						mu[ji] += (float) (xt[j] * pti);
-						// contribution to sigma
+						// contribution to sigmaSqr
 						double diff = xt[j] - mu_old[ji];
-						sigma[ji] += (float) pti * diff * diff;
+						sigmaSqr[ji] += (float) pti * diff * diff;
 					}
 				}// end sum on t
 
-				// handle too small sigma value
+				// handle too small sigmaSqr value
 				for (int j = 0; j < d; j++) {
 					int ji = i_col + j;
-					if (sigma[ji] < min_sigma) {
-						sigma[ji] = min_sigma;
+					if (sigmaSqr[ji] < min_sigmaSqr) {
+						sigmaSqr[ji] = min_sigmaSqr;
 						nz++;
 					}
 				}
@@ -668,7 +650,7 @@ public final class Gmm {
 					mu[ji] /= w[i];// w[i]!=0 only when compute_params is
 									// invoked after handle_emplty, otherwise
 									// infinity number could occur ..
-					sigma[ji] /= w[i];
+					sigmaSqr[ji] /= w[i];
 				}
 			}
 		}
@@ -688,7 +670,7 @@ public final class Gmm {
 
 		double[] mu_old = mu;
 		mu = new double[k * d];
-		sigma = new double[k * d];
+		sigmaSqr = new double[k * d];
 
 		// for each gaussian
 		int threadN = ParallelOptions.reserveNFreeProcessors() + 1;
@@ -731,8 +713,8 @@ public final class Gmm {
 		}
 
 		if (nz != 0)
-			System.out.println("WARN " + nz
-					+ " sigma diagonals are too small (set to " + min_sigma+ ")");
+			Log.info_verbose("WARN " + nz
+					+ " sigmaSqr diagonals are too small (set to " + min_sigmaSqr+ ")");
 
 		if (Float.isInfinite(mu_sum))
 			throw new Exception("Infinity number occurs");
@@ -781,7 +763,7 @@ public final class Gmm {
 	 * <td>means of the mixture</td>
 	 * </tr>
 	 * <tr>
-	 * <td>sigma</td>
+	 * <td>sigmaSqr</td>
 	 * <td>float*k*d</td>
 	 * <td>diagonal elements of the covariance matrices</td>
 	 * </tr>
@@ -803,7 +785,7 @@ public final class Gmm {
 		for (int l = 0; l < k * d; l++)
 			out.writeFloat((float) mu[l]);
 		for (int l = 0; l < k * d; l++)
-			out.writeFloat((float) sigma[l]);
+			out.writeFloat((float) sigmaSqr[l]);
 		out.close();
 
 	}
