@@ -17,7 +17,7 @@ import java.util.Properties;
 
 public class FeaturesSelection {
 	public static void usage() {
-		System.out.println("PCAProject <properties filename>.properties");
+		System.out.println(" FeaturesSelection <properties filename>.properties");
 		System.out.println();
 		System.out.println("Properties file must contain:");
 		System.out.println("- inArchiveFileName=<archive file name>");

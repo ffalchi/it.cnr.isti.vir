@@ -25,7 +25,7 @@ public class KMeansMain {
 	static final double distRedThr_def = 0.999;
 	
 	public static void usage() {
-		System.out.println("PCAProject <properties filename>.properties");
+		System.out.println("KMeansMain <properties filename>.properties");
 		System.out.println();
 		System.out.println("Properties file must contain:");
 		System.out.println("- kMeans.data=<archive file name>");
@@ -123,7 +123,9 @@ public class KMeansMain {
 		System.out.println("Minimun distortion: " + minDistortion);
 		
 		if ( minDistortionOutFile != null ) {
-			// TO DO!!!
+			DataOutputStream outStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(minDistortionOutFile)));
+			outStream.writeDouble(minDistortion);
+			outStream.close();
 		}
 		
 		File outFile = new File(outAbsolutePath);
