@@ -31,7 +31,25 @@ public class AveragePrecision {
 	 * @param gTruth				HashMap of QueryID and Expected Results
 	 * @return
 	 */
-	public static double getmAP(ISimilarityResults[] res,  HashMap<AbstractID,ArrayList<AbstractID>> gTruth ) {
+	public static double getMeanAveragePrecision(
+			ISimilarityResults[] res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives
+			) {
+		return getMeanAveragePrecision(res, positives, null);
+	}
+	
+
+	/**
+	 * @param res
+	 * @param positives
+	 * @param ambiguous
+	 * @return
+	 */
+	public static double getMeanAveragePrecision(
+			ISimilarityResults[] res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives,
+			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous
+			) {
 		
 		double apSum = 0; 
 		
@@ -44,10 +62,14 @@ public class AveragePrecision {
 			AbstractID query = ((IHasID) cRes.getQuery()).getID();
 			
 			// expected results
-			HashSet expectedResults = new HashSet(gTruth.get(query));
+			HashSet expectedResults = new HashSet(positives.get(query));
 			
-			double ap = getAveragePrecision(cRes, expectedResults, null, query);
-			apSum += ap;
+			// ambiguous results
+			HashSet ambiguousResults = null;
+			if ( ambiguous != null ) ambiguousResults = new HashSet(ambiguous.get(query));
+			
+			PrecisionRecall pr = PrecisionRecall.getPrecisionRecall(cRes, expectedResults, ambiguousResults, query);
+			apSum += pr.getAveragePrecision();
 		}
 		
 		return apSum / res.length;
@@ -104,33 +126,7 @@ public class AveragePrecision {
 
 
 	
-	/**
-	 * @param res					Array of results (including quueryID)
-	 * @param gTruth				HashMap of QueryID and Expected Results
-	 * @return
-	 */
-	public static double getMeanAveragePrecision(ISimilarityResults[] res,  HashMap<AbstractID,ArrayList<AbstractID>> gTruth ) {
-		
-		double apSum = 0; 
-		
-		// for each results list
-		for ( int i=0; i<res.length; i++) {
-			// results
-			SimilarityResults cRes = (SimilarityResults) res[i];
-			
-			// query
-			AbstractID query = ((IHasID) cRes.getQuery()).getID();
-			
-			// expected results
-			HashSet expectedResults = new HashSet(gTruth.get(query));
-			
-			PrecisionRecall pr = PrecisionRecall.getPrecisionRecall(cRes, expectedResults, query);
-			apSum += pr.getAveragePrecision();
-		}
-		
-		return apSum / res.length;
-		
-	}
+
 	
 	public static final double getMeanAveragePrecision(Collection<PrecisionRecall> given) {
 		double sum = 0;

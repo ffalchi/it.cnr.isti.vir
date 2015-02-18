@@ -774,6 +774,14 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		tStr += "--> has ID: " + idClass + "\n";
 		return tStr;
 	}
+	
+	public ArrayList<AbstractFeaturesCollector> get(AbstractID[] queries) throws ArchiveException {
+		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();
+		for ( AbstractID q : queries) {
+			res.add(this.get(q));
+		}
+		return res;
+	}
 
 	public ArrayList<AbstractFeaturesCollector> get(ArrayList<AbstractID> queries) throws ArchiveException {
 		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();

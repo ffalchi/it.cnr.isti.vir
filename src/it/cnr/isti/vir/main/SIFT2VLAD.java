@@ -35,7 +35,7 @@ public class SIFT2VLAD {
 			usage();
 		}
 
-		Launch.launch(VLADConvert.class.getName(), args[0]);	
+		Launch.launch(SIFT2VLAD.class.getName(), args[0]);	
 	
 	}
 	

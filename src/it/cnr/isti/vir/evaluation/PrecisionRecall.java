@@ -74,7 +74,16 @@ public class PrecisionRecall {
 	 * @param gTruth				HashMap of QueryID and Expected Results
 	 * @return
 	 */
-	public static Collection<PrecisionRecall> getPrecisionRecalls(ISimilarityResults[] res,  HashMap<AbstractID,ArrayList<AbstractID>> gTruth ) {
+	public static Collection<PrecisionRecall> getPrecisionRecalls(
+			ISimilarityResults[] res,  
+			HashMap<AbstractID,ArrayList<AbstractID>> positive ) {
+		return getPrecisionRecalls(res, positive, null);
+	}
+	
+	public static Collection<PrecisionRecall> getPrecisionRecalls(
+			ISimilarityResults[] res,  
+			HashMap<AbstractID,ArrayList<AbstractID>> positive,
+			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous ) {
 		
 		ArrayList<PrecisionRecall> prs = new ArrayList<PrecisionRecall>(res.length);
 		
@@ -89,9 +98,13 @@ public class PrecisionRecall {
 			AbstractID query = ((IHasID) cRes.getQuery()).getID();
 			
 			// expected results
-			HashSet expectedResults = new HashSet(gTruth.get(query));
+			HashSet positiveHS = new HashSet(positive.get(query));
+			HashSet ambiguousHS = null;
+			if ( ambiguous != null ) {
+				ambiguousHS = new HashSet(ambiguous.get(query));
+			}
 			
-			prs.add( PrecisionRecall.getPrecisionRecall(cRes, expectedResults, query) );
+			prs.add( PrecisionRecall.getPrecisionRecall(cRes, positiveHS, ambiguousHS, query) );
 			
 		}
 		

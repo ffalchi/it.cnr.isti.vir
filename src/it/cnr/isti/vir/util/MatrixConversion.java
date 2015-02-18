@@ -8,10 +8,15 @@ import it.cnr.isti.vir.features.IIntValues;
 import it.cnr.isti.vir.features.IUByteValues;
 import it.cnr.isti.vir.util.math.VectorMath;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 public class MatrixConversion {
 
+	
+	public static final double[][] getDoubles(IArrayValues[] arr) throws Exception {
+		return getDoubles( Arrays.asList( arr ));
+	}
 	
 	public static final double[][] getDoubles(Collection<? extends IArrayValues> coll) throws Exception {
 		if ( coll.size() == 0 ) return null;

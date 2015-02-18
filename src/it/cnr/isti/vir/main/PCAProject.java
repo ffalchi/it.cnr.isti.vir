@@ -27,7 +27,7 @@ public class PCAProject {
 		System.out.println("- PCAProject.inArchive=<archive file name>");
 		System.out.println("- PCAProject.outArchive=<archive file name>");
 		System.out.println("- PCA.PC=<principal components file>");
-		System.out.println("- PCAProject.dim");
+		System.out.println("- [PCAProject.dim]");
 		System.out.println("- PCA.FeatureClass=<file name for PCA output>");
 		System.exit(0);
 	}
@@ -48,7 +48,7 @@ public class PCAProject {
 		File outFile = PropertiesUtils.getFile(prop, "PCAProject.outArchive");
 		File pcFile  = PropertiesUtils.getFile(prop, "PCA.PC"); 
 		Class c = PropertiesUtils.getClass(prop, "PCA.FeatureClass");
-		int dim = PropertiesUtils.getInt(prop, "PCAProject.dim");
+		int dim = PropertiesUtils.getInt_orDefault(prop, "PCAProject.dim", -1);
 		
 		FeaturesCollectorsArchive in = new FeaturesCollectorsArchive(inFile);
 		FeaturesCollectorsArchive out = in.getSameType(outFile);
