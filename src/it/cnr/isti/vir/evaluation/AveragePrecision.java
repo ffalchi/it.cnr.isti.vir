@@ -16,6 +16,7 @@ import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
+import it.cnr.isti.vir.util.math.VectorMath;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,22 +39,22 @@ public class AveragePrecision {
 		return getMeanAveragePrecision(res, positives, null);
 	}
 	
-
+	
 	/**
 	 * @param res
 	 * @param positives
 	 * @param ambiguous
 	 * @return
 	 */
-	public static double getMeanAveragePrecision(
+	public static double[] getAveragePrecisions(
 			ISimilarityResults[] res, 
 			HashMap<AbstractID,ArrayList<AbstractID>> positives,
 			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous
 			) {
 		
-		double apSum = 0; 
+		double[] ap = new double[res.length]; 
 		
-		// for each results list
+		// for each result list
 		for ( int i=0; i<res.length; i++) {
 			// results
 			SimilarityResults cRes = (SimilarityResults) res[i];
@@ -69,10 +70,33 @@ public class AveragePrecision {
 			if ( ambiguous != null ) ambiguousResults = new HashSet(ambiguous.get(query));
 			
 			PrecisionRecall pr = PrecisionRecall.getPrecisionRecall(cRes, expectedResults, ambiguousResults, query);
-			apSum += pr.getAveragePrecision();
+			ap[i] = pr.getAveragePrecision();
 		}
 		
-		return apSum / res.length;
+		return ap;
+		
+	}
+
+	/**
+	 * @param res
+	 * @param positives
+	 * @param ambiguous
+	 * @return
+	 */
+	public static double getMeanAveragePrecision(
+			ISimilarityResults[] res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives,
+			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous
+			) {
+		
+		double[] ap = 
+				getAveragePrecisions(
+						res, 
+						positives,
+						ambiguous
+						);
+		
+		return VectorMath.mean(ap);
 		
 	}
 	
@@ -86,8 +110,8 @@ public class AveragePrecision {
 		    ObjectWithDistance curr = it.next();
 		    AbstractID currID = ((IHasID) curr.getObj()).getID();
 		    ids.add(currID);
-		  }
-		  return getAveragePrecision(ids, positiveIDs, ambiguosIDs, qID);
+		}
+		return getAveragePrecision(ids, positiveIDs, ambiguosIDs, qID);
 	}
 	
 	/*
@@ -105,9 +129,13 @@ public class AveragePrecision {
 		  for ( Iterator<AbstractID> it = results.iterator(); it.hasNext(); ) {
 		    AbstractID currID = it.next();
 		    
-		    if ( qID != null && currID.equals(qID) ) continue;
+		    
 		    if ( ambiguosIDs!=null && ambiguosIDs.contains(currID)) continue;
-		    if (positiveIDs.contains(currID)) intersect_size++;
+		    if ( positiveIDs.contains(currID) ) {
+		    	intersect_size++;
+		    } else {
+		    	if ( qID != null && currID.equals(qID) ) continue;
+		    }
 
 		    double recall = intersect_size / (double) positiveIDs.size();
 		    double precision = intersect_size / (j + 1.0);

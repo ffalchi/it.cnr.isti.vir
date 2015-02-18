@@ -143,10 +143,11 @@ public class PrecisionRecall {
 		  for ( Iterator<AbstractID> it = results.iterator(); it.hasNext(); ) {
 		    AbstractID currID = it.next();
 		    
-		    if ( qID != null && currID.equals(qID) ) continue;
+		    
 		    if ( ambiguosIDs!=null && ambiguosIDs.contains(currID)) continue;
 		    if (positiveIDs.contains(currID)) intersect_size++;
-
+		    else if ( qID != null && currID.equals(qID) ) continue;
+		    
 		    double recall = intersect_size / (double) positiveIDs.size();
 		    double precision = intersect_size / (j + 1.0);
 
