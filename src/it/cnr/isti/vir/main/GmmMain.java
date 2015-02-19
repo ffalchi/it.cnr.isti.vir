@@ -19,19 +19,18 @@ import java.util.Properties;
 
 public class GmmMain {
 
-	static final double distRedThr_def = 0.999;
-
+	public static final String className = "GmmMain";
 	public static void usage() {
-		System.out.println("GmmMain <properties filename>.properties");
+		System.out.println("Usage: " + className + "<properties filename>.properties");
 		System.out.println();
 		System.out.println("Properties file must contain:");
-		System.out.println("- Gmm.inArchive=<archive file name>");
-		System.out.println("- Gmm.k=<number of Gaussians>");
-		System.out.println("- Gmm.outFileName=<file name>");
-		System.out.println("- Gmm.featureClass=<class of the feature>");
-		System.out.println("- Gmm.centroidsFileName=<File Name>");
+		System.out.println("- "+className+".inArchive=<archive file name>");
+		System.out.println("- "+className+".k=<number of Gaussians>");
+		System.out.println("- "+className+".outFileName=<file name>");
+		System.out.println("- "+className+".featureClass=<class of the feature>");
+		System.out.println("- "+className+".centroidsFileName=<File Name>");
 		System.out.println("Properties file optionals:");
-		System.out.println("- [Gmm.minDistortionFileName=<File Name>]");
+		System.out.println("- ["+className+".minDistortionFileName=<File Name>]");
 		System.exit(0);
 	}
 
@@ -45,18 +44,18 @@ public class GmmMain {
 
 	public static void launch(Properties prop) throws Exception {
 		// Input Archive (learning archive)
-		File inFile  = PropertiesUtils.getFile(prop,"Gmm.inArchive");
+		File inFile  = PropertiesUtils.getFile(prop,className+".inArchive");
 		FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive( inFile );
 		//number of Gaussian
-		String outAbsolutePath = PropertiesUtils.getAbsolutePath(prop, "Gmm.outFileName");
+		String outAbsolutePath = PropertiesUtils.getAbsolutePath(prop, className+".outFileName");
 		//centroids file name
-		File centroidsFile  = PropertiesUtils.getFile(prop, "Gmm.centroidsFileName");
-		int k = PropertiesUtils.getInt(prop, "Gmm.k");
+		File centroidsFile  = PropertiesUtils.getFile(prop, className+".centroidsFileName");
+		int k = PropertiesUtils.getInt(prop,className+ ".k");
 
 		// Features or Local Features Group class
-		Class c = PropertiesUtils.getClass(prop, "Gmm.featureClass");
+		Class c = PropertiesUtils.getClass(prop, className+".featureClass");
 
-		File minDistortionFile = PropertiesUtils.getFile_orNull(prop, "Gmm.minDistortionOutFileName");
+		File minDistortionFile = PropertiesUtils.getFile_orNull(prop, className+".minDistortionOutFileName");
 
 		Log.info("GMM computation, number of Gaussian " + k);
 		Log.info("Learning Archive:"+ inArchive.getInfo());

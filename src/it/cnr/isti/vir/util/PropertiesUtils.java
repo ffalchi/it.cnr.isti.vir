@@ -101,6 +101,12 @@ public class PropertiesUtils {
 		Log.info_verbose(propertyName + "=" + str);
 		return Boolean.parseBoolean(str);
 	}
+	public static boolean getIfExistsDefTrue(Properties prop, String propertyName) {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) return true;
+		Log.info_verbose(propertyName + "=" + str);
+		return Boolean.parseBoolean(str);
+	}
 	
 	public static final Object instantiateObject(Properties prop, String propertyName)  throws Exception {
 		Class c = getClass(prop, propertyName);
