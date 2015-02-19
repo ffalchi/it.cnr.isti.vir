@@ -47,6 +47,35 @@ public class AveragePrecision {
 	 * @return
 	 */
 	public static double[] getAveragePrecisions(
+			Collection<ISimilarityResults> res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives,
+			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous
+			) {
+		ISimilarityResults[] temp = new ISimilarityResults[res.size()];
+		return getAveragePrecisions(temp, positives, ambiguous);
+		
+	}
+	
+	/**
+	 * @param res
+	 * @param positives
+	 * @param ambiguous
+	 * @return
+	 */
+	public static double[] getAveragePrecisions(
+			ISimilarityResults[] res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives
+			) {
+		return getAveragePrecisions(res, positives, null);
+	}
+	
+	/**
+	 * @param res
+	 * @param positives
+	 * @param ambiguous
+	 * @return
+	 */
+	public static double[] getAveragePrecisions(
 			ISimilarityResults[] res, 
 			HashMap<AbstractID,ArrayList<AbstractID>> positives,
 			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous
