@@ -76,7 +76,7 @@ public class Statistic {
 		double[][] ret = new double[nD][nD];
 		for (int i = 0; i < nD; i++) {
 			for (int j = i; j < nD; j++) {
-				double v = getCovariance(input, j, i, mean);
+				double v = getCovariance(input, i, j, mean);
 				ret[i][j] = v;
 				ret[j][i] = v;
 			}

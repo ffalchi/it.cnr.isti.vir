@@ -750,6 +750,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			Log.info_verbose((i1)*size + " done. Extimated time to finish: " + (avgTime*(size-i1)*size)/1000/60+ " min");
 		}		
 		out.close();
+		
 		/*
 		System.out.println("Testing:");
 		RandomAccessFile rnd = new RandomAccessFile(outFile, "r");
@@ -932,6 +933,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			for ( ALocalFeature currLF : currGroup.lfArr ) {
 				if ( RandomOperations.trueORfalse(prob)) {
 					if ( removeKeyPoint ) res.add(currLF.unlinkLFGroup().removeKP());
+					else res.add(currLF.unlinkLFGroup());
 				}				
 			}
 			if ( tm.hasToOutput() ) {

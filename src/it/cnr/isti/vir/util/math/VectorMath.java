@@ -23,6 +23,18 @@ public class VectorMath {
 		}
 		return res;
 	}
+	
+	/**
+	 * @param v1	is modified
+	 * @param v2	is subctrated
+	 * @return
+	 */
+	public static final void subtract(double[] v1, double[] v2) {
+		int nD = v1.length;
+		for (int iD = 0; iD < nD; iD++) {
+			v1[iD] = v1[iD] - v2[iD];
+		}
+	}
 
 	public static final float[] subtraction(float[] v1, float[] v2) {
 		int nD = v1.length;

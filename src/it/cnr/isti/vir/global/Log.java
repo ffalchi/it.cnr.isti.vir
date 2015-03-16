@@ -72,6 +72,18 @@ public class Log {
 		}
 	}
 	
+	/**
+	 * @param tm	Initialized time manager
+	 * @param curr	Current number of items processed
+	 */
+	public static synchronized void info_verbose_progress(TimeManager tm, int curr) {
+		if ( verbose ) {
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose_indent(tm.getProgressString(curr));
+			}
+		}
+	}
+	
 	public static synchronized void info_verbose_indent(String str) {
 		if ( verbose ) {
 			System.out.println(indent + str);

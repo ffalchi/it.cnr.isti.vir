@@ -16,7 +16,7 @@ public class TempFile {
         // temp file
 	    File temp = null;
         while ( temp == null || temp.exists() ) {
-	    	String tempFileName = tempDir + RandomOperations.getRandomUUIdString() + ".tmp";
+	    	String tempFileName = tempDir + File.separator + RandomOperations.getRandomUUIdString() + ".tmp";
 	    	temp = new File(tempFileName);
 	    	temp.deleteOnExit();
 	    }
@@ -33,7 +33,7 @@ public class TempFile {
         // temp file
 	    File temp = null;
         while ( temp == null || temp.exists() ) {
-	    	String tempFileName = tempDir + RandomOperations.getRandomUUIdString() + extension;
+	    	String tempFileName = tempDir + File.separator + RandomOperations.getRandomUUIdString() + extension;
 	    	temp = new File(tempFileName);
 	    	temp.deleteOnExit();
 	    }

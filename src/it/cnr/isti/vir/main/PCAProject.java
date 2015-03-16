@@ -174,7 +174,7 @@ public class PCAProject {
 			Thread[] thread = new Thread[nThread];
 			Iterator<AbstractFeaturesCollector> it = in.iterator();
 			for ( int ti=0; ti<nThread; ti++ ) {
-				thread[ti] = new Thread(new Project_LF(it, out, pc, c, tm ));
+				thread[ti] = new Thread(new Project_LF(it, out, pc, lfGroupClass, tm ));
 				thread[ti].start();
 			}
 		        

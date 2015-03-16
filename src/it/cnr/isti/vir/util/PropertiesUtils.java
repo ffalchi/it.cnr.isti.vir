@@ -46,6 +46,20 @@ public class PropertiesUtils {
 		return Integer.parseInt(str);
 	}
 	
+	public static boolean getBoolean(Properties prop, String propertyName ) throws Exception {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) throw new Exception(propertyName + " was not found in properties");
+		Log.info_verbose(propertyName + "=" + str);
+		return Boolean.parseBoolean(str);
+	}
+	
+	public static boolean getBoolean(Properties prop, String propertyName, boolean def) {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) return def;
+		Log.info_verbose(propertyName + "=" + str);
+		return Boolean.parseBoolean(str);
+	}
+	
 	public static final int getInt(Properties prop, String propertyName) throws Exception {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) throw new Exception(propertyName + " was not found in properties");

@@ -238,7 +238,8 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 				}
 			}
 			
-			values = Normalize.getSQRT_float(intValues);
+			Normalize.sqrt(values);
+			//values = Normalize.getSQRT_float(intValues);
 			//values = Normalize.getPower_float(intValues, 0.2);
 			//values = VectorMath.getFloats(intValues);
 							        

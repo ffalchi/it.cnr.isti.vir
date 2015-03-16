@@ -28,8 +28,11 @@ public class VLADAggregator {
 	private PrincipalComponents lfPC = null;
 	private PrincipalComponents vladPC = null;
 	
+	private boolean useRootSIFT = true;
 	
 	public  VLADAggregator(Properties prop ) throws Exception{
+		
+		useRootSIFT = PropertiesUtils.getBoolean(prop, className+".centroids", false);
 		
 		File dictionary_file = PropertiesUtils.getFile(prop, className+".centroids");
 		ref = new LFWords(dictionary_file);
@@ -82,7 +85,7 @@ public class VLADAggregator {
 		
 	public Floats getVLADPCA(AbstractFeaturesCollector fc) throws Exception {
 		ALocalFeaturesGroup group = null;
-		if ( lfGroupClass.equals(RootSIFTGroup.class)) {
+		if ( lfGroupClass.equals(RootSIFTGroup.class) || useRootSIFT ) {
 			RootSIFTGroup rootSIFT = fc.getFeature(RootSIFTGroup.class);
 			if ( rootSIFT == null ) {
 				SIFTGroup sifts = fc.getFeature(SIFTGroup.class);
@@ -101,6 +104,10 @@ public class VLADAggregator {
 			throw new Exception(className + "_ getVLADPCA() can not be execute with VLAD Principal Components set to null");
 		}	
 
+		if ( lfGroupClass.equals(RootSIFTGroup.class) || useRootSIFT ) {
+			group = new RootSIFTGroup((SIFTGroup) group, null);
+		}
+		
 		
 		if ( lfPC != null) {
 			group = lfPC.project(group);
@@ -114,7 +121,7 @@ public class VLADAggregator {
 	
 	public VLAD getVLAD(AbstractFeaturesCollector fc) throws Exception {
 		ALocalFeaturesGroup group = null;
-		if ( lfGroupClass.equals(RootSIFTGroup.class)) {
+		if ( lfGroupClass.equals(RootSIFTGroup.class) || useRootSIFT ) {
 			RootSIFTGroup rootSIFT = fc.getFeature(RootSIFTGroup.class);
 			if ( rootSIFT == null ) {
 				SIFTGroup sifts = fc.getFeature(SIFTGroup.class);

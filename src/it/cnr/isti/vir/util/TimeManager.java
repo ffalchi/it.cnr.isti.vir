@@ -15,6 +15,12 @@ public class TimeManager {
 	
 	public long minInterval = standardMinInterval;
 	
+	private int totNEle = -1;
+	
+	public synchronized void setTotNEle(int totNEle) {
+		this.totNEle = totNEle;
+	}
+	
 	public TimeManager() {
 		start = System.currentTimeMillis();
 		last = start;
@@ -51,7 +57,7 @@ public class TimeManager {
 		return false;
 	}
 	
-	public void resetOutputTimer() {
+	public synchronized void resetOutputTimer() {
 		last = start;
 	}
 	
@@ -98,5 +104,9 @@ public class TimeManager {
 	
 	public String getProgressString(int curr, int tot) {
 		return curr + "/" + tot + " " + Percentage.getString(curr, tot) + " " + "ETC " + getExtimatedTimeToComplete_STR(curr, tot);
+	}
+	
+	public String getProgressString(int curr ) {
+		return curr + "/" + totNEle + " " + Percentage.getString(curr, totNEle) + " " + "ETC " + getExtimatedTimeToComplete_STR(curr, totNEle);
 	}
 }

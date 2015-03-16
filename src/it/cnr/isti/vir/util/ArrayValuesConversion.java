@@ -10,7 +10,7 @@ import it.cnr.isti.vir.util.math.VectorMath;
 
 public class ArrayValuesConversion {
 	
-	public static final double[] getDoubles(IArrayValues given) throws Exception {
+	public static final double[] getDoubles(IArrayValues given) {
 		
 		if ( given instanceof IDoubleValues)
 			return getDoubles( (IDoubleValues) given );
@@ -27,8 +27,8 @@ public class ArrayValuesConversion {
 		if ( given instanceof IUByteValues)
 			return getDoubles( (IUByteValues) given );
 		
-		throw new Exception("Objet type was unknown");
-				
+		//throw new Exception("Objet type was unknown");
+		return null;		
 	}
 	
 	private static final double[] getDoubles(IFloatValues given) {

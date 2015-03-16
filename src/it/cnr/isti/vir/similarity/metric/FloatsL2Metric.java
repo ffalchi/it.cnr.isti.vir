@@ -54,8 +54,7 @@ public class FloatsL2Metric  implements IMetric<Floats>, IMeanEvaluator<Floats> 
 	
 	@Override
 	public final double distance(Floats f1, Floats f2, double max) {
-		// TODO 
-		return L2.get(f1.getValues(), f2.getValues() );
+		return L2.get(f1.getValues(), f2.getValues(), max );
 	}
 
 	@Override

@@ -46,7 +46,7 @@ public class PCA {
 		for (int i = 0; i < numComponents; i++) {
 			double[] eigenvector = new double[numComponents];
 			for (int j = 0; j < numComponents; j++) {
-				eigenvector[j] = vecs[i][j];
+				eigenvector[j] = vecs[j][i];
 			}
 			principalComponents.add(new PrincipalComponent(eigenvalues[i],eigenvector));
 		}

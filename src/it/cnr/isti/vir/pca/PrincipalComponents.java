@@ -39,6 +39,10 @@ public class PrincipalComponents {
 	public int getProjDim() {
 		return projDim;
 	}
+	
+	public double[][] getComponents() {
+		return eigenVectors;
+	}
 
 	public void setProjDim(int projDim) {
 		if (projDim < 0 ) projDim = nEV;
@@ -122,11 +126,11 @@ public class PrincipalComponents {
 		out.close();
 	}
 	
-	public float[] project_float(IArrayValues given) throws Exception {
+	public float[] project_float(IArrayValues given) {
 		return project_float( ArrayValuesConversion.getDoubles(given) );
 	}
 	
-	public float[] project_float(IArrayValues given, int n) throws Exception {
+	public float[] project_float(IArrayValues given, int n) {
 		return project_float( ArrayValuesConversion.getDoubles(given), n );
 	}
 

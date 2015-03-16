@@ -48,6 +48,6 @@ public class Norm {
         for (int i=0; i<values.length; i++) {
         	sum += (values[i]*values[i]);
         }
-        return (float) Math.sqrt(sum);
+        return Math.sqrt(sum);
 	}
 }

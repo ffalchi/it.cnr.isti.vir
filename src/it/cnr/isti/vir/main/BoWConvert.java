@@ -77,8 +77,7 @@ public class BoWConvert {
 			
 			outArchive.add(bofGroup, ((IHasID) curr).getID() );
 			
-			Log.info_verbose_progress(timeManager, outArchive.size(), inArchive.size());
-				
+			Log.info_verbose_progress(timeManager, outArchive.size(), inArchive.size());				
 		}
 		
 		System.out.print( outArchive.getInfo() );
