@@ -122,6 +122,8 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValu
 		for ( int i=0; i<siftValues.length; i++ ) {
 			sum += siftValues[i];
 		}
+		
+		// java does not have UBytes
 		sum += 128*128;
 		
 		byte[] values = new byte[128];

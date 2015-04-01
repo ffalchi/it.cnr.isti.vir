@@ -48,7 +48,7 @@ public class ArrayValuesConversion {
 	}	
 	
 	private static final double[] getDoubles(IUByteValues given) {
-		return VectorMath.getDoubles(given.getValues());
+		return VectorMath.getDoubles_UBytes(given.getValues());
 	}
 	
 }

@@ -203,10 +203,14 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 				}
 			}
 			
-			Normalize.sqrt(values);
+			// Has been proposed in "All about VLAD"
+			Normalize.ssr(values);
+			
+			// Discussed in Revisiting the VLAD
+			//Normalize.sPower(values, 0.2);
 			
 		} else if ( 	refs[0] instanceof IByteValues
-	        		|| 	refs[0] instanceof IIntValues) {
+	        		|| 	refs[0] instanceof IIntValues ) {
 			
 			int[] intValues = new int[size];
 			
@@ -238,15 +242,17 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 				}
 			}
 			
-			Normalize.sqrt(values);
-			//values = Normalize.getSQRT_float(intValues);
-			//values = Normalize.getPower_float(intValues, 0.2);
-			//values = VectorMath.getFloats(intValues);
+			// Has been proposed in "All about VLAD"
+			values = Normalize.ssr_float(intValues);
+			
+			// Discussed in Revisiting the VLAD
+			//values = Normalize.sPower_float(intValues, 0.2);
 							        
 		} else {
         	throw new Exception( "VLAD can't be computed for " + features.getClass() );
 		}
         
+        // L2 Normalization (performed in any case)
         Normalize.l2(values);
         
         return new VLAD(values);

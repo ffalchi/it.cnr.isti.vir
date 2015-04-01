@@ -16,6 +16,7 @@ import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.pca.PrincipalComponents;
 import it.cnr.isti.vir.util.PropertiesUtils;
 import it.cnr.isti.vir.util.TimeManager;
+import it.cnr.isti.vir.util.math.Normalize;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class PCAProject {
 		System.out.println("- PCAProject.outArchive=<archive file name>");
 		System.out.println("- PCA.PC=<principal components file>");
 		System.out.println("- [PCAProject.dim]");
+		System.out.println("- [PCAProject.L2Norm]");
 		System.out.println("- PCA.FeatureClass=<feature class to be projects>");
 		System.exit(0);
 	}
@@ -52,18 +54,21 @@ public class PCAProject {
 		private final PrincipalComponents pc;
 		private final Class c;
 		private final TimeManager tm;
+		private final boolean l2Norm;
 		
 		public Project(
 				Iterator<AbstractFeaturesCollector> it,
 				FeaturesCollectorsArchive out,
 				PrincipalComponents pc,
 				Class c,
-				TimeManager tm ) {
+				TimeManager tm,
+				boolean l2Norm ) {
 			this.it = it;
 			this.out = out;
 			this.c = c;
 			this.tm = tm;
 			this.pc = pc;
+			this.l2Norm = l2Norm;
 		}
 
 		@Override
@@ -77,7 +82,9 @@ public class PCAProject {
 				Log.info_verbose_progress(tm, out.size());
 				
 				AbstractFeature currf = fc.getFeature(c);
-				Floats projected = new Floats(pc.project_float( (IArrayValues) currf));
+				float[] temp = pc.project_float( (IArrayValues) currf);
+				if ( l2Norm ) Normalize.l2(temp);;
+				Floats projected = new Floats(temp);
 				
 				AbstractFeaturesCollector newFC = fc.createWithSameInfo(projected);
 
@@ -98,18 +105,21 @@ public class PCAProject {
 		private final PrincipalComponents pc;
 		private final Class<ALocalFeaturesGroup> lfGroupClass;
 		private final TimeManager tm;
+		private final boolean l2Norm;
 		
 		public Project_LF(
 				Iterator<AbstractFeaturesCollector> it,
 				FeaturesCollectorsArchive out,
 				PrincipalComponents pc,
 				Class<ALocalFeaturesGroup> lfGroupClass,
-				TimeManager tm ) {
+				TimeManager tm,
+				boolean l2Norm ) {
 			this.it = it;
 			this.out = out;
 			this.lfGroupClass = lfGroupClass;
 			this.tm = tm;
 			this.pc = pc;
+			this.l2Norm = l2Norm;
 		}
 
 		@Override
@@ -126,7 +136,10 @@ public class PCAProject {
 				ALocalFeature[] currLFs = currGroup.lfArr;
 				FloatsLF[] projected = new FloatsLF[currGroup.size()];
 				for ( int i=0; i<currLFs.length; i++ ) {
-					projected[i] = new FloatsLF(pc.project_float( (IArrayValues) currLFs[i])); 
+					float[] temp = pc.project_float( (IArrayValues) currLFs[i]);
+					if ( l2Norm ) Normalize.l2(temp);;
+					projected[i] = new FloatsLF(temp); 
+					//projected[i] = new FloatsLF(pc.project_float( (IArrayValues) currLFs[i])); 
 				}
 				FloatsLFGroup projectedGroup = new FloatsLFGroup(projected);
 				AbstractFeaturesCollector newFC = fc.createWithSameInfo(projectedGroup);
@@ -151,6 +164,7 @@ public class PCAProject {
 		File pcFile  = PropertiesUtils.getFile(prop, "PCA.PC"); 
 		Class c = PropertiesUtils.getClass(prop, "PCA.FeatureClass");
 		int dim = PropertiesUtils.getInt_orDefault(prop, "PCAProject.dim", -1);
+		boolean l2Norm = PropertiesUtils.getBoolean(prop, "PCAProject.L2Norm", false);
 		
 		FeaturesCollectorsArchive in = new FeaturesCollectorsArchive(inFile);
 		FeaturesCollectorsArchive out = in.getSameType(outFile);
@@ -174,7 +188,7 @@ public class PCAProject {
 			Thread[] thread = new Thread[nThread];
 			Iterator<AbstractFeaturesCollector> it = in.iterator();
 			for ( int ti=0; ti<nThread; ti++ ) {
-				thread[ti] = new Thread(new Project_LF(it, out, pc, lfGroupClass, tm ));
+				thread[ti] = new Thread(new Project_LF(it, out, pc, lfGroupClass, tm, l2Norm ));
 				thread[ti].start();
 			}
 		        
@@ -211,7 +225,7 @@ public class PCAProject {
 			Thread[] thread = new Thread[nThread];
 			Iterator<AbstractFeaturesCollector> it = in.iterator();
 			for ( int ti=0; ti<nThread; ti++ ) {
-				thread[ti] = new Thread(new Project(it, out, pc, c, tm ));
+				thread[ti] = new Thread(new Project(it, out, pc, c, tm,l2Norm ));
 				thread[ti].start();
 			}
 		        

@@ -54,6 +54,14 @@ public class SimPQueueArr<O> extends AbstractSimPQueue<O> {
 
 	@Override
 	public SimilarityResults getResults() {
+		
+		if ( objCount < size) {
+			//System.out.println("CUTTED " + objCount + "/" + size);
+			ObjectWithDistance[] tArr = Arrays.copyOf(arr, objCount);
+			Arrays.sort(tArr);
+			return new SimilarityResults(tArr);
+		}
+		//System.out.println("NOT CUTTED");
 		Arrays.sort(arr);
 		return new SimilarityResults(arr);
 	}

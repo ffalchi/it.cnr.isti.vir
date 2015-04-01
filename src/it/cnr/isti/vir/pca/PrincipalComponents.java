@@ -6,6 +6,7 @@ import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
 import it.cnr.isti.vir.util.ArrayValuesConversion;
+import it.cnr.isti.vir.util.math.Normalize;
 import it.cnr.isti.vir.util.math.VectorMath;
 
 import java.io.BufferedInputStream;
@@ -213,11 +214,17 @@ public class PrincipalComponents {
 		return tStr;
 	}
 	
-	public FloatsLFGroup project(ALocalFeaturesGroup givenGroup) throws Exception {
+//	public FloatsLFGroup project(ALocalFeaturesGroup givenGroup, Boolean l2Norm) throws Exception {
+//		
+//	}
+	
+	public final FloatsLFGroup project(ALocalFeaturesGroup givenGroup, Boolean l2Norm) throws Exception {
 		FloatsLF[] projected = new FloatsLF[givenGroup.size()];
 		ALocalFeature[] arr = givenGroup.lfArr;
 		for ( int i=0; i<arr.length; i++ ) {
-			projected[i] = new FloatsLF( project_float( (IArrayValues) arr[i])); 
+			float[] tFloat = project_float( (IArrayValues) arr[i]);
+			if ( l2Norm == true ) Normalize.l2(tFloat);
+			projected[i] = new FloatsLF(tFloat); 
 		}
 		FloatsLFGroup projectedGroup = new FloatsLFGroup(projected);
 		return projectedGroup;

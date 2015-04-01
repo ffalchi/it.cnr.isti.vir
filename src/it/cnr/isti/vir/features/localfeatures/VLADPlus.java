@@ -126,7 +126,7 @@ public class VLADPlus extends VLAD {
         	throw new Exception( "VLAD can't be computed for " + features.getClass() );
 		}
 
-        Normalize.power(values, 0.2);
+        Normalize.sPower(values, 0.2);
         
         Normalize.l2(values);
         

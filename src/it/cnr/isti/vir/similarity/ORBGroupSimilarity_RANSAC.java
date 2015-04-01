@@ -26,7 +26,7 @@ import java.util.Properties;
 public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 	
 	boolean rejectUnConsistent = false;
-	
+		
 	Class tr = HomographyTransformation.class;
 	int cycles = 1000;
 	int nHoughMaxForRANSAC = 10;

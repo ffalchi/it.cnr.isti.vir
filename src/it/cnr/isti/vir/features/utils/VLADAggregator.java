@@ -7,6 +7,7 @@ import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
+import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 import it.cnr.isti.vir.global.Log;
@@ -30,24 +31,32 @@ public class VLADAggregator {
 	
 	private boolean useRootSIFT = true;
 	
+	private boolean l2Norm = false;
 	public  VLADAggregator(Properties prop ) throws Exception{
 		
-		useRootSIFT = PropertiesUtils.getBoolean(prop, className+".centroids", false);
-		
+		useRootSIFT = PropertiesUtils.getBoolean(prop, className+".useRootSIFT", true);
 		File dictionary_file = PropertiesUtils.getFile(prop, className+".centroids");
+		
+		File lfPC_file = PropertiesUtils.getFile_orNull(prop, className+".LF_PC");
+		int lfPC_n = PropertiesUtils.getInt_orDefault(prop, className+".LF_PC_n", -1);
+		l2Norm = PropertiesUtils.getBoolean(prop, className+".LF_PCA_L2Norm", false);
+		
+		File vladPC_file = PropertiesUtils.getFile_orNull(prop, className+".VLADPC");
+		int vladPC_n = PropertiesUtils.getInt_orDefault(prop, className+".VLADPC_n", -1);
+		
+		
 		ref = new LFWords(dictionary_file);
 		Log.info(className + ": Number of references for VLAD: " + ref.size());
 		
 		lfGroupClass =  (Class<? extends ALocalFeaturesGroup>) ref.getLocalFeaturesGroupClass();
 		Log.info(className + ": Local Features Group Class: " + lfGroupClass);
 		
-		File lfPC_file = PropertiesUtils.getFile_orNull(prop, className+".RootSIFT_PC");
 		if (lfPC_file != null ) {
 			Log.info(className + ": Local Features Principal Components found.");
 			lfPC = PrincipalComponents.read(lfPC_file);
 			
-			if (PropertiesUtils.contains(prop, className+".RootSIFT_PC_n")) {
-				int lfPC_n = PropertiesUtils.getInt(prop, className+".RootSIFT_PC_n");
+			
+			if (lfPC_n > 0) {
 				lfPC.setProjDim(lfPC_n);				
 			}
 			Log.info(className + ": Local Features Principal Components: " + lfPC.getProjDim());
@@ -60,12 +69,11 @@ public class VLADAggregator {
 		
 		
 		
-		File vladPC_file = PropertiesUtils.getFile_orNull(prop, className+".VLADPC");
 		if (vladPC_file != null ) {
 			Log.info(className + ": VLAD Principal Components found.");
 			vladPC = PrincipalComponents.read(vladPC_file);
 			if (PropertiesUtils.contains(prop, className+".VLADPC_n")) {
-				int vladPC_n = PropertiesUtils.getInt(prop, className+".VLADPC_n");
+				
 				vladPC.setProjDim(vladPC_n);
 			}
 			Log.info(className + ": VLAD Principal Components: " + vladPC.getProjDim());
@@ -108,9 +116,9 @@ public class VLADAggregator {
 			group = new RootSIFTGroup((SIFTGroup) group, null);
 		}
 		
-		
+		// Projection of local features
 		if ( lfPC != null) {
-			group = lfPC.project(group);
+			group = lfPC.project(group, l2Norm);
 		}
 		
 		VLAD vlad = VLAD.getVLAD(group, ref);
@@ -121,7 +129,7 @@ public class VLADAggregator {
 	
 	public VLAD getVLAD(AbstractFeaturesCollector fc) throws Exception {
 		ALocalFeaturesGroup group = null;
-		if ( lfGroupClass.equals(RootSIFTGroup.class) || useRootSIFT ) {
+		if ( lfGroupClass.equals(RootSIFTGroup.class) || ( useRootSIFT && lfGroupClass.equals(SIFT.class))) {
 			RootSIFTGroup rootSIFT = fc.getFeature(RootSIFTGroup.class);
 			if ( rootSIFT == null ) {
 				SIFTGroup sifts = fc.getFeature(SIFTGroup.class);
@@ -137,7 +145,7 @@ public class VLADAggregator {
 	
 	public VLAD getVLAD(ALocalFeaturesGroup group) throws Exception {
 		if ( lfPC != null) {
-			return VLAD.getVLAD(lfPC.project(group), ref);	 
+			return VLAD.getVLAD(lfPC.project(group, l2Norm), ref);	 
 		} else {
 			return VLAD.getVLAD(group, ref);	
 		}

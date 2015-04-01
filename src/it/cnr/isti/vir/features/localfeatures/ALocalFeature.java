@@ -14,6 +14,8 @@ package it.cnr.isti.vir.features.localfeatures;
 import it.cnr.isti.vir.classification.AbstractLabel;
 import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.IArrayValues;
+import it.cnr.isti.vir.util.string.ToString;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -169,13 +171,17 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 
 	
 	public String toString() {
-		String tStr = "";
+		StringBuilder tStr = new StringBuilder();
 		if ( kp != null ) {
-			tStr += kp.toString();
+			tStr.append( kp.toString() );
 		} else {
-			tStr += "kp: null ";
+			//tStr += "kp: null ";
 		}
-		return tStr;
+		if ( this instanceof IArrayValues ) {
+			tStr.append(ToString.getString((IArrayValues) this));
+		}
+		tStr.append("\n");
+		return tStr.toString();
 	}
 	
 	public KeyPoint getKeyPoint() {

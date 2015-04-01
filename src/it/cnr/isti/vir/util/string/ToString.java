@@ -1,5 +1,14 @@
 package it.cnr.isti.vir.util.string;
 
+import it.cnr.isti.vir.features.IArrayValues;
+import it.cnr.isti.vir.features.IByteValues;
+import it.cnr.isti.vir.features.IDoubleValues;
+import it.cnr.isti.vir.features.IFloatValues;
+import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.IUByteValues;
+
+import java.util.Arrays;
+
 public class ToString {
 
 	static final String newLine = System.getProperty("line.separator");
@@ -40,4 +49,26 @@ public class ToString {
 		return builder.toString();
 	}
 	
+	public static final String getString(IArrayValues given) {
+		
+		if ( given instanceof IDoubleValues)
+			return Arrays.toString(( (IDoubleValues) given ).getValues());
+		
+		if ( given instanceof IFloatValues)
+			return Arrays.toString(( (IFloatValues) given ).getValues());
+		
+		if ( given instanceof IIntValues)
+			return Arrays.toString(( (IIntValues) given ).getValues());
+		
+		if ( given instanceof IByteValues)
+			return Arrays.toString(( (IByteValues) given ).getValues());
+
+		if ( given instanceof IUByteValues)
+			return Arrays.toString(( (IUByteValues) given ).getValues());
+		
+		//throw new Exception("Objet type was unknown");
+		return null;		
+	}
+	
+
 }

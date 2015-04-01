@@ -337,22 +337,29 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		return getHtmlTableRow_Images( preFix, postFix, null, null);
 	}
 	
-	public String getHtmlTableRow_Images(String preFix, String postFix, Integer subStringInt, Integer height) {
+	public String getHtmlTableRow_Images(String preFix, String postFix, Integer subStringInt, Integer width) {
 		String tStr = "<tr>\n";
-		if ( height == null) height = 100;
+		if ( width == null) width = 100;
 		if ( subStringInt == null )
-			tStr += "<td>"+ ((IHasID)query).getID()+ "<br>" + "<img src=\"" + preFix + ((IHasID)query).getID()+ postFix + "\" height=\""+height+"\"></td>";
+			tStr += "<td>"+ ((IHasID)query).getID()+ "<br>" +
+					"<img src=\"" + preFix + ((IHasID)query).getID()+ postFix + "\" width=\""+width+"\"></td>";
 		else
-			tStr += "<td>"+ ((IHasID)query).getID() + "<br>" +  "<img src=\"" + preFix + ((IHasID)query).getID().toString().substring(0, subStringInt)+ "/"  + ((IHasID)query).getID()+ postFix + "\" height=\""+height+"\"></td>";
+			tStr += "<td>"+ ((IHasID)query).getID() + "<br>" + 
+					"<img src=\"" + preFix + ((IHasID)query).getID().toString().substring(0, subStringInt)+ "/"  +
+					((IHasID)query).getID()+ postFix + "\" width=\""+width+"\"></td>";
 		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
 			ObjectWithDistance<E> curr = itThis.next();
 			AbstractID id = ((IHasID)curr.obj).getID();
 			if ( subStringInt == null ) {
-				tStr += "<td>" + String.format("%.3f", curr.dist) + "<br>" +  "<img src=\"" + preFix + id + postFix + "\" title=\""+((IHasID)curr.obj).getID() + " d ";
+				tStr += "<td>" + String.format("%.3f", curr.dist) + "<br>" +
+						"<img src=\"" + preFix + id + postFix + "\" title=\""+((IHasID)curr.obj).getID() + " d ";
 				tStr += String.format("%.3f", curr.dist);
-				tStr += "\" height=\""+height+"\"></td>";
+				tStr += "\" width=\""+width+"\"></td>";
 			} else 
-				tStr += "<td>" + String.format("%.3f", curr.dist) + "<br>" +  "<img src=\"" + preFix + id.toString().substring(0, subStringInt) + "/" + id + postFix + "\" title=\""+((IHasID)curr.obj).getID() + " d " + String.format("%.3f", curr.dist) + "\" height=\""+height+"\"></td>";
+				tStr += "<td>" + String.format("%.3f", curr.dist) + "<br>" +
+						"<img src=\"" + preFix + id.toString().substring(0, subStringInt) + "/" +
+						id + postFix + "\" title=\""+((IHasID)curr.obj).getID() +
+						" d " + String.format("%.3f", curr.dist) + "\" width=\""+width+"\"></td>";
 		}
 		
 		return tStr + "</tr>";
@@ -391,8 +398,7 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 			return idStr.substring(0, 3) + "/" + idStr.substring(3, 6) + "/" + idStr;
 		} else {
 			return idStr.substring(0, 4) + "/" + idStr.substring(4, 7) + "/" + idStr;
-		}
-		
+		}		
 	}
 
 

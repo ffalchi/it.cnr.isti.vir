@@ -18,7 +18,7 @@ public class Normalize {
         }
 	}
 	
-	public static final void sqrt( float[] values ) {
+	public static final void ssr( float[] values ) {
 		int size = values.length;
 		// Power Normalization 0.5
         for (int i=0; i<size; i++) {     
@@ -33,7 +33,7 @@ public class Normalize {
 	/**
 	 * @param values	the array to be power 0.5 normalized
 	 */
-	public static final void sqrt(int[] values) {
+	public static final void ssr(int[] values) {
 		int size = values.length;
 		// Power Normalization 0.5
         for (int i=0; i<size; i++) {     
@@ -46,9 +46,11 @@ public class Normalize {
 	}
 	
 	/**
+	 * Signed Square Rooting Normalization
+	 * 
 	 * @param values	the array to be power 0.5 normalized
 	 */
-	public static final float[] getSQRT_float(int[] values) {
+	public static final float[] ssr_float(int[] values) {
 		int size = values.length;
 		float[] res = new float[size];
 		// Power Normalization 0.5
@@ -62,7 +64,7 @@ public class Normalize {
         return res;
 	}	
 	
-	public static final float[] getPower_float( int[] values, double a ) {
+	public static final float[] sPower_float( int[] values, double a ) {
 		int size = values.length;
 		float[] res = new float[size];
         for (int i=0; i<size; i++) {     
@@ -75,7 +77,7 @@ public class Normalize {
         return res;
 	}
 	
-	public static final void power( double[] values, double a ) {
+	public static final void sPower( double[] values, double a ) {
 		int size = values.length;
 		for (int i=0; i<size; i++) {     
         	if ( values[i] == 0 ) values[i] = 0.0F;
@@ -86,7 +88,7 @@ public class Normalize {
         }
 	}	
 	
-	public static final void power( float[] values, double a ) {
+	public static final void sPower( float[] values, double a ) {
 		int size = values.length;
 		for (int i=0; i<size; i++) {     
         	if ( values[i] == 0 ) values[i] = 0.0F;

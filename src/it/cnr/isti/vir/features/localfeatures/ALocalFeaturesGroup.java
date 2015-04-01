@@ -63,6 +63,9 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 	
 	protected ALocalFeaturesGroup(LF[] arr) {
 		lfArr = arr;
+		for ( LF curr : arr) {
+			curr.setLinkedGroup(this);
+		}
 	}
 	
 	public ALocalFeaturesGroup(int initCapacity, AbstractFeaturesCollector fc) {
@@ -492,11 +495,12 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 	}
 	
 	public String toString() {
-		String tStr = this.getClass() + " of " + this.size() + " features\n";
+		StringBuilder sb = new StringBuilder();
+		sb.append( this.getClass() + " of " + this.size() + " features\n" );
 		for ( ALocalFeature o : lfArr ) {
-			tStr += o.toString();
+			sb.append( o.toString() );
 		}
-		return tStr;
+		return sb.toString();
 		
 	}
 	
