@@ -77,7 +77,8 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	private final Class<? extends AbstractID> idClass;
 
 	private boolean changed = false;
-
+	private int lastSaveSize = -1;
+	
 	private final Class<? extends AbstractFeaturesCollector> fcClass;
 
 //	public FeatureClassCollector getFeaturesClasses() {
@@ -212,8 +213,52 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		add(fcClass.getConstructor(AbstractFeature.class, AbstractID.class).newInstance(f, id));
 	}
 	
+	/**
+	 * @param fca		
+	 * @param fc	
+	 * @throws ArchiveException
+	 * @throws IOException
+	 */
+	public synchronized static  void add(File file, AbstractFeaturesCollector fc) throws ArchiveException, IOException {
+		if ( !file.exists() ) {
+			throw new ArchiveException("The FeaturesCollectorsArchive " + file.getAbsolutePath() + " does not exist");
+		}
+		RandomAccessFile rndFile = new RandomAccessFile(file, "rw");
+		
+		if (rndFile.readLong() != fileID) {
+			throw new IOException("The file ["+ file.getAbsolutePath() +"] does not appear to be a FeatureArchive");
+		}
+
+		int fileVersion = rndFile.readInt();
+
+		Class fcClass = null;
+		if (fileVersion > 1) {
+
+			// Reading classes
+			fcClass = FeaturesCollectors.readClass(rndFile);
+			
+		}
+		
+		rndFile.seek(rndFile.length());
+		
+		if (fcClass == null) {
+			FeaturesCollectors.writeData(rndFile, fc);
+		} else {
+			if (fcClass.isInstance(fc)) {
+				fc.writeData(rndFile);
+			} else {
+				throw new ArchiveException("FeaturesCollector class inserted ("
+						+ fc.getClass() + ") diffear from expected (" + fcClass
+						+ ")");
+			}
+		}
+	}
+	
 	public synchronized void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
 
+		if ( changed == false ) {
+			lastSaveSize = size();
+		}
 		
 		int currPos = positions.size();
 		positions.add(rndFile.length());
@@ -225,6 +270,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			if (!idClass.isInstance(id)) {
 				throw new ArchiveException("Object has a wrong ID class: "
 						+ idClass + " requested, " + id.getClass() + " found.");
+			}
+			if ( this.contains(id) ) {
+				throw new ArchiveException("ID " + id + " already exists in the archive");
 			}
 			ids.add(id);
 			
@@ -316,7 +364,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			int size = rndFile.readInt();
 			arr = new ArrayList(size);
 
-			System.out.println("--> The archive contains " + size);
+			Log.info_verbose("--> The archive contains " + size);
 
 			for (int i = 0; i < size; i++) {
 				arr.add(FeaturesCollectors.readData(in));
@@ -341,7 +389,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		IDClasses.readClass_Int(in);
 	}
 	
-	public FeaturesCollectorsArchive open(File file, boolean readIDs) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+	public static FeaturesCollectorsArchive open(File file, boolean readIDs) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
 		return new FeaturesCollectorsArchive(file, readIDs);
 	}
 	
@@ -355,7 +403,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			InstantiationException, IllegalAccessException,
 			InvocationTargetException {
 
-		//System.out.println("Opening FeaturesCollectorsArchive: " + file.getAbsolutePath());
+		//Log.info_verbose("Opening FeaturesCollectorsArchive: " + file.getAbsolutePath());
 		if ( !file.exists()) {
 			throw new IOException("The file ["+ file.getAbsolutePath() +"] was not found");
 		}
@@ -394,17 +442,17 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 					|| file.lastModified() > idFile.lastModified()) {
 
 				if (!offsetFile.exists())
-					System.out.println("Offsets file not found.");
+					Log.info_verbose("Offsets file not found.");
 				else if (file.lastModified() > offsetFile.lastModified())
-					System.out.println("offset file is out of date. Rebuilding...");
+					Log.info_verbose("offset file is out of date. Rebuilding...");
 				if (!idFile.exists())
-					System.out.println("IDs file not found.");
+					Log.info_verbose("IDs file not found.");
 				else if (file.lastModified() > idFile.lastModified())
-					System.out.println("IDs file is out of date. Rebuilding...");
+					Log.info_verbose("IDs file is out of date. Rebuilding...");
 				
 				
 				// Reading all
-				System.out.print("Analysing binary file... ");
+				Log.info_verbose("Analysing binary file... ");
 				positions = new TLongArrayList();
 				ids = new ArrayList();
 				long offset = 0;
@@ -422,13 +470,13 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 					ids.add(((IHasID) fc).getID());
 					
-					if ( positions.size() % 10000 == 0 ) System.out.println(positions.size());
+					if ( positions.size() % 10000 == 0 ) Log.info_verbose(""+positions.size());
 				}
-				System.out.println("done");
+				Log.info_verbose("done");
 
 				
 
-				System.out.print("Creating IDs HashTable... ");
+				Log.info_verbose("Creating IDs HashTable... ");
 				// idOffsetMap = new HashMap(2*positions.size());
 				// for ( int i=0; i<positions.size(); i++ ) {
 				// idOffsetMap.put(ids.get(i), positions.get(i));
@@ -438,7 +486,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				for (int i = 0; i < positions.size(); i++) {
 					idPosMap.put(ids.get(i), i);
 				}
-				System.out.println("done");
+				Log.info_verbose("done");
 
 				createIndexFiles();
 			} else {
@@ -448,7 +496,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				// RandomAccessFile inId = new RandomAccessFile( idFile, "r" );
 
 				int size = (int) (inOffset.length() / 8);
-				System.out.println("Archive " + file.getAbsolutePath()
+				Log.info_verbose("Archive " + file.getAbsolutePath()
 						+ " contains " + size + " objects.");
 
 				// Reading offsets
@@ -467,23 +515,23 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 						// idOffsetMap = new HashMap(2*size);
 						idPosMap = new HashMap(2 * size);
 	
-						System.out.print("Reading IDs... ");
+						Log.info_verbose("Reading IDs... ");
 						ids = new ArrayList(Arrays.asList(IDClasses.readArray(idInput, size, idClass)));
-						System.out.println("done");
+						Log.info_verbose("done");
 	
-						System.out.print("Reading IDs HashTable... ");
+						Log.info_verbose("Reading IDs HashTable... ");
 						size = positions.size();
 						for (int i = 0; i < size; i++) {
 							// idOffsetMap.put(ids.get(i), positions.get(i));
 							idPosMap.put(ids.get(i), i);
 						}
-						System.out.println("done");
+						Log.info_verbose("done");
 					} else {
 						ids = null;
 						idPosMap = null;
 					}
 				} else {
-					System.out.println("--> The archive does not contains IDs");
+					Log.info_verbose("--> The archive does not contains IDs");
 					// no IDs
 					ids = null;
 					// idOffsetMap = null;
@@ -513,9 +561,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			// long indexOffSet = file.readLong();
 			rndFile.seek(indexOffSet);
 			int size = rndFile.readInt();
-			//System.out.println("--> The archive contains " + size);
-			//System.out.println("--> Features Collector Class: " + fcClass);
-			//System.out.println("--> Features to consider are: " + featuresClasses);
+			//Log.info_verbose("--> The archive contains " + size);
+			//Log.info_verbose("--> Features Collector Class: " + fcClass);
+			//Log.info_verbose("--> Features to consider are: " + featuresClasses);
 
 			// Reading offsets
 			long[] tempPositions = new long[size];
@@ -530,27 +578,27 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				// idOffsetMap = new HashMap(2*size);
 				idPosMap = new HashMap(2 * size);
 
-				System.out.print("Reading IDs... ");
+				Log.info_verbose("Reading IDs... ");
 				DataInputStream idInput = new DataInputStream(new BufferedInputStream(new FileInputStream(idFile)));
 				ids = new ArrayList(Arrays.asList(IDClasses.readArray(idInput, size, idClass)));
-				System.out.println("done");
+				Log.info_verbose("done");
 
-				System.out.print("Creating IDs HashTable... ");
+				Log.info_verbose("Creating IDs HashTable... ");
 				size = positions.size();
 				for (int i = 0; i < size; i++) {
 					// idOffsetMap.put(ids.get(i), positions.get(i));
 					idPosMap.put(ids.get(i), i);
 				}
-				System.out.println("done");
+				Log.info_verbose("done");
 			} else {
-				System.out.println("--> The archive does not contains IDs");
+				Log.info_verbose("--> The archive does not contains IDs");
 				// no IDs
 				ids = null;
 				// idOffsetMap = null;
 				idPosMap = null;
 			}
 		}
-		//System.out.println(getInfo());
+		//Log.info_verbose(getInfo());
 	}
 
 	public static final String getIDFileName(File file) {
@@ -565,8 +613,30 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		createIndexFiles(offsetFile, idFile, positions, ids);
 	}
 	
-	public static void createIndexFiles(File offsetFile, File idFile, TLongArrayList positions, ArrayList<AbstractID> ids) throws IOException {
+	public void updateIndexFiles() throws IOException {
 
+		Log.info_verbose("Updating " + getfile().getAbsolutePath() + " index files");
+		 
+		DataOutputStream outOffset = new DataOutputStream(
+				new BufferedOutputStream(new FileOutputStream(offsetFile, true)));
+		DataOutputStream outIDs = new DataOutputStream(
+				new BufferedOutputStream(new FileOutputStream(idFile, true)));
+
+		for (int i = lastSaveSize; i < positions.size(); i++) {
+			outOffset.writeLong(positions.get(i));
+			ids.get(i).writeData(outIDs);
+		}
+
+		outOffset.close();
+		outIDs.close();
+		
+		lastSaveSize = size();
+	}
+	
+	public static void createIndexFiles(File offsetFile, File idFile, TLongArrayList positions, ArrayList<AbstractID> ids) throws IOException {
+		
+		Log.info_verbose("Creating index files");
+		
 		offsetFile.delete();
 		idFile.delete();
 
@@ -587,7 +657,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 	public synchronized AbstractFeaturesCollector get(int i) throws ArchiveException {
 		try {
-			//System.out.println("i: " + i + ", offset: " + positions.get(i));
+			//Log.info_verbose("i: " + i + ", offset: " + positions.get(i));
 			rndFile.seek(positions.get(i));
 
 			byte[] arr = null;
@@ -627,7 +697,6 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	}
 
 	public synchronized final boolean contains(AbstractID id) throws ArchiveException {
-		// return idOffsetMap.get(id) != null;
 		return idPosMap.get(id) != null;
 	}
 
@@ -640,10 +709,14 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	}
 
 	public void close() throws IOException {
-		if (changed) {
-			createIndexFiles();
-		}
 		rndFile.close();
+		if ( changed ) {
+			if ( lastSaveSize <= 0 ) {
+				createIndexFiles();
+			} else {
+				updateIndexFiles();
+			}
+		}
 	}
 
 	@Override
@@ -752,7 +825,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		out.close();
 		
 		/*
-		System.out.println("Testing:");
+		Log.info_verbose("Testing:");
 		RandomAccessFile rnd = new RandomAccessFile(outFile, "r");
 		for (int i=0; i<100000; i++) {
 			int i1 = RandomOperations.getInt(0, size-1);
@@ -764,7 +837,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				System.err.println("Saved distance (" + saved+") and actual (" + actual+")+ diffear");
 			}
 		}
-		System.out.println("Testing ended");*/
+		Log.info_verbose("Testing ended");*/
 		
 	}
 	
@@ -875,7 +948,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	    
 	    TimeManager tm = new TimeManager();
 	    for (int i=0; i<size; i++) {
-	    	//System.out.println(i + "\t" + ids[i]);
+	    	//Log.info_verbose(i + "\t" + ids[i]);
 	    	bufferedOut.add(inArchives.get(ids[i]));
 	    	Log.info_verbose_progress(tm, i, size);
 	    }
@@ -984,6 +1057,16 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		Log.info_verbose( res.size() + " features were randomly selected");
 		
 		return res;
+	}
+	
+	public void finalize() {
+		
+		try {
+			close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
