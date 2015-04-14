@@ -17,18 +17,18 @@ public class ParallelOptions {
 	public static int nPInUse = 1;
 	
 	static {
-		System.out.println("Available processors: " + nProcessors);
+		Log.info_verbose("Available processors: " + nProcessors);
 	}
 	
 	public static final synchronized void setNProcessors( int n) {
 		nProcessors = n;
-		System.out.println("Using " + nProcessors + " processors");
+		Log.info_verbose("Using " + nProcessors + " processors");
 	}
 	public static final synchronized void set( java.util.Properties properties) {
 		String coreStr  = properties.getProperty("core");
 		if ( coreStr != null ) {
 			nProcessors =  Integer.parseInt(coreStr);
-			System.out.println("Using " + nProcessors + " processors");
+			Log.info_verbose("Using " + nProcessors + " processors");
 		}
 	}
 	

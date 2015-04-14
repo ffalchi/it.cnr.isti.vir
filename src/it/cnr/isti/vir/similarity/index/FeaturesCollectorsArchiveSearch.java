@@ -13,7 +13,6 @@ import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.TimeManager;
-import it.cnr.isti.vir.util.string.Percentage;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -32,6 +31,10 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 	
 	public FeaturesCollectorsArchiveSearch(FeaturesCollectorsArchive archive) {
 		this.archive = archive;
+	}
+	
+	public FeaturesCollectorsArchiveSearch(File archiveFile) throws Exception {
+		archive = FeaturesCollectorsArchive.open(archiveFile, true);
 	}
 	
 	public synchronized ISimilarityResults<IHasID>[] getKNN_IDs(
@@ -178,7 +181,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				while ( tParallelBatchSize > nObj/2) {
 					tParallelBatchSize = nObj / 10;
 				}
-				
+				if ( tParallelBatchSize == 0) tParallelBatchSize = 1;
 				final int parallelBatchSize = tParallelBatchSize;
 				
 				Iterator<AbstractFeaturesCollector> it = archive.iterator();

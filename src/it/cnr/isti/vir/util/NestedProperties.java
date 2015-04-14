@@ -1,5 +1,7 @@
 package it.cnr.isti.vir.util;
 
+import it.cnr.isti.vir.global.Log;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -17,7 +19,7 @@ public class NestedProperties {
 	public static void load(Properties properties, String pFName) throws FileNotFoundException, IOException {
 	    
 		File propertiesFile = WorkingPath.getFile(pFName);
-		System.out.println("Loading properties " + propertiesFile);
+		Log.info_verbose("Loading properties " + propertiesFile);
 		
 		// Reading this
 		Properties thisProperties = new java.util.Properties();
@@ -29,7 +31,7 @@ public class NestedProperties {
 			if ( propertiesFile.getParent() != null ) {
 				WorkingPath.setWorkingPath( propertiesFile.getParent().toString() );
 			}
-			System.out.println("WorkingDirectory: " + WorkingPath.getWorkingPath() );
+			Log.info_verbose("WorkingDirectory: " + WorkingPath.getWorkingPath() );
 		}
 		
 		// Nested properties

@@ -163,7 +163,19 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		return id;
 	}
 	
-
+	public ObjectWithDistance get(int k) {
+		ObjectWithDistance res = null;
+		Iterator<ObjectWithDistance<E>> it = iterator();
+		for ( int i=0; i<k; i++) {
+			if ( it.hasNext() )  {
+				res = it.next();
+			} else {
+				return null;
+			}
+		}
+		
+		return res;
+	}
 		
 	public Iterator<ObjectWithDistance<E>> iterator() {
 		if ( excludedGroup == null ) return coll.iterator();

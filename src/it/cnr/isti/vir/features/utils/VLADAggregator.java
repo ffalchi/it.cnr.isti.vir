@@ -46,40 +46,40 @@ public class VLADAggregator {
 		
 		
 		ref = new LFWords(dictionary_file);
-		Log.info(className + ": Number of references for VLAD: " + ref.size());
+		Log.info_verbose(className + ": Number of references for VLAD: " + ref.size());
 		
 		lfGroupClass =  (Class<? extends ALocalFeaturesGroup>) ref.getLocalFeaturesGroupClass();
-		Log.info(className + ": Local Features Group Class: " + lfGroupClass);
+		Log.info_verbose(className + ": Local Features Group Class: " + lfGroupClass);
 		
 		if (lfPC_file != null ) {
-			Log.info(className + ": Local Features Principal Components found.");
+			Log.info_verbose(className + ": Local Features Principal Components found.");
 			lfPC = PrincipalComponents.read(lfPC_file);
 			
 			
 			if (lfPC_n > 0) {
 				lfPC.setProjDim(lfPC_n);				
 			}
-			Log.info(className + ": Local Features Principal Components: " + lfPC.getProjDim());
+			Log.info_verbose(className + ": Local Features Principal Components: " + lfPC.getProjDim());
 			
 			lfGroupClass = (Class<? extends ALocalFeaturesGroup>) PropertiesUtils.getClass(prop, className+".lfGroupClass");
 			
 		} else {
-			Log.info(className + ": Local Features Principal Components not found");
+			Log.info_verbose(className + ": Local Features Principal Components not found");
 		}
 		
 		
 		
 		if (vladPC_file != null ) {
-			Log.info(className + ": VLAD Principal Components found.");
+			Log.info_verbose(className + ": VLAD Principal Components found.");
 			vladPC = PrincipalComponents.read(vladPC_file);
 			if (PropertiesUtils.contains(prop, className+".VLADPC_n")) {
 				
 				vladPC.setProjDim(vladPC_n);
 			}
-			Log.info(className + ": VLAD Principal Components: " + vladPC.getProjDim());
+			Log.info_verbose(className + ": VLAD Principal Components: " + vladPC.getProjDim());
 			
 		} else {
-			Log.info(className + ": VLAD Principal Components not found");
+			Log.info_verbose(className + ": VLAD Principal Components not found");
 		}
 	}
 	

@@ -11,8 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.classification;
 
-import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
+import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.readers.IDClassReader;
 
@@ -110,5 +110,6 @@ public class LabelAssigner {
 		return classID;
 
 	}
+
 
 }

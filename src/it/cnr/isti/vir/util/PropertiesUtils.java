@@ -32,7 +32,7 @@ public class PropertiesUtils {
 	public static final File getFile_orNull(Properties prop, String propertyName) throws Exception {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) {
-			Log.info(propertyName + " was not found in properties. Null will be returned.");
+			Log.info_verbose(propertyName + " was not found in properties. Null will be returned.");
 			return null;
 		}
 		Log.info_verbose(propertyName + "=" + str);
@@ -70,7 +70,7 @@ public class PropertiesUtils {
 	public static final int getInt_orDefault(Properties prop, String propertyName, int def) throws Exception {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) {
-			Log.info(propertyName + " was not found in properties. Using deafult value " + def);
+			Log.info_verbose(propertyName + " was not found in properties. Using deafult value " + def);
 			return def;
 		}
 		Log.info_verbose(propertyName + "=" + str);
@@ -88,7 +88,7 @@ public class PropertiesUtils {
 	public static final double getDouble_orDefault(Properties prop, String propertyName, double def) throws Exception {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) {
-			Log.info(propertyName + " was not found in properties. Using deafult value " + def);
+			Log.info_verbose(propertyName + " was not found in properties. Using deafult value " + def);
 			return def;
 		}
 		Log.info_verbose(propertyName + "=" + str);

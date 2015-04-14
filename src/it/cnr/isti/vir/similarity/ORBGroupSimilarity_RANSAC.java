@@ -18,6 +18,7 @@ import it.cnr.isti.vir.geom.AffineTransformation;
 import it.cnr.isti.vir.geom.HomographyTransformation;
 import it.cnr.isti.vir.geom.RSTTransformation;
 import it.cnr.isti.vir.geom.TransformationHypothesis;
+import it.cnr.isti.vir.global.Log;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -28,22 +29,28 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 	boolean rejectUnConsistent = false;
 		
 	Class tr = HomographyTransformation.class;
-	int cycles = 1000;
+	int cycles = 2000;
 	int nHoughMaxForRANSAC = 10;
 	double errorPerc = 0.1;
 	double minXYDist = 0.1;
 	double[] RANSAC_minMaxSR;
+	private static int matchingDistance = 35; 
 	int maxFDist = Integer.MAX_VALUE;
+	double loweThrDef = 1.0;
 	
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORBGroup.class);
 	
 	private final double loweThr;
 	
-	public ORBGroupSimilarity_RANSAC( Properties properties) throws SimilarityOptionException {
+	public ORBGroupSimilarity_RANSAC( Properties properties ) throws SimilarityOptionException {
 		super(properties);
 		String value = properties.getProperty("loweThr");
-		loweThr = Double.parseDouble(value);
-		System.out.println("loweThr: " +  loweThr );
+		if ( value != null ) {
+			loweThr = Double.parseDouble(value);
+			Log.info_verbose("loweThr: " +  loweThr );
+		} else  {
+			loweThr = loweThrDef;
+		}
 		
 		value = properties.getProperty("RANSAC_tr");
 		if ( value != null ) {
@@ -56,54 +63,54 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 			} else {
 				throw new SimilarityOptionException("Option " + value + " not found!");
 			}
-			System.out.println("RANSAC TR: " +  tr );
+			Log.info_verbose("RANSAC TR: " +  tr );
 		}
 		
 		value = properties.getProperty("maxFDist");
 		if ( value != null) {
 			double tValue = Double.parseDouble(value);
 			maxFDist = (int) Math.floor(tValue);
-			System.out.println("maxFDist: " + maxFDist);
+			Log.info_verbose("maxFDist: " + maxFDist);
 		}
 		
 		value = properties.getProperty("RANSAC_cycles");
 		if ( value != null) {
 			cycles = Integer.parseInt(value);
-			System.out.println("RANSAC cycles: " + cycles);
+			Log.info_verbose("RANSAC cycles: " + cycles);
 		}
 		value = properties.getProperty("RANSAC_nBackets");
 		if ( value != null) {
 			nHoughMaxForRANSAC = Integer.parseInt(value);
-			System.out.println("RANSAC nHoughMaxForRANSAC: " + nHoughMaxForRANSAC);
+			Log.info_verbose("RANSAC nHoughMaxForRANSAC: " + nHoughMaxForRANSAC);
 		}
 		value = properties.getProperty("RANSAC_err");
 		if ( value != null) {
 			errorPerc = Double.parseDouble(value);
-			System.out.println("RANSAC errorPerc: " + errorPerc);				
+			Log.info_verbose("RANSAC errorPerc: " + errorPerc);				
 		}
 		value = properties.getProperty("RANSAC_minDist");
 		if ( value != null) {
 			minXYDist = Double.parseDouble(value);
-			System.out.println("RANSAC minDist: " + minXYDist);				
+			Log.info_verbose("RANSAC minDist: " + minXYDist);				
 		}
 		
 		value = properties.getProperty("RANSAC_minSR");
 		if ( value != null) {
 			RANSAC_minMaxSR = new double[2];
 			RANSAC_minMaxSR[0] = Double.parseDouble(value);
-			System.out.println("RANSAC_minSR: " + RANSAC_minMaxSR[0]);				
+			Log.info_verbose("RANSAC_minSR: " + RANSAC_minMaxSR[0]);				
 		}
 		
 		value = properties.getProperty("RANSAC_maxSR");
 		if ( value != null) {
 			RANSAC_minMaxSR[1] = Double.parseDouble(value);
-			System.out.println("RANSAC_maxSR: " + RANSAC_minMaxSR[1]);				
+			Log.info_verbose("RANSAC_maxSR: " + RANSAC_minMaxSR[1]);				
 		}
 	}
 	
 	public ORBGroupSimilarity_RANSAC() {
-		this.loweThr = 1.0;
-		this.maxFDist = 35;
+		this.loweThr = loweThrDef;
+		this.maxFDist = matchingDistance;
 	}
 	
 	public ORBGroupSimilarity_RANSAC(double loweThr) {

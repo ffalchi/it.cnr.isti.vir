@@ -25,9 +25,18 @@ public class ResultsReordering {
 			ISimilarityResults res,
 			FeaturesCollectorsArchive fca,
 			ISimilarity sim,
-			Double minDistance,
-			Double exitDistance,
 			Integer maxNResults ) throws ArchiveException {
+		return reorder(res, fca, sim, 1.0, maxNResults, null );
+	}
+	
+	public static ISimilarityResults reorder(
+			ISimilarityResults res,
+			FeaturesCollectorsArchive fca,
+			ISimilarity sim,
+			Double minDistance,
+			Integer maxNResults,
+			Double exitDistance
+			) throws ArchiveException {
 		
 		int count = 0;
 		
@@ -45,11 +54,11 @@ public class ResultsReordering {
 		for ( Object curr : res ) {
 			AbstractID currID = ((IHasID) ((ObjectWithDistance)curr).obj).getID();
 			AbstractFeaturesCollector fc = fca.get(currID);
-			
+			if ( fc == null ) throw new ArchiveException("Object " + currID + " was not found in  " + fca.getfile().getAbsolutePath());
 			double dist = sim.distance(query, fc);
 			if ( dist < actualMinDist ) knn.offer(fc, dist);
-			
-			if ( maxNResults != null && count++ > actualK) {
+			if ( dist < 1.0 ) count++;
+			if ( maxNResults != null && count >= actualK) {
 				break;
 			}
 		}
