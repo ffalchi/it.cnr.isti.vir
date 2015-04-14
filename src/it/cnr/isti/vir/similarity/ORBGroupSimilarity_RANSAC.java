@@ -141,9 +141,13 @@ public class ORBGroupSimilarity_RANSAC extends IGroupSimilarity<ORBGroup> {
 		ArrayList<TransformationHypothesis> trArr = null;
 		
 		if ( maxFDist != Integer.MAX_VALUE )
-			matches = ORBGroup.getLoweMatches( g1, g2, loweThr, maxFDist );
+			if ( loweThr >= 1.0 )
+				matches = ORBGroup.getMatches( g1, g2, maxFDist );
+			else 
+				matches = ORBGroup.getLoweMatches( g1, g2, loweThr, maxFDist );				
 		else
 			matches = ORBGroup.getLoweMatches( g1, g2, loweThr );
+		
 		if ( matches == null || matches.size() < 2 ) return 1.0; 
 		Hashtable<Long, LocalFeaturesMatches> ht = LoweHoughTransform.getLoweHoughTransforms_HT(matches.getMatches(), false, RANSAC_minMaxSR);
 		trArr = matches.getRANSAC( ht, cycles, nHoughMaxForRANSAC, errorPerc, tr, minXYDist, true, rejectUnConsistent);

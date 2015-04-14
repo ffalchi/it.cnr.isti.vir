@@ -124,11 +124,11 @@ public class ORB extends ALocalFeature<ORBGroup> implements ILongBinaryValues {
 //	}
 	
 		
-	public static float getDistance_Norm(ORB o1, ORB o2) {
+	public static final float getDistance_Norm(ORB o1, ORB o2) {
 		return Hamming.distance_norm(o1.data, o2.data, BITS_LENGTH);
 	}
 	
-	public static int getDistance(ORB o1, ORB o2) {
+	public static final int getDistance(ORB o1, ORB o2) {
 		return Hamming.distance(o1.data, o2.data);
 	}
 	
