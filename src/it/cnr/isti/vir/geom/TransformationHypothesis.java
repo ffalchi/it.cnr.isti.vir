@@ -63,8 +63,8 @@ public class TransformationHypothesis implements Comparable {
 //    	float[][] matchingBox = matches.getMatchingBox();
         // int n1 = matches.getLFGroup().countInBox(box);
         // int n2 = matches.getMatchingLFGroup().countInBox(matchingBox);
-        perMatches = (double) matches.size() / matches.getLFGroup().size();
-      	perMatchesOnMatching = (double) matches.getMatchingLFGroup().size();
+        perMatches = matches.size() / (double) matches.getLFGroup().size();
+      	perMatchesOnMatching = matches.size() / (double) matches.getMatchingLFGroup().size();
       	if ( perMatches > perMatchesOnMatching ) maxPercentageMatches = perMatches;
       	else maxPercentageMatches = perMatchesOnMatching;
     }
