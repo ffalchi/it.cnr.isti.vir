@@ -87,7 +87,7 @@ public class VLADConvert {
 			
 			
 			VLAD vlad = VLAD.getVLAD(lfs, words);
-			if (pc != null ) {
+			if (pc == null ) {
 				outArchive.add(vlad, ((IHasID) curr).getID() );
 			} else {
 				Floats f = new Floats(pc.project_float( (IArrayValues) vlad));
