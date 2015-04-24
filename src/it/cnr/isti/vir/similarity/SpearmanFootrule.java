@@ -129,4 +129,5 @@ public class SpearmanFootrule implements ISimilarity<Permutation>{
 		return sum;
 	}
 
+	public String getStatsString() { return ""; };
 }

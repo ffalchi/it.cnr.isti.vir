@@ -66,4 +66,6 @@ public class ScalableColorMetric  implements IMetric<ScalableColor> {
 	public String toString() {
 		return this.getClass().toString();
 	}
+	
+	public String getStatsString() { return ""; };
 }

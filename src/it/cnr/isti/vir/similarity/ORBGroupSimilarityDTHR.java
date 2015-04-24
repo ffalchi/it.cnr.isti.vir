@@ -6,14 +6,18 @@ import it.cnr.isti.vir.features.localfeatures.ORBGroup;
 
 import java.util.Properties;
 
-public class ORBGroupSimilarityDTHR  extends IGroupSimilarity<ORBGroup> {
+public class ORBGroupSimilarityDTHR  extends AGroupSimilarity<ORBGroup> {
 
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORBGroup.class);
 	
 	private final int radius;
 	
 	private final int DEFAULT_RADIUS_RANGE = 35;
-		
+
+	@Override
+	public Class getRequestedGroup()  { return ORBGroup.class; } 
+	
+	
 	public ORBGroupSimilarityDTHR(int radius) throws Exception {
 		super("query");
 		this.radius = radius;
@@ -71,4 +75,6 @@ public class ORBGroupSimilarityDTHR  extends IGroupSimilarity<ORBGroup> {
 	public String toString() {
 		return super.toString() + " radius=" + radius + " ";
 	}
+	
+	public String getStatsString() { return ""; };
 }

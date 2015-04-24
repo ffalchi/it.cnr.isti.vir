@@ -6,12 +6,15 @@ import it.cnr.isti.vir.features.localfeatures.BRISKGroup;
 
 import java.util.Properties;
 
-public class BRISKGroupSimilarity  extends IGroupSimilarity<BRISKGroup> {
+public class BRISKGroupSimilarity  extends AGroupSimilarity<BRISKGroup> {
 
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(BRISKGroup.class);
 	
 	
 	private final double sqrLoweThr;
+
+	@Override
+	public Class getRequestedGroup()  { return BRISKGroup.class; } 
 	
 	
 	public BRISKGroupSimilarity( Properties properties) throws SimilarityOptionException {
@@ -66,4 +69,5 @@ public class BRISKGroupSimilarity  extends IGroupSimilarity<BRISKGroup> {
 	public String toString() {
 		return super.toString() + " sqrLoweThr=" + sqrLoweThr + " ";
 	}
+	public String getStatsString() { return ""; };
 }

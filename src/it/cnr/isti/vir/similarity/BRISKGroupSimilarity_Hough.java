@@ -3,14 +3,18 @@ package it.cnr.isti.vir.similarity;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.BRISKGroup;
+import it.cnr.isti.vir.features.localfeatures.ORBGroup;
 
 import java.util.Properties;
 
-public class BRISKGroupSimilarity_Hough  extends IGroupSimilarity<BRISKGroup> {
+public class BRISKGroupSimilarity_Hough  extends AGroupSimilarity<BRISKGroup> {
 
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(BRISKGroup.class);
 	
 	private final double sqrLoweThr;
+
+	@Override
+	public Class getRequestedGroup()  { return BRISKGroup.class; } 
 	
 	public BRISKGroupSimilarity_Hough( Properties properties) {
 		String value = properties.getProperty("loweThr");
@@ -95,6 +99,7 @@ public class BRISKGroupSimilarity_Hough  extends IGroupSimilarity<BRISKGroup> {
 		return super.toString() + " sqrConfThr=" + sqrLoweThr + " ";
 	}
 
+	public String getStatsString() { return ""; };
 
 
 }

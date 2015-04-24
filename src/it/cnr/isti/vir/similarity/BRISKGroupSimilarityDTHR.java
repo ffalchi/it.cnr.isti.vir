@@ -6,14 +6,17 @@ import it.cnr.isti.vir.features.localfeatures.BRISKGroup;
 
 import java.util.Properties;
 
-public class BRISKGroupSimilarityDTHR  extends IGroupSimilarity<BRISKGroup> {
+public class BRISKGroupSimilarityDTHR  extends AGroupSimilarity<BRISKGroup> {
 
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(BRISKGroup.class);
 	
 	private final int radius;
 	
 	private final int DEFAULT_RADIUS_RANGE = 35;
-		
+
+	@Override
+	public Class getRequestedGroup()  { return BRISKGroup.class; } 
+	
 	public BRISKGroupSimilarityDTHR(int radius) throws Exception {
 		super("query");
 		this.radius = radius;
@@ -71,4 +74,6 @@ public class BRISKGroupSimilarityDTHR  extends IGroupSimilarity<BRISKGroup> {
 	public String toString() {
 		return super.toString() + " radius=" + radius + " ";
 	}
+	
+	public String getStatsString() { return ""; };
 }

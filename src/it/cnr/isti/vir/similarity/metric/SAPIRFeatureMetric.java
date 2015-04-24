@@ -95,5 +95,6 @@ public class SAPIRFeatureMetric implements IMetric<AbstractFeaturesCollector>, I
 		return 0;
 	}
 
+	public String getStatsString() { return ""; };
 
 }

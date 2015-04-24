@@ -12,6 +12,7 @@
 package it.cnr.isti.vir.util;
 
 import java.awt.geom.Point2D;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -293,7 +294,7 @@ public class RandomOperations {
 		return res;
 	}
 	
-	public static final ArrayList getRandomObjects( ArrayList given, double prob ) {
+	public static final ArrayList getRandomObjects( AbstractList given, double prob ) {
 		//ArrayList res = new ArrayList((int) (given.size() * prob));
 		ArrayList res = new ArrayList((int) (given.size() * prob));
 		
@@ -306,9 +307,9 @@ public class RandomOperations {
 		return res;
 	}
 	
-	public static final LinkedList getNRandomObjectList( LinkedList givenList, int n ) {
+	public static final ArrayList getNRandomObjectList( AbstractList givenList, int n ) {
 		assert ( n > givenList.size() );
-		LinkedList outList = new LinkedList();
+		ArrayList outList = new ArrayList();
 		
 		ArrayList<Integer> random = getOrderedIntegersAL(givenList.size());
 		

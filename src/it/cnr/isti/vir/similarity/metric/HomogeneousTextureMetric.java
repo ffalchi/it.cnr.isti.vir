@@ -68,4 +68,5 @@ public class HomogeneousTextureMetric implements IMetric<HomogeneousTexture> {
 		return this.getClass() + " option: " + option;
 	}
 	
+	public String getStatsString() { return ""; };
 }

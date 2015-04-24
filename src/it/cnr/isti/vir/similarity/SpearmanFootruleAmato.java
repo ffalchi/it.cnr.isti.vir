@@ -120,4 +120,6 @@ public class SpearmanFootruleAmato implements ISimilarity<Permutation>{
 		}
 		return sum;
 	}
+	
+	public String getStatsString() { return ""; };
 }

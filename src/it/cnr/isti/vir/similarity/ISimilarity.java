@@ -11,10 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
-import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
-
-import java.io.DataInputStream;
+import it.cnr.isti.vir.features.FeatureClassCollector;
 
 
 public interface ISimilarity<F> {
@@ -31,4 +29,5 @@ public interface ISimilarity<F> {
 	
 	public abstract FeatureClassCollector getRequestedFeaturesClasses();
 	
+	public String getStatsString();
 }

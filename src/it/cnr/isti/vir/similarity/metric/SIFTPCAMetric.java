@@ -85,4 +85,6 @@ public class SIFTPCAMetric implements IMetric<SIFTPCA>, ILocalFeaturesMetric<SIF
 		return SIFTPCAGroup.class;
 	}
 	
+	public String getStatsString() { return ""; };
+	
 }

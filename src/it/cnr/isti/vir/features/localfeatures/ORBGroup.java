@@ -128,22 +128,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		return new ORBGroup(lfArr);
 	}
 	
-	static final public ORB getNNWithRange(ORB s1, ALocalFeaturesGroup<ORB> sg, int maxD) {
-		int dist1 = maxD;
-		int dsq = 0;
-		ORB best = null;
-		ORB[] arr = sg.lfArr;
-		for (ORB curr : arr) {
-			dsq = ORB.getDistance(s1, curr);
-			//if (dsq < 0 || dsq > maxD)
-			//	continue;
-			if (dsq < dist1) {
-				dist1 = dsq;
-				best = curr;
-			}
-		}
-		return best;
-	}
+
 	
 	static final public ORB getLoweMatch(ORB s1, ALocalFeaturesGroup<ORB> sg,
 			double conf, int maxFDsq) {
@@ -245,19 +230,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 		return matches;
 	}
 
-	static final public LocalFeaturesMatches getMatches(ALocalFeaturesGroup<ORB> sg1, ALocalFeaturesGroup<ORB> sg2, final int maxD) {
-		LocalFeaturesMatches matches = new LocalFeaturesMatches();
-		if ( sg2.size() < 2 ) return null;
-		int nMatches = 0;
-		ORB[] arr = sg1.lfArr;
-		for (int i=0; i<arr.length; i++ ) {
-			ORB match = ORBGroup.getNNWithRange(arr[i], sg2, maxD );
-			if ( match != null)
-				matches.add( new LocalFeatureMatch( arr[i], match ) );
-		}
-		
-		return matches;
-	}
+
 	
 	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<ORB> sg1, ALocalFeaturesGroup<ORB> sg2, double dRatioThr, final int maxLFDistSq) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();

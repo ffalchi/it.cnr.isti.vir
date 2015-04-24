@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
 
-public class BRISKGroupSimilarity_RANSAC extends IGroupSimilarity<BRISKGroup> {
+public class BRISKGroupSimilarity_RANSAC extends AGroupSimilarity<BRISKGroup> {
 	
 	boolean rejectUnConsistent = false;
 	
@@ -38,6 +38,9 @@ public class BRISKGroupSimilarity_RANSAC extends IGroupSimilarity<BRISKGroup> {
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(BRISKGroup.class);
 	
 	private final double sqrLoweThr;
+	
+	@Override
+	public Class getRequestedGroup()  { return BRISKGroup.class; } 
 	
 	public BRISKGroupSimilarity_RANSAC( Properties properties) throws SimilarityOptionException {
 		super(properties);
@@ -153,5 +156,6 @@ public class BRISKGroupSimilarity_RANSAC extends IGroupSimilarity<BRISKGroup> {
 		return super.toString() + " sqrConfThr=" + sqrLoweThr + " ";
 	}
 	
+	public String getStatsString() { return ""; };
 }
 

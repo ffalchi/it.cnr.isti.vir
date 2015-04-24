@@ -17,6 +17,7 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.distance.L1;
 import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
+
 import java.util.Collection;
 import java.util.Properties;
 
@@ -81,6 +82,8 @@ public class FloatsLFL1Metric  implements IMetric<FloatsLF>, ILocalFeaturesMetri
 	@Override//lucia
 	public final Class getRequestedFeatureGroupClass() {
 		return FloatsLFGroup.class;
-}
+	}
 	
+	
+	public String getStatsString() { return ""; };
 }

@@ -85,4 +85,5 @@ public class SIFTPCAFloatMetric implements IMetric<SIFTPCAFloat>, ILocalFeatures
 		return SIFTPCAFloatGroup.class;
 	}
 	
+	public String getStatsString() { return ""; };
 }

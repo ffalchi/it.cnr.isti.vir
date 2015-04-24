@@ -12,11 +12,12 @@
 package it.cnr.isti.vir.similarity.metric;
 
 import it.cnr.isti.vir.clustering.IMeanEvaluator;
-import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.distance.L2;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
+
 import java.util.Collection;
 import java.util.Properties;
 
@@ -80,6 +81,7 @@ public class FloatsLFL2Metric  implements IMetric<FloatsLF>, ILocalFeaturesMetri
 	@Override//lucia
 	public final Class getRequestedFeatureGroupClass() {
 		return FloatsLFGroup.class;
-}
+	}
 	
+	public String getStatsString() { return ""; };
 }

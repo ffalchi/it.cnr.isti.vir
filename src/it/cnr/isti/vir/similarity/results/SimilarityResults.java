@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 public class SimilarityResults<E> implements ISimilarityResults<E> {
 
@@ -431,6 +432,14 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 						
 		}
 		return res;
+	}
+	
+	public static Predicate<ObjectWithDistance> hasDistGEq(double d) {
+		return p -> p.dist >= d;
+	}
+	
+	public void removeDistanceGEq(double d) {
+		coll.removeIf(hasDistGEq(d));
 	}
 
 	

@@ -60,5 +60,7 @@ public class VLADSimilarity implements ISimilarity<VLAD> {
 	public FeatureClassCollector getRequestedFeaturesClasses() {
 		return reqFeatures;
 	}
+	
+	public String getStatsString() { return ""; };
 
 }

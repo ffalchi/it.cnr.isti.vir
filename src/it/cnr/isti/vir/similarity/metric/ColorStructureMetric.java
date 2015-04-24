@@ -62,4 +62,6 @@ public class ColorStructureMetric  implements IMetric<ColorStructure> {
 		return this.getClass().toString();
 	}
 	
+	public String getStatsString() { return ""; };
+	
 }

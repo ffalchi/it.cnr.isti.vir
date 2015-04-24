@@ -63,5 +63,6 @@ public class DominantColorSimilarity   implements ISimilarity<DominantColor> {
 	public FeatureClassCollector getRequestedFeaturesClasses() {
 		return reqFeatures;
 	}
-	
+
+	public String getStatsString() { return ""; };
 }

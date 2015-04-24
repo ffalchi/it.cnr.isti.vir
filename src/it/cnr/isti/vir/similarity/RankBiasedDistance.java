@@ -259,4 +259,6 @@ public class RankBiasedDistance implements ISimilarity<Permutation>, IMetric<Per
 		return d(pos1, pos2);
 	}
 
+	public String getStatsString() { return ""; };
+	
 }

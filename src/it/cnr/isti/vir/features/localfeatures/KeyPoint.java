@@ -133,6 +133,11 @@ public class KeyPoint {
 			float[] tnormxy = new float[2];
 			float[] mean = linkedGroup.getMeanXY();
 			float scale = linkedGroup.getNormScale();
+			
+			if ( Float.isNaN(scale) || Float.isNaN(mean[0]) || Float.isNaN(mean[0]) ) {
+				System.out.println("FOUND NAN");
+			}
+			
 			tnormxy[0] = (xy[0] - mean[0]) * scale;
 			tnormxy[1] = (xy[1] - mean[1]) * scale;
 			normxy = tnormxy;

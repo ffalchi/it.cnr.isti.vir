@@ -138,7 +138,7 @@ public class PCAProject {
 				for ( int i=0; i<currLFs.length; i++ ) {
 					float[] temp = pc.project_float( (IArrayValues) currLFs[i]);
 					if ( l2Norm ) Normalize.l2(temp);;
-					projected[i] = new FloatsLF(temp); 
+					projected[i] = new FloatsLF(currLFs[i].getKeyPoint(), temp); 
 					//projected[i] = new FloatsLF(pc.project_float( (IArrayValues) currLFs[i])); 
 				}
 				FloatsLFGroup projectedGroup = new FloatsLFGroup(projected);

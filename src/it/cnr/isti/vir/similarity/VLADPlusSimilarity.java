@@ -61,4 +61,7 @@ public class VLADPlusSimilarity implements ISimilarity<VLADPlus> {
 		return reqFeatures;
 	}
 
+	public String getStatsString() { return ""; };
+
 }
+

@@ -146,5 +146,6 @@ public class SAPIRMetric implements IMetric<AbstractFeaturesCollector>, IMeanEva
 		return new SAPIRObject(clMean, csMean, scMean, ehMean, htMean, null);
 	}
 	
+	public String getStatsString() { return ""; };
 	
 }

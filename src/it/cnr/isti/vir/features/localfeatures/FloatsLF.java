@@ -12,9 +12,9 @@
 package it.cnr.isti.vir.features.localfeatures;
 
 import it.cnr.isti.vir.features.IFloatValues;
-import it.cnr.isti.vir.util.math.Mean;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.bytes.IntByteArrayUtil;
+import it.cnr.isti.vir.util.math.Mean;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.util.Iterator;
 public class FloatsLF extends ALocalFeature<FloatsLFGroup> implements IFloatValues{
 	
 
-	final float[] values; 
+	public final float[] values; 
 	
 	@Override
 	public final int getLength() {
@@ -55,7 +55,8 @@ public class FloatsLF extends ALocalFeature<FloatsLFGroup> implements IFloatValu
         }
     }
         
-        public FloatsLF(KeyPoint kp, float[] values) {
+    
+    public FloatsLF(KeyPoint kp, float[] values) {
 		this(kp, values, null);
 	}
 	

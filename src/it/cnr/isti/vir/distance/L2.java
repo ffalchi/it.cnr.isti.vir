@@ -11,7 +11,14 @@
  ******************************************************************************/
 package it.cnr.isti.vir.distance;
 
+import it.cnr.isti.vir.features.IByteValues;
+import it.cnr.isti.vir.features.IDoubleValues;
+import it.cnr.isti.vir.features.IFloatValues;
+import it.cnr.isti.vir.features.IIntValues;
+
 public class L2 {
+	
+
 	
 	public static final int getSquared(byte[] v1, byte[] v2) {
 		int dist = 0;	    
@@ -52,6 +59,15 @@ public class L2 {
 		}
 		return acc; 
 	}
+	
+	public static final int getSquared(int[]f1, int[]f2) {
+		int acc = 0;
+		for ( int j=0; j<f1.length; j++) {
+			int diff = f1[j] - f2[j];
+			acc += diff * diff;
+		}
+		return acc; 
+	}	
 	
 	public static final double getSquared(float[]f1, float[]f2) {
 		double acc = 0;
@@ -94,6 +110,40 @@ public class L2 {
 			return Math.sqrt(temp);
 		}
 	}
+	
+	public static final double get(IByteValues v1, IByteValues v2 ) {
+		return  Math.sqrt(getSquared(v1,v2));
+	}
+	
+	public static final double get(IFloatValues v1, IFloatValues v2 ) {
+		return  Math.sqrt(getSquared(v1,v2));
+	}
+	
+	public static final double get(IDoubleValues v1, IDoubleValues v2 ) {
+		return  Math.sqrt(getSquared(v1,v2));
+	}
+	
+	public static final double get(IIntValues v1, IIntValues v2 ) {
+		return  Math.sqrt(getSquared(v1,v2));
+	}
+	
+	
+	public static final int getSquared(IByteValues v1, IByteValues v2 ) {
+		return getSquared(v1.getValues(), v2.getValues());
+	}
+	
+	public static final double getSquared(IFloatValues v1, IFloatValues v2 ) {
+		return getSquared(v1.getValues(), v2.getValues());
+	}
+	
+	public static final double getSquared(IDoubleValues v1, IDoubleValues v2 ) {
+		return getSquared(v1.getValues(), v2.getValues());
+	}
+	
+	public static final double getSquared(IIntValues v1, IIntValues v2 ) {
+		return getSquared(v1.getValues(), v2.getValues());
+	}
+	
 	
 	public static final double get(float[]f1, float[]f2, double max) {
 		double temp = getSquared(f1,f2, max*max);

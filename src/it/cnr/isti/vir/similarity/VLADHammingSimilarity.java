@@ -60,4 +60,5 @@ public class VLADHammingSimilarity implements ISimilarity<VLADHamming> {
 		return reqFeatures;
 	}
 
+	public String getStatsString() { return ""; };
 }

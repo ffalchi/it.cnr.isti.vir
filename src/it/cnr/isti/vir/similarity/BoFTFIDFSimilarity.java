@@ -124,5 +124,6 @@ public class BoFTFIDFSimilarity implements ISimilarity<BoFLFGroup>, IRequiresIDF
         return distance((BoFLFGroup) f1.getFeature(BoFLFGroup.class), (BoFLFGroup) f2.getFeature(BoFLFGroup.class));
     }
 
+    public String getStatsString() { return ""; };
 }
 

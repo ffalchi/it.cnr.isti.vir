@@ -98,5 +98,6 @@ public class RootSIFTMetric implements IMetric<RootSIFT>, ILocalFeaturesMetric<R
 	public final Class getRequestedFeatureGroupClass() {
 		return RootSIFTGroup.class;
 	}
-	
+
+	public String getStatsString() { return ""; };
 }

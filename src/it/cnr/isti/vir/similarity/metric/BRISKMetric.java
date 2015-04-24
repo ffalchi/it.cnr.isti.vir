@@ -83,4 +83,5 @@ public class BRISKMetric implements IMetric<BRISK>, ILocalFeaturesMetric<BRISK>,
 		return BRISKGroup.class;
 	}
 	
+	public String getStatsString() { return ""; };
 }

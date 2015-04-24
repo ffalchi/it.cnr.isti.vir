@@ -178,8 +178,8 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				
 				int nObj = archive.size();
 				
-				while ( tParallelBatchSize > nObj/2) {
-					tParallelBatchSize = nObj / 10;
+				while ( tParallelBatchSize > nObj/100) {
+					tParallelBatchSize = tParallelBatchSize / 10;
 				}
 				if ( tParallelBatchSize == 0) tParallelBatchSize = 1;
 				final int parallelBatchSize = tParallelBatchSize;

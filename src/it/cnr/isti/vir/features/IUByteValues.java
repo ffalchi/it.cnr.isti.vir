@@ -8,6 +8,6 @@ package it.cnr.isti.vir.features;
  *  subctrating 128 because they were actually unsigned.
  *  
  */
-public interface IUByteValues extends IByteValues{
+public interface IUByteValues extends IByteValues {
 
 }

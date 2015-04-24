@@ -83,4 +83,5 @@ public class SIFTMetric implements IMetric<SIFT>, ILocalFeaturesMetric<SIFT>, IM
 		return SIFTGroup.class;
 	}
 	
+	public String getStatsString() { return ""; };
 }

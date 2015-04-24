@@ -20,16 +20,15 @@ import java.io.BufferedReader;
 import java.io.DataInput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Iterator;
 
 public class ORB extends ALocalFeature<ORBGroup> implements ILongBinaryValues {
 
 	public static final int NLONG = 4;
 	public static final int BYTES_LENGTH = NLONG * Long.SIZE / Byte.SIZE;
 	public static final int BITS_LENGTH = Byte.SIZE * BYTES_LENGTH;
+	
 	// 256 bits in 4x8 bytes
-	private final long[] data;
+	public final long[] data;
 	
 	public final int getDataByteSize() {
 		return BYTES_LENGTH;

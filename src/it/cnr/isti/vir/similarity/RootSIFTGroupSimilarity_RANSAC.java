@@ -1,29 +1,19 @@
-/*******************************************************************************
- * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 
 import java.util.Properties;
 
-public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
+public class RootSIFTGroupSimilarity_RANSAC extends AbstractRANSAC<RootSIFTGroup> {
 
-	protected static final FeatureClassCollector reqFeatures = new FeatureClassCollector(SIFTGroup.class);
+	protected static final FeatureClassCollector reqFeatures = new FeatureClassCollector(RootSIFTGroup.class);
 	
 	@Override
 	public Class getRequestedGroup() {
-		return SIFTGroup.class;
+		return RootSIFTGroup.class;
 	}
 	
 	@Override
@@ -31,11 +21,11 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 		return reqFeatures;
 	}
 	
-	public SIFTGroupSimilarity_RANSAC() {
+	public RootSIFTGroupSimilarity_RANSAC() {
 		super();
 	}
 	
-	public SIFTGroupSimilarity_RANSAC( Properties properties ) throws SimilarityOptionException {
+	public RootSIFTGroupSimilarity_RANSAC( Properties properties ) throws SimilarityOptionException {
 		super(properties);
 		
 		if ( maxFDist != Double.MAX_VALUE ) {
@@ -47,28 +37,27 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
-		return distance((SIFTGroup) f1.getFeature(SIFTGroup.class), (SIFTGroup) f2.getFeature(SIFTGroup.class));
+		return distance((RootSIFTGroup) f1.getFeature(RootSIFTGroup.class), (RootSIFTGroup) f2.getFeature(RootSIFTGroup.class));
 	}
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
-		return distance((SIFTGroup) f1.getFeature(SIFTGroup.class), (SIFTGroup) f2.getFeature(SIFTGroup.class));
+		return distance((RootSIFTGroup) f1.getFeature(RootSIFTGroup.class), (RootSIFTGroup) f2.getFeature(RootSIFTGroup.class));
 	}
-
-	@Override
-	public final LocalFeaturesMatches getMatches( SIFTGroup g1,  SIFTGroup g2) {
+		@Override
+	public final LocalFeaturesMatches getMatches( RootSIFTGroup g1,  RootSIFTGroup g2) {
 		if ( loweThr >= 1.0 )
-			return L2NNMatcher.getSIFT(g1, g2, sqMaxFDist_int);
+			return L2NNMatcher.getMatchesRootSIFT(g1, g2, sqMaxFDist_int);
 		else if ( sqMaxFDist_int == Integer.MAX_VALUE ) 
-			return L2NNLoweMatcher.getMatchesSIFT( g1, g2, sqLoweThr );
+			return L2NNLoweMatcher.getMatchesRootSIFT( g1, g2, sqLoweThr );
 		
 		// both parameters are used
-		return L2NNLoweMatcher.getMatchesSIFT( g1, g2, sqLoweThr, sqMaxFDist_int );
+		return L2NNLoweMatcher.getMatchesRootSIFT( g1, g2, sqLoweThr, sqMaxFDist_int );
 	}
-			
+				
 }
-
-//	boolean rejectUnConsistent = false;
+	
+//	boolean rejectUnConsistent = true;
 //	
 //	Class tr = HomographyTransformation.class;
 //	int cycles = 1000;
@@ -78,23 +67,11 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 //	double[] RANSAC_minMaxSR;
 //	int maxFDistSq = Integer.MAX_VALUE;
 //	
-//	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(SIFTGroup.class);
+//	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(RootSIFTGroup.class);
 //	
 //	private final double sqrLoweThr;
 //	
-//	private long totNMatches = 0;
-//	private long totNMatchesFiltered = 0;
-//	private long totNMatchesUnused = 0;
-//	
-//	
-//	public final synchronized void updateStats(int nMatches, int nMatchesFiltered, int nMatchesUnused) {
-//		totNMatches += nMatches;
-//		totNMatchesFiltered += nMatchesFiltered;
-//		totNMatchesUnused += nMatchesUnused;
-//	}
-//	
-//	
-//	public SIFTGroupSimilarity_RANSAC( Properties properties) throws SimilarityOptionException {
+//	public RootSIFTGroupSimilarity_RANSAC( Properties properties) throws SimilarityOptionException {
 //		super(properties);
 //		String value = properties.getProperty("loweThr");
 //		sqrLoweThr = Double.parseDouble(value);
@@ -155,27 +132,27 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 //		}
 //	}
 //	
-//	public SIFTGroupSimilarity_RANSAC(double loweThr) {
+//	public RootSIFTGroupSimilarity_RANSAC(double loweThr) {
 //		this.sqrLoweThr = loweThr*loweThr;
 //	}
 //	
-//	public SIFTGroupSimilarity_RANSAC(String opt, double loweThr) throws Exception {
+//	public RootSIFTGroupSimilarity_RANSAC(String opt, double loweThr) throws Exception {
 //		super(opt);
 //		this.sqrLoweThr = loweThr*loweThr;
 //	}
 //
 //	@Override
 //	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
-//		return distance((SIFTGroup) f1.getFeature(SIFTGroup.class), (SIFTGroup) f2.getFeature(SIFTGroup.class));
+//		return distance((RootSIFTGroup) f1.getFeature(RootSIFTGroup.class), (RootSIFTGroup) f2.getFeature(RootSIFTGroup.class));
 //	}
 //	
 //	@Override
 //	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
-//		return distance((SIFTGroup) f1.getFeature(SIFTGroup.class), (SIFTGroup) f2.getFeature(SIFTGroup.class));
+//		return distance((RootSIFTGroup) f1.getFeature(RootSIFTGroup.class), (RootSIFTGroup) f2.getFeature(RootSIFTGroup.class));
 //	}
 //	
 //	@Override
-//	public final double distance( SIFTGroup g1,  SIFTGroup g2) {
+//	public final double distance( RootSIFTGroup g1,  RootSIFTGroup g2) {
 //		double sim = 0;
 //		distCount++;
 //		
@@ -183,9 +160,9 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 //		ArrayList<TransformationHypothesis> trArr = null;
 //		
 //		if ( maxFDistSq != Integer.MAX_VALUE )
-//			matches = SIFTGroup.getLoweMatches( g1, g2, sqrLoweThr, maxFDistSq );
+//			matches = RootSIFTGroup.getLoweMatches( g1, g2, sqrLoweThr, maxFDistSq );
 //		else
-//			matches = SIFTGroup.getLoweMatches( g1, g2, sqrLoweThr );
+//			matches = RootSIFTGroup.getLoweMatches( g1, g2, sqrLoweThr );
 //		if ( matches == null || matches.size() < 2 ) return 1.0; 
 //		Hashtable<Long, LocalFeaturesMatches> ht = LoweHoughTransform.getLoweHoughTransforms_HT(matches.getMatches(), false, RANSAC_minMaxSR);
 //		trArr = matches.getRANSAC( ht, cycles, nHoughMaxForRANSAC, errorPerc, tr, minXYDist, true, rejectUnConsistent);
@@ -268,6 +245,5 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 //	public String toString() {
 //		return super.toString() + " sqrConfThr=" + sqrLoweThr + " ";
 //	}
-//	
-//	public String getStatsString() { return ""; };
+
 

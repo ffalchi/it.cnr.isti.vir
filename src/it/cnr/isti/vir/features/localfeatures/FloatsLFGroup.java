@@ -11,6 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
+import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
@@ -75,6 +76,34 @@ public class FloatsLFGroup extends ALocalFeaturesGroup<FloatsLF> {
 			lfArr[i].setLinkedGroup(this);
 		}
 
+	}
+	
+	
+	static final public FloatsLF getL2NN(FloatsLF q, ALocalFeaturesGroup<FloatsLF> g, double sqMaxDist) {
+		FloatsLF res = null;
+		double resDist = Double.MAX_VALUE;
+		for ( FloatsLF curr : g.lfArr ) {
+			double sqD = L2.getSquared(q.values, curr.values);
+			if ( sqD < sqMaxDist && sqD < resDist ) {
+				res = curr;
+				resDist = sqD;
+			}
+		}
+		
+		return res;
+	}
+	
+	static final public LocalFeaturesMatches getL2NN(ALocalFeaturesGroup<FloatsLF> g1, ALocalFeaturesGroup<FloatsLF> g2, double sqMaxDist) {
+		LocalFeaturesMatches matches = new LocalFeaturesMatches();
+		if ( g2.size() == 0 ) return null;
+		int nMatches = 0;
+		for ( FloatsLF curr : g1.lfArr ) {
+			FloatsLF match = FloatsLFGroup.getL2NN(curr, g2, sqMaxDist );
+			if ( match != null)
+				matches.add( new LocalFeatureMatch( curr, match ) );
+		}
+		
+		return matches;
 	}
 
 	@Override

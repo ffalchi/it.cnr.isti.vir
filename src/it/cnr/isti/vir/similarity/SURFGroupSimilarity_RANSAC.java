@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
 
-public class SURFGroupSimilarity_RANSAC extends IGroupSimilarity<SURFGroup> {
+public class SURFGroupSimilarity_RANSAC extends AGroupSimilarity<SURFGroup> {
 	
 	boolean rejectUnConsistent = false;
 	
@@ -37,6 +37,11 @@ public class SURFGroupSimilarity_RANSAC extends IGroupSimilarity<SURFGroup> {
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(SURFGroup.class);
 	
 	private final double sqrLoweThr;
+	
+	@Override
+	public Class getRequestedGroup() {
+		return SURFGroup.class;
+	}
 	
 	public SURFGroupSimilarity_RANSAC( Properties properties) throws SimilarityOptionException {
 		super(properties);
@@ -202,5 +207,6 @@ public class SURFGroupSimilarity_RANSAC extends IGroupSimilarity<SURFGroup> {
 		return super.toString() + " sqrConfThr=" + sqrLoweThr + " ";
 	}
 	
+	public String getStatsString() { return ""; };
 }
 

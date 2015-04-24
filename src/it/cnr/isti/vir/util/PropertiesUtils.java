@@ -67,7 +67,7 @@ public class PropertiesUtils {
 		return Integer.parseInt(str);
 	}
 	
-	public static final int getInt_orDefault(Properties prop, String propertyName, int def) throws Exception {
+	public static final int getInt_orDefault(Properties prop, String propertyName, int def) {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) {
 			Log.info_verbose(propertyName + " was not found in properties. Using deafult value " + def);

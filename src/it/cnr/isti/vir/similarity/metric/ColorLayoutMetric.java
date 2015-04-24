@@ -65,4 +65,6 @@ public class ColorLayoutMetric  implements IMetric<ColorLayout> {
 	public String toString() {
 		return this.getClass().toString();
 	}
+	
+	public String getStatsString() { return ""; };
 }

@@ -59,5 +59,7 @@ public class EdgeHistogramMetric implements IMetric<EdgeHistogram> {
 	public String toString() {
 		return this.getClass().toString();
 	}
+	
+	public String getStatsString() { return ""; };
 
 }

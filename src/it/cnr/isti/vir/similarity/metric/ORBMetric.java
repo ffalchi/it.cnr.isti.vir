@@ -86,4 +86,5 @@ public class ORBMetric implements IMetric<ORB>, ILocalFeaturesMetric<ORB>, IMean
 		return ORBGroup.class;
 	}
 	
+	public String getStatsString() { return ""; };
 }

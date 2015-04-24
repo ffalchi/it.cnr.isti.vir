@@ -28,7 +28,7 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValu
     private final static float sqrt2 = (float) Math.sqrt(2.0);
 	private static final double maxSQRDistValue = 255 * 255 * 128;
 	
-	final byte[] values;     			/* Vector of descriptor values (- 128 for storing in java byte) */
+	public final byte[] values;     			/* Vector of descriptor values (- 128 for storing in java byte) */
 	
 	public Class getGroupClass() { return RootSIFTGroup.class; };
 	

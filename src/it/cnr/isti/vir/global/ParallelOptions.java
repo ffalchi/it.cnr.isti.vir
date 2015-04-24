@@ -11,6 +11,9 @@
  ******************************************************************************/
 package it.cnr.isti.vir.global;
 
+import it.cnr.isti.vir.util.PropertiesUtils;
+import it.cnr.isti.vir.util.RandomOperations;
+
 
 public class ParallelOptions {
 	public static int nProcessors = Runtime.getRuntime().availableProcessors();
@@ -29,6 +32,11 @@ public class ParallelOptions {
 		if ( coreStr != null ) {
 			nProcessors =  Integer.parseInt(coreStr);
 			Log.info_verbose("Using " + nProcessors + " processors");
+		}
+		int seed = PropertiesUtils.getInt_orDefault(properties, "seed", -1);
+		if ( seed != -1 ) {
+			Log.info_verbose("Seed was set to " + seed);
+			RandomOperations.setSeed(seed);
 		}
 	}
 	

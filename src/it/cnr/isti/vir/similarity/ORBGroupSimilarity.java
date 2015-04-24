@@ -7,13 +7,16 @@ import it.cnr.isti.vir.features.localfeatures.SURFGroup;
 
 import java.util.Properties;
 
-public class ORBGroupSimilarity  extends IGroupSimilarity<ORBGroup> {
+public class ORBGroupSimilarity  extends AGroupSimilarity<ORBGroup> {
 
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORBGroup.class);
 	
 	
 	private final double sqrLoweThr;
 	
+
+	@Override
+	public Class getRequestedGroup()  { return ORBGroup.class; } 
 	
 	public ORBGroupSimilarity( Properties properties) throws SimilarityOptionException {
 		super(properties);
@@ -68,4 +71,6 @@ public class ORBGroupSimilarity  extends IGroupSimilarity<ORBGroup> {
 	public String toString() {
 		return super.toString() + " sqrLoweThr=" + sqrLoweThr + " ";
 	}
+	
+	public String getStatsString() { return ""; };
 }

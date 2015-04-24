@@ -11,6 +11,7 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features.localfeatures;
 
+import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.similarity.LocalFeatureMatch;
 import it.cnr.isti.vir.similarity.LocalFeaturesMatches;
@@ -140,7 +141,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 		}
 		return min;
 	}
-	
+		
 	/*
 	public boolean checkByteFormatConsistency() {
 		byte[] bytes = SIFT.getBytes(lfArr);
@@ -189,24 +190,8 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 		return Math.sqrt(distsq1 / distsq2);
 	}
 
-	static final public double getLowePercMatches(ALocalFeaturesGroup<SIFT> sg1,
-			ALocalFeaturesGroup<SIFT> sg2, double conf) {
-		return (double) getLoweNMatches(sg1, sg2, conf) / sg1.size();
-	}
 
-	static final public int getLoweNMatches(ALocalFeaturesGroup<SIFT> sg1,
-			ALocalFeaturesGroup<SIFT> sg2, double conf) {
-		if (sg2.size() < 2)
-			return 0;
-		int nMatches = 0;
-		SIFT[] arr = sg1.lfArr;
-		for (int i = 0; i < arr.length; i++) {
-			if (SIFTGroup.getLoweMatch(arr[i], sg2, conf) != null)
-				nMatches++;
-		}
 
-		return nMatches;
-	}
 
 	// static final public LocalFeaturesMatches
 	// getLoweMatches(AbstractLFGroup<SIFT> sg1, AbstractLFGroup<SIFT> sg2,
@@ -225,33 +210,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 	// }
 
 
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr) {
-		LocalFeaturesMatches matches = new LocalFeaturesMatches();
-		if ( sg2.size() < 2 ) return null;
-		int nMatches = 0;
-		SIFT[] arr = sg1.lfArr;
-		for (int i=0; i<arr.length; i++ ) {
-			SIFT match = SIFTGroup.getLoweMatch(arr[i], sg2, dRatioThr );
-			if ( match != null)
-				matches.add( new LocalFeatureMatch( arr[i], match ) );
-		}
-		
-		return matches;
-	}	
-	
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr, final int maxLFDistSq) {
-		LocalFeaturesMatches matches = new LocalFeaturesMatches();
-		if ( sg2.size() < 2 ) return null;
-		int nMatches = 0;
-		SIFT[] arr = sg1.lfArr;
-		for (int i=0; i<arr.length; i++ ) {
-			SIFT match = SIFTGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
-			if ( match != null)
-				matches.add( new LocalFeatureMatch( arr[i], match ) );
-		}
-		
-		return matches;
-	}	
+
 	
 /*
 	static final public LocalFeaturesMatches getLoweMatches(
@@ -339,76 +298,7 @@ public class SIFTGroup extends ALocalFeaturesGroup<SIFT> {
 		return matches;
 	}
 */
-	static final public SIFT getLoweMatch(SIFT s1, ALocalFeaturesGroup<SIFT> sg,
-			double conf, int maxFDsq) {
-		int distsq1 = Integer.MAX_VALUE;
-		int distsq2 = Integer.MAX_VALUE;
-		int dsq = 0;
-		SIFT curr, best = null;
-		SIFT[] arr = sg.lfArr;
-		for (int i = 0; i < arr.length; i++) {
-			curr = arr[i];
-			dsq = SIFT.getL2SquaredDistance(s1, curr, distsq2);
-			if (dsq < 0)
-				continue;
-			if (dsq < distsq1) {
-				distsq2 = distsq1;
-				distsq1 = dsq;
-				best = curr;
-			} else if (dsq < distsq2) {
-				distsq2 = dsq;
-			}
-		}
 
-		// System.out.print(bestSIFT.scale + "\t");
-		// if ( bestSIFT.scale > 4 ) return null;
-		if (distsq1 > maxFDsq)
-			return null;
-		if (distsq2 == 0)
-			return null;
-		/*
-		 * Check whether closest distance is less than ratio threshold of
-		 * second.
-		 */
-		if ((double) distsq1 / (double) distsq2 < conf)
-			return best;
-		return null;
-	}
-
-	static final public SIFT getLoweMatch(SIFT s1, ALocalFeaturesGroup<SIFT> sg,
-			double conf) {
-		int distsq1 = Integer.MAX_VALUE;
-		int distsq2 = Integer.MAX_VALUE;
-		int dsq = 0;
-		SIFT curr, best = null;
-
-		SIFT[] arr = sg.lfArr;
-		for (int i = 0; i < arr.length; i++) {
-			curr = arr[i];
-			dsq = SIFT.getL2SquaredDistance(s1, curr, distsq2);
-			if (dsq < 0)
-				continue;
-			if (dsq < distsq1) {
-				distsq2 = distsq1;
-				distsq1 = dsq;
-				best = curr;
-			} else if (dsq < distsq2) {
-				distsq2 = dsq;
-			}
-		}
-
-		// System.out.print(bestSIFT.scale + "\t");
-		// if ( bestSIFT.scale > 4 ) return null;
-		if (distsq2 == 0)
-			return null;
-		/*
-		 * Check whether closest distance is less than ratio threshold of
-		 * second.
-		 */
-		if ((double) distsq1 / (double) distsq2 < conf)
-			return best;
-		return null;
-	}
 
 
 	@Override

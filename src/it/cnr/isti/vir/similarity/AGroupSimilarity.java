@@ -11,9 +11,11 @@
  ******************************************************************************/
 package it.cnr.isti.vir.similarity;
 
+import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+
 import java.util.Properties;
 
-public abstract class IGroupSimilarity<F> implements ISimilarity<F> {
+public abstract class AGroupSimilarity<F extends ALocalFeaturesGroup> implements ISimilarity<F> {
 	
 	protected static final int optFt1 =0;
 	protected static final int optFt2 =1;
@@ -25,15 +27,15 @@ public abstract class IGroupSimilarity<F> implements ISimilarity<F> {
 	
 	protected long distCount = 0;
 	
-	public IGroupSimilarity() {
+	public AGroupSimilarity() {
 		option = optFt1;
 	}
 	
-	public IGroupSimilarity(Properties properties) throws SimilarityOptionException {
+	public AGroupSimilarity(Properties properties) throws SimilarityOptionException {
 		this(properties.getProperty("simOption"));
 	}
 	
-	public IGroupSimilarity(String opt) throws SimilarityOptionException {
+	public AGroupSimilarity(String opt) throws SimilarityOptionException {
 		if ( opt != null ) {
 			if ( opt.equals("def")) {
 				option = optFt1;
@@ -79,5 +81,7 @@ public abstract class IGroupSimilarity<F> implements ISimilarity<F> {
 	public final long getDistCount() {
 		return distCount;
 	}
+	
+	public abstract Class<F> getRequestedGroup();
 	
 }

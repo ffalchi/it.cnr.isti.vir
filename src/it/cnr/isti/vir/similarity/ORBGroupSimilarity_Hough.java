@@ -6,11 +6,14 @@ import it.cnr.isti.vir.features.localfeatures.ORBGroup;
 
 import java.util.Properties;
 
-public class ORBGroupSimilarity_Hough  extends IGroupSimilarity<ORBGroup> {
+public class ORBGroupSimilarity_Hough  extends AGroupSimilarity<ORBGroup> {
 
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(ORBGroup.class);
 	
 	private final double sqrLoweThr;
+	
+	@Override
+	public Class getRequestedGroup()  { return ORBGroup.class; } 
 	
 	public ORBGroupSimilarity_Hough( Properties properties) {
 		String value = properties.getProperty("loweThr");
@@ -95,6 +98,6 @@ public class ORBGroupSimilarity_Hough  extends IGroupSimilarity<ORBGroup> {
 		return super.toString() + " sqrConfThr=" + sqrLoweThr + " ";
 	}
 
-
+	public String getStatsString() { return ""; };
 
 }

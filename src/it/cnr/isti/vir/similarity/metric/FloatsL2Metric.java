@@ -62,4 +62,6 @@ public class FloatsL2Metric  implements IMetric<Floats>, IMeanEvaluator<Floats> 
 		return Floats.getMean(coll);
 	}
 	
+	public String getStatsString() { return ""; };
+	
 }

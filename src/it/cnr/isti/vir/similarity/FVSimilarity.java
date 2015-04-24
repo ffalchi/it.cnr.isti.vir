@@ -16,6 +16,7 @@ package it.cnr.isti.vir.similarity;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FV;
+
 import java.util.Properties;
 /**
  *
@@ -64,5 +65,6 @@ public class FVSimilarity implements ISimilarity<FV> {
 		return reqFeatures;
 	}
 
+	public String getStatsString() { return ""; };
 }
 

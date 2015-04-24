@@ -136,6 +136,7 @@ public class SpearmanRhoLog implements ISimilarity<Permutation>{
 		return new FeatureClassCollector( Permutation.class );
 	}
 
+	public String getStatsString() { return ""; };
 
 
 }

@@ -153,5 +153,5 @@ public class SURFMetric implements IMetric<SURF>, ILocalFeaturesMetric<SURF>, IM
 //		}
 //	}
 
-
+	public String getStatsString() { return ""; };
 }
