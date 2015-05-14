@@ -860,7 +860,12 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	public ArrayList<AbstractFeaturesCollector> get(ArrayList<AbstractID> queries) throws ArchiveException {
 		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();
 		for ( AbstractID q : queries) {
-			res.add(this.get(q));
+			AbstractFeaturesCollector c = this.get(q);
+			if ( c == null ) {
+				Log.info_verbose(q + " was not found");
+			} else {
+				res.add(c);
+			}
 		}
 		return res;
 	}
