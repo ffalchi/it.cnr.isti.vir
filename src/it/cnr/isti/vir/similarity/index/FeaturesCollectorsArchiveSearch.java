@@ -105,32 +105,91 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		return res;
 	}
 	
+//	// For kNN searching
+//	class kNNThread implements Runnable {
+//		private final int from;
+//		private final int to;
+//		private final AbstractFeaturesCollector[] objs;
+//		private final SimPQueueArr[] knn;
+//		private final boolean onlyID;
+//		private final ISimilarity sim;
+//		private final AbstractFeaturesCollector[] q;
+//		
+//		kNNThread(
+//				AbstractFeaturesCollector[] q,
+//				ISimilarity sim, SimPQueueArr[] knn,
+//				int from,
+//				int to,
+//				AbstractFeaturesCollector[]  objs,
+//				boolean onlyID
+//				) {
+//			this.from = from;
+//			this.to = to;
+//			this.objs = objs;
+//			this.knn = knn;
+//			this.onlyID = onlyID;
+//			this.sim = sim; 
+//			this.q = q;
+//		}
+//
+//		@Override
+//		public void run() {
+//			// each query is processed on an independent thread
+//			for (int iQ = from; iQ<=to; iQ++) {
+//				for ( AbstractFeaturesCollector obj : objs ) {
+//					double dist = sim.distance(q[iQ], obj, knn[iQ].excDistance );
+//					if ( dist >= 0) {
+//						if ( onlyID)
+//							knn[iQ].offer(((IHasID) obj).getID(), dist);
+//						else 
+//							knn[iQ].offer(obj, dist);
+//					}
+//				}
+//			}
+//		}
+//	}
+	
 	// For kNN searching
 	class kNNThread implements Runnable {
-		private final int from;
-		private final int to;
-		private final AbstractFeaturesCollector[] objs;
+		private final Iterator<AbstractFeaturesCollector> it;
 		private final SimPQueueArr[] knn;
 		private final boolean onlyID;
 		private final ISimilarity sim;
 		private final AbstractFeaturesCollector[] q;
+		private final TimeManager tm;
+		
+		kNNThread(
+				AbstractFeaturesCollector[] q,
+				ISimilarity sim,
+				SimPQueueArr[] knn,
+				Iterator<AbstractFeaturesCollector> it,
+				boolean onlyID,
+				TimeManager tm
+				) {
 
-		kNNThread(AbstractFeaturesCollector[] q, ISimilarity sim, SimPQueueArr[] knn, int from, int to, AbstractFeaturesCollector[]  objs, boolean onlyID) {
-			this.from = from;
-			this.to = to;
-			this.objs = objs;
+			this.it = it;
 			this.knn = knn;
 			this.onlyID = onlyID;
 			this.sim = sim; 
 			this.q = q;
+			this.tm = tm;
 		}
 
 		@Override
 		public void run() {
 			// each query is processed on an independent thread
-			for (int iQ = from; iQ<=to; iQ++) {
-				//System.out.println(iQ);
-				for ( AbstractFeaturesCollector obj : objs ) {
+			while ( true) {
+				AbstractFeaturesCollector obj = null;
+				synchronized ( it ) {
+					if ( it.hasNext() ) {
+						obj = it.next();
+						tm.reportProgress();
+					} else {
+						return;
+					}
+				}
+				for (int iQ = 0; iQ<q.length; iQ++) {
+				
 					double dist = sim.distance(q[iQ], obj, knn[iQ].excDistance );
 					if ( dist >= 0) {
 						if ( onlyID)
@@ -138,6 +197,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 						else 
 							knn[iQ].offer(obj, dist);
 					}
+				
 				}
 			}
 		}
@@ -174,53 +234,19 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			
 			} else {
 				
-				int tParallelBatchSize = 1000;
-				
-				int nObj = archive.size();
-				
-				while ( tParallelBatchSize > nObj/100) {
-					tParallelBatchSize = tParallelBatchSize / 10;
-				}
-				if ( tParallelBatchSize == 0) tParallelBatchSize = 1;
-				final int parallelBatchSize = tParallelBatchSize;
-				
 				Iterator<AbstractFeaturesCollector> it = archive.iterator();
-				// iterates through multiple batches
 				TimeManager tm = new TimeManager();
-				for (int iObj = 0; iObj < nObj;  ) {
-					
-					Log.info_verbose_progress(tm, iObj, nObj);					
-					
-					int batchSize = parallelBatchSize;
-					if ( iObj + parallelBatchSize > nObj ) batchSize = nObj-iObj;
-					AbstractFeaturesCollector[] objects = new AbstractFeaturesCollector[batchSize];
-					
-					// reading objects in batch
-					for ( int i=0; i<objects.length; i++  ) {
-						objects[i] = it.next();
-						iObj++;
-					}
-					
-					// kNNQueues are performed in parallels
-					int bnt = ParallelOptions.reserveNFreeProcessors();
-					final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / (bnt+1) );
-					final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
-					int ti = 0;
-			        Thread[] thread = new Thread[nThread];
-			        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
-			        	int to = from+nQueriesPerThread-1;
-			        	if ( to >= qObj.length ) to =qObj.length-1;
-			        	thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, from, to, objects, onlyID) ) ;
-			        	thread[ti].start();
-			        	ti++;
-			        }
-			        
-			        for ( Thread t : thread ) {
-		        		if ( t != null ) t.join();
-			        }
-			        ParallelOptions.free(bnt);
-					
+				tm.setTotNEle(archive.size());
+				int nThread = ParallelOptions.reserveNFreeProcessors()+1;
+				Thread[] thread = new Thread[nThread];
+				for ( int ti=0; ti<thread.length; ti++ ) {
+					thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, it, onlyID, tm) ) ;
+		        	thread[ti].start();
 				}
+		        for ( Thread t : thread ) {
+		        	t.join();
+		        }
+		        ParallelOptions.free(nThread-1);
 			}
 		}
 	}
@@ -269,24 +295,39 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 					iObj++;
 				}
 				
+				TimeManager tm = new TimeManager();
+				tm.setTotNEle(nObj);
+				
+				
 				// kNNQueues are performed in parallels
-				int bnt = ParallelOptions.reserveNFreeProcessors();
-				final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / (bnt+1) );
-				final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
-				int ti = 0;
-		        Thread[] thread = new Thread[nThread];
-		        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
-		        	int to = from+nQueriesPerThread-1;
-		        	if ( to >= qObj.length ) to =qObj.length-1;
-		        	thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, from, to, objects, true) ) ;
+				Iterator<AbstractFeaturesCollector> itObj = Arrays.asList(objects).iterator();
+				int nThread = ParallelOptions.reserveNFreeProcessors();
+				Thread[] thread = new Thread[nThread];
+				for ( int ti=0; ti<thread.length; ti++ ) {
+					thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, it, true, tm) ) ;
 		        	thread[ti].start();
-		        	ti++;
-		        }
-		        
+				}
 		        for ( Thread t : thread ) {
-	        		if ( t != null ) t.join();
+		        	t.join();
 		        }
-		        ParallelOptions.free(bnt);
+		        ParallelOptions.free(nThread);
+//				int bnt = ParallelOptions.reserveNFreeProcessors();
+//				final int nQueriesPerThread = (int) Math.ceil((double) kNNQueue.length / (bnt+1) );
+//				final int nThread = (int) Math.ceil((double) kNNQueue.length / nQueriesPerThread);
+//				int ti = 0;
+//		        Thread[] thread = new Thread[nThread];
+//		        for ( int from=0; from<qObj.length; from+=nQueriesPerThread) {
+//		        	int to = from+nQueriesPerThread-1;
+//		        	if ( to >= qObj.length ) to =qObj.length-1;
+//		        	thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, from, to, objects, true) ) ;
+//		        	thread[ti].start();
+//		        	ti++;
+//		        }
+//		        
+//		        for ( Thread t : thread ) {
+//	        		if ( t != null ) t.join();
+//		        }
+//		        ParallelOptions.free(bnt);
 				Log.info(iObj + "/" + nObj);
 				
 				
