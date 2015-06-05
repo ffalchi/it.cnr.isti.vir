@@ -49,10 +49,10 @@ public class LongBinaryUtil {
 		long oneLong = 1;
 		for ( int i=0; i<bitsSum.length; i++ ) {
 			if ( bitsSum[i] > threshold
-					||
-				 (	bitsSum[i] == threshold
-				 	&&
-				 	RandomOperations.getBoolean() )
+//					||
+//				 (	bitsSum[i] == threshold
+//				 	&&	RandomOperations.getBoolean()
+//				 	)
 				 	) {
 				newValues[i/Long.SIZE] ^= (oneLong << i%Long.SIZE );
 			}
