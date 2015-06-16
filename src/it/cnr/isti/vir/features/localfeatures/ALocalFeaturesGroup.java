@@ -142,6 +142,9 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
         }
 
         avgDistFromMean = sumDist / lfArr.length;
+        // avgDistFromMean can not be 0
+        if ( avgDistFromMean == 0 ) avgDistFromMean = 1.0f;
+        
         meanXY = tmeanXY;
     }
 
