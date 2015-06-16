@@ -28,6 +28,18 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValu
     private final static float sqrt2 = (float) Math.sqrt(2.0);
 	private static final double maxSQRDistValue = 255 * 255 * 128;
 	
+
+	public static boolean L2Norm = false;
+	
+	
+	public static boolean isL2Norm() {
+		return L2Norm;
+	}
+
+	public static void setL2Norm(boolean l2Norm) {
+		L2Norm = l2Norm;
+	}
+
 	public final byte[] values;     			/* Vector of descriptor values (- 128 for storing in java byte) */
 	
 	public Class getGroupClass() { return RootSIFTGroup.class; };
@@ -112,24 +124,81 @@ public class RootSIFT extends ALocalFeature<RootSIFTGroup> implements IUByteValu
 	public final static int getRootSIFTValue( int value, int sum ) {
 		return (int)
 			(
+				// Squared root
 				Math.sqrt( (float) value / sum ) 	// between 0 and 1
 				* 255						// to have between 0 and 255
 			);
 	}
 	
-	public final static byte[] getRootSIFTValues( byte[] siftValues ) {
+	public final static float[] getRootSIFTFloatValues( byte[] siftValues ) {
+		
+		// Sum for L1 Normalization	
 		int sum = 0;
+		for ( byte curr : siftValues ) {
+			sum += curr;
+		}
+		
+		// java does not have UBytes
+		sum += 128*128;
+		
+		// Root of L1 Norm
+		float[] dValues = new float[128];
 		for ( int i=0; i<siftValues.length; i++ ) {
-			sum += siftValues[i];
+			dValues[i] = (float) Math.sqrt( (siftValues[i]+128) / sum ); 
+		}
+
+		// L2 Norm
+		float dSum = 0;
+		for ( float curr : dValues ) {
+			dSum += curr*curr;
+		}
+		for ( int i=0; i<siftValues.length; i++ ) {
+			dValues[i] /= dSum;
+		}
+		
+		return dValues;
+		
+	}
+	
+	public final static FloatsLF getFloatsLFValues( SIFT sift ) {
+		return new FloatsLF(sift.kp, getRootSIFTFloatValues(sift.values));
+	}
+	
+	public final static byte[] getRootSIFTValues( byte[] siftValues ) {
+		
+		// Sum for L1 Normalization	
+		int sum = 0;
+		for ( byte curr : siftValues ) {
+			sum += curr;
 		}
 		
 		// java does not have UBytes
 		sum += 128*128;
 		
 		byte[] values = new byte[128];
-		for ( int i=0; i<siftValues.length; i++ ) {
-			values[i] = (byte) (getRootSIFTValue( siftValues[i]+128, sum)-128);
+		if ( !L2Norm ) {
+			
+			for ( int i=0; i<siftValues.length; i++ ) {
+				values[i] = (byte) (getRootSIFTValue( siftValues[i]+128, sum)-128);
+			}
+		} else {
+		
+			// Root of L1 Norm
+			double[] dValues = new double[128];
+			for ( int i=0; i<siftValues.length; i++ ) {
+				dValues[i] = Math.sqrt( (float) (siftValues[i]+128) / sum ); 
+			}
+	
+			// L2 Norm
+			double dSum = 0;
+			for ( double curr : dValues ) {
+				dSum += curr*curr;
+			}
+			for ( int i=0; i<siftValues.length; i++ ) {
+				values[i] = (byte) ( (int) (dValues[i]/dSum) - 128);
+			}
 		}
+		
 		
 		return values;
 		
