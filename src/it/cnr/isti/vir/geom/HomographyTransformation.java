@@ -23,7 +23,6 @@ import java.awt.image.BufferedImage;
 
 import Jama.EigenvalueDecomposition;
 
-
 /*
  *      u       h0  h1  h2      x
  *  w * v   =   h3  h4  h5      y
@@ -54,8 +53,8 @@ import Jama.EigenvalueDecomposition;
  */
 public class HomographyTransformation extends AbstractTransformation {
 
-	static double minDet = 0.01;
-	static double maxDet = 1.0;
+//	static double minDet = 0.10;
+//	static double maxDet = 0.15;
 	
     public static HomographyTransformation getRandom() {
         double[] values = RandomOperations.getDoubleArray(9);
@@ -162,7 +161,7 @@ public class HomographyTransformation extends AbstractTransformation {
 
         
         HomographyTransformation tRes = new HomographyTransformation(eigM[minIndex]);
-        if ( tRes.isNice() ) return tRes;
+        if ( tRes.isNice_Other() ) return tRes;
                     
         return null;
     }
@@ -276,12 +275,19 @@ public class HomographyTransformation extends AbstractTransformation {
     // http://answers.opencv.org/question/2588/check-if-homography-is-good/
     // http://stackoverflow.com/questions/14954220/how-to-check-if-obtained-homography-matrix-is-good
     // http://stackoverflow.com/questions/10667834/trying-to-understand-the-affine-transform/
-    public boolean isNice()
-    {
-      double det = this.getDeterminant();
-      if ( 	det < minDet || det > maxDet )  return false;
-      
-      return true;
+//    public boolean isNice()
+//    {
+//      double det = this.getDeterminant();
+//      if ( 	det < minDet || det > maxDet )  return false;
+//      
+//      return true;
+//    }
+    
+    public double getMeasureOfGoodness() {
+    	double det = values[0] * values[4] - values[3] * values[1];
+    	if ( det < 0 ) return 0;
+    	if ( det > 1.0 ) return 0; 
+    	return det;
     }
     
     // from a BRIEF demo online
@@ -292,20 +298,20 @@ public class HomographyTransformation extends AbstractTransformation {
     {
     	// orientation not reversing
         double det = values[0] * values[4] - values[3] * values[1];
-        if (det < 0)
+        if (det < 0.05)
           return false;
 
-        double N1 = Math.sqrt(values[0]*values[0] + values[3] * values[3]);
-        if (N1 > 4 || N1 < 0.1)
-          return false;
-
-        double N2 = Math.sqrt(values[1] * values[1] + values[4] * values[4]);
-        if (N2 > 4 || N2 < 0.1)
-          return false;
-
-        double N3 = Math.sqrt(values[6] * values[6] + values[7] * values[7]);
-        if (N3 > 0.002)
-          return false;
+//        double N1 = Math.sqrt(values[0]*values[0] + values[3] * values[3]);
+//        if (N1 > 4 || N1 < 0.1)
+//          return false;
+//
+//        double N2 = Math.sqrt(values[1] * values[1] + values[4] * values[4]);
+//        if (N2 > 4 || N2 < 0.1)
+//          return false;
+//
+//        double N3 = Math.sqrt(values[6] * values[6] + values[7] * values[7]);
+//        if (N3 > 0.002)
+//          return false;
     	
         return true;
 
