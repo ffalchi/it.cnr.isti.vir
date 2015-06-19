@@ -674,7 +674,7 @@ public class LocalFeaturesMatches {
 					// filtering the matches according to the evaluated trasformation
 					LocalFeaturesMatches tempFiltered = getFiltered_L2(currMatches, t, errorSquare, maxNPointsFound);
 	
-					if (tempFiltered.size() > nPoints && (bestFilteredMatches == null || tempFiltered.size() > bestFilteredMatches.size())) {
+					if (tempFiltered.size() >= nPoints && (bestFilteredMatches == null || tempFiltered.size() > bestFilteredMatches.size())) {
 						bestFilteredMatches = tempFiltered;
 						bestTr = t;
 					}
@@ -709,7 +709,7 @@ public class LocalFeaturesMatches {
 					if (t == null) continue;
 					LocalFeaturesMatches tempFiltered = getFiltered_L2(currMatches, t, errorSquare);
 
-					if (tempFiltered.size() > nPoints && (bestFilteredMatches == null || tempFiltered.size() > bestFilteredMatches.size())) {
+					if (tempFiltered.size() >= nPoints && (bestFilteredMatches == null || tempFiltered.size() > bestFilteredMatches.size())) {
 						bestFilteredMatches = tempFiltered;
 						bestTr = t;
 					}

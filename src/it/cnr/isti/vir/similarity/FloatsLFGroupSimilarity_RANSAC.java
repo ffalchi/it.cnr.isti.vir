@@ -40,8 +40,7 @@ public class FloatsLFGroupSimilarity_RANSAC extends AbstractRANSAC<FloatsLFGroup
 		super(properties);
 		
 		if ( maxFDist != Double.MAX_VALUE ) {
-			// Because of UBytes and L2 Norm of SIFT Vectors
-			setMaxFDist( maxFDist * ( 256 * Math.sqrt(128) * 2 ));
+			setMaxFDist( maxFDist );
 		}
 		
 	}

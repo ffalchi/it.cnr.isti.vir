@@ -3,7 +3,6 @@ package it.cnr.isti.vir.similarity;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.RootSIFTGroup;
-import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 
 import java.util.Properties;
 
@@ -30,9 +29,13 @@ public class RootSIFTGroupSimilarity_RANSAC extends AbstractRANSAC<RootSIFTGroup
 		
 		if ( maxFDist != Double.MAX_VALUE ) {
 			// Because of UBytes and L2 Norm of SIFT Vectors
-			setMaxFDist( maxFDist * ( 256 * Math.sqrt(128) * 2 ));
+			setMaxFDist( maxFDist * getL2NormFactor() );
 		}
 		
+	}
+	
+	public static final double getL2NormFactor() {
+		return ( 256 * Math.sqrt(128) * 2 );
 	}
 	
 	@Override

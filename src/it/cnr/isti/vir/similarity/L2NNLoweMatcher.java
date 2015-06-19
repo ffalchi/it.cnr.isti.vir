@@ -8,52 +8,80 @@ import it.cnr.isti.vir.features.localfeatures.SIFT;
 
 public class L2NNLoweMatcher {
 
+	
+	static long candidatesCount = 0;
+	
+	/**
+	 * 
+	 * Finds 2-NN with distance <= maxFDsq and then applies the Lowe check.
+	 * 
+	 * @param s1
+	 * @param sg
+	 * @param conf
+	 * @param maxFDsq
+	 * @return
+	 */
 	static final public SIFT get(SIFT s1, ALocalFeaturesGroup<SIFT> sg, double conf, int maxFDsq) {
 		int distsq1 = Integer.MAX_VALUE;
-		int distsq2 = Integer.MAX_VALUE;
+		int excDist = (int) Math.ceil( maxFDsq / conf );		
+		int distsq2 = excDist;
 		int dsq = 0;
 		SIFT curr, best = null;
 		SIFT[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = L2.getSquared(s1.values, curr.values, distsq2);
+			dsq = L2.getSquared(s1.values, curr.values, excDist);
 			if (dsq >= 0) {
-				if (dsq < distsq1) {
+				candidatesCount++;
+				if ( dsq < distsq1 && dsq <= maxFDsq) {
 					distsq2 = distsq1;
 					distsq1 = dsq;
 					best = curr;
-				} else if (dsq < distsq2) {
+				} else if (dsq <= distsq2) {
 					distsq2 = dsq;
 				}
 			}
 		}
 
 		if (distsq1 > maxFDsq) return null;
+		
 		if (distsq2 == 0) return null;
 		
 		// Lowe check
-		if ((double) distsq1 / (double) distsq2 < conf) return best;
+		if ( (double) distsq1 / (double) distsq2 <= conf) return best;
 		
 		return null;
 	}
 	
+	/**
+	 * 
+	 * Finds 2-NN with distance <= maxFDsq and then applies the Lowe check.
+	 * 
+	 * @param s1
+	 * @param sg
+	 * @param conf
+	 * @param maxFDsq
+	 * @return
+	 */
 	static final public RootSIFT get(RootSIFT s1, ALocalFeaturesGroup<RootSIFT> sg, double conf, int maxFDsq) {
 		int distsq1 = Integer.MAX_VALUE;
-		int distsq2 = Integer.MAX_VALUE;
+		int excDist = (int) Math.ceil( maxFDsq / conf );		
+		int distsq2 = excDist;
 		int dsq = 0;
 		RootSIFT curr, best = null;
 		RootSIFT[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = L2.getSquared(s1.values, curr.values, distsq2);
+			dsq = L2.getSquared(s1.values, curr.values, excDist);
 			if (dsq >= 0) {
-				if (dsq < distsq1) {
+				candidatesCount++;
+				if (dsq < distsq1 && dsq <= maxFDsq) {
 					distsq2 = distsq1;
 					distsq1 = dsq;
 					best = curr;
 				} else if (dsq < distsq2) {
 					distsq2 = dsq;
-				}
+					excDist = distsq2;}
 			}
 		}
 
@@ -66,22 +94,35 @@ public class L2NNLoweMatcher {
 		return null;
 	}
 	
+	/**
+	 * 
+	 * Finds 2-NN with distance <= maxFDsq and then applies the Lowe check.
+	 * 
+	 * @param s1
+	 * @param sg
+	 * @param conf
+	 * @param maxFDsq
+	 * @return
+	 */
 	static final public FloatsLF get(FloatsLF s1, ALocalFeaturesGroup<FloatsLF> sg, double conf, double maxFDsq) {
 		double distsq1 = Double.MAX_VALUE;
 		double distsq2 = Double.MAX_VALUE;
+		double excDist = maxFDsq;
 		double dsq = 0;
 		FloatsLF curr, best = null;
 		FloatsLF[] arr = sg.lfArr;
 		for (int i = 0; i < arr.length; i++) {
 			curr = arr[i];
-			dsq = L2.getSquared(s1.values, curr.values, distsq2);
-			if (dsq >= 0) {
+			dsq = L2.getSquared(s1.values, curr.values, excDist);
+			if (dsq >= 0 && dsq <= maxFDsq) {
+				candidatesCount++;
 				if (dsq < distsq1) {
 					distsq2 = distsq1;
 					distsq1 = dsq;
 					best = curr;
 				} else if (dsq < distsq2) {
 					distsq2 = dsq;
+					excDist = distsq2;
 				}
 			}
 		}
@@ -95,7 +136,7 @@ public class L2NNLoweMatcher {
 		return null;
 	}
 	
-	static final public LocalFeaturesMatches getMatchesSIFT(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr, final int maxLFDistSq) {
+	static final public LocalFeaturesMatches getLoweMatchesSIFT(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr, final int maxLFDistSq) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
@@ -158,8 +199,8 @@ public class L2NNLoweMatcher {
 		return getMatch(s1, sg, Integer.MAX_VALUE);
 	}
 	
-	static final public LocalFeaturesMatches getMatchesSIFT(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr) {
-		return getMatchesSIFT(sg1, sg2, dRatioThr, Integer.MAX_VALUE);
+	static final public LocalFeaturesMatches getLoweMatchesSIFT(ALocalFeaturesGroup<SIFT> sg1, ALocalFeaturesGroup<SIFT> sg2, double dRatioThr) {
+		return getLoweMatchesSIFT(sg1, sg2, dRatioThr, Integer.MAX_VALUE);
 	}
 	
 	static final public LocalFeaturesMatches getMatchesRootSIFT(ALocalFeaturesGroup<RootSIFT> sg1, ALocalFeaturesGroup<RootSIFT> sg2, double dRatioThr) {

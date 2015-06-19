@@ -9,23 +9,14 @@ import it.cnr.isti.vir.features.localfeatures.SIFT;
 public class L2NNMatcher {
 
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	// SIFT
 	static final public SIFT get(SIFT q, ALocalFeaturesGroup<SIFT> g, int sqMaxDist) {
 		SIFT res = null;
 		int resDist = sqMaxDist;
 		
 		for ( SIFT curr : g.lfArr ) {
-			int sqD = L2.getSquared(q.values, curr.values );
-			if ( sqD < resDist ) {
+			int sqD = L2.getSquared(q.values, curr.values, resDist );
+			if ( sqD >= 0 &&  sqD < resDist ) {
 				res = curr;
 				resDist = sqD;
 			}
@@ -53,8 +44,8 @@ public class L2NNMatcher {
 		int resDist = sqMaxDist;
 		
 		for ( RootSIFT curr : g.lfArr ) {
-			int sqD = L2.getSquared(q.values, curr.values );
-			if ( sqD < resDist ) {
+			int sqD = L2.getSquared(q.values, curr.values, sqMaxDist );
+			if ( sqD >= 0 &&  sqD < resDist ) {
 				res = curr;
 				resDist = sqD;
 			}
@@ -83,8 +74,8 @@ public class L2NNMatcher {
 		double resDist = sqMaxDist;
 		
 		for ( FloatsLF curr : g.lfArr ) {
-			double sqD = L2.getSquared(q.values, curr.values );
-			if ( sqD < resDist ) {
+			double sqD = L2.getSquared(q.values, curr.values, sqMaxDist );
+			if ( sqD >= 0 && sqD < resDist ) {
 				res = curr;
 				resDist = sqD;
 			}

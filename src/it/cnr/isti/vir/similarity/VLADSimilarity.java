@@ -52,7 +52,6 @@ public class VLADSimilarity implements ISimilarity<VLAD> {
 
 	@Override
 	public long getDistCount() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

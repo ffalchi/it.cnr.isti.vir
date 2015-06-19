@@ -11,8 +11,8 @@ public class HammingNNMatcher {
 		int resDist = maxD;
 
 		for (ORB curr : sg.lfArr) {
-			int d = Hamming.distance(q.data, curr.data);
-			if (d < resDist) {
+			int d = Hamming.distance(q.data, curr.data );
+			if ( d < resDist) {
 				resDist = d;
 				best = curr;
 			}

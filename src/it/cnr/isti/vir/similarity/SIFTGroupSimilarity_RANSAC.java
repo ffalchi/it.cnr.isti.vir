@@ -13,6 +13,7 @@ package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.features.localfeatures.SIFTGroup;
 
 import java.util.Properties;
@@ -40,9 +41,13 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 		
 		if ( maxFDist != Double.MAX_VALUE ) {
 			// Because of UBytes and L2 Norm of SIFT Vectors
-			setMaxFDist( maxFDist * ( 256 * Math.sqrt(128) * 2 ));
+			setMaxFDist( maxFDist * getL2NormFactor() );
 		}
 		
+	}
+	
+	public static final double getL2NormFactor() {
+		return SIFT.getL2NormFactor(); 
 	}
 	
 	@Override
@@ -60,12 +65,20 @@ public class SIFTGroupSimilarity_RANSAC extends AbstractRANSAC<SIFTGroup> {
 		if ( loweThr >= 1.0 )
 			return L2NNMatcher.getSIFT(g1, g2, sqMaxFDist_int);
 		else if ( sqMaxFDist_int == Integer.MAX_VALUE ) 
-			return L2NNLoweMatcher.getMatchesSIFT( g1, g2, sqLoweThr );
-		
-		// both parameters are used
-		return L2NNLoweMatcher.getMatchesSIFT( g1, g2, sqLoweThr, sqMaxFDist_int );
+			return L2NNLoweMatcher.getLoweMatchesSIFT( g1, g2, sqLoweThr );
+		else
+			// both parameters are used
+			return L2NNLoweMatcher.getLoweMatchesSIFT( g1, g2, sqLoweThr, sqMaxFDist_int );
 	}
 			
+	
+	public String toString() {
+		String temp = super.toString();
+		
+		temp += "\t" + "L2NNLoweMatcher.candidatesCount=" + L2NNLoweMatcher.candidatesCount;
+		
+		return temp;
+	}
 }
 
 //	boolean rejectUnConsistent = false;

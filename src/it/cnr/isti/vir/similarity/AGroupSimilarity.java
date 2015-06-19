@@ -12,6 +12,8 @@
 package it.cnr.isti.vir.similarity;
 
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.global.Log;
+import it.cnr.isti.vir.util.math.HarmonicMean;
 
 import java.util.Properties;
 
@@ -22,8 +24,12 @@ public abstract class AGroupSimilarity<F extends ALocalFeaturesGroup> implements
 	protected static final int optAvg =2;
 	protected static final int optMin =3;
 	protected static final int optMax =4;
+	protected static final int optHrm =5;
+	protected static final int optAbs =6;
 
-	protected final int option;
+	protected int absNormMax = 100000;
+	
+	protected int option;
 	
 	protected long distCount = 0;
 	
@@ -33,9 +39,20 @@ public abstract class AGroupSimilarity<F extends ALocalFeaturesGroup> implements
 	
 	public AGroupSimilarity(Properties properties) throws SimilarityOptionException {
 		this(properties.getProperty("simOption"));
+		
+	}
+	
+	public void set(Properties properties) {
+		properties.getProperty("simOption");
+		
 	}
 	
 	public AGroupSimilarity(String opt) throws SimilarityOptionException {
+		option =  getSimOptionInt(opt);
+	}
+	
+	public static int getSimOptionInt(String opt) throws SimilarityOptionException {
+		int option = 0;
 		if ( opt != null ) {
 			if ( opt.equals("def")) {
 				option = optFt1;
@@ -49,13 +66,31 @@ public abstract class AGroupSimilarity<F extends ALocalFeaturesGroup> implements
 				option = optMin;
 			} else if ( opt.equals("max")) {
 				option = optMax;
+			} else if ( opt.equals("hrm")) {
+				option = optHrm;
+			} else if ( opt.equals("abs")) {
+				option = optAbs;
 			} else {
 				throw new SimilarityOptionException("Option " + opt + " not found!");
 			}	
-		} else {
-			option = 0;
+		}
+		
+		return option;
+	}
+	
+	public double getPercentage(int n, int size1, int size2) {
+		switch (option) {
+			case optFt1:	return n / (double) size1;
+			case optFt2:	return n / (double) size2;
+			case optAvg:	return ( n/size1 + n/size2) / 2.0;
+			case optMin:	return Math.max( n/(double) size1, n/(double) size1);
+			case optMax:	return Math.min( n/(double) size1, n/(double) size1);	
+			case optHrm:   return HarmonicMean.get(n/(double) size1, n/(double) size1);
+			case optAbs:   return n / (double) absNormMax;
+			default: 		return n / (double) absNormMax;
 		}
 	}
+	
 	
 	public String toString() {
 		String optionStr = "";
@@ -65,13 +100,13 @@ public abstract class AGroupSimilarity<F extends ALocalFeaturesGroup> implements
 			case optAvg:	optionStr="optAvg";	break;
 			case optMin:	optionStr="optMin"; break;
 			case optMax:	optionStr="optMax"; break;	
+			case optHrm:   optionStr="optHrm"; break;	
+			case optAbs:   optionStr="optAbs"; break;	
 			default: 	break;
-		
 		}
 		return this.getClass().toString() + " " + optionStr;
 	}
 
-	
 	@Override
 	public final double distance(F fc1, F fc2, double max) {
 		return distance(fc1, fc2);
