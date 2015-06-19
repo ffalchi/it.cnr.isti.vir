@@ -14,6 +14,7 @@ package it.cnr.isti.vir.util.math;
 import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IDoubleValues;
+import it.cnr.isti.vir.features.IFloatByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
 import it.cnr.isti.vir.features.IUByteValues;
@@ -135,6 +136,9 @@ public  class Mean {
 
 		if ( firstObj instanceof IUByteValues)
 			return getMeans_fromUBytes( (Collection<IUByteValues>) coll );
+
+		if ( firstObj instanceof IFloatByteValues)
+			return getMeans_fromFloatBytes( (Collection<IFloatByteValues>) coll );
 		
 		throw new Exception("Collection objet type was unknown");
 				
@@ -185,6 +189,16 @@ public  class Mean {
 		
 		for ( IUByteValues curr : coll ) {
 			VectorMath.add(res,  VectorMath.getDoubles_UBytes(curr.getValues()));
+		}
+		VectorMath.multiply(res, 1/coll.size());
+		return res;
+	}
+	
+	private static final double[] getMeans_fromFloatBytes(Collection<IFloatByteValues> coll) {
+		double[] res = new double[coll.iterator().next().getLength()];
+		
+		for ( IFloatByteValues curr : coll ) {
+			VectorMath.add(res,  VectorMath.getDoubles_FloatBytes(curr.getValues()));
 		}
 		VectorMath.multiply(res, 1/coll.size());
 		return res;

@@ -110,6 +110,14 @@ public class VectorMath {
 		}
 		return res;		
 	}
+	
+	public static final float[] getFloats_FloatBytes(byte[] values ) {
+		float[] res = new float[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = (values[i] + 128) / 255.0f;
+		}
+		return res;		
+	}
 
 	public static final float[] getFloats(byte[] values ) {
 		float[] res = new float[values.length];
@@ -139,6 +147,14 @@ public class VectorMath {
 		double[] res = new double[values.length];
 		for ( int i=0; i<values.length; i++) {
 			res[i] = (values[i] + 128);
+		}
+		return res;		
+	}
+	
+	public static final double[] getDoubles_FloatBytes(byte[] values ) {
+		double[] res = new double[values.length];
+		for ( int i=0; i<values.length; i++) {
+			res[i] = (values[i] + 128) / 255.0;
 		}
 		return res;		
 	}

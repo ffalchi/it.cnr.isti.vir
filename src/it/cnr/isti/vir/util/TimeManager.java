@@ -17,6 +17,8 @@ public class TimeManager {
 	
 	private int totNEle = -1;
 	
+	private int curr = 0;
+	
 	public synchronized void setTotNEle(int totNEle) {
 		this.totNEle = totNEle;
 	}
@@ -108,5 +110,14 @@ public class TimeManager {
 	
 	public String getProgressString(int curr ) {
 		return curr + "/" + totNEle + " " + Percentage.getString(curr, totNEle) + " " + "ETC " + getExtimatedTimeToComplete_STR(curr, totNEle);
+	}
+	
+	public void reportProgress() {
+		curr++;
+		if ( Log.verbose ) {
+			if ( hasToOutput() ) {
+				Log.info_verbose_indent(getProgressString(curr, totNEle));
+			}
+		}
 	}
 }

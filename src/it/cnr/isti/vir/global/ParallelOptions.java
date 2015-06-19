@@ -40,6 +40,10 @@ public class ParallelOptions {
 		}
 	}
 	
+	public static final synchronized int getAvailable() {
+		return nProcessors - nPInUse;
+	}
+	
 	public static final synchronized int reserveNFreeProcessors() {
 		int available = nProcessors - nPInUse;
 		

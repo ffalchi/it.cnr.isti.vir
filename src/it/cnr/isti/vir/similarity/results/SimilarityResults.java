@@ -334,16 +334,16 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 	
 	public String toString() {
 		//String tStr = query.toString() + "\t";
-		String tStr = "";
+		StringBuilder tStr = new StringBuilder();
 		if ( query != null ) {
 			AbstractID id = ((IHasID) query).getID();
-			if ( id != null ) tStr = id.toString() + "\t";
+			if ( id != null ) tStr.append( id.toString() + "\t");
 		}
 		
 		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
-			tStr += itThis.next().toString() +"\t";
+			tStr.append(itThis.next().toString() +"\t");
 		}
-		return tStr;
+		return tStr.toString();
 	}
 	
 	public String getHtmlTableRow_Images(String preFix, String postFix ) {

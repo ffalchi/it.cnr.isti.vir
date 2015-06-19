@@ -12,7 +12,6 @@
 package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.classification.AbstractLabel;
-import it.cnr.isti.vir.classification.ILabeled;
 import it.cnr.isti.vir.classification.LabelClasses;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.id.AbstractID;
@@ -59,6 +58,10 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 		if ( feature[0] instanceof ALocalFeaturesGroup ) {
 			((ALocalFeaturesGroup) feature[0]).setLinkedFC(this);
 		}
+	}
+	
+	public FeaturesCollectorArr(Collection<AbstractFeature> coll, AbstractID id ) {
+		this( coll, id, null);
 	}
 	
 	public FeaturesCollectorArr(Collection<AbstractFeature> coll, AbstractID id, AbstractLabel cl) {
@@ -144,6 +147,9 @@ public class FeaturesCollectorArr extends AbstractFeaturesCollector_Labeled_HasI
 		return null;
 	}
 
+	
+	
+	
 	@Override
 	public void add(AbstractFeature f) {
 			

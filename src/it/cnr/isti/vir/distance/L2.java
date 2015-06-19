@@ -13,12 +13,12 @@ package it.cnr.isti.vir.distance;
 
 import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IDoubleValues;
+import it.cnr.isti.vir.features.IFloatByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.IUByteValues;
 
 public class L2 {
-	
-
 	
 	public static final int getSquared(byte[] v1, byte[] v2) {
 		int dist = 0;	    
@@ -115,6 +115,14 @@ public class L2 {
 		return  Math.sqrt(getSquared(v1,v2));
 	}
 	
+	public static final double get(IUByteValues v1, IUByteValues v2 ) {
+		return  Math.sqrt(getSquared(v1,v2));
+	}
+	
+	public static final double get(IFloatByteValues v1, IFloatByteValues v2 ) {
+		return  Math.sqrt(getSquared(v1,v2));
+	}
+	
 	public static final double get(IFloatValues v1, IFloatValues v2 ) {
 		return  Math.sqrt(getSquared(v1,v2));
 	}
@@ -132,6 +140,14 @@ public class L2 {
 		return getSquared(v1.getValues(), v2.getValues());
 	}
 	
+	public static final int getSquared(IUByteValues v1, IUByteValues v2 ) {
+		return getSquared(v1.getValues(), v2.getValues());
+	}
+	
+	public static final double getSquared(IFloatByteValues v1, IFloatByteValues v2 ) {
+		return getSquared(v1.getValues(), v2.getValues()) / (255.0f*Math.sqrt(v1.getLength()));
+	}
+	
 	public static final double getSquared(IFloatValues v1, IFloatValues v2 ) {
 		return getSquared(v1.getValues(), v2.getValues());
 	}
@@ -141,7 +157,7 @@ public class L2 {
 	}
 	
 	public static final double getSquared(IIntValues v1, IIntValues v2 ) {
-		return getSquared(v1.getValues(), v2.getValues());
+		return getSquared(v1.getValues(), v2.getValues()) ;
 	}
 	
 	

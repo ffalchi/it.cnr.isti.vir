@@ -308,7 +308,6 @@ public class RandomOperations {
 	}
 	
 	public static final ArrayList getNRandomObjectList( AbstractList givenList, int n ) {
-		assert ( n > givenList.size() );
 		ArrayList outList = new ArrayList();
 		
 		ArrayList<Integer> random = getOrderedIntegersAL(givenList.size());

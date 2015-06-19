@@ -275,5 +275,17 @@ public class SIFT extends ALocalFeature<SIFTGroup> implements IUByteValues {
 	    }
 	}
 
+	public float getFloat(int index) {
+		return (values[index] + 128) / 255.0f;
+	}
+	
+//	public static float getFloatValue(byte v) {
+//		return (v + 128) / 255.0f;
+//	}
+	
+	public static double getL2NormFactor() {
+		return ( 255 * Math.sqrt(VLEN) * 2 );
+	}
+
 
 }

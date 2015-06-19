@@ -12,10 +12,17 @@ public class PropertiesUtils {
 		if ( str == null ) return false;
 		else return true;
 	}
-
+	
 	public static String getAbsolutePath(Properties prop, String propertyName) throws Exception {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) throw new Exception(propertyName + " was not found in properties");
+		Log.info_verbose(propertyName + "=" + str);
+		return WorkingPath.getAbsolutePath(str);
+	}
+	
+	public static String getAbsolutePath_orNull(Properties prop, String propertyName) throws Exception {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) return null;
 		Log.info_verbose(propertyName + "=" + str);
 		return WorkingPath.getAbsolutePath(str);
 	}
@@ -42,6 +49,13 @@ public class PropertiesUtils {
 	public static int getInt_maxIfNotExists(Properties prop, String propertyName) {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) return Integer.MAX_VALUE;
+		Log.info_verbose(propertyName + "=" + str);
+		return Integer.parseInt(str);
+	}
+	
+	public static Integer getInt_nullIfNotExists(Properties prop, String propertyName) {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) return null;
 		Log.info_verbose(propertyName + "=" + str);
 		return Integer.parseInt(str);
 	}

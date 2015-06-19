@@ -17,6 +17,7 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
+import it.cnr.isti.vir.util.PropertiesUtils;
 
 import java.util.Collection;
 import java.util.Properties;
@@ -31,7 +32,7 @@ public class FloatsLFL2Metric  implements IMetric<FloatsLF>, ILocalFeaturesMetri
 	}
 	
 	public FloatsLFL2Metric(Properties properties) {
-		
+//		PropertiesUtils.getDouble_orDefault(properties, "FloatsLFL2Metric.", 1.0)
 	}
 	
 	public FloatsLFL2Metric() {

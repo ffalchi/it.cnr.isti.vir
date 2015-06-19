@@ -79,41 +79,45 @@ public class Launch {
 		
 	}
 	
-	public static void launch(String className, Properties properties, String propertyFileName ) throws Exception {
+	public static void launch(String className, Properties properties, String propertyFileName )  {
 		
-		// Experiment start string
-		String dateTime = DateTime.now();
-		Long startTime = System.currentTimeMillis();
-			
-		// Redirecting OUT
 		PrintStream stdout = System.out;
-		File outFile = new File(propertyFileName + "_" + dateTime + "_out.txt");
-		PrintStream outPStream = new PrintStream(outFile);
-		System.setOut(new TeeStream(System.out, outPStream));
-		System.out.println("Cloning OUT to: " + outFile.getAbsolutePath());
-			
-		// Redirecting ERR
 		PrintStream stderr = System.err;
-		File errFile = new File(propertyFileName + "_" + dateTime + "_err.txt");
-		PrintStream errPStream = new PrintStream(errFile);
-		System.out.println("Cloning ERR to: " + errFile.getAbsolutePath());
-		System.setErr(new TeeStream(System.err, errPStream));
-		
-		System.out.println();	
-					
-		// Setting global parameters
-		GlobalParameters.set(properties);
-		
-		// Getting class to launch
-		Class<?> act = Class.forName(className);
 		
 	    try {
-	        Class<ILaunchable> c = (Class<ILaunchable>) Class.forName(className);
+
+			// Experiment start string
+			String dateTime = DateTime.now();
+			Long startTime = System.currentTimeMillis();
+				
+			// Redirecting OUT
+			
+			File outFile = new File(propertyFileName + "_" + dateTime + "_out.txt");
+			PrintStream outPStream = new PrintStream(outFile);
+			System.setOut(new TeeStream(System.out, outPStream));
+			System.out.println("Cloning OUT to: " + outFile.getAbsolutePath());
+				
+			// Redirecting ERR
+			
+			File errFile = new File(propertyFileName + "_" + dateTime + "_err.txt");
+			PrintStream errPStream = new PrintStream(errFile);
+			System.out.println("Cloning ERR to: " + errFile.getAbsolutePath());
+			System.setErr(new TeeStream(System.err, errPStream));
+			
+			System.out.println();	
+						
+			// Setting global parameters
+			GlobalParameters.set(properties);
+			
+			// Getting class to launch
+			Class<?> act = Class.forName(className);
+	    	
+	    	Class<ILaunchable> c = (Class<ILaunchable>) Class.forName(className);
 	        Method m = c.getMethod("launch", Properties.class);
         
-	        // For readability
 	        System.out.println("\n--------------------------------");
-	        System.out.format("launching %s with properties file %s%n", c.getName() , propertyFileName);
+	        System.out.format("launching %s with properties file:%n", c.getName() );
+	        System.out.println(propertyFileName);
 	        System.out.println("DateTime: " + dateTime);
 	        System.out.println("--------------------------------");
 	        System.out.println();
@@ -121,18 +125,17 @@ public class Launch {
 	        // Launching Experiment
 	        m.invoke(null, properties);
 	        
-	        // For readability
 	        Long endTime = System.currentTimeMillis();
 	        System.out.println("\n--------------------------------");
-	        System.out.format("%s with properties file %s ended%n", c.getName() , propertyFileName);
+	        System.out.format("%s with properties file:%n", c.getName() );
+	        System.out.println(propertyFileName);
+	        System.out.println("ended");
 	        System.out.println("DateTime: " + DateTime.now());
 	        System.out.println("TotalTime: " +  Time.getString_millis(endTime-startTime) );
 	        System.out.println("--------------------------------");
 	        
 	        // production code should handle these exceptions more gracefully
-	    } catch (ClassNotFoundException x) {
-	        x.printStackTrace();
-	    } catch (IllegalAccessException x) {
+	    } catch (Exception x) {
 	        x.printStackTrace();
 	    }
 	    

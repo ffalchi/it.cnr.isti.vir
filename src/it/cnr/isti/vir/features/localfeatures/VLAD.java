@@ -18,6 +18,7 @@ import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.IUByteValues;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.pca.PrincipalComponents;
@@ -210,7 +211,7 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 			//Normalize.sPower(values, 0.2);
 			
 		} else if ( 	refs[0] instanceof IByteValues
-	        		|| 	refs[0] instanceof IIntValues ) {
+	        		|| 	refs[0] instanceof IIntValues  ) {
 			
 			int[] intValues = new int[size];
 			
@@ -233,6 +234,44 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 					int end = start + d;
 	
 					byte[] ref = ((IByteValues) refs[iW]).getValues();
+	
+					int j = 0;
+					for (int i = start; i < end; i++, j++) {
+						intValues[i] += curr[j] - ref[j];
+					}
+					
+				}
+			}
+			
+			// Has been proposed in "All about VLAD"
+			values = Normalize.ssr_float(intValues);
+			
+			// Discussed in Revisiting the VLAD
+			//values = Normalize.sPower_float(intValues, 0.2);
+							        
+		} else if (  refs[0] instanceof IUByteValues ) {
+			
+			int[] intValues = new int[size];
+			
+			if ( lf.length == 0 ) {
+				// NO LOCAL FEATURES WERE FOUND!				
+				for ( int i=0; i<size; ) {
+					byte[] ref = ((IByteValues) refs[i/d]).getValues();
+					for ( int id=0; id<d; id++) {
+						intValues[i++] = -ref[id];
+					}					
+				}
+			} else {
+			
+				for (int iLF = 0; iLF < lf.length; iLF++) {
+	
+					byte[] curr = ((IUByteValues) lf[iLF]).getValues();
+	
+					int iW = fWords.getNNIndex(lf[iLF]);
+					int start = iW * d;
+					int end = start + d;
+	
+					byte[] ref = ((IUByteValues) refs[iW]).getValues();
 	
 					int j = 0;
 					for (int i = start; i < end; i++, j++) {

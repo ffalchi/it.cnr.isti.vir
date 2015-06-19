@@ -11,7 +11,6 @@
  ******************************************************************************/
 package it.cnr.isti.vir.distance;
 
-import it.cnr.isti.vir.util.bytes.LongByteArrayUtil;
 
 public class Hamming {
 
@@ -23,6 +22,10 @@ public class Hamming {
 		return acc;
 	}
 	
+	public static final int distance(long[] bits1, long[] bits2, int max) {
+		return distance(bits1, bits2);
+	}
+	
 	public static final float distance_norm(long[] bits1, long[] bits2, int nBits) {
 		return distance(bits1, bits2) / (float)  nBits;
 	}
@@ -30,6 +33,5 @@ public class Hamming {
 	public static final float distance_norm(long[] bits1, long[] bits2 ) {
 		return distance_norm(bits1, bits2, bits1.length*Long.SIZE );
 	}
-	
 
 }

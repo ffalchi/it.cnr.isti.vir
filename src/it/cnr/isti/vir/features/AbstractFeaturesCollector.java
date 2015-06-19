@@ -17,14 +17,14 @@ public abstract class AbstractFeaturesCollector extends AbstractFeature {
 
 	public abstract <T extends AbstractFeature> T getFeature(Class<T> featureClass);
 	
-	//public IFeature getFeature( Class featureClass );
-
-//	public FeatureInterface[] getAllFeatures();
-//	
-//	public void addAll( FeaturesCollectionInterface givenFC );
-	
 	public abstract void add( AbstractFeature f ) throws FeaturesCollectorException ;
 
+	public void addAll( Collection<AbstractFeature> coll ) throws FeaturesCollectorException {
+		for ( AbstractFeature f : coll ) {
+			add(f);
+		}
+	}
+	
 	public abstract void discardAllBut(FeatureClassCollector featuresClasses) throws FeaturesCollectorException;
 	
 	public abstract void discard(Class<? extends AbstractFeature> c)  throws FeaturesCollectorException;

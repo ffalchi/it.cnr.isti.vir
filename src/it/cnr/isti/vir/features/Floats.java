@@ -1,6 +1,5 @@
 package it.cnr.isti.vir.features;
 
-import it.cnr.isti.vir.features.localfeatures.SIFT;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Mean;
 
@@ -16,7 +15,7 @@ public class Floats extends AbstractFeature implements IFloatValues {
 
 	public AbstractFeaturesCollector linkedFC;
 	
-	float[] values;
+	public float[] values;
 	
 	final int getDim() {
 		return values.length;

@@ -51,6 +51,16 @@ public class RootSIFTGroup extends ALocalFeaturesGroup<RootSIFT>  {
 		}
 	}
 	
+	public static FloatsLFGroup getFloatsLFGroup(SIFTGroup siftGroup, AbstractFeaturesCollector fc  ) {
+		int size = siftGroup.lfArr.length;
+		SIFT[] siftArr = siftGroup.lfArr;
+		FloatsLF[] res = new FloatsLF[siftArr.length];
+		for ( int i=0; i<size; i++) {
+			res[i] = RootSIFT.getFloatsLFValues(siftArr[i]);
+		}
+		return new FloatsLFGroup(res, fc);
+	}
+	
 	
 	public RootSIFTGroup(ByteBuffer in) throws Exception {
 		byte version = in.get();

@@ -139,15 +139,17 @@ public class PrecisionRecall {
 		  int j = 0;
 		  
 		  PrecisionRecall res = new PrecisionRecall();
-		  
+
 		  for ( Iterator<AbstractID> it = results.iterator(); it.hasNext(); ) {
 		    AbstractID currID = it.next();
 		    
 		    
 		    if ( ambiguosIDs!=null && ambiguosIDs.contains(currID)) continue;
+		    
 		    if (positiveIDs.contains(currID)) intersect_size++;
 		    else if ( qID != null && currID.equals(qID) ) continue;
 		    
+		    // Recall and precision are updated for each result
 		    double recall = intersect_size / (double) positiveIDs.size();
 		    double precision = intersect_size / (j + 1.0);
 
@@ -179,7 +181,7 @@ public class PrecisionRecall {
 	
 	/**
 	 * @param prs			Collection of PrecisionRecall
-	 * @param nSampling		Number of recall samplig
+	 * @param nSampling		Number of recall sampling
 	 * @return
 	 */
 	public static PrecisionRecall getAvg(Collection<PrecisionRecall> prs, int nSampling) {
