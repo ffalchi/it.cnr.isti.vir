@@ -34,7 +34,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 	}
 	
 	public FeaturesCollectorsArchiveSearch(File archiveFile) throws Exception {
-		archive = FeaturesCollectorsArchive.open(archiveFile, true);
+		archive = FeaturesCollectorsArchive.open(archiveFile, false);
 	}
 	
 	public synchronized ISimilarityResults<IHasID>[] getKNN_IDs(
@@ -83,7 +83,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		return getKNN( qObjs, k, sim, true)[0];
 	}
 	
-	public ISimilarityResults[] getKNN(
+	public SimilarityResults[] getKNN(
 			AbstractFeaturesCollector[] qObj, int k,
 			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
 			NoSuchMethodException, IllegalArgumentException,
@@ -97,57 +97,14 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 
 		getKNN(qObj, kNNQueue, sim, onlyID);
 
-		ISimilarityResults[] res = new ISimilarityResults[kNNQueue.length];
+		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
 			res[i] = kNNQueue[i].getResults();
+
 		}
 
 		return res;
 	}
-	
-//	// For kNN searching
-//	class kNNThread implements Runnable {
-//		private final int from;
-//		private final int to;
-//		private final AbstractFeaturesCollector[] objs;
-//		private final SimPQueueArr[] knn;
-//		private final boolean onlyID;
-//		private final ISimilarity sim;
-//		private final AbstractFeaturesCollector[] q;
-//		
-//		kNNThread(
-//				AbstractFeaturesCollector[] q,
-//				ISimilarity sim, SimPQueueArr[] knn,
-//				int from,
-//				int to,
-//				AbstractFeaturesCollector[]  objs,
-//				boolean onlyID
-//				) {
-//			this.from = from;
-//			this.to = to;
-//			this.objs = objs;
-//			this.knn = knn;
-//			this.onlyID = onlyID;
-//			this.sim = sim; 
-//			this.q = q;
-//		}
-//
-//		@Override
-//		public void run() {
-//			// each query is processed on an independent thread
-//			for (int iQ = from; iQ<=to; iQ++) {
-//				for ( AbstractFeaturesCollector obj : objs ) {
-//					double dist = sim.distance(q[iQ], obj, knn[iQ].excDistance );
-//					if ( dist >= 0) {
-//						if ( onlyID)
-//							knn[iQ].offer(((IHasID) obj).getID(), dist);
-//						else 
-//							knn[iQ].offer(obj, dist);
-//					}
-//				}
-//			}
-//		}
-//	}
 	
 	// For kNN searching
 	class kNNThread implements Runnable {

@@ -143,116 +143,12 @@ public class AveragePrecision {
 	}
 	
 
-	
-	/*
-	 * Average Precision
-	 * Area below the average precision curve
-	 */
-//	public static double getAveragePrecision(
-//			ISimilarityResults results,
-//			HashSet positiveIDs,
-//			HashSet ambiguosIDs,
-//			AbstractID qID ) {
-//		
-//		ArrayList<AbstractID> ids = new ArrayList<AbstractID>();
-//		for ( Iterator<ObjectWithDistance> it = results.iterator(); it.hasNext(); ) {
-//		    ObjectWithDistance curr = it.next();
-//		    AbstractID currID = ((IHasID) curr.getObj()).getID();
-//		    ids.add(currID);
-//		}
-//		return getAveragePrecision(ids, positiveIDs, ambiguosIDs, qID);
-//	}
-	
-	/*
-	 * Average Precision
-	 * Area below the average precision curve
-	 */
+	public static double getAveragePrecision(ISimilarityResults res, HashSet positiveIDs, HashSet ambiguosIDs, AbstractID qID ) {
+		return PrecisionRecall.getPrecisionRecall(res, positiveIDs, ambiguosIDs, qID).getAveragePrecision();
+	}
+
 	public static double getAveragePrecision(Collection<AbstractID> results, HashSet positiveIDs, HashSet ambiguosIDs, AbstractID qID ) {
 		return PrecisionRecall.getPrecisionRecall(results, positiveIDs, ambiguosIDs, qID).getAveragePrecision();
-		
-		//
-//		// INRIA & OXFORD
-//		double ap = 0.0;
-//		
-//		double recallStep = 1.0 / positiveIDs.size();
-//		int nTP = 0;
-//		int rank = 0;
-//		for ( Iterator<AbstractID> it = results.iterator(); it.hasNext(); ) {
-//		    AbstractID currID = it.next();
-//		    
-//		    if ( ambiguosIDs!=null && ambiguosIDs.contains(currID)) continue;
-//				    
-//		    if ( positiveIDs.contains(currID) ) {
-//		    	
-//		    	double precision_0;
-//		    	if ( rank == 0 ) precision_0 = 1.0;
-//		    	else precision_0 = nTP / (double) rank;
-//		    	double precision_1 = (nTP+1) / (double) (rank+1);
-//		    	ap += ( precision_0+precision_1) * recallStep / 2.0;
-//		    	nTP++;
-//		    } else if ( qID != null && currID.equals(qID) ) continue;		    	
-//
-//		    rank++;
-//		    
-//		}
-//		
-//		return ap;		
-		
-		// WIKIPEDIA
-//		double precisionSum = 0.0;
-//		int intersect_size = 0;
-//		int count = 0;
-//		for ( Iterator<AbstractID> it = results.iterator(); it.hasNext(); ) {
-//		    AbstractID currID = it.next();
-//		    
-//		    if ( ambiguosIDs!=null && ambiguosIDs.contains(currID)) continue;
-//		
-//		    
-//		    if ( positiveIDs.contains(currID) ) {
-//		    	intersect_size++;
-//		    	count++;
-//		    	precisionSum += intersect_size / (double) count;	 
-//		    } else if ( qID != null && currID.equals(qID) ) continue;		    	
-//		    else {
-//		    	count++;
-//		    }		       
-//		    
-//		}
-//		
-//		return precisionSum / positiveIDs.size();
-		    
-		
-		// DEPRECATED MINE
-//		  double old_recall = 0.0;
-//		  double old_precision = 1.0;
-//		  double ap = 0.0;
-//		  
-//		  int intersect_size = 0;		  
-//		  int j = 1;
-//		  for ( Iterator<AbstractID> it = results.iterator(); it.hasNext(); ) {
-//		    AbstractID currID = it.next();
-//		    
-//		    
-//		    if ( ambiguosIDs!=null && ambiguosIDs.contains(currID)) continue;
-//		    if ( positiveIDs.contains(currID) ) {
-//		    	intersect_size++;
-//		    } else {
-//		    	if ( qID != null && currID.equals(qID) ) continue;
-//		    }
-//
-//		    double recall = intersect_size / (double) positiveIDs.size();
-//		    double precision = intersect_size / (double) j ;
-//
-//		    ap += (recall - old_recall)*((old_precision + precision)/2.0);
-//
-//		    old_recall = recall;
-//		    old_precision = precision;
-//		    j++;
-//		    if ( recall == 1.0 ) {
-//		    	break;
-//		    }
-//		  }
-//		  return ap;
 	
 	}
 

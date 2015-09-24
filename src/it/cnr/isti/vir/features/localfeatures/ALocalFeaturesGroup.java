@@ -516,5 +516,16 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 	}
 	
 	
-	
+	public ArrayList<LF> getInRange( KeyPoint kp, double range ) {
+		ArrayList<LF> res = new ArrayList<LF>();
+		
+		double xyEucMaxD_sq = range*range;
+		
+		for ( LF curr : lfArr) {
+			double sqDist = KeyPoint.distance_sq(kp, curr.getKeyPoint());
+			if ( sqDist <= xyEucMaxD_sq ) res.add(curr);
+		}
+		
+		return res;
+	}
 }

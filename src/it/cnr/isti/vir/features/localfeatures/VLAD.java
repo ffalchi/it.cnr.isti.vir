@@ -25,6 +25,7 @@ import it.cnr.isti.vir.pca.PrincipalComponents;
 import it.cnr.isti.vir.util.WorkingPath;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Normalize;
+import it.cnr.isti.vir.util.math.VectorMath;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -151,148 +152,251 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 	}
 
 
-	public static final VLAD getVLAD(ALocalFeaturesGroup features ) throws Exception {
-		if ( ref == null ) {
-			return getVLAD(features, ref);
-		} 
-		throw new Exception("No references have been defined for VLAD");
+//	public static final VLAD getVLAD(ALocalFeaturesGroup features ) throws Exception {
+//		if ( ref == null ) {
+//			return getVLAD(features, ref);
+//		} 
+//		throw new Exception("No references have been defined for VLAD");
+//	}
+	
+	public static final  VLAD getVLAD(ALocalFeaturesGroup features, LFWords fWords ) throws Exception {
+		return getVLAD(features, fWords, 0.2, false, false);
 	}
 	
-    public static final  VLAD getVLAD(ALocalFeaturesGroup features, LFWords fWords) throws Exception {
-    	ALocalFeature[] refs = (ALocalFeature[]) fWords.getFeatures();
+	public static final  VLAD getVLAD(ALocalFeaturesGroup features, LFWords fWords, boolean intranorm ) throws Exception {
+		if ( intranorm ) 
+			return getVLAD(features, fWords, null, true, false);
+		else
+			return getVLAD(features, fWords, 0.2, false, false);
+	}
+	
+    public static final  VLAD getVLAD(
+    		ALocalFeaturesGroup features, LFWords fWords,
+    		Double a, boolean intranorm, boolean residualNormalization) throws Exception {
+	
     	ALocalFeature[] lf  = features.getLocalFeatures();
-        
-        
-        if ( ! (refs[0] instanceof IArrayValues) ) {
-        	throw new Exception( "VLAD can't be computed for " + features.getClass() );
+
+    	if ( lf.length == 0 ) {
+        	throw new Exception( "VLAD can't be computed for images with 0LFs " + features.getClass() );
         }
         
+    	return getVLAD(lf, fWords, a, intranorm, residualNormalization);
+    }
+	
+    public static final  VLAD getVLAD(
+    		ALocalFeature[] lf, LFWords fWords,
+    		Double a, boolean intranorm, boolean residualNormalization) throws Exception {
+    	        
+    	ALocalFeature[] refs = (ALocalFeature[]) fWords.getFeatures();
+    	
+    	
+        if ( ! (refs[0] instanceof IArrayValues) ) {
+        	throw new Exception( "VLAD can't be computed for " + refs[0].getClass() );
+        }
+    	
         int d = ((IArrayValues) refs[0]).getLength(); 
         
         int size = refs.length * d;
         	
         float[] values = null;
         
+
+        
         if ( refs[0] instanceof IFloatValues ) {
         	values = new float[size];
         	
-			if ( lf.length == 0 ) {
-				// NO LOCAL FEATURES WERE FOUND!
-				for ( int i=0; i<size; ) {
-					float[] ref = ((IFloatValues) refs[i/d]).getValues();
-					for ( int id=0; id<d; id++) {
-						values[i++] = -ref[id];
-					}					
-				}
-			} else {
-			
-				for (int iLF = 0; iLF < lf.length; iLF++) {
-	
-					float[] curr = ((IFloatValues) lf[iLF]).getValues();
-	
-					int iW = fWords.getNNIndex(lf[iLF]);
-					int start = iW * d;
-					int end = start + d;
-	
-					float[] ref = ((IFloatValues) refs[iW]).getValues();
-	
-					int j = 0;
-					for (int i = start; i < end; i++, j++) {
-						values[i] += curr[j] - ref[j];
+        	float[] temp  = null;
+        	if ( residualNormalization ) temp = new float[d];
+        	
+			for (int iLF = 0; iLF < lf.length; iLF++) {
+
+				float[] curr = ((IFloatValues) lf[iLF]).getValues();
+				int iW = fWords.getNNIndex(lf[iLF]);
+				int start = iW * d;
+				int end = start + d;
+				float[] ref = ((IFloatValues) refs[iW]).getValues();
+					
+				if ( residualNormalization ) {
+					
+					float norm = 0;
+					for (int i=0; i<d; i++ ) {
+						temp[i] = curr[i] - ref[i];
+						norm += temp[i]*temp[i];
 					}
 					
+					if ( norm > 0.0F ) {
+						norm = (float) Math.sqrt( norm );
+						for (int i=start, j=0; i < end; i++, j++) {
+							values[i] += temp[j] / norm;
+						}
+					}
+				} else {
+					for (int i=start, j=0; i < end; i++, j++) {
+						values[i] += curr[j] - ref[j];
+					}
 				}
 			}
+
 			
-			// Has been proposed in "All about VLAD"
-			Normalize.ssr(values);
-			
-			// Discussed in Revisiting the VLAD
-			//Normalize.sPower(values, 0.2);
-			
-		} else if ( 	refs[0] instanceof IByteValues
-	        		|| 	refs[0] instanceof IIntValues  ) {
+		} else if ( refs[0] instanceof IByteValues  ) {
 			
 			int[] intValues = new int[size];
 			
-			if ( lf.length == 0 ) {
-				// NO LOCAL FEATURES WERE FOUND!				
-				for ( int i=0; i<size; ) {
-					byte[] ref = ((IByteValues) refs[i/d]).getValues();
-					for ( int id=0; id<d; id++) {
-						intValues[i++] = -ref[id];
-					}					
-				}
-			} else {
+			int[] temp  = null;
+        	if ( residualNormalization ) temp = new int[d];
 			
-				for (int iLF = 0; iLF < lf.length; iLF++) {
-	
-					byte[] curr = ((IByteValues) lf[iLF]).getValues();
-	
-					int iW = fWords.getNNIndex(lf[iLF]);
-					int start = iW * d;
-					int end = start + d;
-	
-					byte[] ref = ((IByteValues) refs[iW]).getValues();
-	
+			for (int iLF = 0; iLF < lf.length; iLF++) {
+				byte[] curr = ((IByteValues) lf[iLF]).getValues();
+				
+				int iW = fWords.getNNIndex(lf[iLF]);
+				int start = iW * d;
+				int end = start + d;
+				
+				byte[] ref = ((IByteValues) refs[iW]).getValues();
+				
+				if ( residualNormalization ) {
+					
+					int intNorm = 0;
+					for (int i=0; i<d; i++ ) {
+						temp[i] = curr[i] - ref[i];
+						intNorm += temp[i]*temp[i];
+					}
+					
+					if ( intNorm > 0 ) {
+						float norm = (float) Math.sqrt((float) intNorm);
+						for (int i=start, j=0; i < end; i++, j++) {
+							values[i] += temp[j] / norm;
+						}
+					}
+				} else {
 					int j = 0;
 					for (int i = start; i < end; i++, j++) {
 						intValues[i] += curr[j] - ref[j];
 					}
-					
 				}
+			
 			}
 			
-			// Has been proposed in "All about VLAD"
-			values = Normalize.ssr_float(intValues);
-			
-			// Discussed in Revisiting the VLAD
-			//values = Normalize.sPower_float(intValues, 0.2);
+			values = VectorMath.getFloats(intValues);
 							        
+		} else if ( refs[0] instanceof IIntValues  ) {
+			
+			int[] intValues = new int[size];
+			
+			int[] temp  = null;
+	    	if ( residualNormalization ) temp = new int[d];
+			
+			for (int iLF = 0; iLF < lf.length; iLF++) {
+				int[] curr = ((IIntValues) lf[iLF]).getValues();
+				
+				int iW = fWords.getNNIndex(lf[iLF]);
+				int start = iW * d;
+				int end = start + d;
+				
+				int[] ref = ((IIntValues) refs[iW]).getValues();
+				
+				if ( residualNormalization ) {
+					
+					int intNorm = 0;
+					for (int i=0; i<d; i++ ) {
+						temp[i] = curr[i] - ref[i];
+						intNorm += temp[i]*temp[i];
+					}
+					
+					if ( intNorm > 0 ) {
+						float norm = (float) Math.sqrt((float) intNorm);
+						for (int i=start, j=0; i < end; i++, j++) {
+							values[i] += temp[j] / norm;
+						}
+					}
+				} else {
+					int j = 0;
+					for (int i = start; i < end; i++, j++) {
+						intValues[i] += curr[j] - ref[j];
+					}
+				}
+			
+			}
+			
+			values = VectorMath.getFloats(intValues);
+						        
 		} else if (  refs[0] instanceof IUByteValues ) {
 			
 			int[] intValues = new int[size];
 			
-			if ( lf.length == 0 ) {
-				// NO LOCAL FEATURES WERE FOUND!				
-				for ( int i=0; i<size; ) {
-					byte[] ref = ((IByteValues) refs[i/d]).getValues();
-					for ( int id=0; id<d; id++) {
-						intValues[i++] = -ref[id];
-					}					
-				}
-			} else {
+			int[] temp  = null;
+        	if ( residualNormalization ) temp = new int[d];
 			
-				for (int iLF = 0; iLF < lf.length; iLF++) {
-	
-					byte[] curr = ((IUByteValues) lf[iLF]).getValues();
-	
-					int iW = fWords.getNNIndex(lf[iLF]);
-					int start = iW * d;
-					int end = start + d;
-	
-					byte[] ref = ((IUByteValues) refs[iW]).getValues();
-	
+			for (int iLF = 0; iLF < lf.length; iLF++) {
+
+				byte[] curr = ((IUByteValues) lf[iLF]).getValues();
+
+				int iW = fWords.getNNIndex(lf[iLF]);
+				int start = iW * d;
+				int end = start + d;
+
+				byte[] ref = ((IUByteValues) refs[iW]).getValues();
+
+				if ( residualNormalization ) {
+					
+					int intNorm = 0;
+					for (int i=0; i<d; i++ ) {
+						temp[i] = curr[i] - ref[i];
+						intNorm += temp[i]*temp[i];
+					}
+					
+					if ( intNorm > 0 ) {
+						float norm = (float) Math.sqrt((float) intNorm);
+						for (int i=start, j=0; i < end; i++, j++) {
+							values[i] += temp[j] / norm;
+						}
+					}
+				} else {
 					int j = 0;
 					for (int i = start; i < end; i++, j++) {
 						intValues[i] += curr[j] - ref[j];
 					}
-					
 				}
+				
+				
 			}
 			
-			// Has been proposed in "All about VLAD"
-			values = Normalize.ssr_float(intValues);
-			
-			// Discussed in Revisiting the VLAD
-			//values = Normalize.sPower_float(intValues, 0.2);
+			values = VectorMath.getFloats(intValues);
 							        
 		} else {
-        	throw new Exception( "VLAD can't be computed for " + features.getClass() );
+        	throw new Exception( "VLAD can't be computed for " + refs[0].getClass() );
 		}
         
+        
+        
+        if ( intranorm) {
+        	
+        	/* INTRANORM 
+        	 * See "All about VLAD" paper
+        	 */
+        	for ( int i=0; i<refs.length; i++ ) {
+        		int start = d * i;
+        		int end = start + d;
+        		Normalize.l2(values, start, end);         		
+        	}
+        	
+        	
+        }
+        
+        if ( a == null ) {
+           	/* SSR */
+           	// SSR has been proposed in 2012
+           	// "Negative evidences and co-occurrences in image retrieval: the benefit of PCA and whitening"
+    		Normalize.ssr(values);
+    	} else {
+
+    		Normalize.sPower(values, a);
+    	}
+        
+        
         // L2 Normalization (performed in any case)
-        Normalize.l2(values);
+        Normalize.l2(values);        	
+        
         
         return new VLAD(values);
     }
@@ -319,7 +423,7 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 		float[] v2 = s2.values;
 		
 		if ( v1 == null && v2 == null ) return 0;
-		if ( v1 == null || v2 == null ) return 0.5; // TODO !!!
+		if ( v1 == null || v2 == null ) return 1.0; // TODO !!!
 		
 		if ( v1.length != v2.length ) return 1.0;
 		

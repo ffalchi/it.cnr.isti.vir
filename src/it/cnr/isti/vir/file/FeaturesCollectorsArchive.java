@@ -286,7 +286,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				fc.writeData(rndFile);
 			} else {
 				throw new ArchiveException("FeaturesCollector class inserted ("
-						+ fc.getClass() + ") diffear from expected (" + fcClass
+						+ fc.getClass() + ") differ from expected (" + fcClass
 						+ ")");
 			}
 		}
@@ -653,6 +653,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		outOffset.close();
 		outIDs.close();
 
+		Log.info_verbose("Creating index files done");
 	}
 
 	public synchronized AbstractFeaturesCollector get(int i) throws ArchiveException {

@@ -131,7 +131,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 
 	
 	static final public ORB getLoweMatch(ORB s1, ALocalFeaturesGroup<ORB> sg,
-			double conf, int maxFDsq) {
+			double conf, int maxD) {
 		int dist1 = Integer.MAX_VALUE;
 		int dist2 = Integer.MAX_VALUE;
 		int dsq = 0;
@@ -153,7 +153,7 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 
 		// System.out.print(bestSIFT.scale + "\t");
 		// if ( bestSIFT.scale > 4 ) return null;
-		if (dist1 > maxFDsq)
+		if (dist1 > maxD)
 			return null;
 		if (dist2 == 0)
 			return null;
@@ -232,13 +232,13 @@ public class ORBGroup extends ALocalFeaturesGroup<ORB> {
 
 
 	
-	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<ORB> sg1, ALocalFeaturesGroup<ORB> sg2, double dRatioThr, final int maxLFDistSq) {
+	static final public LocalFeaturesMatches getLoweMatches(ALocalFeaturesGroup<ORB> sg1, ALocalFeaturesGroup<ORB> sg2, double dRatioThr, final int maxD) {
 		LocalFeaturesMatches matches = new LocalFeaturesMatches();
 		if ( sg2.size() < 2 ) return null;
 		int nMatches = 0;
 		ORB[] arr = sg1.lfArr;
 		for (int i=0; i<arr.length; i++ ) {
-			ORB match = ORBGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxLFDistSq );
+			ORB match = ORBGroup.getLoweMatch(arr[i], sg2, dRatioThr, maxD );
 			if ( match != null)
 				matches.add( new LocalFeatureMatch( arr[i], match ) );
 		}

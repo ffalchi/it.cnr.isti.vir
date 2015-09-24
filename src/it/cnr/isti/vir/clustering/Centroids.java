@@ -16,6 +16,7 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClasses;
 import it.cnr.isti.vir.features.FeaturesCollectors;
 import it.cnr.isti.vir.id.IHasID;
+import it.cnr.isti.vir.similarity.ISimilarity;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -124,6 +125,26 @@ public class Centroids {
 			tStr += ((IHasID) centroids[i]).getID() + "\n";
 		}
 		return tStr;
+	}
+	
+	public int getNNIndex(AbstractFeature f, ISimilarity sim ) {
+		
+		int best = -1;
+		double minDistance = Double.MAX_VALUE;
+		for ( int i=0; i<centroids.length; i++) {
+			double currDistance = sim.distance(centroids[i], f);
+			if ( currDistance < minDistance ) {
+				best = i;
+				minDistance = currDistance;
+			}
+		}
+		
+		return best;
+			
+	}
+
+	public int size() {
+		return centroids.length;
 	}
 	
 }

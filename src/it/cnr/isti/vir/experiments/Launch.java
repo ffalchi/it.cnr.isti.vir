@@ -17,8 +17,10 @@ import it.cnr.isti.vir.util.TeeStream;
 import it.cnr.isti.vir.util.string.DateTime;
 import it.cnr.isti.vir.util.string.Time;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -36,6 +38,7 @@ public class Launch {
 	
 	
 	public static void launch( String propertyFileName ) throws Exception {
+		
 		// Reading properties file.
 		Properties properties;
 
@@ -134,6 +137,20 @@ public class Launch {
 	        System.out.println("TotalTime: " +  Time.getString_millis(endTime-startTime) );
 	        System.out.println("--------------------------------");
 	        
+	        
+	        // Resetting Streams
+	        System.setOut(stdout);
+	        System.setErr(stderr);
+	        
+	        outPStream.close();
+	        errPStream.close();
+	        
+	        BufferedReader br = new BufferedReader(new FileReader(errFile));     
+	        if (br.readLine() == null) {
+	            br.close();
+	            errFile.delete();
+	        }
+	        
 	        // production code should handle these exceptions more gracefully
 	    } catch (Exception x) {
 	        x.printStackTrace();
@@ -142,6 +159,10 @@ public class Launch {
         // Resetting Streams
         System.setOut(stdout);
         System.setErr(stderr);
+        
+       
+        
+        
 	}
 	
 	/**

@@ -59,4 +59,53 @@ public class ArrayValuesConversion {
 		return VectorMath.getDoubles_FloatBytes(given.getValues());
 	}
 	
+	
+	
+	public static final float[] getFloats(IArrayValues given) {
+		
+		if ( given instanceof IDoubleValues)
+			return getFloats( (IDoubleValues) given );
+		
+		if ( given instanceof IFloatValues)
+			return getFloats( (IFloatValues) given );
+		
+		if ( given instanceof IIntValues)
+			return getFloats( (IIntValues) given );
+		
+		if ( given instanceof IByteValues)
+			return getFloats( (IByteValues) given );
+
+		if ( given instanceof IUByteValues)
+			return getFloats( (IUByteValues) given );
+		
+		if ( given instanceof IFloatByteValues)
+			return getFloats( (IFloatByteValues) given );
+		
+		//throw new Exception("Objet type was unknown");
+		return null;		
+	}
+	
+	private static final float[] getFloats(IFloatValues given) {
+		return given.getValues();
+	}
+	
+	private static final float[] getFloats(IDoubleValues given) {
+		return VectorMath.getFloats( given.getValues() );
+	}
+	
+	private static final float[] getFloats(IIntValues given) {
+		return VectorMath.getFloats(given.getValues());
+	}
+	
+	private static final float[] getFloats(IByteValues given) {
+		return VectorMath.getFloats(given.getValues());
+	}	
+	
+	private static final float[] getFloats(IUByteValues given) {
+		return VectorMath.getFloats_UBytes(given.getValues());
+	}
+	
+	private static final float[] getFloats(IFloatByteValues given) {
+		return VectorMath.getFloats_FloatBytes(given.getValues());
+	}
 }

@@ -151,6 +151,22 @@ public class PrincipalComponents {
 		return project(given, projDim);
 	}
 	
+	public float[] project(float[] given) {
+		return project(given, projDim);
+	}
+		
+	public final float[] project(float[] given, int nComp) {
+		float[] res = new float[nComp];
+		
+		float[] vNorm = VectorMath.subtraction_float(given, means);
+		
+		for ( int i=0; i<nComp; i++) {
+			res[i] = (float) VectorMath.scalarProduct( vNorm, eigenVectors[i]);
+		}
+		
+		return res;
+	}
+	
 	public final float[] project_float(double[] given, int nComp) {
 		float[] res = new float[nComp];
 		

@@ -22,7 +22,7 @@ import java.util.Properties;
 
 public class KMeansMain {
 
-	static final double distRedThr_def = 0.999;
+	static final double distRedThr_def = 0.000001;
 	
 	public static void usage() {
 		System.out.println("KMeansMain <properties filename>.properties");

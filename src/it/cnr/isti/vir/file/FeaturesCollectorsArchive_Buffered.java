@@ -71,6 +71,17 @@ public class FeaturesCollectorsArchive_Buffered {
 		return new FeaturesCollectorsArchive_Buffered(file, idclass, fcClass );
 	}
 	
+	public static  FeaturesCollectorsArchive_Buffered createAs(File newFile, File origFile ) throws Exception {
+		FeaturesCollectorsArchive archive = new FeaturesCollectorsArchive(origFile, false);
+		FeaturesCollectorsArchive_Buffered res =  FeaturesCollectorsArchive_Buffered.createAs(newFile, archive );
+		archive.close();
+		return res;
+	}
+	
+	public static  FeaturesCollectorsArchive_Buffered createAs(File file, FeaturesCollectorsArchive archive ) throws Exception {
+		return new FeaturesCollectorsArchive_Buffered(file, archive.getIDClass(), archive.getFcClass() );
+	}
+	
 	public FeaturesCollectorsArchive_Buffered(File file,
 			Class<? extends AbstractID> idClass, Class<? extends AbstractFeaturesCollector> fcClass)
 			throws Exception {
@@ -102,7 +113,7 @@ public class FeaturesCollectorsArchive_Buffered {
 
 	public synchronized void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
 
-		int currPos = positions.size();
+		//int currPos = positions.size();
 		positions.add(out.size());
 		
 		if (idClass != null) {

@@ -18,6 +18,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class KeyPoint {
 
@@ -169,6 +170,26 @@ public class KeyPoint {
 
 	public String toString() {
 		return "kp: " + xy[0] + " " + xy[1] + " " + ori + " " + size;
+	}
+
+	
+	public double distance(KeyPoint given) {
+		return distance(this, given);
+	}
+	
+	public static double distance(KeyPoint kp1, KeyPoint kp2 ) {
+		return Math.sqrt(distance_sq(kp1,kp2));
+	}
+	public static final double distance_sq(KeyPoint kp1, KeyPoint kp2 ) {
+		
+		double diffX = kp1.getX() - kp2.getX();
+		double diffY = kp1.getY() - kp2.getY();
+		
+		return diffX*diffX+diffY*diffY;
+	}
+	
+	public int getXYScaleHashCode() {
+		return Arrays.hashCode(xy)^Float.hashCode(size);
 	}
 	
 }

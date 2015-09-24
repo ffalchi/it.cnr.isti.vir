@@ -24,6 +24,7 @@ import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDClasses;
 import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.id.IHasID;
+import it.cnr.isti.vir.id.IID2URL;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -50,6 +51,10 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 
 	public void setExcludedGroup(ALocalFeaturesGroup excludedGroup) {
 		this.excludedGroup = excludedGroup;
+	}
+	
+	public Collection<ObjectWithDistance<E>> getCollection() {
+		return coll;
 	}
 
 	private class SimilarityResultsIterator<E> implements Iterator<E>{
@@ -350,29 +355,65 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		return getHtmlTableRow_Images( preFix, postFix, null, null);
 	}
 	
+	public String getHtmlTableRow_Images(IID2URL conv ) {
+		return getHtmlTableRow_Images( conv, 100);
+	}
+	
+	public String getHtmlTableRow_Images(IID2URL conv, Integer width) {
+		String tStr = "<tr>\n";
+		if ( width == null) width = 100;
+		if ( query != null && ((IHasID)query).getID() != null ) {
+			tStr += "<td>"+ ((IHasID)query).getID() + "<br>" +
+						"<img" +
+							" src=\"" + conv.getURL( ((IHasID)query).getID().toString() ) + "\"" +
+							//" width=\""+width+
+						"\">" + 
+					"</td>";
+		}
+		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
+			ObjectWithDistance<E> curr = itThis.next();
+			AbstractID id = ((IHasID)curr.obj).getID();
+			tStr += "<td>" +
+						"<img" +
+							" src=\"" + conv.getURL(id.toString()) + "\"" + 
+							" title=\"" + id + " d=" +  String.format(Locale.ENGLISH, "%.3f", curr.dist) + "\"" +
+							//" max-width=\""+width+
+						"\">"+
+						"<br>" +
+						"d:" + String.format(Locale.ENGLISH, "%.3f", curr.dist)+// + "<br>" +
+					"</td>";
+		}
+		return tStr;
+	}
+	
 	public String getHtmlTableRow_Images(String preFix, String postFix, Integer subStringInt, Integer width) {
 		String tStr = "<tr>\n";
 		if ( width == null) width = 100;
 		if ( subStringInt == null )
 			tStr += "<td>"+ ((IHasID)query).getID()+ "<br>" +
-					"<img src=\"" + preFix + ((IHasID)query).getID()+ postFix + "\" width=\""+width+"\"></td>";
+					"<img src=\"" + preFix + ((IHasID)query).getID()+ postFix + "\" max-width=\""+width+"\"></td>";
 		else
 			tStr += "<td>"+ ((IHasID)query).getID() + "<br>" + 
 					"<img src=\"" + preFix + ((IHasID)query).getID().toString().substring(0, subStringInt)+ "/"  +
-					((IHasID)query).getID()+ postFix + "\" width=\""+width+"\"></td>";
+					((IHasID)query).getID()+ postFix + "\" max-width=\""+width+"\"></td>";
 		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
 			ObjectWithDistance<E> curr = itThis.next();
 			AbstractID id = ((IHasID)curr.obj).getID();
 			if ( subStringInt == null ) {
 				tStr += "<td>" + String.format("%.3f", curr.dist) + "<br>" +
-						"<img src=\"" + preFix + id + postFix + "\" title=\""+((IHasID)curr.obj).getID() + " d ";
-				tStr += String.format("%.3f", curr.dist);
-				tStr += "\" width=\""+width+"\"></td>";
+							"<img" +
+								" src=\"" + preFix + id + postFix + "\"" +
+								" title=\""+((IHasID)curr.obj).getID() + " d " +
+								String.format("%.3f", curr.dist) +
+								//	tStr += "\" max-width=\""+width+"\"></td>";
+							"\">" + 
+						"</td>";
+
 			} else 
 				tStr += "<td>" + String.format("%.3f", curr.dist) + "<br>" +
 						"<img src=\"" + preFix + id.toString().substring(0, subStringInt) + "/" +
 						id + postFix + "\" title=\""+((IHasID)curr.obj).getID() +
-						" d " + String.format("%.3f", curr.dist) + "\" width=\""+width+"\"></td>";
+						" d " + String.format("%.3f", curr.dist) + "\" max-width=\""+width+"\"></td>";
 		}
 		
 		return tStr + "</tr>";

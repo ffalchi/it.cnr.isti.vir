@@ -11,6 +11,12 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util.math;
 
+import it.cnr.isti.vir.features.IArrayValues;
+import it.cnr.isti.vir.features.IByteValues;
+import it.cnr.isti.vir.features.IFloatValues;
+import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.IUByteValues;
+
 public class VectorMath {
 
 	
@@ -41,6 +47,15 @@ public class VectorMath {
 		float[] res = new float[nD];
 		for (int iD = 0; iD < nD; iD++) {
 			res[iD] = v1[iD] - v2[iD];
+		}
+		return res;
+	}
+	
+	public static final float[] subtraction_float(float[] v1, double[] v2) {
+		int nD = v1.length;
+		float[] res = new float[nD];
+		for (int iD = 0; iD < nD; iD++) {
+			res[iD] = v1[iD] - (float) v2[iD];
 		}
 		return res;
 	}
@@ -77,6 +92,26 @@ public class VectorMath {
 		}
 		
 		return res;		
+	}
+	
+	public static final double scalarProduct( float[] a, double[] b) {
+		double res = 0;
+		
+		for ( int i=0; i<a.length; i++) {
+			res += a[i] * b[i];
+		}
+		
+		return res;		
+	}
+	
+	public static final double scalarProduct( double[] a, float[] b) {
+		double res = 0;
+		
+		for ( int i=0; i<a.length; i++) {
+			res += a[i] * b[i];
+		}
+		
+		return (float) res;		
 	}
 	
 	public static final float scalarProduct( float[] a, float[] b) {
@@ -215,7 +250,106 @@ public class VectorMath {
 			a[i] += b[i];
 		}
 	}	
-
+	
+	 
+	public static final double[] getDiff_double( float[] a, float[] b ) {
+		double[] res = new double[a.length];
 		
+		for ( int i=0; i<a.length; i++ ) {
+			res[i] = (double) a[i] - b[i];
+		}
+		return res;
+	}
+
+	public static final double[] getDiff_double( byte[] a, byte[] b ) {
+		double[] res = new double[a.length];
+		
+		for ( int i=0; i<a.length; i++ ) {
+			res[i] = (double) a[i] - b[i];
+		}
+		return res;
+	}
+
+	public static final double[] getDiff_double( int[] a, int[] b ) {
+		double[] res = new double[a.length];
+		
+		for ( int i=0; i<a.length; i++ ) {
+			res[i] = (double) a[i] - b[i];
+		}
+		return res;
+	}
+	 
+	public static final float[] getDiff_float( float[] a, float[] b ) {
+		float[] res = new float[a.length];
+		
+		for ( int i=0; i<a.length; i++ ) {
+			res[i] = (float) a[i] - b[i];
+		}
+		return res;
+	}
+
+	public static final float[] getDiff_float( byte[] a, byte[] b ) {
+		float[] res = new float[a.length];
+		
+		for ( int i=0; i<a.length; i++ ) {
+			res[i] = (float) a[i] - b[i];
+		}
+		return res;
+	}
+
+	public static final float[] getDiff_float( int[] a, int[] b ) {
+		float[] res = new float[a.length];
+		
+		for ( int i=0; i<a.length; i++ ) {
+			res[i] = (float) a[i] - b[i];
+		}
+		return res;
+	}
+	
+	public static final double[] diff(IArrayValues a, IArrayValues b) throws Exception {
+	
+		
+		if ( a instanceof IFloatValues ) {
+			return getDiff_double( ((IFloatValues) a).getValues(), ((IFloatValues) b).getValues() );
+			
+		} else if ( a instanceof IByteValues ) {
+			return getDiff_double( ((IByteValues) a).getValues(), ((IByteValues) b).getValues() );
+			
+		} else if ( a instanceof IUByteValues ) {
+			return getDiff_double( ((IUByteValues) a).getValues(), ((IUByteValues) b).getValues() );
+				
+		} else if ( a instanceof IIntValues  ) {
+			return getDiff_double( ((IIntValues) a).getValues(), ((IIntValues) b).getValues() );
+			
+
+		} else {
+        	throw new Exception( "diff can't be computed for " + a.getClass() );
+		}		
+		
+	}
+	
+	public static final float[] diff_float(IArrayValues a, IArrayValues b) throws Exception {
+	
+		
+		if ( a instanceof IFloatValues ) {
+			return getDiff_float( ((IFloatValues) a).getValues(), ((IFloatValues) b).getValues() );
+			
+		} else if ( a instanceof IByteValues ) {
+			return getDiff_float( ((IByteValues) a).getValues(), ((IByteValues) b).getValues() );
+			
+		} else if ( a instanceof IUByteValues ) {
+			return getDiff_float( ((IUByteValues) a).getValues(), ((IUByteValues) b).getValues() );
+				
+		} else if ( a instanceof IIntValues  ) {
+			return getDiff_float( ((IIntValues) a).getValues(), ((IIntValues) b).getValues() );
+			
+
+		} else {
+        	throw new Exception( "diff can't be computed for " + a.getClass() );
+		}		
+		
+	}
+	
+
 }
 

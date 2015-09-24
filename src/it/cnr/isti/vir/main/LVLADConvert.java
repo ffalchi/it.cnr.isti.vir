@@ -5,25 +5,34 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.Floats;
 import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.bof.LFWords;
+import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
+import it.cnr.isti.vir.features.localfeatures.FloatsLF;
+import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
+import it.cnr.isti.vir.features.localfeatures.KeyPoint;
+import it.cnr.isti.vir.features.localfeatures.LVLAD;
 import it.cnr.isti.vir.features.localfeatures.VLAD;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.AbstractID;
+import it.cnr.isti.vir.id.IDString;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.pca.PrincipalComponents;
 import it.cnr.isti.vir.util.PropertiesUtils;
+import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.TimeManager;
 import it.cnr.isti.vir.util.WorkingPath;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class VLADConvert {
+public class LVLADConvert {
 
-	public static final String className = "VLADConvert";
+	public static final String className = "LVLADConvert";
 	
 	public static void usage() {
 		System.out.println("Usage: " + className + "<properties filename>.properties");
@@ -37,6 +46,7 @@ public class VLADConvert {
 		System.out.println("- ["+className+".intraNorm=<def false>]");
 		System.out.println("- ["+className+".SSR=<def false>]");
 		System.out.println("- ["+className+".RN=<def false>]");
+		System.out.println("- ["+className+".nRnd=<n>]");
 		System.exit(0);
 	}
 	
@@ -46,7 +56,7 @@ public class VLADConvert {
 			usage();
 		}
 
-		Launch.launch(VLADConvert.class.getName(), args[0]);	
+		Launch.launch(LVLADConvert.class.getName(), args[0]);	
 	
 	}
 	
@@ -59,12 +69,13 @@ public class VLADConvert {
 		boolean intraNorm = PropertiesUtils.getBoolean(prop, className+".intraNorm", false);
 		boolean rn = PropertiesUtils.getBoolean(prop, className+".RN", false);
 		Double ssr = PropertiesUtils.getDouble_orNull(prop, className+".SSR");
+		Integer nRnd = PropertiesUtils.getInt_orNull(prop, className+".nRnd"); 
 		int vladPC_n = -1;
 		if (vladPC_file != null ) {
 			vladPC_n = PropertiesUtils.getInt(prop, className+".VLADPC_n");
 		}
 		
-		createVLAD(lfArchive_file, dictionary_file, vladArchive_file, vladPC_file, vladPC_n, ssr, intraNorm, rn );		
+		createVLAD(lfArchive_file, dictionary_file, vladArchive_file, vladPC_file, vladPC_n, ssr, intraNorm, rn, nRnd  );		
 	}
 	
 
@@ -125,25 +136,20 @@ public class VLADConvert {
 				if ( lfs == null || lfs.size() == 0 ) {
 					System.out.println(id + " was not considered because has no LFs");
 				} else {
-					
+						
 					try {
-						VLAD vlad = VLAD.getVLAD(lfs, words, ssr, intraNorm, rn);
-						if (pc == null ) {
-							outArchive.add(vlad, id );
-						} else {
-							Floats f = new Floats(pc.project_float( (IArrayValues) vlad));
-							outArchive.add(f, id );
-						}
-					} catch ( Exception e ) {
+						FloatsLFGroup resGroup = LVLAD.getLVLAD(lfs.lfArr, words, ssr, intraNorm, rn, pc);
+						
+						outArchive.add(resGroup, id );
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
+						
 				}
-
 
 			}
 		}
 	}
-	
 	
 	
 	public static void createVLAD(
@@ -151,14 +157,29 @@ public class VLADConvert {
 			int vladPC_n,
 			Double ssr,
 			boolean intraNorm,
-			boolean rn) throws Exception {
+			boolean rn,
+			Integer nRnd ) throws Exception {
 
 		
 		FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive(lfArchive_file );
 
 		LFWords words = new LFWords(dictionary_file);
-		Class<ALocalFeaturesGroup> lfGroup_class =  (Class<ALocalFeaturesGroup>) words.getLocalFeaturesGroupClass();
 		
+		Class<ALocalFeaturesGroup> lfGroup_class = (Class<ALocalFeaturesGroup>) words.getLocalFeaturesGroupClass();
+		
+		int[] lfIDs = null;
+		if ( nRnd != null ) {
+			int tot = inArchive.getNumberOfLocalFeatures(lfGroup_class);
+			
+			Log.info("Selecting " + nRnd + " random number of local features");
+			
+			lfIDs = RandomOperations.getDistinctInts(nRnd, tot);
+			
+			Arrays.sort(lfIDs);
+		}
+		
+		
+				
 		Log.info("\t" + dictionary_file.getAbsolutePath() + "\t" + words.size());
 		
 		Log.info("Creating: " + bowArchive_file);
@@ -170,36 +191,93 @@ public class VLADConvert {
 			pc = PrincipalComponents.read(vladPC_file);
 			if ( vladPC_n > 0 ) pc.setProjDim(vladPC_n);
 		}
+		TimeManager timeManager = new  TimeManager( inArchive.size() );
 		
-		TimeManager tm = new TimeManager();
-		tm.setTotNEle(inArchive.size());
-		int nThread = ParallelOptions.reserveNFreeProcessors()+1;
-		Thread[] thread = new Thread[nThread];
-		Iterator<AbstractFeaturesCollector> it = inArchive.iterator();
-		for ( int ti=0; ti<thread.length; ti++ ) {
-			thread[ti] = new Thread(
-					new ConvertThread(
-							it,
-							tm,
-							words,
-							lfGroup_class,
-							ssr,
-							intraNorm,
-							rn,
-							pc,
-							outArchive
-							) );
-        	thread[ti].start();
+		int lfCount = 0;
+		int lfIDs_i = 0;
+		
+		if ( lfIDs == null ) {
+			
+			TimeManager tm = new TimeManager();
+			tm.setTotNEle(inArchive.size());
+			int nThread = ParallelOptions.reserveNFreeProcessors()+1;
+			Thread[] thread = new Thread[nThread];
+			Iterator<AbstractFeaturesCollector> it = inArchive.iterator();
+			for ( int ti=0; ti<thread.length; ti++ ) {
+				thread[ti] = new Thread(
+						new ConvertThread(
+								it,
+								tm,
+								words,
+								lfGroup_class,
+								ssr,
+								intraNorm,
+								rn,
+								pc,
+								outArchive
+								) );
+	        	thread[ti].start();
+			}
+	        for ( Thread t : thread ) {
+	        	t.join();
+	        }
+	        ParallelOptions.free(nThread-1);
+			
+		} else {
+			
+			for (Iterator<AbstractFeaturesCollector> it = inArchive.iterator(); it.hasNext(); ) {
+				AbstractFeaturesCollector currFC = it.next();
+				
+				ALocalFeaturesGroup lfs = currFC.getFeature(lfGroup_class);
+				
+				AbstractID id = ((IHasID) currFC).getID();
+				
+				if ( lfs == null || lfs.size() == 0 ) {
+					System.out.println(id + " was not considered because has no LFs");
+				} else {
+						
+					for ( ALocalFeature currLF : lfs.lfArr ) {
+						if ( lfIDs[lfIDs_i] == lfCount ) {
+					 
+							KeyPoint kp = currLF.getKeyPoint();					
+							float scale = kp.getScale();					
+							double range = scale;
+						
+							ArrayList<ALocalFeature> inRange = lfs.getInRange(kp, range);
+						
+							ALocalFeature[] temp = new ALocalFeature[inRange.size()];
+							inRange.toArray(temp);
+							
+							VLAD vlad = VLAD.getVLAD(temp, words, ssr, intraNorm, rn);
+							if (pc == null ) {
+								outArchive.add(vlad, new IDString(String.valueOf(lfCount)) );
+							} else {
+								Floats f = new Floats(pc.project_float( (IArrayValues) vlad));
+								outArchive.add(f, new IDString(String.valueOf(lfCount)) );
+							}							
+							
+							
+							lfIDs_i++;
+							
+							if ( lfIDs_i == lfIDs.length ) break;
+						}
+						
+						lfCount++;
+					}
+					
+					if ( lfIDs_i == lfIDs.length ) break;	
+					
+				}
+					
+				
+				timeManager.reportProgress();
+					
+			}
 		}
-        for ( Thread t : thread ) {
-        	t.join();
-        }
-        ParallelOptions.free(nThread-1);
-		
 		
 		System.out.print( outArchive.getInfo() );
 		
-		System.out.println("VLADs were created in " + tm.getTotalTime_STR());
+		System.out.println("VLADs were created in " + timeManager.getTotalTime_STR());
 		
 		System.out.println();
 		

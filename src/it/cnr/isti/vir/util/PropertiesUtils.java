@@ -20,7 +20,7 @@ public class PropertiesUtils {
 		return WorkingPath.getAbsolutePath(str);
 	}
 	
-	public static String getAbsolutePath_orNull(Properties prop, String propertyName) throws Exception {
+	public static String getAbsolutePath_orNull(Properties prop, String propertyName)   {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) return null;
 		Log.info_verbose(propertyName + "=" + str);
@@ -69,7 +69,10 @@ public class PropertiesUtils {
 	
 	public static boolean getBoolean(Properties prop, String propertyName, boolean def) {
 		String str = prop.getProperty(propertyName);
-		if ( str == null ) return def;
+		if ( str == null ) 	{
+			Log.info_verbose(propertyName + " was not found in properties. Using deafult value " + def);
+			return def;
+		}
 		Log.info_verbose(propertyName + "=" + str);
 		return Boolean.parseBoolean(str);
 	}
@@ -91,6 +94,16 @@ public class PropertiesUtils {
 		return Integer.parseInt(str);
 	}
 	
+	public static final Integer getInt_orNull(Properties prop, String propertyName ) throws Exception {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) {
+			Log.info_verbose(propertyName + " was not found in properties. Using deafult value NULL");
+			return null;
+		}
+		Log.info_verbose(propertyName + "=" + str);
+		return Integer.parseInt(str);
+	}
+	
 	
 	public static final double getDouble(Properties prop, String propertyName) throws Exception {
 		String str = prop.getProperty(propertyName);
@@ -104,6 +117,16 @@ public class PropertiesUtils {
 		if ( str == null ) {
 			Log.info_verbose(propertyName + " was not found in properties. Using deafult value " + def);
 			return def;
+		}
+		Log.info_verbose(propertyName + "=" + str);
+		return Double.parseDouble(str);
+	}
+	
+	public static final Double getDouble_orNull(Properties prop, String propertyName ) throws Exception {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) {
+			Log.info_verbose(propertyName + " was not found in properties. Using deafult value NULL");
+			return null;
 		}
 		Log.info_verbose(propertyName + "=" + str);
 		return Double.parseDouble(str);

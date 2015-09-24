@@ -172,9 +172,7 @@ public class KNNPQueue<F> {
 			}
 		}
 	}
-	
-
-	
+		
 	public final void offerAll(ArrayList<F> coll) throws InterruptedException {
 		
 		if ( parallel ) {
@@ -230,14 +228,7 @@ public class KNNPQueue<F> {
 		if ( ! this.getResults().equalResults(that.getResults()) ) return false;
 		return true;
 	}
-	
-//	public double getExcDistance() {
-//		return pQueue.excDistance;
-//	}
-	
-//	public final Object getQuery() {
-//		return query;
-//	}
+
 	
 	public double getLastDist() {
 		return pQueue.getLastDist();

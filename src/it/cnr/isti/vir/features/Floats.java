@@ -26,7 +26,7 @@ public class Floats extends AbstractFeature implements IFloatValues {
 		if ( values == null ) {
 			out.writeInt( 0);
 		} else {
-			out.writeInt( values.length);
+			out.writeInt( values.length );
 			byte[] b = new byte[FloatByteArrayUtil.BYTES*values.length];
 			FloatByteArrayUtil.convToBytes(values, b, 0);
 			out.write(b);

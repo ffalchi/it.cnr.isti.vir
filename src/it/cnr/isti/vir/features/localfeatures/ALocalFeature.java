@@ -188,6 +188,8 @@ public abstract class ALocalFeature<LFGroup extends ALocalFeaturesGroup> extends
 		return kp;
 	}
 	
+
+	
 	
 	//public abstract byte[] getBytes();
 	

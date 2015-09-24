@@ -34,7 +34,6 @@ public class SimilarityClasses {
 		String simClassName = sim.getClass().getCanonicalName();
 		out.writeInt(simClassName.length());
 		out.writeChars(simClassName);
-	}
-	
+	}	
 	
 }

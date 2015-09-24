@@ -32,6 +32,9 @@ public class VLADAggregator {
 	private boolean useRootSIFT = true;
 	
 	private boolean l2Norm = false;
+	
+	private boolean intranorm = false;
+	
 	public  VLADAggregator(Properties prop ) throws Exception{
 		
 		useRootSIFT = PropertiesUtils.getBoolean(prop, className+".useRootSIFT", true);
@@ -121,7 +124,7 @@ public class VLADAggregator {
 			group = lfPC.project(group, l2Norm);
 		}
 		
-		VLAD vlad = VLAD.getVLAD(group, ref);
+		VLAD vlad = VLAD.getVLAD(group, ref, intranorm);
 		
 		
 		return new Floats(vladPC.project_float( (IArrayValues) vlad));
@@ -145,9 +148,9 @@ public class VLADAggregator {
 	
 	public VLAD getVLAD(ALocalFeaturesGroup group) throws Exception {
 		if ( lfPC != null) {
-			return VLAD.getVLAD(lfPC.project(group, l2Norm), ref);	 
+			return VLAD.getVLAD(lfPC.project(group, l2Norm), ref, intranorm);	 
 		} else {
-			return VLAD.getVLAD(group, ref);	
+			return VLAD.getVLAD(group, ref, intranorm);	
 		}
 		
 		

@@ -12,12 +12,14 @@ public class TimeManager {
 	
 	public long start;
 	public long last;
+	public long lastResetTime;
 	
 	public long minInterval = standardMinInterval;
 	
 	private int totNEle = -1;
 	
 	private int curr = 0;
+	private int lastResetCurr = 0;
 	
 	public synchronized void setTotNEle(int totNEle) {
 		this.totNEle = totNEle;
@@ -26,13 +28,20 @@ public class TimeManager {
 	public TimeManager() {
 		start = System.currentTimeMillis();
 		last = start;
+		lastResetTime = start;
 	}
 	
-	public TimeManager(long minInterval) {
+	public TimeManager(int totNEle) {
 		this();
 		
-		this.minInterval = minInterval;
+		this.totNEle = totNEle;
 	}
+	
+//	public TimeManager(long minInterval) {
+//		this();
+//		
+//		this.minInterval = minInterval;
+//	}
 	
 	public long getTime() {
 		return System.currentTimeMillis()-start;
@@ -59,14 +68,10 @@ public class TimeManager {
 		return false;
 	}
 	
-	public synchronized void resetOutputTimer() {
-		last = start;
-	}
-	
 	public boolean hasToOutput_long(int nTimes) {
-		long curr = System.currentTimeMillis();
-		if ( (curr-last) > minInterval*nTimes ) {
-			last = curr;
+		long currT = System.currentTimeMillis();
+		if ( (currT-last) > minInterval*nTimes ) {
+			last = currT;
 			return true;
 		}
 		return false;
@@ -88,16 +93,16 @@ public class TimeManager {
 		Log.info_verbose("TimeManager.standardMinInterval was set to " + standardMinInterval + " millis");
 	}
 	
-	public long getExtimatedTimeToComplete(double perc) {
-		long curr = System.currentTimeMillis();
-		
-		return (long) ((curr-start)/(perc/100));
-	}
+//	public long getExtimatedTimeToComplete(double perc) {
+//		long curr = System.currentTimeMillis();
+//		
+//		return (long) ((curr-start)/(perc/100));
+//	}
 	
 	public long getExtimatedTimeToComplete(int curr, int tot) {
 		long currT = System.currentTimeMillis();
 		
-		return (long) ((double)(currT-start)/curr*(tot-curr));
+		return (long) ((double)(currT-lastResetTime)/(curr-lastResetCurr)*(tot-curr));
 	}
 	
 	public String getExtimatedTimeToComplete_STR(int curr, int tot) {
@@ -112,7 +117,7 @@ public class TimeManager {
 		return curr + "/" + totNEle + " " + Percentage.getString(curr, totNEle) + " " + "ETC " + getExtimatedTimeToComplete_STR(curr, totNEle);
 	}
 	
-	public void reportProgress() {
+	public final void reportProgress() {
 		curr++;
 		if ( Log.verbose ) {
 			if ( hasToOutput() ) {
@@ -120,4 +125,14 @@ public class TimeManager {
 			}
 		}
 	}
+
+	public void resetExtimation() {
+		lastResetCurr = curr;
+		lastResetTime = System.currentTimeMillis();
+	}
+
+	public int getCurr() {
+		return curr;
+	}
 }
+
