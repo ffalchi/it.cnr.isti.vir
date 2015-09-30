@@ -25,18 +25,22 @@ import java.nio.ByteBuffer;
  * <img src="\Users\lucia\Documents\NetBeansProjects\Info\fvToHTML-1.png" />
  * 
  */
-public class FV extends AbstractFeature{
+public class FV extends AbstractFeature implements IDoubleValues{
     public AbstractFeaturesCollector linkedFC;
     double[] values;
-    
-    public double[] getValues() {
+  
+	@Override
+	public int getLength() {
+		 return values.length;
+	}
+
+   
+    @Override
+	public double[] getValues() {
         return values;
     }
     
-    public int size() {
-        return values.length;
-    }
-    
+  
     @Override
     public void writeData(DataOutput out) throws IOException {
         out.writeInt( values.length);
@@ -661,13 +665,13 @@ public class FV extends AbstractFeature{
     
     
     public static final double getDistance( FV s1, FV s2 ) {
-        if ( s1.size() != s2.size() ) return Double.MAX_VALUE;//1.0;
+        if ( s1.getLength() != s2.getLength() ) return Double.MAX_VALUE;//1.0;
         
         double dist = 0;
         double dis_i;
         double[] v1 = s1.values;
         double[] v2 = s2.values;
-        for ( int i=0; i<s1.size(); i++ ) {
+        for ( int i=0; i<s1.getLength(); i++ ) {
             dis_i=v1[i]- v2[i];
             dist += dis_i*dis_i;
         }
@@ -680,5 +684,302 @@ public class FV extends AbstractFeature{
         return getDistance(s1, s2);
     }
     
+    /**
+     * Compute Fisher vector given the local descriptors (binary-valued) and
+     * the Bmm parameters (mixture weight, and bernoulli parameters)
+     *
+     * @param x
+     * @param bmm
+     * @param compute_mu_part
+     * @param compute_w_part
+     * @param power_norm
+     * @return 
+     * @throws Exception
+     *
+     */
     
+
+    public static final   FV getFV(double[][] x, Bmm bmm, boolean power_norm,   boolean compute_w_part, boolean compute_mu_part) throws Exception{
+    	if(compute_w_part){
+    		if(compute_mu_part)
+    			return(getFV_wm(x, bmm, power_norm));
+    		else
+    			return(getFV_w(x, bmm, power_norm));
+    	}else{
+    		if(compute_mu_part)
+    			return(getFV_m(x, bmm, power_norm));
+    		else
+    			return null;
+    	}
+    }
+
+    public static final   FV getFV_w(double[][] x, Bmm bmm, boolean power_norm) throws Exception{    
+    	int k=bmm.getK();
+    	double[] w=bmm.getW();//dimesion k
+
+    	int T=x.length; //sample size
+
+    	double[][] p= bmm.compute_p(x);
+
+    	double[] fv=new double[k];
+
+    	double[] S0= new double[k];
+
+    	double l2sum=0;
+
+
+    	for (int t=0; t<T; t++){
+    		double[] pt = p[t];
+    		for(int i=0; i<k; i++){
+    			double p_ti=pt[i];
+    			if((float)p_ti!=0.f){
+    				S0[i]+=p_ti;
+    			}
+    		}
+    	}
+
+    	for(int i=0; i<k; i++){
+    		double den_w=Math.sqrt(w[i]);
+    		double fv_i=(S0[i]/T-w[i])/den_w;
+
+    		if(power_norm)
+    			fv_i= Math.signum(fv_i)*Math.sqrt(Math.abs(fv_i));
+
+    		l2sum+=fv_i*fv_i;
+    		fv[i]=fv_i;            
+    	}
+
+    	//       //l2 normalization
+
+    	if(l2sum!=0){
+    		l2sum= Math.sqrt(l2sum);
+    		for(int i=0; i<k; i++){
+    			fv[i]/=l2sum;
+    		}
+    	}
+
+    	return new FV(fv);
+
+    }
+
+    public static final   FV getFV_m(double[][] x, Bmm bmm, boolean power_norm) throws Exception{
+    	int d=bmm.getD();
+    	if(d!=x[0].length)
+    		throw new Exception("Bmm and descriptors dimensions are not consistent");
+    	int k=bmm.getK();
+    	double[] w=bmm.getW();//dimesion k
+    	double[] mu=bmm.getMu();//dimesion k*d
+
+    	int T=x.length; //sample size
+
+    	double[][] p= bmm.compute_p(x);
+
+    	double[] fv=new double[k*d];
+
+
+    	double[] S0= new double[k];
+    	double[] S1= new double[d*k];
+
+    	double l2sum=0;
+
+    	for (int t=0; t<T; t++){
+    		double[] pt = p[t];
+
+    		for(int i=0; i<k; i++){
+    			int i_col=i*d;
+    			double p_ti = pt[i];
+    			if((float)p_ti!=0.f){
+    				double[] xt = x[t];
+    				S0[i]+=p_ti;
+    				for(int j=0; j<d; j++)
+    					S1[i_col+j] += p_ti*xt[j];           
+    			}
+    		}
+
+    	}
+
+    	for(int i=0; i<k; i++){
+    		int i_col=i*d;
+    		double den_m=Math.sqrt(w[i])*T;
+
+    		for(int j=0; j<d; j++){
+    			int h=i_col+j;
+    			double fv_h=(S1[h]-S0[i]*mu[h])/(Math.sqrt(mu[h]*(1-mu[h]))*den_m);
+
+    			if(power_norm)
+    				fv_h= Math.signum(fv_h)*Math.sqrt(Math.abs(fv_h));
+
+    			l2sum+=fv_h*fv_h;
+    			fv[h]=fv_h;
+    		}
+
+    	}
+
+    	//l2 normalization
+    	if(l2sum!=0){
+    		l2sum= Math.sqrt(l2sum);
+    		for(int i=0; i<k*d; i++)
+    			fv[i]/=l2sum;
+    	}
+    	return new FV(fv);
+    }
+
+
+    public static final   FV getFV_wm(double[][] x, Bmm bmm, boolean power_norm) throws Exception{
+    	int d=bmm.getD();
+    	if(d!=x[0].length)
+    		throw new Exception("Bmm and descriptors dimensions are not consistent");
+    	int k=bmm.getK();
+    	double[] w=bmm.getW();//dimesion k
+    	double[] mu=bmm.getMu();//dimesion k*d
+    	double T=x.length; //sample size
+
+    	double[][] p= bmm.compute_p(x);
+    	double[] fvW=new double[k];
+    	double[] fvM=new double[k*d];
+
+
+    	double[] S0= new double[k];
+    	double[] S1= new double[d*k];
+
+    	double l2sum=0;
+
+    	for(int i=0; i<k; i++){
+    		int i_col=i*d;
+    		for (int t=0; t<T; t++){
+    			double p_ti=p[t][i];
+    			double[] xt = x[t];
+    			if((float)p_ti!=0.f){
+    				S0[i]+=p_ti;
+    				for(int j=0; j<d; j++){
+    					S1[i_col+j]+=p_ti*xt[j];
+    				}
+    			}
+    		}
+    		double den_w=Math.sqrt(w[i]);
+    		double den_m= den_w*T;
+
+    		double fvW_i=(S0[i]/T-w[i])/den_w;
+
+
+    		if(power_norm)
+    			fvW_i= Math.signum(fvW_i)*Math.sqrt(Math.abs(fvW_i));
+
+    		l2sum+=fvW_i*fvW_i;
+    		fvW[i]=fvW_i;
+
+    		for(int j=0; j<d; j++){
+    			int h=i_col+j;
+    			double fvM_h=(S1[h]-S0[i]*mu[h])/(Math.sqrt(mu[h]*(1-mu[h]))*den_m);
+    			if(power_norm)
+    				fvM_h= Math.signum(fvM_h)*Math.sqrt(Math.abs(fvM_h));
+
+    			l2sum+=fvM_h*fvM_h;
+    			fvM[h]=fvM_h;
+    		}
+    	}
+    	double[] fv=new double[k+k*d];
+
+    	//l2 normalization
+
+    	if(l2sum==0){
+    		for(int i=0; i<k+k*d; i++)
+    			fv[i]=0;
+    	}
+    	else{
+    		l2sum= Math.sqrt(l2sum);
+    		for(int i=0; i<k; i++){
+    			fv[i]=fvW[i]/l2sum;
+    		}
+    		for(int i=0; i<k*d; i++){
+    			fv[k+i]=fvM[i]/l2sum;
+    		}
+    	}
+
+    	return new FV(fv);
+    }
+
+    public static final   FV getFV_Uchida(double[][] x, Bmm bmm, boolean power_norm,   boolean compute_w_part, boolean compute_mu_part) throws Exception{
+    	if(compute_mu_part)
+    		return(getFV_m_Uchida(x, bmm, power_norm));
+    	else
+    		return null;
+
+    }
+    public static final   FV getFV_m_Uchida(double[][] x, Bmm bmm, boolean power_norm) throws Exception{
+    	int d=bmm.getD();
+    	if(d!=x[0].length)
+    		throw new Exception("Bmm and descriptors dimensions are not consistent");
+    	int k=bmm.getK();
+    	double[] w=bmm.getW();//dimesion k
+    	double[] mu=bmm.getMu();//dimesion k*d
+
+    	int T=x.length; //sample size
+
+    	double[][] p= bmm.compute_p(x);
+
+    	double[] fv=new double[k*d];
+
+
+    	double[] S0= new double[k];
+    	double[] S1= new double[d*k];
+
+    	double l2sum=0;
+
+    	for (int t=0; t<T; t++){
+    		double[] pt = p[t];
+
+    		for(int i=0; i<k; i++){
+    			int i_col=i*d;
+    			double p_ti = pt[i];
+    			if((float)p_ti!=0.f){
+    				double[] xt = x[t];
+    				S0[i]+=p_ti;
+    				for(int j=0; j<d; j++)
+    					S1[i_col+j] += p_ti*xt[j];           
+    			}
+    		}
+
+    	}
+
+    	double[]den_m2=new double[d];
+    	double[] den_m3=new double[d];  
+    	for(int i=0; i<k; i++){
+    		int i_col=i*d;
+    		for(int j=0; j<d; j++){
+    			int h=i_col+j;
+    			den_m2[j]+=w[i]*mu[h];
+    			den_m3[j]+=w[i]*(1-mu[h]);
+    		}
+    	}
+
+
+    	for(int i=0; i<k; i++){
+    		int i_col=i*d;
+    		double den_m=Math.sqrt(w[i]*T);
+
+    		for(int j=0; j<d; j++){
+    			int h=i_col+j;
+    			double tmp=den_m*Math.sqrt(den_m2[j]/(mu[h]*mu[h])+den_m3[j]/((1-mu[h])*(1-mu[h])));
+    			double fv_h=(S1[h]-S0[i]*mu[h])/(mu[h]*(1-mu[h])*tmp*T);//
+
+    			if(power_norm)
+    				fv_h= Math.signum(fv_h)*Math.sqrt(Math.abs(fv_h));
+
+    			l2sum+=fv_h*fv_h;
+    			fv[h]=fv_h;
+    		}
+    	}
+
+
+    	//l2 normalization
+    	if(l2sum!=0){
+    		l2sum= Math.sqrt(l2sum);
+    		for(int i=0; i<k*d; i++)
+    			fv[i]/=l2sum;
+    	}
+    	return new FV(fv);
+    }
+
+
 }
