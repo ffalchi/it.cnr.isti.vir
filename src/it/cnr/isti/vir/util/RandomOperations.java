@@ -43,6 +43,10 @@ public class RandomOperations {
 		return r.nextFloat();
 	}
 	
+	public static final byte getByte() {
+		return (byte) r.nextInt();
+	}
+	
 	/**
 	 * Randomly generates a positive float
 	 * @param max
@@ -419,6 +423,14 @@ public class RandomOperations {
 		long[] res = new long[vlength];
 		for ( int i=0; i<vlength; i++) {
 			res[i] = r.nextLong();
+		}
+		return res;
+	}
+
+	public static float[] getRandomFloatArray(int vlength) {
+		float[] res = new float[vlength];
+		for ( int i=0; i<vlength; i++) {
+			res[i] = RandomOperations.getFloat();
 		}
 		return res;
 	}

@@ -52,6 +52,10 @@ public class IDInteger extends AbstractID {
 		id = in.readInt();
 	}
 	
+	public IDInteger(String str) {
+		id = Integer.parseInt(str);
+	}
+	
 	public static final IDInteger[] readArray(DataInput in, int n) throws IOException {
 		IDInteger[] arr = new IDInteger[n];
 		

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, Fabrizio Falchi (NeMIS Lab., ISTI-CNR, Italy)
+ * Copyright (c) 2013, Fabrizio Falchi and Lucia Vadicamo (NeMIS Lab., ISTI-CNR, Italy)
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
@@ -11,7 +11,48 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features;
 
-public interface IIntValues extends IArrayValues {
+import static org.junit.Assert.assertTrue;
+import it.cnr.isti.vir.distance.L2;
+import it.cnr.isti.vir.util.RandomOperations;
 
-	public int[] getValues();
+import org.junit.Test;
+
+public class FloatsL2Norm_CompSparseBytesTest {
+
+	@Test
+	public void test() {
+		double nonZeroProb = 0.2;
+		int length = 4096;
+		
+		for ( int ic=0; ic<100; ic++ ) {
+			byte[] origBytes = new byte[length];
+			
+			for ( int i=0; i<origBytes.length; i++ ) {
+				if ( RandomOperations.trueORfalse(0.2) ) {
+					origBytes[i] = RandomOperations.getByte();
+				} else {
+					origBytes[i] = -128;
+				}
+			}
+			
+			byte[] comp = FloatsL2Norm_CompSparseBytes.getComp(origBytes);
+			
+			assertTrue(FloatsL2Norm_CompSparseBytes.getCompSize(origBytes) == comp.length);
+			
+			assertTrue(FloatsL2Norm_CompSparseBytes.getDecompSize(comp) == length);
+			
+			byte[] deComp = FloatsL2Norm_CompSparseBytes.getDecomp(comp);
+			
+			assertTrue(origBytes.length == deComp.length);
+			
+			for ( int i=0; i<origBytes.length; i++ ) {
+				assertTrue( origBytes[i] == deComp[i] );
+			}
+			
+
+		}
+	}
+
+	
+	
 }

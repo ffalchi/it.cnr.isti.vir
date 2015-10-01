@@ -29,12 +29,10 @@ public class Normalize {
 	public static final void l2( float[] values ) {
 		float norm = Norm.l2(values);
         if ( norm > 0.0 ) {
-        	//if ( Math.abs(norm-1.0) < 0.0001 ) return;
 	        for (int i=0; i<values.length; i++) {
 	        	values[i] = values[i] / norm;	        	
 	        }        
         }
-        // zero values are left 0
 	}
 	
 	/**
@@ -49,7 +47,6 @@ public class Normalize {
 	        	values[i] = values[i] / norm;	        	
 	        }        
         }
-        // zero values are left 0
 	}
 	
 	/**

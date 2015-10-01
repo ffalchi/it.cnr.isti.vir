@@ -103,7 +103,8 @@ public class FeatureClasses {
 		FloatsLF.class,
 		FloatsLFGroup.class,
 		FREAK.class,
-		FREAKGroup.class
+		FREAKGroup.class,
+		FloatsL2Norm_Bytes.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

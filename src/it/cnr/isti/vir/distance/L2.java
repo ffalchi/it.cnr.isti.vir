@@ -24,17 +24,18 @@ public class L2 {
 		int dist = 0;	    
 		int dif = 0;		
 	    for (int i = 0; i < v1.length; i++) {
-	    	dif = (int) v1[i] - (int) v2[i];
+	    	dif = v1[i] - v2[i];
 	    	dist += dif * dif;
 	    }		
 		return dist;
 	}
+
 	
 	public static final int getSquared(byte[] v1, byte[] v2, int maxDist) {
 		int dist = 0;	    
 		int dif = 0;
 	    for (int i = 0; i < v1.length; i++) {
-	    	dif = (int) v1[i] - (int) v2[i];
+	    	dif = v1[i] - v2[i];
 	    	dist += dif * dif;
 	    	if ( dist > maxDist ) return -dist;
 	    }		
@@ -89,8 +90,20 @@ public class L2 {
 	}
 	
 	
+	public static final double get(int[]f1, int[]f2) {
+		return  Math.sqrt(getSquared(f1,f2));
+	}
+	
 	public static final double get(byte[]f1, byte[]f2) {
 		return  Math.sqrt(getSquared(f1,f2));
+	}
+	
+	public static double get_fromCompSparseBytes(byte[] v1, byte[] v2) {
+		return Math.sqrt(getSquared_fromCompSparseBytes(v1, v2));
+	}
+	
+	public static double get_fromCompSparseBytes(byte[] v1, byte[] v2, double max) {
+		return Math.sqrt(getSquared_fromCompSparseBytes(v1, v2, (int) Math.ceil(max*max)));
 	}
 	
 	public static final double get(float[]f1, float[]f2) {
@@ -103,6 +116,16 @@ public class L2 {
 
 	public static final double get(byte[]f1, byte[]f2, int max) {
 		int temp = getSquared(f1,f2, max*max);
+		
+		if (temp <0) {
+			return -Math.sqrt(-temp);
+		} else {
+			return Math.sqrt(temp);
+		}
+	}
+	
+	public static final double get(byte[]f1, byte[]f2, double max) {
+		int temp = getSquared(f1,f2, (int) Math.ceil(max*max));
 		
 		if (temp <0) {
 			return -Math.sqrt(-temp);
@@ -169,6 +192,105 @@ public class L2 {
 		} else {
 			return Math.sqrt(temp);
 		}
+	}
+
+	public static final int getSquared_fromCompSparseBytes(byte[] v1, byte[] v2, int max) {
+		
+		int i1 = 0;
+		int i2 = 0;
+		
+		int n1 = 0;
+		int n2 = 0;
+		
+		int c1;
+		int c2;
+		
+		int dist = 0;
+		while ( i1 < v1.length || i2 < v2.length) {
+
+			if ( n1 < n2 ) {
+				c1 = v1[i1++] +128;
+				
+				if ( c1 == 0 ) {
+					n1 += v1[i1++] + 129;
+					continue;
+				}
+				n1++;
+				dist += c1*c1;
+				
+			} else if ( n2 < n1 ) {
+				c2 = v2[i2++] +128;
+				if ( c2 == 0 ) {
+					n2 += v2[i2++] + 129;
+					continue;
+				}
+				n2++;
+				dist += c2*c2;
+				
+			} else {
+				c1 = v1[i1++] ;
+				c2 = v2[i2++] ;
+				n1++;
+				n2++;
+				if ( c1 == -128 ) n1 += v1[i1++] + 128;
+				if ( c2 == -128 ) n2 += v2[i2++] + 128;
+				int dif = c1 - c2;
+				dist += dif*dif;
+			}			
+	 		
+			if ( dist > max ) return -dist;
+		}
+		
+		return dist;
+	}
+	
+	public static final int getSquared_fromCompSparseBytes(byte[] v1, byte[] v2) {
+		
+		int i1 = 0;
+		int i2 = 0;
+		
+		int n1 = 0;
+		int n2 = 0;
+		
+		int c1;
+		int c2;
+		
+		int dist = 0;
+		while ( i1 < v1.length || i2 < v2.length) {
+
+			if ( n1 < n2 ) {
+				c1 = v1[i1++] +128;
+				
+				if ( c1 == 0 ) {
+					n1 += v1[i1++] + 129;
+					continue;
+				}
+				n1++;
+				dist += c1*c1;
+				
+			} else if ( n2 < n1 ) {
+				c2 = v2[i2++] +128;
+				if ( c2 == 0 ) {
+					n2 += v2[i2++] + 129;
+					continue;
+				}
+				n2++;
+				dist += c2*c2;
+				
+			} else {
+				c1 = v1[i1++] ;
+				c2 = v2[i2++] ;
+				n1++;
+				n2++;
+				if ( c1 == -128 ) n1 += v1[i1++] + 128;
+				if ( c2 == -128 ) n2 += v2[i2++] + 128;
+				int dif = c1 - c2;
+				dist += dif*dif;
+			}			
+	 		
+		}
+		
+		return dist;
 	}
 
 }
