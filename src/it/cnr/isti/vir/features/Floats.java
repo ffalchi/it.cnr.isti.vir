@@ -27,33 +27,7 @@ public class Floats extends AbstractFeature implements IFloatValues {
 	public AbstractFeaturesCollector linkedFC;
 	
 	public float[] values;
-	
-	final int getDim() {
-		return values.length;
-	}
 
-	@Override
-	public void writeData(DataOutput out) throws IOException {
-		if ( values == null ) {
-			out.writeInt( 0);
-		} else {
-			out.writeInt( values.length );
-			byte[] b = new byte[FloatByteArrayUtil.BYTES*values.length];
-			FloatByteArrayUtil.convToBytes(values, b, 0);
-			out.write(b);
-		}
-	}
-	
-	public void writeData(ByteBuffer buff) throws IOException {
-		if ( values == null ) {
-			buff.putInt( 0);
-		} else {
-			buff.putInt( values.length);
-			for ( int i=0; i<values.length; i++ )
-				buff.putFloat(values[i]);
-		}
-	}
-	
     public Floats(ByteBuffer in ) throws Exception {
         this(in, null);
     }
@@ -88,6 +62,36 @@ public class Floats extends AbstractFeature implements IFloatValues {
 	public Floats(DataInput in ) throws Exception {
 		this(in, null);
 	}
+	
+	
+	
+	final int getDim() {
+		return values.length;
+	}
+
+	@Override
+	public void writeData(DataOutput out) throws IOException {
+		if ( values == null ) {
+			out.writeInt( 0);
+		} else {
+			out.writeInt( values.length );
+			byte[] b = new byte[FloatByteArrayUtil.BYTES*values.length];
+			FloatByteArrayUtil.convToBytes(values, b, 0);
+			out.write(b);
+		}
+	}
+	
+	public void writeData(ByteBuffer buff) throws IOException {
+		if ( values == null ) {
+			buff.putInt( 0);
+		} else {
+			buff.putInt( values.length);
+			for ( int i=0; i<values.length; i++ )
+				buff.putFloat(values[i]);
+		}
+	}
+	
+
 
 	@Override
 	public int getLength() {

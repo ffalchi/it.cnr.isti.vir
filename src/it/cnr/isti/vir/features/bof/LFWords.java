@@ -53,7 +53,7 @@ public class LFWords<F extends AbstractFeature> {
 
 	protected F[] fArr;
 	protected final ILFSimilarity<F> sim;
-	protected final Class<ALocalFeaturesGroup> featureGroupClass;
+	protected final Class<ALocalFeaturesGroup<?>> featureGroupClass;
 	protected final byte version = 2;
 	protected float[] eval = null;
 
@@ -355,7 +355,7 @@ public class LFWords<F extends AbstractFeature> {
 		size = arr.length;
 	}
 
-	public Class<ALocalFeaturesGroup> getLocalFeaturesGroupClass() {
+	public Class<ALocalFeaturesGroup<?>> getLocalFeaturesGroupClass() {
 		return featureGroupClass;
 	}
 

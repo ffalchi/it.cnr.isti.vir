@@ -17,5 +17,5 @@ public interface ILFSimilarity<E> extends ISimilarity<E> {
 
 	public Class<E> getRequestedFeatureClass();
 	
-	public Class<ALocalFeaturesGroup> getRequestedFeatureGroupClass();
+	public Class<ALocalFeaturesGroup<?>> getRequestedFeatureGroupClass();
 }
