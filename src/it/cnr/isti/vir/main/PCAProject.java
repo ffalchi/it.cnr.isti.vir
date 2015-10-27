@@ -34,6 +34,8 @@ public class PCAProject {
 		System.out.println("- PCA.PC=<principal components file>");
 		System.out.println("- [PCAProject.dim]");
 		System.out.println("- [PCAProject.L2Norm]");
+		System.out.println("- [PCAProject.Whithening]");
+		System.out.println("- [PCAProject.SignedPowerTransform]");
 		System.out.println("- PCA.FeatureClass=<feature class to be projects>");
 		System.exit(0);
 	}
@@ -55,6 +57,9 @@ public class PCAProject {
 		private final Class c;
 		private final TimeManager tm;
 		private final boolean l2Norm;
+		private final boolean whithening;
+		private final boolean signedPowerTransform_flag;
+		private final double signedPowerTransform;
 		
 		public Project(
 				Iterator<AbstractFeaturesCollector> it,
@@ -62,13 +67,25 @@ public class PCAProject {
 				PrincipalComponents pc,
 				Class c,
 				TimeManager tm,
-				boolean l2Norm ) {
+				boolean l2Norm,
+				boolean whithening,
+				Double signedPowerTransform ) {
 			this.it = it;
 			this.out = out;
 			this.c = c;
 			this.tm = tm;
 			this.pc = pc;
 			this.l2Norm = l2Norm;
+			this.whithening = whithening;
+			
+			
+			if ( signedPowerTransform != null) {
+				this.signedPowerTransform = signedPowerTransform;
+				signedPowerTransform_flag = true;
+			} else {
+				this.signedPowerTransform = 1.0;
+				signedPowerTransform_flag = false;
+			}
 		}
 
 		@Override
@@ -83,7 +100,16 @@ public class PCAProject {
 				
 				AbstractFeature currf = fc.getFeature(c);
 				float[] temp = pc.project_float( (IArrayValues) currf);
-				if ( l2Norm ) Normalize.l2(temp);;
+				if ( whithening ) pc.withening(temp);
+				
+				if ( signedPowerTransform_flag ) {
+					Normalize.sPower( temp, signedPowerTransform );
+				}				
+				
+				if ( l2Norm ) Normalize.l2(temp);
+				
+
+				
 				Floats projected = new Floats(temp);
 				
 				AbstractFeaturesCollector newFC = fc.createWithSameInfo(projected);
@@ -165,6 +191,8 @@ public class PCAProject {
 		Class c = PropertiesUtils.getClass(prop, "PCA.FeatureClass");
 		int dim = PropertiesUtils.getInt_orDefault(prop, "PCAProject.dim", -1);
 		boolean l2Norm = PropertiesUtils.getBoolean(prop, "PCAProject.L2Norm", false);
+		boolean whithening = PropertiesUtils.getBoolean(prop, "PCAProject.Whithening", false);
+		Double signedPowerTransform = PropertiesUtils.getDouble_orNull(prop, "PCAProject.SignedPowerTransform" );
 		
 		FeaturesCollectorsArchive in = new FeaturesCollectorsArchive(inFile);
 		FeaturesCollectorsArchive out = in.getSameType(outFile);
@@ -225,7 +253,7 @@ public class PCAProject {
 			Thread[] thread = new Thread[nThread];
 			Iterator<AbstractFeaturesCollector> it = in.iterator();
 			for ( int ti=0; ti<nThread; ti++ ) {
-				thread[ti] = new Thread(new Project(it, out, pc, c, tm,l2Norm ));
+				thread[ti] = new Thread(new Project(it, out, pc, c, tm,l2Norm, whithening, signedPowerTransform ));
 				thread[ti].start();
 			}
 		        

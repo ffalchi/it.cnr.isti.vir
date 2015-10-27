@@ -28,6 +28,8 @@ public class PrincipalComponents {
 	double[][] eigenVectors;
 	double[] means;
 	
+	double[] eigenValues;
+	
 	private int nEV; 	// number of EV
 	private int oDim;	// original dim
 	
@@ -52,22 +54,27 @@ public class PrincipalComponents {
 
 	static final int classID = 0x1A646C05;
 	
-	static final int version = 0;
+	static final int version = 1;
 	
 	public PrincipalComponents getReduced(int nDim) {
 		double[][] newEV = Arrays.copyOf(eigenVectors, nDim);
 		
-		return new PrincipalComponents(newEV, means);
+		return new PrincipalComponents(newEV, means, eigenValues);
 	}
 	
 	public PrincipalComponents(double[][] eigenVectors, double[] mean, int projDim) {
-		this(eigenVectors, mean);
+		this( eigenVectors, mean, null, projDim);
+	}
+	
+	public PrincipalComponents(double[][] eigenVectors, double[] mean, double[] eigenValues, int projDim) {
+		this(eigenVectors, mean, eigenValues);
 		this.projDim = projDim;
 	}
 	
-	public PrincipalComponents(double[][] eigenVectors, double[] mean) {
+	public PrincipalComponents(double[][] eigenVectors, double[] mean, double[] eigenValues) {
 		this.eigenVectors = eigenVectors;
 		this.means = mean;
+		this.eigenValues = eigenValues;
 		nEV = eigenVectors.length;
 		oDim = eigenVectors[0].length;
 		
@@ -99,7 +106,19 @@ public class PrincipalComponents {
 			}
 		}
 		
-		return	new PrincipalComponents(eigenVectors, means, nEV);		
+		double[] eigenValues = null;
+		if ( version >= 1 ) {
+			boolean eigenValues_flag = in.readBoolean();
+			
+			if ( eigenValues_flag ) {
+				eigenValues = new double[nEV];  
+				for ( int i=0; i<nEV; i++) {
+					eigenValues[i] = in.readDouble();
+				}
+			}
+		}
+		
+		return	new PrincipalComponents(eigenVectors, means, eigenValues, nEV);		
 		
 	}
 	
@@ -121,6 +140,15 @@ public class PrincipalComponents {
 		for ( int ir=0; ir<nEV; ir++) {
 			for ( int ic=0; ic<oDim; ic++) {
 				out.writeDouble(eigenVectors[ir][ic]);
+			}
+		}
+		
+		if ( eigenValues == null ) {
+			out.writeBoolean(false);
+		} else {
+			out.writeBoolean(true);
+			for ( int i=0; i<nEV; i++) {
+				out.writeDouble(eigenValues[i]);
 			}
 		}
 		
@@ -154,6 +182,9 @@ public class PrincipalComponents {
 	public float[] project(float[] given) {
 		return project(given, projDim);
 	}
+	
+	
+	
 		
 	public final float[] project(float[] given, int nComp) {
 		float[] res = new float[nComp];
@@ -216,12 +247,22 @@ public class PrincipalComponents {
 		
 		return res;
 	}
+	
+	public final void withening(float[] given) {
+		
+		for ( int i=0; i<given.length; i++ ) {
+			given[i] = (float) ( given[i] / Math.sqrt(eigenValues[i]));
+		}
+		
+	}
 
 	public String toString() {
 		String tStr = 
 				"PC contains:\n" +
 				" - " + means.length + " mean values and " +
 				" - " + eigenVectors.length + " eigenvectors of dimensionality " + eigenVectors[0].length + "\n";
+		if ( eigenValues != null )
+				tStr +=" - " + eigenValues.length + " eigenValues \n";
 		
 		
 		//tStr += "eigenVectors:\n" + ToString.getString(eigenVectors);
