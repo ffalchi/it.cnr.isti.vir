@@ -125,6 +125,15 @@ public class TimeManager {
 			}
 		}
 	}
+	
+	public final void reportProgress(int i) {
+		curr+= i;
+		if ( Log.verbose ) {
+			if ( hasToOutput() ) {
+				Log.info_verbose_indent(getProgressString(curr, totNEle));
+			}
+		}
+	}
 
 	public void resetExtimation() {
 		lastResetCurr = curr;
@@ -134,5 +143,6 @@ public class TimeManager {
 	public int getCurr() {
 		return curr;
 	}
+
 }
 

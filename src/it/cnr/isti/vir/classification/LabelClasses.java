@@ -20,9 +20,10 @@ import java.nio.ByteBuffer;
 public class LabelClasses {
 	
 	private enum LabelClasses_ID {
-		STRINGLABEL(StringLabel.class, (byte) 0);
+		STRINGLABEL(StringLabel.class, (byte) 0),
+		INTEGERLABEL(IntegerLabel.class, (byte) 1);
 		
-		private static final byte idMax = 0;
+		private static final byte idMax = 1;
 		
 		private Class<? extends AbstractLabel> c;
 		private byte id;

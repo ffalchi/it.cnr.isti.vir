@@ -15,26 +15,28 @@ import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.Floats;
 import it.cnr.isti.vir.features.FloatsL2Norm_UBytes;
-import it.cnr.isti.vir.features.FloatsL2Norm_CompSparseBytes;
+import it.cnr.isti.vir.util.math.Mean;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Properties;
 
-public class FloatsL2NormCompSparseBytes_L2Metric  implements IMetric<FloatsL2Norm_CompSparseBytes>, IMeanEvaluator<FloatsL2Norm_CompSparseBytes> {
+public class FloatsL2NormUBytes_L2Metric  implements IMetric<FloatsL2Norm_UBytes>, IMeanEvaluator<FloatsL2Norm_UBytes> {
 
 	private static long distCount = 0;
-	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(FloatsL2Norm_CompSparseBytes.class);
+	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(FloatsL2Norm_UBytes.class);
 	
 	public final long getDistCount() {
 		return distCount;
 	}
 	
-	public FloatsL2NormCompSparseBytes_L2Metric(Properties properties) {
+	public FloatsL2NormUBytes_L2Metric(Properties properties) {
 		
 	}
 	
-	public FloatsL2NormCompSparseBytes_L2Metric() {
+	public FloatsL2NormUBytes_L2Metric() {
 		
 	}
 	
@@ -50,27 +52,27 @@ public class FloatsL2NormCompSparseBytes_L2Metric  implements IMetric<FloatsL2No
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
-		return distance( f1.getFeature(FloatsL2Norm_CompSparseBytes.class), f2.getFeature(FloatsL2Norm_CompSparseBytes.class));
+		return distance( f1.getFeature(FloatsL2Norm_UBytes.class), f2.getFeature(FloatsL2Norm_UBytes.class));
 	}
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
-		return distance( f1.getFeature(FloatsL2Norm_CompSparseBytes.class), f2.getFeature(FloatsL2Norm_CompSparseBytes.class), max);
+		return distance( f1.getFeature(FloatsL2Norm_UBytes.class), f2.getFeature(FloatsL2Norm_UBytes.class), max);
 	}
 	
 	@Override
-	public final double distance(FloatsL2Norm_CompSparseBytes f1, FloatsL2Norm_CompSparseBytes f2) {
-		return L2.get_fromCompSparseBytes(f1.getValues(), f2.getValues()) / 255.0 ;	
+	public final double distance(FloatsL2Norm_UBytes f1, FloatsL2Norm_UBytes f2) {
+		return L2.get(f1.getValues(), f2.getValues()) / 255.0 ;	
 	}
 	
 	@Override
-	public final double distance(FloatsL2Norm_CompSparseBytes f1, FloatsL2Norm_CompSparseBytes f2, double max) {
-		return L2.get_fromCompSparseBytes(f1.getValues(), f2.getValues(), max*255.0 ) / 255.0;
+	public final double distance(FloatsL2Norm_UBytes f1, FloatsL2Norm_UBytes f2, double max) {
+		return L2.get(f1.getValues(), f2.getValues(), max*255.0 ) / 255.0;
 	}
 
 	@Override
-	public FloatsL2Norm_CompSparseBytes getMean(Collection<FloatsL2Norm_CompSparseBytes> coll) {
-		return FloatsL2Norm_CompSparseBytes.getMean(coll);
+	public FloatsL2Norm_UBytes getMean(Collection<FloatsL2Norm_UBytes> coll) {
+		return FloatsL2Norm_UBytes.getMean(coll);
 	}
 	
 	public String getStatsString() { return ""; };

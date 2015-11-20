@@ -11,7 +11,7 @@ public class LongBinaryUtil {
 		long[][] temp = new long[coll.size()][];
 		int i=0;
 		for ( Object curr : coll ) {
-			temp[i++] = ((ILongBinaryValues) curr).getElements();
+			temp[i++] = ((ILongBinaryValues) curr).getValues();
 		}
 		return getMean( temp );
 	}

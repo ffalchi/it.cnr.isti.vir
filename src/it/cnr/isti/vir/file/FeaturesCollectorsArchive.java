@@ -850,10 +850,10 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return tStr;
 	}
 	
-	public ArrayList<AbstractFeaturesCollector> get(AbstractID[] queries) throws ArchiveException {
+	public ArrayList<AbstractFeaturesCollector> get(AbstractID[] ids) throws ArchiveException {
 		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();
-		for ( AbstractID q : queries) {
-			res.add(this.get(q));
+		for ( AbstractID id : ids) {
+			res.add(this.get(id));
 		}
 		return res;
 	}
@@ -1029,6 +1029,31 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		double prob = maxNObjs / (double) size();
 		if ( prob > 1.0 ) prob = 1.0;
 		return getRandomFeatures(featureClass, prob);
+	}
+
+	
+	public ArrayList<AbstractFeaturesCollector> getRandom(double prob) {
+		Log.info_verbose("Getting random elements  with probability " + prob);
+		
+		int i=0;
+		
+		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();
+		TimeManager tm = new TimeManager();
+		for ( AbstractFeaturesCollector currFC : this ) {
+			i++;
+			
+			if ( RandomOperations.trueORfalse(prob)) {
+				res.add(currFC);
+			}				
+			
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose(" - " + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
+			}
+		}
+		
+		Log.info_verbose( res.size() + " features were randomly selected");
+		
+		return res;
 	}
 	
 	public ArrayList<AbstractFeature> getRandomFeatures(Class<? extends AbstractFeature> featureClass, double prob) {

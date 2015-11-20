@@ -14,6 +14,15 @@ package it.cnr.isti.vir.distance;
 
 public class Hamming {
 
+	public static final int distance(long[] bits1, long[] bits2, int max) {
+		int acc = 0;
+		for ( int i=0; i<bits1.length; i++) {
+			acc+=Long.bitCount(bits1[i]^bits2[i]);
+			if ( acc > max ) return -acc;
+		}		
+		return acc;
+	}
+	
 	public static final int distance(long[] bits1, long[] bits2) {
 		int acc = 0;
 		for ( int i=0; i<bits1.length; i++) {
@@ -22,16 +31,32 @@ public class Hamming {
 		return acc;
 	}
 	
-	public static final int distance(long[] bits1, long[] bits2, int max) {
-		return distance(bits1, bits2);
+
+	
+	
+	
+	public static final float distance_norm(long[] bits1, long[] bits2, int nBits, double max) {
+		return distance(bits1, bits2, (int) Math.ceil(max*nBits))  / (float)  nBits;
 	}
 	
 	public static final float distance_norm(long[] bits1, long[] bits2, int nBits) {
 		return distance(bits1, bits2) / (float)  nBits;
 	}
 	
+	
+	
+	
+	public static final float distance_norm(long[] bits1, long[] bits2, double max) {
+		return distance_norm(bits1, bits2, bits1.length*Long.SIZE, max);
+	}
+
+	
 	public static final float distance_norm(long[] bits1, long[] bits2 ) {
 		return distance_norm(bits1, bits2, bits1.length*Long.SIZE );
 	}
+	
+
+	
+
 
 }

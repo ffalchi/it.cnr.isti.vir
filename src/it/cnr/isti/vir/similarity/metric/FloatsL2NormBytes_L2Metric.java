@@ -15,12 +15,9 @@ import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.Floats;
 import it.cnr.isti.vir.features.FloatsL2Norm_Bytes;
-import it.cnr.isti.vir.util.math.Mean;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Properties;
 
 public class FloatsL2NormBytes_L2Metric  implements IMetric<FloatsL2Norm_Bytes>, IMeanEvaluator<FloatsL2Norm_Bytes> {
@@ -62,12 +59,12 @@ public class FloatsL2NormBytes_L2Metric  implements IMetric<FloatsL2Norm_Bytes>,
 	
 	@Override
 	public final double distance(FloatsL2Norm_Bytes f1, FloatsL2Norm_Bytes f2) {
-		return L2.get(f1.getValues(), f2.getValues()) / 255.0 ;	
+		return L2.get(f1.getValues(), f2.getValues()) / 127.0 ;	
 	}
 	
 	@Override
 	public final double distance(FloatsL2Norm_Bytes f1, FloatsL2Norm_Bytes f2, double max) {
-		return L2.get(f1.getValues(), f2.getValues(), max*255.0 ) / 255.0;
+		return L2.get(f1.getValues(), f2.getValues(), max*127.0 ) / 127.0;
 	}
 
 	@Override

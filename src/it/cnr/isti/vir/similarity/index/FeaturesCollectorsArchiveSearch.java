@@ -200,6 +200,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 					thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, it, onlyID, tm) ) ;
 		        	thread[ti].start();
 				}
+				
 		        for ( Thread t : thread ) {
 		        	t.join();
 		        }

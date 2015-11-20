@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
+public class FloatsL2Norm_UBytes extends AbstractFeature implements IUByteValues {
 
 	public AbstractFeaturesCollector linkedFC;
 	
@@ -31,7 +31,7 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
 		return values.length;
 	}
 
-	public FloatsL2Norm_Bytes(float[] floatValues) {
+	public FloatsL2Norm_UBytes(float[] floatValues) {
 		values = getBytes(floatValues);
 	}
 	
@@ -39,13 +39,13 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
 		byte[] values = new byte[floatValues.length];
 		
 		for ( int i=0; i<floatValues.length; i++ ) {
-			values[i] = (byte) ( Math.round( floatValues[i] * 127.0F ) );
+			values[i] = (byte) ( Math.round( floatValues[i] * 255.0F ) - 128 );
 		}
 		return values;
 	}
 	
 	
-	public FloatsL2Norm_Bytes(byte[] values) {
+	public FloatsL2Norm_UBytes(byte[] values) {
 		this.values = values;
 	}
 	
@@ -69,11 +69,11 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
 		}
 	}
 	
-    public FloatsL2Norm_Bytes(ByteBuffer in ) throws Exception {
+    public FloatsL2Norm_UBytes(ByteBuffer in ) throws Exception {
         this(in, null);
     }
 	
-	public FloatsL2Norm_Bytes(ByteBuffer in, AbstractFeaturesCollector fc ) throws Exception {
+	public FloatsL2Norm_UBytes(ByteBuffer in, AbstractFeaturesCollector fc ) throws Exception {
 		int size = in.getInt();
 		linkedFC = fc;
 		if ( size != 0 ) { 
@@ -82,7 +82,7 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
 		}	
 	}
 	
-	public FloatsL2Norm_Bytes(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
+	public FloatsL2Norm_UBytes(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
 		
 		int size = in.readInt();
 
@@ -94,7 +94,7 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
 	
 
 
-	public FloatsL2Norm_Bytes(DataInput in ) throws Exception {
+	public FloatsL2Norm_UBytes(DataInput in ) throws Exception {
 		this(in, null);
 	}
 
@@ -108,15 +108,15 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
 		return values;
 	}
 	
-	public static FloatsL2Norm_Bytes getMean(Collection<FloatsL2Norm_Bytes> coll) {
+	public static FloatsL2Norm_UBytes getMean(Collection<FloatsL2Norm_UBytes> coll) {
 		if ( coll.size() == 0 ) return null;
 		byte[][] values = new byte[coll.size()][];
 		int i=0;
-		for ( Iterator<FloatsL2Norm_Bytes> it = coll.iterator(); it.hasNext(); ) {
+		for ( Iterator<FloatsL2Norm_UBytes> it = coll.iterator(); it.hasNext(); ) {
 			values[i++] = it.next().values;
 		}
 				
-		return new FloatsL2Norm_Bytes(Mean.getMean(values));		
+		return new FloatsL2Norm_UBytes(Mean.getMean(values));		
 	}
 
 //	public void reduceToDim(int dim) throws Exception {

@@ -220,4 +220,27 @@ public class PrecisionRecall {
 		  		  
 		  return ap;
 	}
+	
+	
+	public double getAveragePrecision_interpolated() {
+		
+		double acc = 0;
+		
+		for ( double currRecall = 0; currRecall<=1.0; currRecall += 0.1 ) {
+			double maxPrecision = 0.0;
+			for ( PrecisionRecallPoint pr : points ) {
+				if ( 
+						pr.recall >= currRecall 
+						&&
+						pr.precision > maxPrecision
+						)
+					maxPrecision = pr.precision;
+			}
+			acc+=maxPrecision;
+		}
+		
+		return acc / 11.0;
+	}
+	
+	
 }

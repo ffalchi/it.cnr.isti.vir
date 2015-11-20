@@ -14,7 +14,6 @@ package it.cnr.isti.vir.evaluation;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
-import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.math.VectorMath;
 
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 
 public class AveragePrecision {
 
@@ -51,7 +49,6 @@ public class AveragePrecision {
 		return sum / given.size();		
 	}
 	
-	
 	/**
 	 * @param res
 	 * @param positives
@@ -63,10 +60,24 @@ public class AveragePrecision {
 			HashMap<AbstractID,ArrayList<AbstractID>> positives,
 			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous
 			) {
-		ISimilarityResults[] temp = new ISimilarityResults[res.size()];
-		return getAveragePrecisions(temp, positives, ambiguous);
-		
+		return getAveragePrecisions(res, positives, ambiguous, false);
 	}
+	/**
+	 * @param res
+	 * @param positives
+	 * @param ambiguous
+	 * @return
+	 */
+	public static double[] getAveragePrecisions(
+			Collection<ISimilarityResults> res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives,
+			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous,
+			boolean interpolatedPrecision
+			) {
+		ISimilarityResults[] temp = new ISimilarityResults[res.size()];
+		return getAveragePrecisions(temp, positives, ambiguous, interpolatedPrecision);		
+	}
+	
 	
 	/**
 	 * @param res
@@ -78,7 +89,7 @@ public class AveragePrecision {
 			ISimilarityResults[] res, 
 			HashMap<AbstractID,ArrayList<AbstractID>> positives
 			) {
-		return getAveragePrecisions(res, positives, null);
+		return getAveragePrecisions(res, positives, null, false);
 	}
 	
 	/**
@@ -90,7 +101,37 @@ public class AveragePrecision {
 	public static double[] getAveragePrecisions(
 			ISimilarityResults[] res, 
 			HashMap<AbstractID,ArrayList<AbstractID>> positives,
+			boolean interpolatedPrecision
+			) {
+		return getAveragePrecisions(res, positives, null, interpolatedPrecision);
+	}
+	
+	
+	/**
+	 * @param res
+	 * @param positives
+	 * @param ambiguous
+	 * @return
+	 */
+	public static double[] getAveragePrecisions(
+			ISimilarityResults[] res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives,
 			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous
+			) {
+		return getAveragePrecisions(res, positives, ambiguous, false);
+	}
+	
+	/**
+	 * @param res
+	 * @param positives
+	 * @param ambiguous
+	 * @return
+	 */
+	public static double[] getAveragePrecisions(
+			ISimilarityResults[] res, 
+			HashMap<AbstractID,ArrayList<AbstractID>> positives,
+			HashMap<AbstractID,ArrayList<AbstractID>> ambiguous,
+			boolean interpolatedPrecision
 			) {
 		
 		double[] ap = new double[res.length]; 
@@ -111,7 +152,12 @@ public class AveragePrecision {
 			if ( ambiguous != null ) ambiguousResults = new HashSet(ambiguous.get(query));
 			
 			PrecisionRecall pr = PrecisionRecall.getPrecisionRecall(cRes, expectedResults, ambiguousResults, query);
-			ap[i] = pr.getAveragePrecision();
+			
+			if ( interpolatedPrecision) {
+				ap[i] = pr.getAveragePrecision_interpolated();
+			} else {
+				ap[i] = pr.getAveragePrecision();
+			}
 			//ap[i] = getAveragePrecision(cRes, expectedResults, ambiguousResults, query);
 		}
 		
@@ -151,6 +197,8 @@ public class AveragePrecision {
 		return PrecisionRecall.getPrecisionRecall(results, positiveIDs, ambiguosIDs, qID).getAveragePrecision();
 	
 	}
+
+
 
 
 	

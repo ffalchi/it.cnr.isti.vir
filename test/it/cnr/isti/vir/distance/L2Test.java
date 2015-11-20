@@ -1,6 +1,6 @@
 package it.cnr.isti.vir.distance;
 
-import it.cnr.isti.vir.features.FloatsL2Norm_Bytes;
+import it.cnr.isti.vir.features.FloatsL2Norm_UBytes;
 import it.cnr.isti.vir.features.FloatsL2Norm_CompSparseBytes;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.math.Normalize;
@@ -34,8 +34,8 @@ public class L2Test {
 		Normalize.l2(f1);
 		Normalize.l2(f2);
 		
-		byte[] byte1 = FloatsL2Norm_Bytes.getBytes(f1);
-		byte[] byte2 = FloatsL2Norm_Bytes.getBytes(f2);
+		byte[] byte1 = FloatsL2Norm_UBytes.getBytes(f1);
+		byte[] byte2 = FloatsL2Norm_UBytes.getBytes(f2);
 		
 		byte[] comp1 = FloatsL2Norm_CompSparseBytes.getComp(f1);
 		byte[] comp2 = FloatsL2Norm_CompSparseBytes.getComp(f2);

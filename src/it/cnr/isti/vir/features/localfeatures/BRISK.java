@@ -177,7 +177,7 @@ public class BRISK extends ALocalFeature<BRISKGroup> implements ILongBinaryValue
 	}
 
 	@Override
-	public long[] getElements() {
+	public long[] getValues() {
 		return data;
 	}
 
@@ -185,5 +185,6 @@ public class BRISK extends ALocalFeature<BRISKGroup> implements ILongBinaryValue
 	public int getNBits() {
 		return BITS_LENGTH;
 	}
+
 
 }
