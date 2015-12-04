@@ -12,7 +12,6 @@
 package it.cnr.isti.vir.similarity.pqueues;
 
 import it.cnr.isti.vir.similarity.DecreasingComparator;
-import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 
@@ -99,7 +98,7 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 //	}
 
 	@Override
-	public final void offer(O object, double distance) {
+	public final synchronized void offer(O object, double distance) {
 		
 		// excDistance takes also into account range!!!
 		if ( distance >= excDistance) return ;
@@ -196,7 +195,7 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 	}
 	
 	@Override
-	public ISimilarityResults getResults() {
+	public SimilarityResults getResults() {
 		ObjectWithDistance<O>[] arr = getSortedArray();
 		SimilarityResults res = new SimilarityResults(null, arr);
 		
@@ -204,7 +203,7 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 	}
 	
 	@Override
-	public ISimilarityResults getResultsAndEmpty() {
+	public SimilarityResults getResultsAndEmpty() {
 		ObjectWithDistance<O>[] arr = getSortedArrayAndEmpty();
 		SimilarityResults res = new SimilarityResults(null, arr);
 		return res;

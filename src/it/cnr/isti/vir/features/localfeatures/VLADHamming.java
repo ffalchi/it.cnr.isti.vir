@@ -89,7 +89,7 @@ public class VLADHamming extends AbstractFeature implements ILongBinaryValues {
 			int nBytes = Primitives.LONG_NBYTES*size;
 			byte[] bytes = new byte[nBytes];
 			in.readFully(bytes);
-			values = LongByteArrayUtil.get(bytes, 0, size);
+			values = LongByteArrayUtil.getArr(bytes, 0, size);
 		}
     }
 	

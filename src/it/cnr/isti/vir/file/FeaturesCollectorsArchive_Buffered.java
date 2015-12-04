@@ -54,6 +54,8 @@ public class FeaturesCollectorsArchive_Buffered {
 	File offsetFile;
 	File idFile;
 	
+	private boolean closed = false;
+	
 	public final int size() {
 		return ids.size();
 	}
@@ -85,6 +87,11 @@ public class FeaturesCollectorsArchive_Buffered {
 	public FeaturesCollectorsArchive_Buffered(File file,
 			Class<? extends AbstractID> idClass, Class<? extends AbstractFeaturesCollector> fcClass)
 			throws Exception {
+		this(file, idClass, fcClass, true);
+	}
+	public FeaturesCollectorsArchive_Buffered(File file,
+			Class<? extends AbstractID> idClass, Class<? extends AbstractFeaturesCollector> fcClass, boolean saveIDs)
+			throws Exception {
 		
 		file.delete();
 		
@@ -100,8 +107,9 @@ public class FeaturesCollectorsArchive_Buffered {
 		FeaturesCollectorsArchive.writeIntro(out, idClass,	fcClass);
 		
 		positions = new TLongArrayList();
-		ids = new ArrayList();
-
+		if ( saveIDs) ids = new ArrayList();
+		else ids = null; 
+		
 		offsetFile = new File(FeaturesCollectorsArchive.getIDFileName(file));
 		idFile = new File(FeaturesCollectorsArchive.getOffsetFileName(file));
 
@@ -116,7 +124,7 @@ public class FeaturesCollectorsArchive_Buffered {
 		//int currPos = positions.size();
 		positions.add(out.size());
 		
-		if (idClass != null) {
+		if (idClass != null && ids != null ) {
 			AbstractID id = ((IHasID) fc).getID();
 			if (!idClass.isInstance(id)) {
 				throw new ArchiveException("Objecct has a wrong ID class: "
@@ -141,8 +149,10 @@ public class FeaturesCollectorsArchive_Buffered {
 
 
 	public void close() throws IOException {
+		if ( closed ) return;
 		out.close();
-		FeaturesCollectorsArchive.createIndexFiles(offsetFile, idFile, positions, ids);		
+		FeaturesCollectorsArchive.createIndexFiles(offsetFile, idFile, positions, ids);
+		closed = true;
 	}
 	
 	@Override

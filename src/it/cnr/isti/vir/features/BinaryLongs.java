@@ -36,7 +36,7 @@ public class BinaryLongs extends AbstractFeature implements ILongBinaryValues {
 			int nBytes = Long.BYTES*size;
 			byte[] bytes = new byte[nBytes];
 			in.readFully(bytes);
-			values = LongByteArrayUtil.get(bytes, 0, size);
+			values = LongByteArrayUtil.getArr(bytes, 0, size);
 		}
     }
 	
@@ -94,6 +94,14 @@ public class BinaryLongs extends AbstractFeature implements ILongBinaryValues {
 		return values.length * 64;
 	}
 
+	public int bitCount() {
+		int res = 0;
+		for (int i=0; i<values.length; i++) {
+			res += Long.bitCount(values[i]);
+		}
+		
+		return res;
+	}
 
 	
 }

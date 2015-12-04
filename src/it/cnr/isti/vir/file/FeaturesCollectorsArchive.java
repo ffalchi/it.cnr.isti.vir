@@ -81,6 +81,8 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	
 	private final Class<? extends AbstractFeaturesCollector> fcClass;
 
+	private boolean closed = false;
+	
 //	public FeatureClassCollector getFeaturesClasses() {
 //		return featuresClasses;
 //	}
@@ -633,7 +635,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		lastSaveSize = size();
 	}
 	
-	public static void createIndexFiles(File offsetFile, File idFile, TLongArrayList positions, ArrayList<AbstractID> ids) throws IOException {
+	public synchronized static void createIndexFiles(File offsetFile, File idFile, TLongArrayList positions, ArrayList<AbstractID> ids) throws IOException {
 		
 		Log.info_verbose("Creating index files");
 		
@@ -642,18 +644,21 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 		DataOutputStream outOffset = new DataOutputStream(
 				new BufferedOutputStream(new FileOutputStream(offsetFile)));
-		DataOutputStream outIDs = new DataOutputStream(
+		DataOutputStream outIDs = null;
+		if ( ids != null )
+			outIDs = new DataOutputStream(
 				new BufferedOutputStream(new FileOutputStream(idFile)));
 
 		for (int i = 0; i < positions.size(); i++) {
 			outOffset.writeLong(positions.get(i));
-			ids.get(i).writeData(outIDs);
+			if ( outIDs != null ) ids.get(i).writeData(outIDs);
 		}
 
 		outOffset.close();
-		outIDs.close();
+		if ( outIDs != null )  outIDs.close();
 
 		Log.info_verbose("Creating index files done");
+		
 	}
 
 	public synchronized AbstractFeaturesCollector get(int i) throws ArchiveException {
@@ -709,8 +714,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return get(i);
 	}
 
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		rndFile.close();
+
 		if ( changed ) {
 			if ( lastSaveSize <= 0 ) {
 				createIndexFiles();
@@ -718,6 +724,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				updateIndexFiles();
 			}
 		}
+
+		closed = true;
+
 	}
 
 	@Override
@@ -1090,7 +1099,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return res;
 	}
 	
-	public void finalize() {
+	public synchronized void finalize() {
 		
 		try {
 			close();

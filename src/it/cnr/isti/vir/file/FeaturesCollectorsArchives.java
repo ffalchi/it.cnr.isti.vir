@@ -239,8 +239,4 @@ public class FeaturesCollectorsArchives {
 		return res;
 	}
 	
-	
-	
-
-	
 }

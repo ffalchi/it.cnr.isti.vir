@@ -41,7 +41,21 @@ public class LongByteArrayUtil {
 	 * @param n				desired array length
 	 * @return
 	 */
-	public static final long[] get(byte byteArr[], int byteOffset, int n) {
+	public static final long[] getArr(byte byteArr[], int n) {
+		long[] arr = new long[n];
+		for ( int i=0; i<arr.length; i++) {
+			arr[i]=get(byteArr, (Long.SIZE/Byte.SIZE)*i);
+		}
+		return arr;
+	}
+	
+	/**
+	 * @param byteArr		source bytes
+	 * @param byteOffset	source bytes offset
+	 * @param n				desired array length
+	 * @return
+	 */
+	public static final long[] getArr(byte byteArr[], int byteOffset, int n) {
 		long[] arr = new long[n];
 		for ( int i=0; i<arr.length; i++) {
 			arr[i]=get(byteArr, byteOffset+(Long.SIZE/Byte.SIZE)*i);
@@ -49,6 +63,32 @@ public class LongByteArrayUtil {
 		return arr;
 	}
 	
+	/**
+	 * @param byteArr		source bytes
+	 * @param byteOffset	source bytes offset
+	 * @param n				desired array length
+	 * @return
+	 */
+	public static final long[] convToLong(byte byteArr[], long[] res, int n) {
+		for ( int i=0; i<res.length; i++) {
+			res[i]=get(byteArr, (Long.SIZE/Byte.SIZE)*i);
+		}
+		return res;
+	}
+	
+	
+	/**
+	 * @param data			long array
+	 * @param byteArray		dest bytes
+	 * @param byteOffset	dest bytes offset
+	 */
+	public static final int convToBytes(long[] data, byte[] byteArr ) {
+		int index = 0;
+		for ( int i=0; i<data.length; i++) {
+			index  = convToBytes(data[i], byteArr, index );
+		}
+		return index;
+	}
 	
 	/**
 	 * @param data			long array

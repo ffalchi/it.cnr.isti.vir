@@ -31,8 +31,36 @@ public class Hamming {
 		return acc;
 	}
 	
-
+	public static final int distance_offset(long[] data1, long[] data2, int data2Offset) {
 	
+		int res = 0;
+		for ( int i=0; i<data1.length; i++) {
+			long xor = data1[i]^data2[data2Offset+i];
+			res += Long.bitCount(xor);
+		}
+		return res;
+	}
+	
+	public static final int distance_offset(long[] data1, int data1Offset, long[] data2, int data2Offset, int dim) {
+	
+		int res = 0;
+		for	( int i=0; i<dim; i++) {
+			long xor = data1[data1Offset+i]^data2[data2Offset+i];
+			res += Long.bitCount(xor);
+		}
+		return res;
+	}
+	
+	
+	public static final int distance_offset(long[] data1, long[] data2, int data2Offset, int dim) {
+	
+		int res = 0;
+		for ( int i=0; i<dim; i++) {
+			long xor = data1[i]^data2[data2Offset+i];
+			res += Long.bitCount(xor);
+		}
+		return res;
+	}
 	
 	
 	public static final float distance_norm(long[] bits1, long[] bits2, int nBits, double max) {
@@ -58,5 +86,26 @@ public class Hamming {
 
 	
 
+//
+//public static final int distance(long[] data1, int data1Offset, long[] data2, int data2Offset, int dim) {
+//	
+//	int res = 0;
+//	for ( int i=0; i<dim; i++) {
+//		long xor = data1[data1Offset+i]^data2[data2Offset+i];
+//		res += Long.bitCount(xor);
+//	}
+//	return res;
+//}
+//
+//public static final int distance(long[] data1, long[] data2, int data2Offset, int dim) {
+//	
+//	int res = 0;
+//	for ( int i=0; i<dim; i++) {
+//		long xor = data1[i]^data2[data2Offset+i];
+//		res += Long.bitCount(xor);
+//	}
+//	return res;
+//}
+	
 
 }
