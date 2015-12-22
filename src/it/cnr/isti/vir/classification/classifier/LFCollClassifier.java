@@ -281,8 +281,8 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 	
 
 	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc) throws InterruptedException {
-		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();
-		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);
+		Class<ALocalFeaturesGroup<?>> c = sim.getRequestedFeatureGroupClass();
+		ALocalFeaturesGroup<LF> fg = (ALocalFeaturesGroup<LF>) fc.getFeature(c);
 		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());
 		kNNs.offer(coll);
 		return kNNs;
@@ -346,7 +346,7 @@ public class LFCollClassifier<LF extends ALocalFeature>  implements IClassifier,
 //		return kNNs;
 //	}
 	//
-	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) throws InterruptedException {		Class<ALocalFeaturesGroup> c = sim.getRequestedFeatureGroupClass();		ALocalFeaturesGroup<LF> fg = fc.getFeature(c);		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());		kNNs.offer(convert(collection));		return kNNs;	}
+	private MultipleKNNPQueueID<LF> getkNNs(AbstractFeaturesCollector fc, Collection<AbstractFeaturesCollector_Labeled_HasID> collection) throws InterruptedException {		Class<ALocalFeaturesGroup<?>> c = sim.getRequestedFeatureGroupClass();		ALocalFeaturesGroup<LF> fg = (ALocalFeaturesGroup<LF>) fc.getFeature(c);		MultipleKNNPQueueID<LF>  kNNs = createKNNs(fg.getCollection());		kNNs.offer(convert(collection));		return kNNs;	}
 	
 
 	

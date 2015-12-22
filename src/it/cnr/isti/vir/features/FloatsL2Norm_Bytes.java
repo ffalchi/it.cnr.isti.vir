@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-public class FloatsL2Norm_Bytes extends AbstractFeature implements IUByteValues {
+public class FloatsL2Norm_Bytes extends AbstractFeature implements IByteValues {
 
 	public AbstractFeaturesCollector linkedFC;
 	
@@ -39,7 +39,7 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IUByteValues 
 		byte[] values = new byte[floatValues.length];
 		
 		for ( int i=0; i<floatValues.length; i++ ) {
-			values[i] = (byte) ( Math.round( floatValues[i] * 255.0F ) - 128 );
+			values[i] = (byte) ( Math.round( floatValues[i] * 127.0F ) );
 		}
 		return values;
 	}
@@ -119,10 +119,10 @@ public class FloatsL2Norm_Bytes extends AbstractFeature implements IUByteValues 
 		return new FloatsL2Norm_Bytes(Mean.getMean(values));		
 	}
 
-	public void reduceToDim(int dim) throws Exception {
-		if ( dim > values.length )
-				throw new Exception("Requested dimensionality greater than current.");
-		values = Arrays.copyOf(values, dim);		
-	}
+//	public void reduceToDim(int dim) throws Exception {
+//		if ( dim > values.length )
+//				throw new Exception("Requested dimensionality greater than current.");
+//		values = Arrays.copyOf(values, dim);		
+//	}
 	
 }

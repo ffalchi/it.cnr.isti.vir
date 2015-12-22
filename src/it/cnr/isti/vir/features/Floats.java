@@ -13,6 +13,7 @@ package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Mean;
+import it.cnr.isti.vir.util.math.Normalize;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -22,11 +23,71 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
+
+
 public class Floats extends AbstractFeature implements IFloatValues {
 
 	public AbstractFeaturesCollector linkedFC;
 	
 	public float[] values;
+
+	
+	public static float[] negPow(float[] f, double pow) {
+		
+		for ( int i=0; i<f.length; i++ ) {
+			if ( f[i]<0.0 ) f[i] = (float) -Math.pow(-f[i], pow); 
+		}
+		
+		return f;
+	}
+	
+    public Floats(ByteBuffer in ) throws Exception {
+        this(in, null);
+    }
+	
+	public Floats(ByteBuffer in, AbstractFeaturesCollector fc ) throws Exception {
+		int size = in.getInt();
+		linkedFC = fc;
+		if ( size != 0 ) { 
+			values = new float[size];
+			for ( int i=0; i<values.length; i++ ) {
+				values[i] = in.getFloat();
+			}
+		}	
+		
+		// TO REMOVE!!!!!!!!!!!!!!!
+//		ReLu.perform(values);
+//		negPow(values, 0.5);
+//		Normalize.l2(values);
+
+	}
+	
+	public Floats(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
+		
+		int size = in.readInt();
+
+		if ( size != 0 ) {
+			int nBytes = Float.BYTES*size;
+			byte[] bytes = new byte[nBytes];
+			in.readFully(bytes);
+			values = FloatByteArrayUtil.get(bytes, 0, size);
+		}
+		
+		// TO REMOVE!!!!!!!!!!!!!!!
+//		ReLu.perform(values);
+//		negPow(values, 0.5);
+//		Normalize.l2(values);
+    }
+	
+	public Floats(float[] values) {
+		this.values = values;
+	}
+
+	public Floats(DataInput in ) throws Exception {
+		this(in, null);
+	}
+	
+	
 	
 	final int getDim() {
 		return values.length;
@@ -54,40 +115,7 @@ public class Floats extends AbstractFeature implements IFloatValues {
 		}
 	}
 	
-    public Floats(ByteBuffer in ) throws Exception {
-        this(in, null);
-    }
-	
-	public Floats(ByteBuffer in, AbstractFeaturesCollector fc ) throws Exception {
-		int size = in.getInt();
-		linkedFC = fc;
-		if ( size != 0 ) { 
-			values = new float[size];
-			for ( int i=0; i<values.length; i++ ) {
-				values[i] = in.getFloat();
-			}
-		}	
-	}
-	
-	public Floats(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
-		
-		int size = in.readInt();
 
-		if ( size != 0 ) {
-			int nBytes = Float.BYTES*size;
-			byte[] bytes = new byte[nBytes];
-			in.readFully(bytes);
-			values = FloatByteArrayUtil.get(bytes, 0, size);
-		}
-    }
-	
-	public Floats(float[] values) {
-		this.values = values;
-	}
-
-	public Floats(DataInput in ) throws Exception {
-		this(in, null);
-	}
 
 	@Override
 	public int getLength() {

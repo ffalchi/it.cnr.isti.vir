@@ -176,7 +176,7 @@ public class ORB extends ALocalFeature<ORBGroup> implements ILongBinaryValues {
 	}
 
 	@Override
-	public long[] getElements() {
+	public long[] getValues() {
 		return data;
 	}
 

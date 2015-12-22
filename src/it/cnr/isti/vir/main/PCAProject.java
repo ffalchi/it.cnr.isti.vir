@@ -4,6 +4,7 @@ import it.cnr.isti.vir.experiments.Launch;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.Floats;
+import it.cnr.isti.vir.features.FloatsL2Norm_Bytes;
 import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
@@ -34,6 +35,9 @@ public class PCAProject {
 		System.out.println("- PCA.PC=<principal components file>");
 		System.out.println("- [PCAProject.dim]");
 		System.out.println("- [PCAProject.L2Norm]");
+		System.out.println("- [PCAProject.Whithening]");
+		System.out.println("- [PCAProject.SignedPowerTransform]");
+		System.out.println("- [PCAProject.Bytes]");
 		System.out.println("- PCA.FeatureClass=<feature class to be projects>");
 		System.exit(0);
 	}
@@ -55,6 +59,10 @@ public class PCAProject {
 		private final Class c;
 		private final TimeManager tm;
 		private final boolean l2Norm;
+		private final boolean whithening;
+		private final boolean signedPowerTransform_flag;
+		private final double signedPowerTransform;
+		private final boolean bytes_flag;
 		
 		public Project(
 				Iterator<AbstractFeaturesCollector> it,
@@ -62,13 +70,27 @@ public class PCAProject {
 				PrincipalComponents pc,
 				Class c,
 				TimeManager tm,
-				boolean l2Norm ) {
+				boolean l2Norm,
+				boolean whithening,
+				Double signedPowerTransform,
+				boolean bytes_flag ) {
 			this.it = it;
 			this.out = out;
 			this.c = c;
 			this.tm = tm;
 			this.pc = pc;
 			this.l2Norm = l2Norm;
+			this.whithening = whithening;
+			this.bytes_flag = bytes_flag;
+			
+			
+			if ( signedPowerTransform != null) {
+				this.signedPowerTransform = signedPowerTransform;
+				signedPowerTransform_flag = true;
+			} else {
+				this.signedPowerTransform = 1.0;
+				signedPowerTransform_flag = false;
+			}
 		}
 
 		@Override
@@ -83,15 +105,26 @@ public class PCAProject {
 				
 				AbstractFeature currf = fc.getFeature(c);
 				float[] temp = pc.project_float( (IArrayValues) currf);
-				if ( l2Norm ) Normalize.l2(temp);;
-				Floats projected = new Floats(temp);
+				if ( whithening ) pc.withening(temp);
 				
-				AbstractFeaturesCollector newFC = fc.createWithSameInfo(projected);
-
+				if ( signedPowerTransform_flag ) {
+					Normalize.sPower( temp, signedPowerTransform );
+				}				
+				
+				if ( l2Norm ) Normalize.l2(temp);
+				
+				AbstractFeaturesCollector newFC = null;
+				if ( bytes_flag ) {
+					FloatsL2Norm_Bytes projected = new FloatsL2Norm_Bytes(temp);
+					newFC = fc.createWithSameInfo(projected);
+					
+				} else {
+					Floats projected = new Floats(temp);
+					newFC = fc.createWithSameInfo(projected);
+				}
 				try {
 					out.add(newFC);
 				} catch (ArchiveException | IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -165,6 +198,9 @@ public class PCAProject {
 		Class c = PropertiesUtils.getClass(prop, "PCA.FeatureClass");
 		int dim = PropertiesUtils.getInt_orDefault(prop, "PCAProject.dim", -1);
 		boolean l2Norm = PropertiesUtils.getBoolean(prop, "PCAProject.L2Norm", false);
+		boolean whithening = PropertiesUtils.getBoolean(prop, "PCAProject.Whithening", false);
+		Double signedPowerTransform = PropertiesUtils.getDouble_orNull(prop, "PCAProject.SignedPowerTransform" );
+		boolean bytes_flag = PropertiesUtils.getBoolean(prop, "PCAProject.Bytes", false);
 		
 		FeaturesCollectorsArchive in = new FeaturesCollectorsArchive(inFile);
 		FeaturesCollectorsArchive out = in.getSameType(outFile);
@@ -225,7 +261,7 @@ public class PCAProject {
 			Thread[] thread = new Thread[nThread];
 			Iterator<AbstractFeaturesCollector> it = in.iterator();
 			for ( int ti=0; ti<nThread; ti++ ) {
-				thread[ti] = new Thread(new Project(it, out, pc, c, tm,l2Norm ));
+				thread[ti] = new Thread(new Project(it, out, pc, c, tm,l2Norm, whithening, signedPowerTransform, bytes_flag ));
 				thread[ti].start();
 			}
 		        

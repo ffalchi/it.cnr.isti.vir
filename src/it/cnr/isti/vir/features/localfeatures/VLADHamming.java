@@ -35,7 +35,7 @@ public class VLADHamming extends AbstractFeature implements ILongBinaryValues {
 	}
 	
 	@Override
-	public final long[] getElements() {
+	public final long[] getValues() {
 		return values;
 	}
 	
@@ -89,7 +89,7 @@ public class VLADHamming extends AbstractFeature implements ILongBinaryValues {
 			int nBytes = Primitives.LONG_NBYTES*size;
 			byte[] bytes = new byte[nBytes];
 			in.readFully(bytes);
-			values = LongByteArrayUtil.get(bytes, 0, size);
+			values = LongByteArrayUtil.getArr(bytes, 0, size);
 		}
     }
 	
@@ -122,7 +122,7 @@ public class VLADHamming extends AbstractFeature implements ILongBinaryValues {
 		if ( lf.length == 0 ) {
 			// NO LOCAL FEATURES WERE FOUND!
 			for ( int i=0; i<size; ) {
-				long[] ref = ((ILongBinaryValues) refs[i/nEleLongs]).getElements();
+				long[] ref = ((ILongBinaryValues) refs[i/nEleLongs]).getValues();
 				for ( int id=0; id<nEleLongs; id++) {
 					values[i++] = ~ ref[id];
 				}					
@@ -135,10 +135,10 @@ public class VLADHamming extends AbstractFeature implements ILongBinaryValues {
 //			}
 			for (int iLF = 0; iLF < lf.length; iLF++) {
 	
-				long[] curr = ((ILongBinaryValues) lf[iLF]).getElements();
+				long[] curr = ((ILongBinaryValues) lf[iLF]).getValues();
 				int iW = fWords.getNNIndex(lf[iLF]);
 				refsCount[iW]++;
-				long[] ref = ((ILongBinaryValues) refs[iW]).getElements();
+				long[] ref = ((ILongBinaryValues) refs[iW]).getValues();
 				
 				int iAcc = iW * nEleBits;
 				//int end = start + nBits;

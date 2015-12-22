@@ -87,6 +87,23 @@ public class Sort {
 	  	} while (n != 0);
 	}
 	
+	public final static void sortDescending(int[] values, Object[] other1, Object[] other2) {
+	      
+	  	int n = values.length;
+	  	do {
+	  		int	newn = 0;
+	  		for (int i = 1; i<n; i++) {
+	  			if (values[i - 1] < values[i]) {
+	  				swap(values, i - 1, i);
+	  				swap(other1, i - 1, i);
+	  				swap(other2, i - 1, i);
+	  				newn = i;
+	  			};
+	  		};
+	  		n = newn;
+	  	} while (n != 0);
+	}
+	
 	
 	public final static void sortDescending(float[] values, int[] other ) {
 		

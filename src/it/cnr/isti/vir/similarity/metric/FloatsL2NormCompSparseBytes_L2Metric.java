@@ -15,7 +15,7 @@ import it.cnr.isti.vir.clustering.IMeanEvaluator;
 import it.cnr.isti.vir.distance.L2;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
-import it.cnr.isti.vir.features.FloatsL2Norm_Bytes;
+import it.cnr.isti.vir.features.FloatsL2Norm_UBytes;
 import it.cnr.isti.vir.features.FloatsL2Norm_CompSparseBytes;
 
 import java.util.Collection;

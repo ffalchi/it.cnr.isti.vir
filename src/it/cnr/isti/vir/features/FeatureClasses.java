@@ -104,7 +104,10 @@ public class FeatureClasses {
 		FloatsLFGroup.class,
 		FREAK.class,
 		FREAKGroup.class,
-		FloatsL2Norm_Bytes.class
+		FloatsL2Norm_UBytes.class,
+		CNNFloats.class,
+		FloatsL2Norm_Bytes.class,
+		BinaryLongs.class
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

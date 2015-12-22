@@ -61,6 +61,16 @@ public class L2 {
 		return acc; 
 	}
 	
+	public static final double get(double[]f1, double[]f2, double max) {
+		double temp = getSquared(f1,f2, max*max);
+		
+		if (temp <0) {
+			return -Math.sqrt(-temp);
+		} else {
+			return Math.sqrt(temp);
+		}
+	}
+	
 	public static final int getSquared(int[]f1, int[]f2) {
 		int acc = 0;
 		for ( int j=0; j<f1.length; j++) {
@@ -88,6 +98,17 @@ public class L2 {
 	    }		
 		return acc;
 	}
+	
+	public static final double get(float[]f1, float[]f2, double max) {
+		double temp = getSquared(f1,f2, max*max);
+		
+		if (temp <0) {
+			return -Math.sqrt(-temp);
+		} else {
+			return Math.sqrt(temp);
+		}
+	}
+
 	
 	
 	public static final double get(int[]f1, int[]f2) {
@@ -184,15 +205,6 @@ public class L2 {
 	}
 	
 	
-	public static final double get(float[]f1, float[]f2, double max) {
-		double temp = getSquared(f1,f2, max*max);
-		
-		if (temp <0) {
-			return -Math.sqrt(-temp);
-		} else {
-			return Math.sqrt(temp);
-		}
-	}
 
 	public static final int getSquared_fromCompSparseBytes(byte[] v1, byte[] v2, int max) {
 		
