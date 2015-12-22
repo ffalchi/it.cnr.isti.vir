@@ -8,7 +8,7 @@ import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.knn.KNNPQueue;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 
@@ -140,7 +140,7 @@ public class ResultsReordering {
 		
 		double actualMinDist = Double.MAX_VALUE;
 		if ( minDistance != null ) actualMinDist = minDistance;
-		SimPQueueArr pQueue = new SimPQueueArr(actualK);
+		SimPQueueDMax pQueue = new SimPQueueDMax(actualK);
 		KNNPQueue knn = new KNNPQueue(pQueue, sim, query);
 		
 		int nThread = ParallelOptions.reserveNFreeProcessors()+1;

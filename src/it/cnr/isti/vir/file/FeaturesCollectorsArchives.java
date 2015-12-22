@@ -18,7 +18,7 @@ import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
 import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch_multiSim;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 
 import java.io.File;
@@ -190,9 +190,9 @@ public class FeaturesCollectorsArchives {
 			IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 
-		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
+		SimPQueueDMax[] kNNQueue = new SimPQueueDMax[qObj.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
-			kNNQueue[i] = new SimPQueueArr(k);
+			kNNQueue[i] = new SimPQueueDMax(k);
 		}
 
 		for (int i = 0; i < archive.length; i++) {
@@ -215,10 +215,10 @@ public class FeaturesCollectorsArchives {
 			IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 
-		SimPQueueArr[][] kNNQueue = new SimPQueueArr[sim.length][qObj.length];
+		SimPQueueDMax[][] kNNQueue = new SimPQueueDMax[sim.length][qObj.length];
 		for (int iS = 0; iS < sim.length; iS++) {
 			for (int i = 0; i < qObj.length; i++) {
-				kNNQueue[iS][i] = new SimPQueueArr(k);
+				kNNQueue[iS][i] = new SimPQueueDMax(k);
 			}
 		}
 

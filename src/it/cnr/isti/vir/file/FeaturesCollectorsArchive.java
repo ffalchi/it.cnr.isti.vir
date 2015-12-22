@@ -28,7 +28,7 @@ import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
 import it.cnr.isti.vir.similarity.metric.IMetric;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.TimeManager;
@@ -661,7 +661,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		
 	}
 
-	public synchronized AbstractFeaturesCollector get(int i) throws ArchiveException {
+	public final synchronized AbstractFeaturesCollector get(int i) throws ArchiveException {
 		try {
 			//Log.info_verbose("i: " + i + ", offset: " + positions.get(i));
 			rndFile.seek(positions.get(i));
@@ -896,9 +896,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 
-		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
+		SimPQueueDMax[] kNNQueue = new SimPQueueDMax[qObj.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
-			kNNQueue[i] = new SimPQueueArr(k);
+			kNNQueue[i] = new SimPQueueDMax(k);
 		}
 
 		Log.info_verbose("... searching in archive " + this.getfile());
