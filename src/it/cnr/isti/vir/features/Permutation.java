@@ -17,7 +17,7 @@ import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 
@@ -58,7 +58,7 @@ public class Permutation extends AbstractFeature {
 	public Permutation(AbstractFeaturesCollector obj, AbstractFeaturesCollector[] ro, ISimilarity sim, int pLength, boolean roPosition) {
 		
 		nRO = ro.length;
-		SimPQueueArr<Integer> pQueue = new SimPQueueArr<Integer>(pLength);
+		SimPQueueDMax<Integer> pQueue = new SimPQueueDMax<Integer>(pLength);
 		
 		for ( int i=0; i<ro.length; i++) {
 			pQueue.offer(i, sim.distance(obj, ro[i]));

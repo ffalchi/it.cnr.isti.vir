@@ -35,6 +35,7 @@ public class Normalize {
         }
 	}
 	
+	
 	/**
 	 * @param values
 	 * 

@@ -51,7 +51,7 @@ public class FloatsL2Norm_CompSparseBytes extends AbstractFeature implements IUB
 	}
 
 	public static byte[] getComp(float[] floatValues) {
-		return getComp(FloatsL2Norm_Bytes.getBytes(floatValues));
+		return getComp(FloatsL2Norm_UBytes.getBytes(floatValues));
 	}
 	public FloatsL2Norm_CompSparseBytes(float[] floatValues) {
 		this( getComp(floatValues) );

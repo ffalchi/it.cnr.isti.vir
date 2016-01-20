@@ -177,7 +177,7 @@ public class FREAK extends ALocalFeature<FREAKGroup> implements ILongBinaryValue
 	}
 
 	@Override
-	public long[] getElements() {
+	public long[] getValues() {
 		return data;
 	}
 

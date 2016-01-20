@@ -45,7 +45,7 @@ public class LongByteArrayUtilTest {
     		
     		// Encoding and decoding
     		LongByteArrayUtil.convToBytes(value, bytes, rndOffset);
-    		long[] decodedValue = LongByteArrayUtil.get(bytes, rndOffset, rndArrLength);
+    		long[] decodedValue = LongByteArrayUtil.getArr(bytes, rndOffset, rndArrLength);
     		
     		assertTrue(Arrays.equals(decodedValue,value));
     	}

@@ -28,7 +28,7 @@ import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
 import it.cnr.isti.vir.similarity.metric.IMetric;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.TimeManager;
@@ -81,6 +81,8 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 	
 	private final Class<? extends AbstractFeaturesCollector> fcClass;
 
+	private boolean closed = false;
+	
 //	public FeatureClassCollector getFeaturesClasses() {
 //		return featuresClasses;
 //	}
@@ -633,7 +635,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		lastSaveSize = size();
 	}
 	
-	public static void createIndexFiles(File offsetFile, File idFile, TLongArrayList positions, ArrayList<AbstractID> ids) throws IOException {
+	public synchronized static void createIndexFiles(File offsetFile, File idFile, TLongArrayList positions, ArrayList<AbstractID> ids) throws IOException {
 		
 		Log.info_verbose("Creating index files");
 		
@@ -642,21 +644,24 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 		DataOutputStream outOffset = new DataOutputStream(
 				new BufferedOutputStream(new FileOutputStream(offsetFile)));
-		DataOutputStream outIDs = new DataOutputStream(
+		DataOutputStream outIDs = null;
+		if ( ids != null )
+			outIDs = new DataOutputStream(
 				new BufferedOutputStream(new FileOutputStream(idFile)));
 
 		for (int i = 0; i < positions.size(); i++) {
 			outOffset.writeLong(positions.get(i));
-			ids.get(i).writeData(outIDs);
+			if ( outIDs != null ) ids.get(i).writeData(outIDs);
 		}
 
 		outOffset.close();
-		outIDs.close();
+		if ( outIDs != null )  outIDs.close();
 
 		Log.info_verbose("Creating index files done");
+		
 	}
 
-	public synchronized AbstractFeaturesCollector get(int i) throws ArchiveException {
+	public final synchronized AbstractFeaturesCollector get(int i) throws ArchiveException {
 		try {
 			//Log.info_verbose("i: " + i + ", offset: " + positions.get(i));
 			rndFile.seek(positions.get(i));
@@ -709,8 +714,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return get(i);
 	}
 
-	public void close() throws IOException {
+	public synchronized void close() throws IOException {
 		rndFile.close();
+
 		if ( changed ) {
 			if ( lastSaveSize <= 0 ) {
 				createIndexFiles();
@@ -718,6 +724,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 				updateIndexFiles();
 			}
 		}
+
+		closed = true;
+
 	}
 
 	@Override
@@ -850,10 +859,10 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return tStr;
 	}
 	
-	public ArrayList<AbstractFeaturesCollector> get(AbstractID[] queries) throws ArchiveException {
+	public ArrayList<AbstractFeaturesCollector> get(AbstractID[] ids) throws ArchiveException {
 		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();
-		for ( AbstractID q : queries) {
-			res.add(this.get(q));
+		for ( AbstractID id : ids) {
+			res.add(this.get(id));
 		}
 		return res;
 	}
@@ -887,9 +896,9 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 
-		SimPQueueArr[] kNNQueue = new SimPQueueArr[qObj.length];
+		SimPQueueDMax[] kNNQueue = new SimPQueueDMax[qObj.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
-			kNNQueue[i] = new SimPQueueArr(k);
+			kNNQueue[i] = new SimPQueueDMax(k);
 		}
 
 		Log.info_verbose("... searching in archive " + this.getfile());
@@ -1030,6 +1039,31 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		if ( prob > 1.0 ) prob = 1.0;
 		return getRandomFeatures(featureClass, prob);
 	}
+
+	
+	public ArrayList<AbstractFeaturesCollector> getRandom(double prob) {
+		Log.info_verbose("Getting random elements  with probability " + prob);
+		
+		int i=0;
+		
+		ArrayList<AbstractFeaturesCollector> res = new ArrayList<AbstractFeaturesCollector>();
+		TimeManager tm = new TimeManager();
+		for ( AbstractFeaturesCollector currFC : this ) {
+			i++;
+			
+			if ( RandomOperations.trueORfalse(prob)) {
+				res.add(currFC);
+			}				
+			
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose(" - " + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
+			}
+		}
+		
+		Log.info_verbose( res.size() + " features were randomly selected");
+		
+		return res;
+	}
 	
 	public ArrayList<AbstractFeature> getRandomFeatures(Class<? extends AbstractFeature> featureClass, double prob) {
 		Log.info_verbose("Getting random elements of " + featureClass + " with probability " + prob);
@@ -1065,7 +1099,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return res;
 	}
 	
-	public void finalize() {
+	public synchronized void finalize() {
 		
 		try {
 			close();

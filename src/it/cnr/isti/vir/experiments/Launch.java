@@ -80,7 +80,12 @@ public class Launch {
 		
 		launch( className, properties, propertyFileName);
 		
+		
+		
 	}
+	
+	
+	
 	
 	public static void launch(String className, Properties properties, String propertyFileName )  {
 		
@@ -94,14 +99,12 @@ public class Launch {
 			Long startTime = System.currentTimeMillis();
 				
 			// Redirecting OUT
-			
 			File outFile = new File(propertyFileName + "_" + dateTime + "_out.txt");
 			PrintStream outPStream = new PrintStream(outFile);
 			System.setOut(new TeeStream(System.out, outPStream));
 			System.out.println("Cloning OUT to: " + outFile.getAbsolutePath());
 				
 			// Redirecting ERR
-			
 			File errFile = new File(propertyFileName + "_" + dateTime + "_err.txt");
 			PrintStream errPStream = new PrintStream(errFile);
 			System.out.println("Cloning ERR to: " + errFile.getAbsolutePath());

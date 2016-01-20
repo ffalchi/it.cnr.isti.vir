@@ -71,4 +71,8 @@ public class CumulativeDistribution {
 		}
 		return tStr;
 	}
+
+	public long getCount() {
+		return count;
+	}
 }

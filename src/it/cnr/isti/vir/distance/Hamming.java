@@ -14,6 +14,15 @@ package it.cnr.isti.vir.distance;
 
 public class Hamming {
 
+	public static final int distance(long[] bits1, long[] bits2, int max) {
+		int acc = 0;
+		for ( int i=0; i<bits1.length; i++) {
+			acc+=Long.bitCount(bits1[i]^bits2[i]);
+			if ( acc > max ) return -acc;
+		}		
+		return acc;
+	}
+	
 	public static final int distance(long[] bits1, long[] bits2) {
 		int acc = 0;
 		for ( int i=0; i<bits1.length; i++) {
@@ -22,16 +31,81 @@ public class Hamming {
 		return acc;
 	}
 	
-	public static final int distance(long[] bits1, long[] bits2, int max) {
-		return distance(bits1, bits2);
+	public static final int distance_offset(long[] data1, long[] data2, int data2Offset) {
+	
+		int res = 0;
+		for ( int i=0; i<data1.length; i++) {
+			long xor = data1[i]^data2[data2Offset+i];
+			res += Long.bitCount(xor);
+		}
+		return res;
+	}
+	
+	public static final int distance_offset(long[] data1, int data1Offset, long[] data2, int data2Offset, int dim) {
+	
+		int res = 0;
+		for	( int i=0; i<dim; i++) {
+			long xor = data1[data1Offset+i]^data2[data2Offset+i];
+			res += Long.bitCount(xor);
+		}
+		return res;
+	}
+	
+	
+	public static final int distance_offset(long[] data1, long[] data2, int data2Offset, int dim) {
+	
+		int res = 0;
+		for ( int i=0; i<dim; i++) {
+			long xor = data1[i]^data2[data2Offset+i];
+			res += Long.bitCount(xor);
+		}
+		return res;
+	}
+	
+	
+	public static final float distance_norm(long[] bits1, long[] bits2, int nBits, double max) {
+		return distance(bits1, bits2, (int) Math.ceil(max*nBits))  / (float)  nBits;
 	}
 	
 	public static final float distance_norm(long[] bits1, long[] bits2, int nBits) {
 		return distance(bits1, bits2) / (float)  nBits;
 	}
 	
+	
+	
+	
+	public static final float distance_norm(long[] bits1, long[] bits2, double max) {
+		return distance_norm(bits1, bits2, bits1.length*Long.SIZE, max);
+	}
+
+	
 	public static final float distance_norm(long[] bits1, long[] bits2 ) {
 		return distance_norm(bits1, bits2, bits1.length*Long.SIZE );
 	}
+	
+
+	
+
+//
+//public static final int distance(long[] data1, int data1Offset, long[] data2, int data2Offset, int dim) {
+//	
+//	int res = 0;
+//	for ( int i=0; i<dim; i++) {
+//		long xor = data1[data1Offset+i]^data2[data2Offset+i];
+//		res += Long.bitCount(xor);
+//	}
+//	return res;
+//}
+//
+//public static final int distance(long[] data1, long[] data2, int data2Offset, int dim) {
+//	
+//	int res = 0;
+//	for ( int i=0; i<dim; i++) {
+//		long xor = data1[i]^data2[data2Offset+i];
+//		res += Long.bitCount(xor);
+//	}
+//	return res;
+//}
+	
 
 }

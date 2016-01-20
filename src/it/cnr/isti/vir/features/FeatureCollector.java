@@ -76,7 +76,7 @@ public class FeatureCollector extends AbstractFeaturesCollector_Labeled_HasID {
 	
 	
 	@Override
-	public <T extends AbstractFeature> T getFeature(Class<T> featureClass) {
+	public final <T extends AbstractFeature> T getFeature(Class<T> featureClass) {
 		return (T) f;
 	}
 

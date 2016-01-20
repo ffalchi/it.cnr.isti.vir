@@ -6,7 +6,7 @@ import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
+import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -24,12 +24,12 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 		private final int from;
 		private final int to;
 		private final AbstractFeaturesCollector[] objs;
-		private final SimPQueueArr[][] knn;
+		private final SimPQueueDMax[][] knn;
 		private final boolean onlyID;
 		private final ISimilarity[] sim;
 		private final AbstractFeaturesCollector[] q;
 
-		kNNThread_multiSim(AbstractFeaturesCollector[] q, ISimilarity[] sim, SimPQueueArr[][] knn, int from, int to, AbstractFeaturesCollector[]  objs, boolean onlyID) {
+		kNNThread_multiSim(AbstractFeaturesCollector[] q, ISimilarity[] sim, SimPQueueDMax[][] knn, int from, int to, AbstractFeaturesCollector[]  objs, boolean onlyID) {
 			this.from = from;
 			this.to = to;
 			this.objs = objs;
@@ -63,7 +63,7 @@ public class FeaturesCollectorsArchiveSearch_multiSim extends FeaturesCollectors
 		}
 	}
 	
-	public synchronized void getKNNs(AbstractFeaturesCollector[] qObj, SimPQueueArr[][] kNNQueue, final ISimilarity[] sim, final boolean onlyID)
+	public synchronized void getKNNs(AbstractFeaturesCollector[] qObj, SimPQueueDMax[][] kNNQueue, final ISimilarity[] sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
 
 

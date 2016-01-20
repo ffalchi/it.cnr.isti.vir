@@ -20,6 +20,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
 
 
 public class ObjectWithDistance<ObjectClass> implements Comparable<ObjectWithDistance<ObjectClass>> {
@@ -67,7 +68,8 @@ public class ObjectWithDistance<ObjectClass> implements Comparable<ObjectWithDis
 //	}
 		
 	public String toString() {
-		return  "("+ ((IHasID) obj).getID() + ", " + dist +")";
+		//return  "("+ ((IHasID) obj).getID() + ", " + dist +")";
+		return  ((IHasID) obj).getID() + "," +String.format(Locale.ENGLISH, "%.6f", dist);
 	}
 	
 	public final boolean equals(Object obj) {

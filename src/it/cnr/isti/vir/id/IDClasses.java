@@ -23,9 +23,10 @@ public class IDClasses  {
 	public enum IDClasses_ID {
 		IDINTEGER(IDInteger.class, (byte) 0),
 		IDLONG(IDLong.class, (byte) 1),
-		IDSTRING(IDString.class, (byte) 2);
+		IDSTRING(IDString.class, (byte) 2),
+		IDFLICKR(IDFlickr.class, (byte) 3);
 		
-		private static final byte idMax = 2;
+		private static final byte idMax = 3;
 		
 		private Class<? extends AbstractID> c;
 		private byte id;

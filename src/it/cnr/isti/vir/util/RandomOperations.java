@@ -39,6 +39,10 @@ public class RandomOperations {
 		return max*r.nextDouble();
 	}
 	
+	public static final long getLong() {
+		return r.nextLong();
+	}
+	
 	public static final float getFloat() {
 		return r.nextFloat();
 	}
@@ -476,18 +480,7 @@ public class RandomOperations {
 		return res;
 	}
 	
-//	public static final long[] getPerturbated(long[] orig, int nBitsPerturbated) {
-//		long[] res = orig.clone();
-//		int nBits = Long.SIZE * res.length;
-//		for(int i=0; i<nBits; i++) {
-//			int currRandom = RandomOperations.getInt(nBits);
-//			int int_pos = currRandom/Long.SIZE;
-//			long mask = (long) 1<<currRandom%Long.SIZE;
-//			res[int_pos]=res[int_pos]^mask;
-//		}
-//		return res;
-//	}
-	
+
 	public static final long[] getPerturbated(long[] orig, int nBitsPerturbated) {
 		long[] res = orig.clone();
 		int nBits = Long.SIZE * orig.length;
@@ -495,7 +488,7 @@ public class RandomOperations {
 		
 		for(int bit : pert) {
 			int pos = bit/Long.SIZE;
-			long mask = ((long) 1)<<bit%Long.SIZE;
+			long mask = 1L<<bit%Long.SIZE;
 			res[pos]=res[pos]^mask;
 		}
 		return res;
