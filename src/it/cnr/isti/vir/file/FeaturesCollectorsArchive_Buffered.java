@@ -84,6 +84,13 @@ public class FeaturesCollectorsArchive_Buffered {
 		return new FeaturesCollectorsArchive_Buffered(file, archive.getIDClass(), archive.getFcClass() );
 	}
 	
+	/**
+	 * Create an empty archive of FeaturesCollector. FeaturesCollectors are buffered and written to disk while added. 
+	 * @param file The file where the archive will be written
+	 * @param idClass The class, inherited from {@link it.cnr.isti.vir.id.AbstractID} used to represent the ID 
+	 * @param fcClass The class, inherited from {@link it.cnr.isti.vir.id.AbstractLabel} used to represent the class label
+	 * @throws Exception TODO
+	 */
 	public FeaturesCollectorsArchive_Buffered(File file,
 			Class<? extends AbstractID> idClass, Class<? extends AbstractFeaturesCollector> fcClass)
 			throws Exception {
@@ -140,7 +147,7 @@ public class FeaturesCollectorsArchive_Buffered {
 				fc.writeData(out);
 			} else {
 				throw new ArchiveException("FeaturesCollector class inserted ("
-						+ fc.getClass() + ") diffear from expected (" + fcClass
+						+ fc.getClass() + ") differ from expected (" + fcClass
 						+ ")");
 			}
 		}

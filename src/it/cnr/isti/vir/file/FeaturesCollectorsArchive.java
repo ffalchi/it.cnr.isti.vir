@@ -145,6 +145,10 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		this(WorkingPath.getFile(fileName), readIDs);
 	}
 
+	/**
+	 * Constructs an FeaturesCollectorsArchive loading an existing archive.
+	 * @param file The file containing the archive
+	 */
 	public FeaturesCollectorsArchive(File file ) throws IOException,
 			SecurityException, NoSuchMethodException, IllegalArgumentException,
 			InstantiationException, IllegalAccessException,

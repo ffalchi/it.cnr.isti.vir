@@ -74,7 +74,13 @@ public class FV extends AbstractFeature implements IDoubleValues{
     public  FV(double[] values) {
         this.values = values;
     }
-    
+    public  FV(float[] fvalues) {
+    	int n=fvalues.length;
+    	double[]val =new double[n];
+    	for(int i=0;i<n;i++)
+    		val[i]=fvalues[i];
+        this.values = val;
+    }
     public FV(DataInput in ) throws Exception {
         this(in, null);
     }
