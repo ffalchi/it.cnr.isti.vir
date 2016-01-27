@@ -76,6 +76,36 @@ public class Permutation extends AbstractFeature {
 		
 	}
 	
+	public Permutation(double[] distances, int pLength, boolean roPosition) {
+		ordRO = getOrdRO(distances, pLength);
+		
+		if ( roPosition) this.convertToPositions();
+	}
+	
+	public static final int[] getOrdRO(double[] dist ) {
+		return getOrdRO(dist, dist.length);
+	}
+	
+	public static final int[] getOrdRO(double[] dist, int pLength) {
+		
+		SimPQueueDMax<Integer> pQueue = new SimPQueueDMax<Integer>(pLength);
+		
+		for ( int i=0; i<dist.length; i++) {
+			pQueue.offer(i,dist[i]);
+		}
+		
+		SimilarityResults res = pQueue.getResults();
+		int[] ordRO = new int[pLength];
+		int i=0; 
+		for ( Iterator<ObjectWithDistance<Integer>> it =  res.iterator(); it.hasNext(); ) {
+			ObjectWithDistance<Integer> curr = it.next();
+			ordRO[i++] = curr.getObj();
+		}
+		
+		return ordRO;	
+		
+	}
+	
     public Permutation(ByteBuffer in) throws IOException  {
     	byte inVersion = in.get(); // version
     	byte type = in.get();
