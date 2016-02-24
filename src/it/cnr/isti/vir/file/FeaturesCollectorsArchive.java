@@ -655,9 +655,13 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 		for (int i = 0; i < positions.size(); i++) {
 			outOffset.writeLong(positions.get(i));
-			if ( outIDs != null ) ids.get(i).writeData(outIDs);
 		}
-
+		if ( outIDs != null ) {
+			for (int i = 0; i < positions.size(); i++) {
+				ids.get(i).writeData(outIDs);
+			}
+		}
+		
 		outOffset.close();
 		if ( outIDs != null )  outIDs.close();
 

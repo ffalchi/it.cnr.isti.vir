@@ -16,7 +16,6 @@
 
 package it.cnr.isti.vir.file;
 
-import gnu.trove.list.array.TLongArrayList;
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeaturesCollectorArr;
@@ -40,8 +39,8 @@ import java.util.ArrayList;
  */
 public class FeaturesCollectorsArchive_Buffered {
 
-	private final TLongArrayList positions;
-	private final ArrayList<AbstractID> ids;
+	//private final TLongArrayList positions;
+	//private final ArrayList<AbstractID> ids;
 
 	private final DataOutputStream out;
 	//private final RandomAccessFile rndFile;
@@ -54,10 +53,13 @@ public class FeaturesCollectorsArchive_Buffered {
 	File offsetFile;
 	File idFile;
 	
+	int size=0;
+	
 	private boolean closed = false;
 	
 	public final int size() {
-		return ids.size();
+		return size;
+		//return ids.size();
 	}
 	
 	public static  FeaturesCollectorsArchive_Buffered create(File file ) throws Exception {
@@ -65,11 +67,16 @@ public class FeaturesCollectorsArchive_Buffered {
 	}
 	
 	
-	public static  FeaturesCollectorsArchive_Buffered create(File file, Class<? extends AbstractID> idclass ) throws Exception {
+	public static  FeaturesCollectorsArchive_Buffered create(
+			File file,
+			Class<? extends AbstractID> idclass ) throws Exception {
 		return new FeaturesCollectorsArchive_Buffered(file, idclass, FeaturesCollectorArr.class );
 	}
 	
-	public static  FeaturesCollectorsArchive_Buffered create(File file, Class<? extends AbstractID> idclass, Class<? extends AbstractFeaturesCollector> fcClass ) throws Exception {
+	public static  FeaturesCollectorsArchive_Buffered create(
+			File file,
+			Class<? extends AbstractID> idclass,
+			Class<? extends AbstractFeaturesCollector> fcClass ) throws Exception {
 		return new FeaturesCollectorsArchive_Buffered(file, idclass, fcClass );
 	}
 	
@@ -113,9 +120,9 @@ public class FeaturesCollectorsArchive_Buffered {
 
 		FeaturesCollectorsArchive.writeIntro(out, idClass,	fcClass);
 		
-		positions = new TLongArrayList();
-		if ( saveIDs) ids = new ArrayList();
-		else ids = null; 
+		//positions = new TLongArrayList();
+//		if ( saveIDs) ids = new ArrayList();
+//		else ids = null; 
 		
 		offsetFile = new File(FeaturesCollectorsArchive.getIDFileName(file));
 		idFile = new File(FeaturesCollectorsArchive.getOffsetFileName(file));
@@ -129,16 +136,16 @@ public class FeaturesCollectorsArchive_Buffered {
 	public synchronized void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
 
 		//int currPos = positions.size();
-		positions.add(out.size());
+		//positions.add(out.size());
 		
-		if (idClass != null && ids != null ) {
-			AbstractID id = ((IHasID) fc).getID();
-			if (!idClass.isInstance(id)) {
-				throw new ArchiveException("Objecct has a wrong ID class: "
-						+ idClass + " requeste, " + id.getClass() + " found.");
-			}
-			ids.add(id);			
-		}
+//		if (idClass != null && ids != null ) {
+//			AbstractID id = ((IHasID) fc).getID();
+//			if (!idClass.isInstance(id)) {
+//				throw new ArchiveException("Objecct has a wrong ID class: "
+//						+ idClass + " requested, " + id.getClass() + " found.");
+//			}
+//			ids.add(id);			
+//		}
 
 		if (fcClass == null) {
 			FeaturesCollectors.writeData(out, fc);
@@ -152,13 +159,15 @@ public class FeaturesCollectorsArchive_Buffered {
 			}
 		}
 
+		size++;
 	}
 
 
 	public void close() throws IOException {
 		if ( closed ) return;
 		out.close();
-		FeaturesCollectorsArchive.createIndexFiles(offsetFile, idFile, positions, ids);
+		
+		//FeaturesCollectorsArchive.createIndexFiles(offsetFile, idFile, positions, ids);
 		closed = true;
 	}
 	
