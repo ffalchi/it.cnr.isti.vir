@@ -24,9 +24,10 @@ public class IDClasses  {
 		IDINTEGER(IDInteger.class, (byte) 0),
 		IDLONG(IDLong.class, (byte) 1),
 		IDSTRING(IDString.class, (byte) 2),
-		IDFLICKR(IDFlickr.class, (byte) 3);
+		IDFLICKRLEGACY(IDFlickr_Legacy.class, (byte) 3),
+		IDFLICKR(IDFlickr.class, (byte) 4);
 		
-		private static final byte idMax = 3;
+		private static final byte idMax = 4;
 		
 		private Class<? extends AbstractID> c;
 		private byte id;
@@ -132,7 +133,7 @@ public class IDClasses  {
 	}
 	
 	public static void writeClass(Class<? extends AbstractID> c, DataOutput out) throws IOException {
-		out.writeInt(getClassID(c));
+		out.write(getClassID(c));
 	}
 	
 	public static final AbstractID[] readArray(DataInput in, int n, Class<? extends AbstractID> idClass) throws IOException {
@@ -144,6 +145,12 @@ public class IDClasses  {
 		}
 		if ( idClass.equals(IDLong.class) ) {
 			return IDLong.readArray(in, n);
+		}
+		if ( idClass.equals(IDFlickr_Legacy.class) ) {
+			return IDFlickr_Legacy.readArray(in, n);
+		}
+		if ( idClass.equals(IDFlickr.class) ) {
+			return IDFlickr.readArray(in, n);
 		}
 		throw new IOException("idClass not found");
 	}
