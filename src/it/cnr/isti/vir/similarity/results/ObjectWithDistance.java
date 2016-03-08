@@ -92,9 +92,9 @@ public class ObjectWithDistance<ObjectClass> implements Comparable<ObjectWithDis
 	
 	public ObjectWithDistance(DataInput in) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		//obj = (ObjectClass) IDClasses.readData(in);
-		int idType = in.readInt();
+		byte idType = in.readByte();
 		obj = (ObjectClass) IDClasses.getClass(idType).getConstructor(DataInput.class).newInstance(in);
-		dist = in.readDouble();
+		dist = in.readFloat();
 	}
 	
 	public void writeIDFloat(DataOutput out) throws IOException {

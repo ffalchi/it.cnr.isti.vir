@@ -26,6 +26,7 @@ import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.id.IID2URL;
 
+import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -38,7 +39,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.function.Predicate;
 
-public class SimilarityResults<E> implements ISimilarityResults<E> {
+public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<ObjectWithDistance<E>>  {
 
 	protected final Collection<ObjectWithDistance<E>> coll;
 	protected E query;
@@ -169,20 +170,21 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		return id;
 	}
 	
-	public ObjectWithDistance get(int k) {
-		ObjectWithDistance res = null;
-		Iterator<ObjectWithDistance<E>> it = iterator();
-		for ( int i=0; i<k; i++) {
-			if ( it.hasNext() )  {
-				res = it.next();
-			} else {
-				return null;
-			}
-		}
+//	public ObjectWithDistance get(int k) {
+//		ObjectWithDistance res = null;
+//		Iterator<ObjectWithDistance<E>> it = iterator();
+//		for ( int i=0; i<k; i++) {
+//			if ( it.hasNext() )  {
+//				res = it.next();
+//			} else {
+//				return null;
+//			}
+//		}
+//		
+//		return res;
+//	}
 		
-		return res;
-	}
-		
+	@Override
 	public Iterator<ObjectWithDistance<E>> iterator() {
 		if ( excludedGroup == null ) return coll.iterator();
 		//System.out.println("Results Size " + coll.size());
@@ -236,15 +238,15 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 			qID = ((IHasID) query).getID();
 		
 		// Write ID Class
-		IDClasses.writeClass( qID.getClass(), out );
+		IDClasses.writeClass_Int( qID.getClass(), out );
 
 		// Write Query ID 
 		qID.writeData(out);
 		
-		// Result size
+		// Write Result size
 		out.writeInt(coll.size());
 		
-		// Reslts
+		// Write Results
 		for (Iterator<ObjectWithDistance<E>> itThis = this.iterator(); itThis.hasNext(); ) {
 			ObjectWithDistance<E> obj = itThis.next();
 			obj.writeIDFloat(out);
@@ -253,13 +255,8 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 	}
 	
 	public SimilarityResults(DataInputStream in ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-//		int idType = in.readInt();
-		// work around for old Cophir
-//		if ( idType != 1001 ) { 
-//			throw new IOException("IDType error!");
-//		}
 		
-		Constructor<? extends AbstractID> idc = IDClasses.readClass(in).getConstructor(DataInputStream.class);
+		Constructor<? extends AbstractID> idc = IDClasses.readClass_Int(in).getConstructor(DataInput.class);
 		
 		query = (E) idc.newInstance(in);
 
@@ -267,31 +264,19 @@ public class SimilarityResults<E> implements ISimilarityResults<E> {
 		coll = new ArrayList(size);
 		
 		for (int i=0; i<size; i++) {
-			coll.add(new ObjectWithDistance(in));
+			coll.add(new ObjectWithDistance(in,idc));
 		}
 	}
 	
-//	public SimilarityResults(DataInputStream in  ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-//		int idType = in.readInt();
-//		// work around for old Cophir
-////		if ( idType != 1001 ) { 
-////			throw new IOException("IDType error!");
-////		}
-//		
-//		query = (E) new IDInteger(in);
-//		//query = (E) IDClasses.readData(in);
-//		int size = in.readInt();
-//		coll = new ArrayList(size);
-//		
-//		for (int i=0; i<size; i++) {
-//			coll.add(new ObjectWithDistance(in));
-//		}
-//	}
-	
 	public static SimilarityResults[] readArray(DataInputStream in ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		LinkedList<SimilarityResults> list = new LinkedList<SimilarityResults>();
-		while ( in.available() > 0) {
-			list.add( new SimilarityResults(in) );
+		while (  in.available() > 0) {
+			try {
+				list.add( new SimilarityResults(in) );
+			} catch ( Exception e ) {
+				e.printStackTrace();
+				break;
+			}
 		} 
 		
 		SimilarityResults[] arr = new SimilarityResults[list.size()];

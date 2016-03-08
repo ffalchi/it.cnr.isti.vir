@@ -104,25 +104,22 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 		if ( distance >= excDistance) return ;
 		
 		if ( k<0 ) {
-			pQueue.offer(new ObjectWithDistance(object, distance));
-		} else { // k>= 0
-			/// TEST ///
-//			if ( pQueue.size() > k ) {
-//				System.err.println("SimPQueueDMax has more than k objects");
-//			}
-			
-			if ( pQueue.size() < k ) {
-				pQueue.offer(new ObjectWithDistance(object, distance));
+			// RANGE QUERY
+			pQueue.offer(new ObjectWithDistance<O>(object, distance));
+		} else if ( pQueue.size() < k ) {
+				// kNN and pQueue not full
+				pQueue.offer(new ObjectWithDistance<O>(object, distance));
 				if ( pQueue.size() == k ) {
-					if ( range <0 ) excDistance = pQueue.peek().dist;
+					if (range <0 ) excDistance = pQueue.peek().dist;
 				}
-			} else {// pQueue.size()==k
-				ObjectWithDistance temp = pQueue.poll();
-				temp.reset(object, distance);
-				pQueue.offer(temp);
-				if ( range <0 ) excDistance = pQueue.peek().dist;
-			}
+		} else {
+			// kNN pQueue.size()==k
+			ObjectWithDistance<O> temp = pQueue.poll();
+			temp.reset(object, distance);
+			pQueue.offer(temp);
+			if ( range<0 ) excDistance = pQueue.peek().dist;
 		}
+		
 	}
 		
 //		// excDistance also consider range!!!
@@ -241,6 +238,7 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 	@Override
 	public O getFirstObject() {
 		if ( pQueue.size() == 0 ) return null;
+		
 		Iterator<ObjectWithDistance<O>> it=pQueue.iterator();
 		ObjectWithDistance<O> best = it.next();
 		for (int i=1; i<pQueue.size(); i++) {
