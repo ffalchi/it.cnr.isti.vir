@@ -32,6 +32,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,7 +42,7 @@ import java.util.function.Predicate;
 
 public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<ObjectWithDistance<E>>  {
 
-	protected final Collection<ObjectWithDistance<E>> coll;
+	protected final AbstractList<ObjectWithDistance<E>> coll;
 	protected E query;
 	
 	protected ALocalFeaturesGroup excludedGroup = null;
@@ -113,7 +114,7 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		this(null, initSize);
 	}
 	
-	public SimilarityResults(Collection<ObjectWithDistance<E>> given ) {
+	public SimilarityResults(AbstractList<ObjectWithDistance<E>> given ) {
 		this(null, given);
 	}
 	
@@ -127,7 +128,7 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		coll.add(given);
 	}
 	
-	public SimilarityResults(E query, Collection<ObjectWithDistance<E>> given ) {
+	public SimilarityResults(E query, AbstractList<ObjectWithDistance<E>> given ) {
 		this.query = query;
 		coll = given;
 	}
@@ -142,12 +143,6 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 				coll.add( given[i]);
 		}	
 	}
-	
-//	public SimilarityResults(E query) {
-//		this.query = query;
-//		coll = new LinkedList<ObjectWithDistance<E>>();
-//	}
-//	
 	
 	public void setQuery(E query ) {
 		this.query = query;
@@ -170,19 +165,9 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		return id;
 	}
 	
-//	public ObjectWithDistance get(int k) {
-//		ObjectWithDistance res = null;
-//		Iterator<ObjectWithDistance<E>> it = iterator();
-//		for ( int i=0; i<k; i++) {
-//			if ( it.hasNext() )  {
-//				res = it.next();
-//			} else {
-//				return null;
-//			}
-//		}
-//		
-//		return res;
-//	}
+	public ObjectWithDistance get(int k) {
+		return coll.get(k);	
+	}
 		
 	@Override
 	public Iterator<ObjectWithDistance<E>> iterator() {
