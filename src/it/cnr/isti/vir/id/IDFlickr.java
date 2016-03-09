@@ -102,26 +102,39 @@ public class IDFlickr extends AbstractID  {
 
 		}
 		
-//		public String getURL_s(long id) {
-//			return
-//	    		  "https://farm" +
-//	    		  farmid + ".staticflickr.com/" +
-//	    		  serverid + "/" +
-//	    		  id + "_" +
-//	    		  Long.toHexString(secret) + "_" + 
-//	    		  "s" +".jpg";
-//		}
+
+		/**
+		 * @param opt
+		 * 		s	small square 75x75
+		 * 		q	large square 150x150
+		 * 		t	thumbnail, 100 on longest side
+		 * 		m	small, 240 on longest side
+		 * 		n	small, 320 on longest sidee
+		 * 		z	medium 640, 640 on longest side
+		 * 		c	medium 800, 800 on longest side†
+		 * 		b	large, 1024 on longest side*
+		 * 		h	large 1600, 1600 on longest side†
+		 * 		k	large 2048, 2048 on longest side†
+		 *
+		 * @return Flickr URL
+		 */
+		public String getFlickrURL(char opt) {
+			return
+		    		  "https://c2.staticflickr.com/" +
+		    		  farmid + "/" +
+		    		  serverid + "/" +
+		    		  id + "_" +
+		    		  String.format("%010x", secret) + //Long.toHexString(secret) + "_" + 
+		    		  "_" + opt +".jpg";
+		}
 		
-		//https://c2.staticflickr.com/4/3576/3522678715_00ec3ff794_b.jpg
-//		public String getURL_q() {
-//			return
-//	    		  "https://c2.staticflickr.com/" +
-//	    		  farmid + "/" +
-//	    		  serverid + "/" +
-//	    		  id + "_" +
-//	    		  String.format("%010x", secret) + //Long.toHexString(secret) + "_" + 
-//	    		  "_q" +".jpg";
-//		}
+
+		/**
+		 * @return Flickr large square image
+		 */
+		public String getURL_q() {
+			return getFlickrURL('q');
+		}
 		
 		//https://s3-us-west-2.amazonaws.com/multimedia-commons/data/images/000/24a/00024a73d1a4c32fb29732d56a2.jpg
 		public String getURL_mmc() {
