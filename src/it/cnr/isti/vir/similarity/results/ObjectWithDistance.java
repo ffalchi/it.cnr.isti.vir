@@ -31,6 +31,13 @@ public class ObjectWithDistance<ObjectClass> implements Comparable<ObjectWithDis
 	public final ObjectClass getObj() {
 		return obj;
 	}
+	
+	public final AbstractID getID() {
+		if ( obj instanceof IHasID ) {
+			return ((IHasID) obj).getID();			
+		}
+		return null;
+	}
 
 	public final double getDist() {
 		return dist;
