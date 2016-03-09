@@ -16,12 +16,11 @@ import it.cnr.isti.vir.distance.PearsonDistance;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.Floats;
-import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 
 import java.util.Collection;
 import java.util.Properties;
 
-public class FloatsPearsonMetric  implements IMetric<Floats>, IMeanEvaluator<Floats> {
+public class FloatsPearsonMetric  implements IMetric<Floats> {
 
 	private static long distCount = 0;
 	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(Floats.class);
@@ -55,7 +54,7 @@ public class FloatsPearsonMetric  implements IMetric<Floats>, IMeanEvaluator<Flo
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
-		return distance( f1.getFeature(Floats.class), f2.getFeature(Floats.class), max);
+		return distance( f1.getFeature(Floats.class), f2.getFeature(Floats.class));
 	}
 	
 	@Override
@@ -65,14 +64,9 @@ public class FloatsPearsonMetric  implements IMetric<Floats>, IMeanEvaluator<Flo
 	
 	@Override
 	public final double distance(Floats f1, Floats f2, double max) {
-		return PearsonDistance.get(f1.getValues(), f2.getValues(), max );
+		return PearsonDistance.get(f1.getValues(), f2.getValues()  );
 	}
 
-	@Override
-	public Floats getMean(Collection<Floats> coll) {
-		return Floats.getMean(coll);
-	}
-	
 	public String getStatsString() { return ""; };
 	
 }

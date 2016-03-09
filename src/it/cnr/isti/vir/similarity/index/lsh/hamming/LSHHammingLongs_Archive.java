@@ -69,7 +69,7 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
     
     FeaturesCollectorsArchive fca;    
     
-    boolean parallel = false;
+    boolean parallel = true;
 
     
     public int getNumberOfBuckets(int b){
@@ -280,13 +280,13 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
     
 	class Search implements Runnable {
 
-		private final TIntHashSet objects;
+		private final TIntArrayList result;
 		private final long[] query;
 		private final Iterator<Integer> ls;
 	    
-		Search(long[] query, Iterator<Integer> ls, TIntArrayList[][] tables, G_HammingInts[] gs, TIntHashSet objects) {
+		Search(long[] query, Iterator<Integer> ls, TIntArrayList[][] tables, G_HammingInts[] gs, TIntArrayList result ) {
             this.ls = ls;
-			this.objects = objects;
+			this.result = result;
             this.query=  query;
         }
         
@@ -310,9 +310,7 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
 	
 	            	for(int iE=0; iE<bucket.size(); iE++ ){
 	                    int o=bucket.get(iE);
-	                    synchronized(objects) {
-		                	objects.add(o);
-	                    }
+	                    result.add(o);
 		            }
 	            }
         	}
@@ -369,13 +367,16 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
     	if ( parallel ) {
 			int nThread = ParallelOptions.reserveNFreeProcessors()+1;
 			Thread[] thread = new Thread[nThread];
+			TIntArrayList[] results = new TIntArrayList[nThread];
 			for ( int ti=0; ti<thread.length; ti++ ) {
-				thread[ti] = new Thread( new Search(query, ls.iterator(), tables, gs, objects) ) ;
+				results[ti] = new TIntArrayList();
+				thread[ti] = new Thread( new Search(query, ls.iterator(), tables, gs, results[ti]) ) ;
 	        	thread[ti].start();
 			}
 			
-	        for ( Thread t : thread ) {
-	        	t.join();
+	        for ( int ti=0; ti<thread.length; ti++  ) {
+	        	thread[ti].join();
+	        	objects.addAll(results[ti]);
 	        }
 	        ParallelOptions.free(nThread-1);
     	} else {
@@ -395,38 +396,38 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
 	        }
     	}
     	
-    	if ( parallel ) {
-	        // Parallel
-	        TIntIterator it = objects.iterator();
-			int nThread = ParallelOptions.reserveNFreeProcessors()+1;
-			Thread[] thread = new Thread[nThread];
-			for ( int ti=0; ti<thread.length; ti++ ) {
-				thread[ti] = new Thread( new Evaluate(query, it, pQueue) ) ;
-	        	thread[ti].start();
+//    	if ( parallel ) {
+//	        // Parallel
+//	        TIntIterator it = objects.iterator();
+//			int nThread = ParallelOptions.reserveNFreeProcessors()+1;
+//			Thread[] thread = new Thread[nThread];
+//			for ( int ti=0; ti<thread.length; ti++ ) {
+//				thread[ti] = new Thread( new Evaluate(query, it, pQueue) ) ;
+//	        	thread[ti].start();
+//			}
+//			
+//	        for ( Thread t : thread ) {
+//	        	t.join();
+//	        }
+//	        ParallelOptions.free(nThread-1);
+//    	} else {
+    	Log.info_verbose("Candidate set size: " + objects.size());
+    	long[] data = new long[nLongs];
+    	for(TIntIterator it = objects.iterator(); it.hasNext(); ){
+	        int oID=it.next();
+		    AbstractFeaturesCollector fc = null;
+		
+		    try {
+				fc = fca.get(oID);
+			} catch (ArchiveException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-	        for ( Thread t : thread ) {
-	        	t.join();
-	        }
-	        ParallelOptions.free(nThread-1);
-    	} else {
-    		Log.info_verbose("Candidate set size: " + objects.size());
-	       long[] data = new long[nLongs];
-	       for(TIntIterator it = objects.iterator(); it.hasNext(); ){
-	            int oID=it.next();
-	
-	            AbstractFeaturesCollector fc = null;
-				try {
-					fc = fca.get(oID);
-				} catch (ArchiveException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-	            int dist=Hamming.distance(query, ((ILongBinaryValues) fc.getFeature(fClass)).getValues()  );
-	            pQueue.offer(fc, dist);
-	
-	        }
+	        
+		    int dist=Hamming.distance(query, ((ILongBinaryValues) fc.getFeature(fClass)).getValues()  );
+	        pQueue.offer(fc, dist);
     	}
+//   	}
     	
         hashSetPool.releaseTIntHashSet(iHashSet);
         

@@ -7,28 +7,11 @@ public class Normalize {
 	/**
 	 * @param values
 	 * 
-	 * In case the sum of the values is 0.0, values[] is set to null
+	 * In case the sum of the values is 0.0, values[] is left unchanged
 	 */
 	public static final void l2( double[] values ) {
 		double norm = Norm.l2(values);
-        if ( norm > 0.0 ) {
-	        for (int i=0; i<values.length; i++) {
-	        	values[i] = values[i] / norm;	        	
-	        }        
-        } else {
-        	//  TO DO !!!
-        }
-	}
-	
-	
-	/**
-	 * @param values
-	 * 
-	 * In case the sum of the values is 0.0, values[] is set to null
-	 */
-	public static final void l2( float[] values ) {
-		float norm = Norm.l2(values);
-        if ( norm > 0.0 ) {
+        if ( norm > 0.0 && norm != 1.0) {
 	        for (int i=0; i<values.length; i++) {
 	        	values[i] = values[i] / norm;	        	
 	        }        
@@ -41,9 +24,24 @@ public class Normalize {
 	 * 
 	 * In case the sum of the values is 0.0, values[] is left unchanged
 	 */
+	public static final void l2( float[] values ) {
+		float norm = Norm.l2(values);
+        if ( norm > 0.0F && norm != 1.0F) {
+	        for (int i=0; i<values.length; i++) {
+	        	values[i] = values[i] / norm;	        	
+	        } 
+        }
+	}
+	
+	
+	/**
+	 * @param values
+	 * 
+	 * In case the sum of the values is 0.0, values[] is left unchanged
+	 */
 	public static final void l2( float[] values, int start, int end ) {
 		float norm = Norm.l2(values, start, end );
-        if ( norm > 0.0F ) {
+        if ( norm > 0.0F && norm != 1.0F) {
 	        for (int i=start; i<end; i++) {
 	        	values[i] = values[i] / norm;	        	
 	        }        
@@ -57,21 +55,20 @@ public class Normalize {
 	 */
 	public static final void l2( double[] values, int start, int end ) {
 		double norm = Norm.l2(values, start, end );
-        if ( norm > 0.0F ) {
+        if ( norm > 0.0 && norm != 1.0) {
 	        for (int i=start; i<end; i++) {
 	        	values[i] = values[i] / norm;	        	
 	        }        
         }
-        // zero values are left 0
 	}
 	
 	public static final void ssr( float[] values ) {
 		int size = values.length;
 		// Power Normalization 0.5
         for (int i=0; i<size; i++) {     
-        	if ( values[i] > 0 )
+        	if ( values[i] > 0.0F )
         		values[i] =   (float) Math.sqrt(values[i]);
-        	else  if ( values[i] < 0 )
+        	else  if ( values[i] < 0.0F )
         		values[i] = - (float) Math.sqrt(-values[i]);
         }
 	}
@@ -154,10 +151,6 @@ public class Normalize {
         		values[i] = - (float) Math.pow(-values[i], a);
         }
 	}
-	
-//	public static final void power( float[] values, float a ) {
-//		return;
-//	}
 	
 	
 }

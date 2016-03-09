@@ -60,15 +60,25 @@ public class VectorMath {
 		return res;
 	}
 	
+	public static final float mean_float(float[] v) {
+		return sum_float(v) / (float) v.length;
+	}
+	
 	public static final double mean(float[] v) {
 		return sum(v) / (double) v.length;
 	}
 	
+	public static final float sum_float(float[] v) {
+		float res = 0;
+		for (float f : v)
+			res += f;
+		return res;
+	}
+	
 	public static final double sum(float[] v) {
-		int nD = v.length;
 		double res = 0;
-		for (int iD = 0; iD < nD; iD++)
-			res += v[iD];
+		for (double f : v)
+			res += f;
 		return res;
 	}
 	
@@ -77,65 +87,50 @@ public class VectorMath {
 	}
 	
 	public static final double sum(double[] v) {
-		int nD = v.length;
 		double res = 0;
-		for (int iD = 0; iD < nD; iD++)
-			res += v[iD];
+		for (double f : v)
+			res += f;
 		return res;
 	}
 	
 	public static final double scalarProduct( double[] a, double[] b) {
 		double res = 0;
-		
-		for ( int i=0; i<a.length; i++) {
+		for ( int i=0; i<a.length; i++)
 			res += a[i] * b[i];
-		}
-		
 		return res;		
 	}
 	
 	public static final double scalarProduct( float[] a, double[] b) {
 		double res = 0;
-		
-		for ( int i=0; i<a.length; i++) {
+		for ( int i=0; i<a.length; i++)
 			res += a[i] * b[i];
-		}
-		
 		return res;		
 	}
 	
 	public static final double scalarProduct( double[] a, float[] b) {
 		double res = 0;
-		
-		for ( int i=0; i<a.length; i++) {
+		for ( int i=0; i<a.length; i++)
 			res += a[i] * b[i];
-		}
-		
 		return (float) res;		
 	}
 	
 	public static final float scalarProduct( float[] a, float[] b) {
-		float res = 0;
-		
-		for ( int i=0; i<a.length; i++) {
+		float res = 0;		
+		for ( int i=0; i<a.length; i++)
 			res += a[i] * b[i];
-		}
-		
 		return res;		
 	}
 	
 	public static final void multiply(float[] v, float c) {
 		int nD = v.length;
-		for (int iD = 0; iD < nD; iD++) {
+		for (int iD = 0; iD < nD; iD++)
 			v[iD] *= c;
-		}
 	}
 	
 	public static final void multiply(double[] v, double c) {
 		int nD = v.length;
-		for (int iD = 0; iD < nD; iD++) {
+		for (int iD = 0; iD < nD; iD++)
 			v[iD] *= c;
-		}
 	}
 	
 	public static final float[] getFloats_UBytes(byte[] values ) {

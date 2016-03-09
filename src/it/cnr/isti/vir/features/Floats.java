@@ -14,6 +14,7 @@ package it.cnr.isti.vir.features;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Mean;
 import it.cnr.isti.vir.util.math.Normalize;
+import it.cnr.isti.vir.util.math.ReLu;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -25,8 +26,12 @@ import java.util.Iterator;
 
 
 
+
 public class Floats extends AbstractFeature implements IFloatValues {
 
+	static boolean applyReLuOnReading = false;
+	static boolean applyL2NormOnReading = false;
+	
 	public AbstractFeaturesCollector linkedFC;
 	
 	public float[] values;
@@ -55,10 +60,8 @@ public class Floats extends AbstractFeature implements IFloatValues {
 			}
 		}	
 		
-		// TO REMOVE!!!!!!!!!!!!!!!
-//		ReLu.perform(values);
-//		negPow(values, 0.5);
-//		Normalize.l2(values);
+		if 	(applyReLuOnReading) ReLu.perform(values);
+		if ( applyL2NormOnReading ) Normalize.l2(values);
 
 	}
 	
@@ -73,10 +76,8 @@ public class Floats extends AbstractFeature implements IFloatValues {
 			values = FloatByteArrayUtil.get(bytes, 0, size);
 		}
 		
-		// TO REMOVE!!!!!!!!!!!!!!!
-//		ReLu.perform(values);
-//		negPow(values, 0.5);
-//		Normalize.l2(values);
+		if 	(applyReLuOnReading) ReLu.perform(values);
+		if ( applyL2NormOnReading ) Normalize.l2(values);
     }
 	
 	public Floats(float[] values) {

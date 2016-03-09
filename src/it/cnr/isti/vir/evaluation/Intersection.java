@@ -93,7 +93,7 @@ public class Intersection {
 			int iRes2 = 0;
 			for ( Iterator<ObjectWithDistance> it2 = res2.iterator(); iRes2<kRes2; iRes2++) {
 				ObjectWithDistance currRes2 = it2.next();
-				if ( currObj1.equals(currRes2.getObj()) ) {
+				if ( ((IHasID) currObj1).getID().equals(((IHasID) currRes2.getObj()).getID()) ) {
 					count++;
 					break;
 				}
