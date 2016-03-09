@@ -11,60 +11,27 @@
  ******************************************************************************/
 package it.cnr.isti.vir.distance;
 
+import it.cnr.isti.vir.util.math.VectorMath;
+
 public class PearsonDistance {
 
-	
 	public static final double get(float[]f1, float[]f2) {
 		double acc = 0;
 		double accn1 = 0;
 		double accn2 = 0;
 		
-		float mean1 = mean(f1);
-		float mean2 = mean(f2);
-		
+		float mean1 = VectorMath.mean_float(f1);
+		float mean2 = VectorMath.mean_float(f2);
 		
 		for ( int j=0; j<f1.length; j++) {
-			double prod = (f1[j] - mean1) * (f2[j] - mean2);
-			double norm1 = (f1[j] - mean1) * (f1[j] - mean1);
-			double norm2 = (f2[j] - mean2) * (f2[j] - mean2);
-			acc += prod;
-			accn1 += norm1;
-			accn2 += norm2;
+			float t1 = f1[j] - mean1;
+			float t2 = f2[j] - mean2;
+
+			acc += t1 * t2;
+			accn1 += t1 * t1;
+			accn2 += t2 * t2;
 		}
 		return 1.0 - acc/Math.sqrt(accn1*accn2); 
-	}
-	
-	public static final double get(float[]f1, float[]f2, double max) {
-		double acc = 0;
-		double accn1 = 0;
-		double accn2 = 0;
-		
-		float mean1 = mean(f1);
-		float mean2 = mean(f2);
-		
-		
-		for ( int j=0; j<f1.length; j++) {
-			double prod = (f1[j] - mean1) * (f2[j] - mean2);
-			double norm1 = (f1[j] - mean1) * (f1[j] - mean1);
-			double norm2 = (f2[j] - mean2) * (f2[j] - mean2);
-			acc += prod;
-			accn1 += norm1;
-			accn2 += norm2;
-		}
-		double dist = 1.0 - acc/Math.sqrt(accn1*accn2);
-		
-		if (dist > max) 
-			return -dist; 
-		else
-			return 1.0 - acc/Math.sqrt(accn1*accn2); 
-	}
-	
-	private static float mean(float[] f){
-		float mean = 0;
-	    for (int i = 0; i < f.length; i++) {
-	    	mean += f[i];
-	    }		
-		return mean/(float)f.length;
 	}
 	
 }
