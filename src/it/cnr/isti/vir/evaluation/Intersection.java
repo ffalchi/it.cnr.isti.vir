@@ -71,17 +71,17 @@ public class Intersection {
 		return getNormalized(res1, res2, res1.size(), res2.size());
 	}
 	
-	public static double getNormalized(ISimilarityResults res1, ISimilarityResults res2, int kRes1, int kRes2 ) throws Exception {
+	public static double getNormalized(ISimilarityResults res1, ISimilarityResults res2, int kRes1, int kRes2 ) {
 		int count = getN(res1,res2,kRes1,kRes2);
 		int min = Math.min(kRes1, kRes2);
 		return (double) count / min;
 	}
 	
-	public static int getN(ISimilarityResults res1, ISimilarityResults res2 ) throws Exception {
-		return getN(res1, res2, res1.size(), res2.size());
+	public static int getN(ISimilarityResults approxResults, ISimilarityResults gtResults ) throws Exception {
+		return getN(approxResults, gtResults, approxResults.size(), gtResults.size());
 	}
 	
-	public static int getN(ISimilarityResults res1, ISimilarityResults res2, int kRes1, int kRes2 ) throws Exception {
+	public static int getN(ISimilarityResults res1, ISimilarityResults res2, int kRes1, int kRes2 ) {
 		int count = 0;
 		int iRes1 = 0;
 		
@@ -103,5 +103,102 @@ public class Intersection {
 		}
 		return count;
 	}
+	
+	/**
+	 * @param approxResults			Approximate Results
+	 * @param gtResults				Ground Truth Results
+	 * @return The positions of the first result in gtResults (Ground Truth Results) not found in the approxResults
+	 * @throws Exception
+	 */
+	public static int getMinPosMissed(ISimilarityResults approxResults, ISimilarityResults gtResults ) {
+		return getMinPosMissed(approxResults, gtResults, approxResults.size(), gtResults.size());
+	}
+	
+	
+	/**
+	 * @param approxResults			Approximate Results
+	 * @param gtResults				Ground Truth Results
+	 * @param kApproxResults		The length of approxResults to be considered
+	 * @param kGTResults			The length of Ground Truth Results to be considered
+	 * @return The positions of the first result in gtResults (Ground Truth Results) not found in the approxResults
+	 * If nothing was missed, it returns the position of the first result not reported in the Approximate results, i.e., kApproxResults
+	 * @throws Exception
+	 */
+	public static int getMinPosMissed(ISimilarityResults approxResults, ISimilarityResults gtResults, int kApproxResults, int kGTResults ) {
+		int iGTRes = 0;
+		for ( Iterator<ObjectWithDistance> it = gtResults.iterator(); iGTRes < kGTResults; iGTRes++) {
+			ObjectWithDistance currGTResult = it.next();
+			AbstractID currGTID = currGTResult.getID();
+			
+			// searching currGTID between the approximate results
+			boolean found = false;
+			int iAppRes = 0;
+			for ( Iterator<ObjectWithDistance> it2 = approxResults.iterator(); iAppRes < kApproxResults; iAppRes++ ) {
+				ObjectWithDistance currRes2 = it2.next();
+				if ( currGTID.equals( currRes2.getID() ) ) {
+					found = true;
+					break;
+				}				
+			}
+			if ( !found ) return iGTRes;
+			
+		}
+		
+		// if notingh was missed, we return the position of the first result not reported in the Approximate results, i.e., kApproxResults 
+		return kApproxResults;
+	}
+	
+	
+	/**
+	 * @param approxResults			Approximate Results
+	 * @param gtResults				Ground Truth Results
+	 * @return The average positions of the missed results
+	 */
+	public static double getAvgPosOfMissed(ISimilarityResults res1, ISimilarityResults res2 ) {
+		return getAvgPosOfMissed(res1, res2, res1.size(), res2.size());
+	}
+	
+	/**
+	 * @param approxResults			Approximate Results
+	 * @param gtResults				Ground Truth Results
+	 * @param kApproxResults		The length of approxResults to be considered
+	 * @param kGTResults			The length of Ground Truth Results to be considered
+	 * @return The average positions of the missed results.
+	 * If nothing was missed, it returns the position of the first result not reported in the Approximate results, i.e., kApproxResutls
+	 */
+	public static double getAvgPosOfMissed(ISimilarityResults approxResults, ISimilarityResults gtResults, int kApproxResults, int kGTResults ) {
+		long posAcc = 0;
+		int missedCount = 0;
+
+		int iGTRes = 0;
+		for ( Iterator<ObjectWithDistance> it = gtResults.iterator(); iGTRes < kGTResults; iGTRes++) {
+			ObjectWithDistance currGTResult = it.next();
+			AbstractID currGTID = currGTResult.getID();
+			
+			// searching currGTID between the approximate results
+			boolean found = false;
+			int iAppRes = 0;
+			for ( Iterator<ObjectWithDistance> it2 = approxResults.iterator(); iAppRes < kApproxResults; iAppRes++ ) {
+				ObjectWithDistance currRes2 = it2.next();
+				if ( currGTID.equals( currRes2.getID() ) ) {
+					found = true;
+					break;
+				}				
+			}
+			if ( !found ) {
+				missedCount++;
+				posAcc += iGTRes;
+			}
+			
+			
+		}
+		
+		// if nothing was missed, it returns the position of the first result not reported in the Approximate results, i.e., kApproxResutls
+		if ( missedCount == 0 ) return kApproxResults;
+		
+		return posAcc/missedCount;
+	}
+	
+	
 
 }
