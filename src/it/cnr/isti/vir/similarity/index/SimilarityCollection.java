@@ -49,7 +49,9 @@ public class SimilarityCollection implements IkNNExecuter {
 		//KNNObjects knn = new KNNObjects(qObj, k, sim);
 		KNNPQueue knn = new KNNPQueue(	new SimPQueue_r(r),sim, qObj );
 		knn.offerAll(coll);
-		return knn.getResults();
+		ISimilarityResults res = knn.getResults();
+		res.setQuery(qObj);
+		return res;
 	}
 
 	@Override
@@ -72,6 +74,7 @@ public class SimilarityCollection implements IkNNExecuter {
 			KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj[i] );
 			knn.offerAll(coll);
 			res[i] = knn.getResults();
+			res[i].setQuery(qObj[i]);
 		}
 		return res;
 	}
