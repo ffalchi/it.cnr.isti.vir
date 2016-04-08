@@ -9,7 +9,6 @@ import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
-import it.cnr.isti.vir.similarity.pqueues.SimPQueueArr;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
@@ -97,7 +96,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 			kNNQueue[i] = new SimPQueueDMax(k);
 		}
 
-		getKNN(qObj, kNNQueue, sim, onlyID);
+		search(qObj, kNNQueue, sim, onlyID);
 
 		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
@@ -108,8 +107,31 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		return res;
 	}
 	
-	// For kNN searching
-	class kNNThread implements Runnable {
+	public SimilarityResults[] getRange(
+			AbstractFeaturesCollector[] qObj, double range,
+			final ISimilarity sim, final boolean onlyID) throws IOException, SecurityException,
+			NoSuchMethodException, IllegalArgumentException,
+			InstantiationException, IllegalAccessException,
+			InvocationTargetException, InterruptedException {
+		
+		SimPQueueDMax[] pQueue = new SimPQueueDMax[qObj.length];
+		for (int i = 0; i < pQueue.length; i++) {
+			pQueue[i] = new SimPQueueDMax(range);
+		}
+
+		search(qObj, pQueue, sim, onlyID);
+
+		SimilarityResults[] res = new SimilarityResults[pQueue.length];
+		for (int i = 0; i < pQueue.length; i++) {
+			res[i] = pQueue[i].getResults();
+
+		}
+
+		return res;
+	}
+	
+	
+	class pQueueThread implements Runnable {
 		private final Iterator<AbstractFeaturesCollector> it;
 		private final AbstractSimPQueue[] knn;
 		private final boolean onlyID;
@@ -117,7 +139,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		private final AbstractFeaturesCollector[] q;
 		private final TimeManager tm;
 		
-		kNNThread(
+		pQueueThread(
 				AbstractFeaturesCollector[] q,
 				ISimilarity sim,
 				AbstractSimPQueue[] knn,
@@ -162,7 +184,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 		}
 	}
 	
-	public synchronized void getKNN(
+	public synchronized void search(
 			AbstractFeaturesCollector[] qObj,
 			AbstractSimPQueue[] kNNQueue,
 			final ISimilarity sim,
@@ -199,7 +221,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				int nThread = ParallelOptions.reserveNFreeProcessors()+1;
 				Thread[] thread = new Thread[nThread];
 				for ( int ti=0; ti<thread.length; ti++ ) {
-					thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, it, onlyID, tm) ) ;
+					thread[ti] = new Thread( new pQueueThread(qObj, sim, kNNQueue, it, onlyID, tm) ) ;
 		        	thread[ti].start();
 				}
 				
@@ -264,7 +286,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				int nThread = ParallelOptions.reserveNFreeProcessors();
 				Thread[] thread = new Thread[nThread];
 				for ( int ti=0; ti<thread.length; ti++ ) {
-					thread[ti] = new Thread( new kNNThread(qObj, sim, kNNQueue, it, true, tm) ) ;
+					thread[ti] = new Thread( new pQueueThread(qObj, sim, kNNQueue, it, true, tm) ) ;
 		        	thread[ti].start();
 				}
 		        for ( Thread t : thread ) {

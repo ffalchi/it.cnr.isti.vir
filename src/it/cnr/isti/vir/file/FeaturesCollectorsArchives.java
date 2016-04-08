@@ -26,6 +26,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class FeaturesCollectorsArchives {
 
@@ -86,7 +87,23 @@ public class FeaturesCollectorsArchives {
 	public FeaturesCollectorsArchives(File[] archiveFiles) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		this(archiveFiles, true);
 	}
+	
 	public FeaturesCollectorsArchives(File[] archiveFiles, boolean readIDs) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		archive = new FeaturesCollectorsArchive[archiveFiles.length];
+		archiveStartIndex = new int[archiveFiles.length];
+		size = 0;
+		for ( int i=0; i<archive.length; i++) {			
+			archiveStartIndex[i] = size;
+			archive[i] = new FeaturesCollectorsArchive(archiveFiles[i], readIDs);
+			size += archive[i].size();
+		}		
+	}
+	
+	public FeaturesCollectorsArchives(String[] archiveFiles) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+		this(archiveFiles, true);
+	}
+	
+	public FeaturesCollectorsArchives(String[] archiveFiles, boolean readIDs) throws SecurityException, IllegalArgumentException, IOException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		archive = new FeaturesCollectorsArchive[archiveFiles.length];
 		archiveStartIndex = new int[archiveFiles.length];
 		size = 0;
@@ -184,6 +201,26 @@ public class FeaturesCollectorsArchives {
 		return res;
 	}
 	
+	public synchronized SimilarityResults[] getKNN(Collection<AbstractFeaturesCollector> qObj,
+			int k, final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, InterruptedException {
+		AbstractFeaturesCollector[] tArr = new AbstractFeaturesCollector[qObj.size()];
+		qObj.toArray(tArr);
+		return getKNN(tArr, k, sim, onlyID);
+	}
+	
+	public synchronized SimilarityResults[] getRange(Collection<AbstractFeaturesCollector> qObj,
+			double range, final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, InterruptedException {
+		AbstractFeaturesCollector[] tArr = new AbstractFeaturesCollector[qObj.size()];
+		qObj.toArray(tArr);
+		return getRange(tArr, range, sim, onlyID);
+	}
+	
 	public synchronized SimilarityResults[] getKNN(AbstractFeaturesCollector[] qObj,
 			int k, final ISimilarity sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException,
@@ -198,12 +235,39 @@ public class FeaturesCollectorsArchives {
 		for (int i = 0; i < archive.length; i++) {
 			Log.info_verbose("... searching in archive " + archive[i].getfile());
 			FeaturesCollectorsArchiveSearch search = new FeaturesCollectorsArchiveSearch(archive[i]);
-			search.getKNN(qObj, kNNQueue, sim, onlyID);
+			search.search(qObj, kNNQueue, sim, onlyID);
 		}
 
 		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
 		for (int i = 0; i < kNNQueue.length; i++) {
 			res[i] = kNNQueue[i].getResults();
+			res[i].setQuery(qObj[i]);
+		}
+
+		return res;
+	}
+	
+	public synchronized SimilarityResults[] getRange(AbstractFeaturesCollector[] qObj,
+			double range, final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, InterruptedException {
+
+		SimPQueueDMax[] kNNQueue = new SimPQueueDMax[qObj.length];
+		for (int i = 0; i < kNNQueue.length; i++) {
+			kNNQueue[i] = new SimPQueueDMax(range);
+		}
+
+		for (int i = 0; i < archive.length; i++) {
+			Log.info_verbose("... searching in archive " + archive[i].getfile());
+			FeaturesCollectorsArchiveSearch search = new FeaturesCollectorsArchiveSearch(archive[i]);
+			search.search(qObj, kNNQueue, sim, onlyID);
+		}
+
+		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
+		for (int i = 0; i < kNNQueue.length; i++) {
+			res[i] = kNNQueue[i].getResults();
+			res[i].setQuery(qObj[i]);
 		}
 
 		return res;

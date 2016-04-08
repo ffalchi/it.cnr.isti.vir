@@ -22,7 +22,6 @@ import it.cnr.isti.vir.features.FeaturesCollectorArr;
 import it.cnr.isti.vir.features.FeaturesCollectors;
 import it.cnr.isti.vir.id.AbstractID;
 import it.cnr.isti.vir.id.IDString;
-import it.cnr.isti.vir.id.IHasID;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -31,7 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
 /**
  *
@@ -78,6 +76,10 @@ public class FeaturesCollectorsArchive_Buffered {
 			Class<? extends AbstractID> idclass,
 			Class<? extends AbstractFeaturesCollector> fcClass ) throws Exception {
 		return new FeaturesCollectorsArchive_Buffered(file, idclass, fcClass );
+	}
+	
+	public static  FeaturesCollectorsArchive_Buffered createAs(String newFile, String origFile ) throws Exception {
+		return createAs( new File(newFile), new File(origFile));
 	}
 	
 	public static  FeaturesCollectorsArchive_Buffered createAs(File newFile, File origFile ) throws Exception {

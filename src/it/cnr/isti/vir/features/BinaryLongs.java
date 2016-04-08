@@ -1,6 +1,7 @@
 package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.util.bytes.LongByteArrayUtil;
+import it.cnr.isti.vir.util.math.Binarization;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -45,31 +46,11 @@ public class BinaryLongs extends AbstractFeature implements ILongBinaryValues {
 	}
 	
 	public BinaryLongs(float[] f ) {
-		this( f, 0.0F);
+		values = Binarization.getLongs(f );
 	}
 
 	public BinaryLongs(float[] f, float thr) {
-		
-		values = new long[f.length / 64];
-		int iValue = 0;
-		int bitCount = 0;
-		
-		for ( int i=0; i<f.length; i++ ) {
-			
-			// adding bit
-			if ( f[i] > thr ) values[iValue] += 1;
-					
-			// shifting temporary long value
-			values[iValue] = values[iValue] << 1;
-			
-			bitCount++;
-			
-			if ( bitCount == 64 ) {
-				// moving to next long value
-				iValue++;
-				bitCount =  0;
-			} 
-		}
+		values = Binarization.getLongs(f, thr);
 	}
 	
 	public BinaryLongs(DataInput in ) throws Exception {

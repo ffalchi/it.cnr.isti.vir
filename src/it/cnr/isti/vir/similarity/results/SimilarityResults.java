@@ -152,6 +152,10 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		return query;
 	}
 	
+	public AbstractID getQuery_ID() {
+		return AbstractID.getID(query);
+	}
+	
 	public void removeFirst() {
 		coll.remove(coll.iterator().next());
 	}

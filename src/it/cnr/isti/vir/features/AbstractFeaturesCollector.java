@@ -11,6 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.features;
 
+import it.cnr.isti.vir.id.AbstractID;
+
 import java.util.Collection;
 
 public abstract class AbstractFeaturesCollector extends AbstractFeature {
@@ -19,6 +21,10 @@ public abstract class AbstractFeaturesCollector extends AbstractFeature {
 	
 	public abstract void add( AbstractFeature f ) throws FeaturesCollectorException ;
 
+	public AbstractID getID() {
+		return null;
+	}
+	
 	public void addAll( Collection<AbstractFeature> coll ) throws FeaturesCollectorException {
 		for ( AbstractFeature f : coll ) {
 			add(f);

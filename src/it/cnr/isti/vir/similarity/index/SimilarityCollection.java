@@ -59,7 +59,9 @@ public class SimilarityCollection implements IkNNExecuter {
 		//KNNObjects knn = new KNNObjects(qObj, k, sim);
 		KNNPQueue knn =	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj );
 		knn.offerAll(coll);
-		return knn.getResults();
+		ISimilarityResults res = knn.getResults();
+		res.setQuery(qObj);
+		return res;
 	}
 
 	public synchronized ISimilarityResults[] getKNNResults(Collection<AbstractFeaturesCollector> qObj, int k) throws InterruptedException {
@@ -68,10 +70,27 @@ public class SimilarityCollection implements IkNNExecuter {
 		return getKNNResults( temp, k);
 	}
 	
+	public synchronized ISimilarityResults[] getRangeResults(Collection<AbstractFeaturesCollector> qObj, double r) throws InterruptedException {
+		AbstractFeaturesCollector[] temp = new AbstractFeaturesCollector[qObj.size()];
+		qObj.toArray(temp);
+		return getRangeResults( temp, r);
+	}
+	
 	public synchronized ISimilarityResults[] getKNNResults(AbstractFeaturesCollector[] qObj, int k) throws InterruptedException {
 		ISimilarityResults[] res = new ISimilarityResults[qObj.length];
 		for ( int i=0; i<res.length; i++) {
 			KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(k),sim, qObj[i] );
+			knn.offerAll(coll);
+			res[i] = knn.getResults();
+			res[i].setQuery(qObj[i]);
+		}
+		return res;
+	}
+	
+	public synchronized ISimilarityResults[] getRangeResults(AbstractFeaturesCollector[] qObj, double r) throws InterruptedException {
+		ISimilarityResults[] res = new ISimilarityResults[qObj.length];
+		for ( int i=0; i<res.length; i++) {
+			KNNPQueue knn = 	new KNNPQueue(	new SimPQueueDMax(r),sim, qObj[i] );
 			knn.offerAll(coll);
 			res[i] = knn.getResults();
 			res[i].setQuery(qObj[i]);

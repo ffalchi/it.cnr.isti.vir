@@ -35,4 +35,12 @@ public abstract class AbstractID implements IHasID {
 		return this;
 	}
 	
+	public static final AbstractID getID(Object obj) {
+		if ( obj == null ) return null;
+		if ( obj instanceof IHasID ) {
+			return ((IHasID) obj).getID();			
+		}
+		return null;
+	}
+	
 }
