@@ -1,0 +1,68 @@
+package it.cnr.isti.vir.similarity.metric;
+
+import it.cnr.isti.vir.clustering.IMeanEvaluator;
+import it.cnr.isti.vir.distance.L2;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.features.FeatureClassCollector;
+import it.cnr.isti.vir.features.Floats;
+
+import java.util.Collection;
+import java.util.Properties;
+
+public class FloatsL2Metric_L2Norm  implements IMetric<Floats>, IMeanEvaluator<Floats> {
+
+	private static double sqrt2 = Math.sqrt(2.0);
+	
+	private static long distCount = 0;
+	private static final FeatureClassCollector reqFeatures = new FeatureClassCollector(Floats.class);
+	
+	public final long getDistCount() {
+		return distCount;
+	}
+	
+	public FloatsL2Metric_L2Norm(Properties properties) {
+		
+	}
+	
+	public FloatsL2Metric_L2Norm() {
+		
+	}
+	
+	@Override
+	public FeatureClassCollector getRequestedFeaturesClasses() {		
+		return reqFeatures;
+	}
+	
+	public String toString() {
+		return this.getClass().toString();
+	}
+
+	
+	@Override
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
+		return distance( f1.getFeature(Floats.class), f2.getFeature(Floats.class));
+	}
+	
+	@Override
+	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
+		return distance( f1.getFeature(Floats.class), f2.getFeature(Floats.class), max);
+	}
+	
+	@Override
+	public final double distance(Floats f1, Floats f2) {
+		return L2.get(f1.getValues(), f2.getValues()) / sqrt2;	
+	}
+	
+	@Override
+	public final double distance(Floats f1, Floats f2, double max) {
+		return L2.get(f1.getValues(), f2.getValues(), max*sqrt2 ) / sqrt2;
+	}
+
+	@Override
+	public Floats getMean(Collection<Floats> coll) {
+		return Floats.getMean(coll);
+	}
+	
+	public String getStatsString() { return ""; };
+	
+}
