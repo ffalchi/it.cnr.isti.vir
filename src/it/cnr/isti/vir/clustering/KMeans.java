@@ -32,9 +32,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class KMeans<O extends AbstractFeature> {
 
@@ -54,16 +51,20 @@ public class KMeans<O extends AbstractFeature> {
 	private boolean[] clusterChanged;
 	
 	private TimeManager tm = new TimeManager();
-	private int maxMinPerIteration = Integer.MAX_VALUE;
-	public int getMaxMinPerIteration() {
-		return maxMinPerIteration;
+	private long maxMillisPerIteration = Integer.MAX_VALUE;
+	public long getMaxMillisPerIteration() {
+		return maxMillisPerIteration;
 	}
 
 	public void setMaxMinPerIteration(int maxMinPerIteration) {
-		this.maxMinPerIteration = maxMinPerIteration;
-		Log.info_verbose("kMeans maxMinPerIteration was set to: " + maxMinPerIteration); 
+		this.maxMillisPerIteration = maxMinPerIteration * 60 * 1000;
+		Log.info_verbose("kMeans maxMillisPerIteration was set to: " + maxMillisPerIteration); 
 	}
 
+	public void setMaxMillisPerIteration(int maxMillisPerIteration) {
+		this.maxMillisPerIteration = maxMillisPerIteration;
+		Log.info_verbose("kMeans maxMillisPerIteration was set to: " + maxMillisPerIteration); 
+	}
 	
 	private static final int eqCentroidsChange_Max = 100;
 	
@@ -87,8 +88,16 @@ public class KMeans<O extends AbstractFeature> {
 	
 	public KMeans(ArrayList<O> objects, ISimilarity<O> sim) {
 		
-		this.objects = (O[]) Array.newInstance(objects.get(0).getClass(), objects.size());
-		objects.toArray(this.objects);
+		this(
+				objects.toArray(
+					(O[]) Array.newInstance(objects.get(0).getClass(), objects.size())),
+					sim);	
+		
+	}
+	
+	public KMeans(O[] objects, ISimilarity<O> sim) {
+		
+		this.objects = objects;
 		objectsClass = (Class<? extends O>) this.objects[0].getClass();
 		this.meanEval = (IMeanEvaluator<O>) sim;
 		this.sim = sim;
@@ -128,7 +137,7 @@ public class KMeans<O extends AbstractFeature> {
 		for ( int i=0; i<initCentroids.length; i++ ) {
 			int rnd = -1;
 			do {
-				rnd = RandomOperations.getInt(0, objects.length);
+				rnd = RandomOperations.getInt(objects.length);
 			} while ( selected.contains(rnd));
 			selected.add(rnd);
 			initCentroids[i]= (O) objects[rnd];
@@ -140,33 +149,34 @@ public class KMeans<O extends AbstractFeature> {
 	class KMeanpp implements Runnable {
 		private final int from;
 		private final int to;
-		private O lastCentroid;
+		private final O lastCentroid;
 		private final float[] dFromNNCentroid;
 		private final float[] dFromNNCentroidSQR;
-
-		KMeanpp(O lastCentroid, int from, int to, float[] dFromNNCentroid, float[] dFromNNCentroidSQR) {
+		private final O[] objects;
+		
+		KMeanpp(O[] objects, O lastCentroid, int from, int to, float[] dFromNNCentroid, float[] dFromNNCentroidSQR) {
 			this.from = from;
 			this.to = to;
 			this.lastCentroid = lastCentroid;
+			this.objects = objects;
 			this.dFromNNCentroid = dFromNNCentroid;
 			this.dFromNNCentroidSQR = dFromNNCentroidSQR;
 		}
 		
-		public void set(O lastCentroid) {
-			this.lastCentroid = lastCentroid;
-		}
+//		public void set(O lastCentroid) {
+//			this.lastCentroid = lastCentroid;
+//		}
 
 		@Override
 		public void run() {
 			for (int iO = from; iO<=to; iO++) {
-				O curr = objects[iO];
-
-				float dist = (float) sim.distance(curr, lastCentroid, dFromNNCentroid[iO] );
+				if ( dFromNNCentroid[iO] == 0.0 ) continue;
+				float dist = (float) sim.distance(objects[iO], lastCentroid, dFromNNCentroid[iO] );
 				if ( dist >= 0 && dist < dFromNNCentroid[iO]) {
 					dFromNNCentroid[iO]=dist;
 					dFromNNCentroidSQR[iO]=dist*dist;
 				}		
-
+				
 			}
 		}
 	}
@@ -183,7 +193,7 @@ public class KMeans<O extends AbstractFeature> {
 		O[] initCentroids = (O[]) Array.newInstance(objects_kMPP[0].getClass(), k);	
 		
 		// first centroid is taken randomly
-		initCentroids[0]= (O) objects_kMPP[RandomOperations.getInt(0, objects_kMPP.length)];
+		initCentroids[0]= (O) objects_kMPP[RandomOperations.getInt(objects_kMPP.length)];
 		
 		final float[] dFromNNCentroid = new float[objects_kMPP.length];
 		final float[] dFromNNCentroidSQR = new float[objects_kMPP.length];
@@ -203,16 +213,16 @@ public class KMeans<O extends AbstractFeature> {
 						dFromNNCentroid[iO]= dist;	
 						dFromNNCentroidSQR[iO] = dist*dist;
 					}		
-	
+					
 				}
 				
 				double sqSum = 0;
 				for (int iO = 0; iO<objects_kMPP.length; iO++) {
-					//new centroid will be choosen with squared distance probability
+					// new centroid will be choosen with squared distance probability
 					sqSum+=dFromNNCentroidSQR[iO];
 				}
 			
-				
+				if ( sqSum == 0.0 ) break;
 				
 				// selecting next centroid random weighted squared distance
 				double rnd = RandomOperations.getDouble(sqSum);
@@ -222,6 +232,7 @@ public class KMeans<O extends AbstractFeature> {
 					tempSum += dFromNNCentroidSQR[selected];
 					if ( tempSum >= rnd ) break;
 				}
+				if ( dFromNNCentroidSQR[selected] == 0.0 ) System.err.println("Duplicated centroid was selected by kMeams++");
 				initCentroids[i]=objects_kMPP[selected];
 				
 			}
@@ -235,17 +246,20 @@ public class KMeans<O extends AbstractFeature> {
 			for ( int i=1; i<initCentroids.length; i++ ) {
 				Log.info_verbose_progress(tm, i, initCentroids.length);
 				
-				ExecutorService executor = Executors.newFixedThreadPool(nThread);
+				
+				Thread[] thread = new Thread[nThread];
+				int ti = 0;
 				for ( int from=0; from<objects_kMPP.length; from+=nObjsPerThread) {
 		        	int to = from+nObjsPerThread-1;
 		        	if ( to >= objects_kMPP.length ) to = objects_kMPP.length-1;
-		        	Runnable worker =  new KMeanpp(initCentroids[i-1], from, to, dFromNNCentroid, dFromNNCentroidSQR) ;
-		        	executor.execute(worker);
+					thread[ti] = new Thread( new KMeanpp(objects_kMPP,initCentroids[i-1],  from, to, dFromNNCentroid, dFromNNCentroidSQR)  ) ;
+		        	thread[ti].start();
+		        	ti++;
+				}
+				
+		        for ( Thread t : thread ) {
+		        	t.join();
 		        }
-		        
-		        executor.shutdown();
-		        executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-		        
 		        
 		        double sqSum = 0;
 				for (int iO = 0; iO<objects_kMPP.length; iO++) {
@@ -253,7 +267,7 @@ public class KMeans<O extends AbstractFeature> {
 					sqSum+=dFromNNCentroidSQR[iO];
 				}		
 				
-				
+				if ( sqSum == 0.0 ) break;
 				// selecting next centroid random weighted squared distance
 				double rnd = RandomOperations.getDouble(sqSum);
 				double tempSum = 0;
@@ -262,6 +276,8 @@ public class KMeans<O extends AbstractFeature> {
 					tempSum += dFromNNCentroidSQR[selected];
 					if ( tempSum >= rnd ) break;
 				}
+
+
 				initCentroids[i]=objects_kMPP[selected];
 			}
 			ParallelOptions.free(bookedThreads);
@@ -269,6 +285,8 @@ public class KMeans<O extends AbstractFeature> {
 		
 		//Log.info_verbose_indent( "done." );
 		centroids = initCentroids;
+		
+
 	}
 	
 	
@@ -535,8 +553,8 @@ public class KMeans<O extends AbstractFeature> {
 			}
 			
 			
-			if  ( tm.getTime_min() >= maxMinPerIteration ) {
-				Log.info("Execution time limit of " + maxMinPerIteration + " was reached." );
+			if  ( tm.getTime() >= maxMillisPerIteration ) {
+				Log.info("Execution time limit of " + maxMillisPerIteration + " was reached." );
 				break;
 			}
 			
@@ -640,8 +658,17 @@ public class KMeans<O extends AbstractFeature> {
 				
 				if ( newCentroid != null && AbstractFeaturesCollector.class.isAssignableFrom(objectsClass)) {
 					newCentroid = objectsClass.getConstructor(AbstractFeature.class).newInstance(newCentroid);
+				}				
+			}
+			
+			// checks for duplicated centroids
+			if ( newCentroid != null ) {
+				for ( int j=0;j<i;j++) {
+					if ( centroids[j]!=null && sim.distance(centroids[j],newCentroid)== 0.0) {
+						newCentroid = null;
+						break;
+					}
 				}
-				
 			}
 			
 			if ( newCentroid == null ) {
@@ -653,7 +680,7 @@ public class KMeans<O extends AbstractFeature> {
 			}
 			
 			// centroids changed?
-			if ( !centroids[i].equals(newCentroid) ) {
+			if ( sim.distance(centroids[i],newCentroid)!= 0 ) {
 				centroids[i] = newCentroid;
 				centroidChangedIndexes[changesCount]= i;
 				changesCount++;
@@ -665,6 +692,8 @@ public class KMeans<O extends AbstractFeature> {
 		if ( changesCount < centroidChangedIndexes.length ) {
 			centroidChangedIndexes[changesCount]= -1;
 		}
+		
+		//if ( equalsCentroidsExist() ) System.err.println("equalCentroidsExist");
 		return changesCount;
 	}
 
@@ -674,6 +703,24 @@ public class KMeans<O extends AbstractFeature> {
 			clustersSize[i]=clusters[i].size();
 		}
 		return clustersSize;
+	}
+	
+	public boolean equalsCentroidsExist() {
+		return equalsExist(centroids);
+	}
+	
+	public boolean equalsExist(O[] centroids) {
+		for (int i=0; i<centroids.length; i++) {
+			O c = centroids[i];
+			if ( c == null ) continue;
+			for (int j=i+1; j<centroids.length; j++) {
+				if ( centroids[j] == null ) continue;
+				if ( sim.distance(c,centroids[j])== 0.0)
+					return true;				
+			}
+			
+		}
+		return false;
 	}
 	
 }
