@@ -14,16 +14,23 @@ package it.cnr.isti.vir.similarity;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClassCollector;
 import it.cnr.isti.vir.features.Permutation;
+import it.cnr.isti.vir.util.PropertiesUtils;
+
+import java.util.Properties;
 
 public class SpearmanRho implements ISimilarity<Permutation>{
 
-	private int maxLength = 0;
-//	private int maxRef = -1;
+	private int l = Integer.MAX_VALUE;
+	
+	public SpearmanRho(Properties prop) {
+		l = PropertiesUtils.getInt_orDefault(prop, "SpearmanRho.l", l);
+	}
+	
 	public SpearmanRho() {};
 	
 	public int getMaxDist() {
 		int res=0;
-		for ( int i=1; i<=maxLength; i++) {
+		for ( int i=1; i<=l; i++) {
 			res+=i*i;
 		}
 		return res*2;
@@ -31,50 +38,43 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	
 	public SpearmanRho(int maxLength) {
 		if ( maxLength >= 0)
-			this.maxLength =maxLength;
+			this.l =maxLength;
 	}
 	
-//	public SpearmanRho(int maxLength, int maxRef) {
-//		if ( maxLength >= 0)
-//			this.maxLength =maxLength;
-//		if ( maxRef >= 0 ) 
-//			this.maxRef = maxRef;
-//	}
-	
 	public void setMaxLength(int maxLength) {
-		this.maxLength =maxLength;
-		if ( this.maxLength < 0) this.maxLength = 0;
+		this.l =maxLength;
+		if ( this.l < 0) this.l = 0;
 	}
 	
 	@Override
-	public double distance(Permutation f1, Permutation f2) {
-//		if ( maxRef > 0 ) {
-//			f1.reduceToNRO(maxRef);
-//			f2.reduceToNRO(maxRef);
-//		}
-		if ( maxLength == 0 ) return sfd(f1.getROPositions(), f2.getROPositions());
-		return sfd_l(f1.getROPositions(), f2.getROPositions(), maxLength);
+	public final double distance(Permutation f1, Permutation f2) {
+		int maxPos = l;
+//		int maxPos = Math.max(f1.getOrdLength(), f2.getOrdLength());
+//		if ( l!= 0 ) maxPos = Math.min(maxPos, l);
+			
+		return sfd_l(f1.getROPositions(), f2.getROPositions(), maxPos );	
 	}
 
 	@Override
-	public double distance(Permutation f1, Permutation f2, double max) {
-//		if ( maxRef > 0 ) {
-//			f1.reduceToNRO(maxRef);
-//			f2.reduceToNRO(maxRef);
-//		}
-		if ( maxLength == 0 ) return sfd(f1.getROPositions(), f2.getROPositions(), (long) Math.ceil( max ));
-		return sfd_l(f1.getROPositions(), f2.getROPositions(), (long) Math.ceil( max ), maxLength);
+	public final double distance(Permutation f1, Permutation f2, double max) {
+		
+
+		int maxPos = l;
+//		int maxPos = Math.max(f1.getOrdLength(), f2.getOrdLength());
+//		if ( l!= 0 ) maxPos = Math.min(maxPos, l);
+			
+		return sfd_l(f1.getROPositions(), f2.getROPositions(), maxPos, (long) Math.ceil( max ));
 	}
 
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2 ) {
-		return distance((Permutation) f1.getFeature(Permutation.class), (Permutation) f2.getFeature(Permutation.class));
+			return distance(f1.getFeature(Permutation.class), f2.getFeature(Permutation.class));
 	}
 	
 	@Override
 	public final double distance(AbstractFeaturesCollector f1, AbstractFeaturesCollector f2, double max ) {
-		return distance((Permutation) f1.getFeature(Permutation.class), (Permutation) f2.getFeature(Permutation.class), max);
+		return distance(f1.getFeature(Permutation.class), f2.getFeature(Permutation.class), max);
 	}
 
 	@Override
@@ -89,25 +89,24 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 		return new FeatureClassCollector( Permutation.class );
 	}
 
-	public static long sfd(int[] pos1, int[] pos2) {
-		
-		long sum = 0;
-		for ( int i=0; i<pos1.length; i++) {
-			long temp = pos1[i] - pos2[i];
-			sum += temp*temp;
-		}
-		return sum;
-	}
-	
-	public static long sfd(int[] pos1, int[] pos2, long max) {
-		long sum = 0;
-		for ( int i=0; i<pos1.length; i++) {
-			long temp = pos1[i] - pos2[i];
-			sum += temp*temp;
-			if ( sum > max ) return -sum;
-		}
-		return sum;
-	}
+//	public static long sfd(int[] pos1, int[] pos2) {
+//		long sum = 0;
+//		for ( int i=0; i<pos1.length; i++) {
+//			long temp = pos1[i] - pos2[i];
+//			sum += temp*temp;
+//		}
+//		return sum;
+//	}
+//	
+//	public static long sfd(int[] pos1, int[] pos2, long max) {
+//		long sum = 0;
+//		for ( int i=0; i<pos1.length; i++) {
+//			long temp = pos1[i] - pos2[i];
+//			sum += temp*temp;
+//			if ( sum > max ) return -sum;
+//		}
+//		return sum;
+//	}
 	
 	/**
 	 * @param obj1
@@ -115,23 +114,9 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	 * @param permLength max permutation length
 	 * @return
 	 */
-	public static double sfd_l(int[] pos1, int[] pos2, int permLength) {
-	
-		long sum = 0;
-		for ( int i=0; i<pos1.length; i++) {
-			int t1 = pos1[i];
-			int t2 = pos2[i];
-			if ( t1 >= permLength &&  t2 >= permLength) continue;
-			if ( t1 > permLength ) t1 = permLength;
-			if ( t2 > permLength ) t2 = permLength;
-			long temp = t1 - t2;
-			
-			if ( sum + temp*temp < 0 ) {
-				System.out.println("ERROR");
-			}
-			sum += temp*temp;
-		}
-		return sum;
+	public static final double sfd_l(int[] pos1, int[] pos2, int maxPos ) {
+		
+		return sfd_l(pos1, pos2, maxPos, Long.MAX_VALUE);
 	}
 
 	/**
@@ -141,19 +126,16 @@ public class SpearmanRho implements ISimilarity<Permutation>{
 	 * @param permLength max permutation length
 	 * @return
 	 */
-	public static double  sfd_l(int[] pos1, int[] pos2, long max, int permLength) {
+	public static final double  sfd_l(int[] pos1, int[] pos2, long maxPos, long max ) {
 		
 		long sum = 0;
 		for ( int i=0; i<pos1.length; i++) {
-			int t1 = pos1[i];
-			int t2 = pos2[i];
-			if ( t1 >= permLength &&  t2 >= permLength) continue;
-			if ( t1 > permLength ) t1 = permLength;
-			if ( t2 > permLength ) t2 = permLength;
-			long temp = t1 - t2;
+			long temp =
+					Math.min( pos1[i], maxPos ) -
+					Math.min( pos2[i], maxPos );
+
 			sum += temp*temp;
-			if ( sum > max )
-				return -sum;
+			if ( sum > max ) return -sum;
 		}
 		return sum;
 	}

@@ -29,9 +29,9 @@ import java.util.Iterator;
 
 public class Floats extends AbstractFeature implements IFloatValues {
 
-	static boolean applyReLuOnReading = false;
-	static boolean applyL2NormOnReading = false;
-	
+	static public boolean applyReLuOnReading = false;
+	static public boolean applyL2NormOnReading = false;
+	static public int onlyFirstOnReading = -1;
 	public AbstractFeaturesCollector linkedFC;
 	
 	public float[] values;
@@ -60,9 +60,10 @@ public class Floats extends AbstractFeature implements IFloatValues {
 			}
 		}	
 		
+		if ( onlyFirstOnReading>0 && onlyFirstOnReading != values.length) values=Arrays.copyOfRange(values, 0, onlyFirstOnReading);
 		if 	(applyReLuOnReading) ReLu.perform(values);
 		if ( applyL2NormOnReading ) Normalize.l2(values);
-
+		
 	}
 	
 	public Floats(DataInput in, AbstractFeaturesCollector fc ) throws Exception {
@@ -76,6 +77,7 @@ public class Floats extends AbstractFeature implements IFloatValues {
 			values = FloatByteArrayUtil.get(bytes, 0, size);
 		}
 		
+		if ( onlyFirstOnReading>0 && onlyFirstOnReading != values.length ) values=Arrays.copyOfRange(values, 0, onlyFirstOnReading);
 		if 	(applyReLuOnReading) ReLu.perform(values);
 		if ( applyL2NormOnReading ) Normalize.l2(values);
     }
@@ -143,6 +145,11 @@ public class Floats extends AbstractFeature implements IFloatValues {
 		if ( dim > values.length )
 				throw new Exception("Requested dimensionality greater than current.");
 		values = Arrays.copyOf(values, dim);
+		
+	}
+	
+	public String toString() {
+		return Arrays.toString(values);
 		
 	}
 	

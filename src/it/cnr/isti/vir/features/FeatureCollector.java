@@ -27,9 +27,9 @@ import java.util.Collection;
 
 public class FeatureCollector extends AbstractFeaturesCollector_Labeled_HasID {
 
-	protected final AbstractFeature f;
+	protected AbstractFeature f;
 	protected AbstractLabel l;
-	protected final AbstractID id;
+	protected AbstractID id;
 	
 	public FeatureCollector(AbstractFeature f ) {
 		this(f, null);
@@ -77,7 +77,8 @@ public class FeatureCollector extends AbstractFeaturesCollector_Labeled_HasID {
 	
 	@Override
 	public final <T extends AbstractFeature> T getFeature(Class<T> featureClass) {
-		return (T) f;
+		if ( f.getClass().equals(featureClass) ) return (T) f;
+		return null;
 	}
 
 	@Override
@@ -161,6 +162,13 @@ public class FeatureCollector extends AbstractFeaturesCollector_Labeled_HasID {
 		return new FeatureCollector(f, id, l);
 	}
 	
-	
+	public static FeatureCollector[] create( AbstractFeature[] f ) {
+		FeatureCollector[] res = new FeatureCollector[f.length];
+		for ( int i=0; i<res.length; i++ ) {
+			res[i] = new FeatureCollector(f[i]);
+		}
+		
+		return res;
+	}
 
 }

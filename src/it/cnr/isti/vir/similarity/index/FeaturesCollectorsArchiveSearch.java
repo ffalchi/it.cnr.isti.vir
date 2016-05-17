@@ -24,6 +24,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 
 public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
@@ -131,7 +132,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 	}
 	
 	
-	class pQueueThread implements Runnable {
+	public class pQueueThread implements Runnable {
 		private final Iterator<AbstractFeaturesCollector> it;
 		private final AbstractSimPQueue[] knn;
 		private final boolean onlyID;
@@ -174,7 +175,7 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 					double dist = sim.distance(q[iQ], obj, knn[iQ].excDistance );
 					if ( dist >= 0) {
 						if ( onlyID)
-							knn[iQ].offer(((IHasID) obj).getID(), dist);
+							knn[iQ].offer(obj.getID(), dist);
 						else 
 							knn[iQ].offer(obj, dist);
 					}
@@ -182,6 +183,20 @@ public class FeaturesCollectorsArchiveSearch  implements IkNNExecuter {
 				}
 			}
 		}
+	}
+	
+	public synchronized void search(
+			Collection<AbstractFeaturesCollector> qObj,
+			AbstractSimPQueue[] kNNQueue,
+			final ISimilarity sim,
+			final boolean onlyID) 
+			throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, InterruptedException {
+	
+		search(
+				qObj.toArray(new AbstractFeaturesCollector[qObj.size()]),
+				kNNQueue,
+				sim,
+				onlyID);
 	}
 	
 	public synchronized void search(

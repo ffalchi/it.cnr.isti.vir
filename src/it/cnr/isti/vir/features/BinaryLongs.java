@@ -93,7 +93,7 @@ public class BinaryLongs extends AbstractFeature implements ILongBinaryValues {
 	}
 
 	@Override
-	public long[] getValues() {
+	public final long[] getValues() {
 		return values;
 	}
 
@@ -111,6 +111,5 @@ public class BinaryLongs extends AbstractFeature implements ILongBinaryValues {
 		
 		return res;
 	}
-
 	
 }

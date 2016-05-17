@@ -15,6 +15,7 @@ import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.features.FeatureClasses;
 import it.cnr.isti.vir.features.FeaturesCollectors;
+import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
 
@@ -31,6 +32,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 
 public class Centroids {
 
@@ -49,6 +51,12 @@ public class Centroids {
 		this (centroids, null);
 	}
 	
+	public Centroids(FeaturesCollectorsArchive fca) {
+		ArrayList<AbstractFeaturesCollector> all = fca.getAll();
+		centroids = new AbstractFeature[all.size()];
+		all.toArray(centroids);
+	}
+
 	public AbstractFeature[] getCentroids() {
 		return centroids;
 	}

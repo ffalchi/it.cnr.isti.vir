@@ -70,7 +70,32 @@ public class Intersection {
 	public static double getNormalized(ISimilarityResults res1, ISimilarityResults res2 ) throws Exception {
 		return getNormalized(res1, res2, res1.size(), res2.size());
 	}
+
+	public static double getNormalized(ISimilarityResults[] res1, ISimilarityResults[] res2 ) throws Exception {
+		return getNormalized(res1, res2, res1[0].size(), res2[0].size());
+	}
 	
+	public static double getNormalized(ISimilarityResults[] res1, ISimilarityResults[] res2, int nRes ) throws Exception {
+		if ( res1.length != res2.length ) {
+			throw new Exception("Results arrays to compare have different length;");
+		}
+		return getNormalized(res1, res2, res1[0].size(), res2[0].size(), res1.length);
+	}
+	
+	public static double getNormalized(ISimilarityResults[] res1, ISimilarityResults[] res2, int kRes1, int kRes2 ) throws Exception {
+		if ( res1.length != res2.length ) {
+			throw new Exception("Results arrays to compare have different length;");
+		}
+		return getNormalized(res1, res2, kRes1, kRes2, res1.length);
+	}
+	
+	public static double getNormalized(ISimilarityResults[] res1, ISimilarityResults[] res2, int kRes1, int kRes2, int nRes ) throws Exception {
+		double acc = 0;
+		for ( int i=0; i<nRes; i++) {
+			acc += getNormalized(res1[i], res2[i], kRes1, kRes2);
+		}
+		return acc/nRes;
+	}
 	public static double getNormalized(ISimilarityResults res1, ISimilarityResults res2, int kRes1, int kRes2 ) {
 		int count = getN(res1,res2,kRes1,kRes2);
 		int min = Math.min(kRes1, kRes2);
@@ -85,15 +110,14 @@ public class Intersection {
 		int count = 0;
 		int iRes1 = 0;
 		
-		for ( Iterator<ObjectWithDistance> it = res1.iterator(); iRes1 < kRes1; iRes1++) {
+		for ( Iterator<ObjectWithDistance> it = res1.iterator(); iRes1<kRes1; iRes1++) {
 			ObjectWithDistance currRes1 = it.next();
-			Object currObj1 = currRes1.getObj();
 
 			// searching same results in gt
 			int iRes2 = 0;
 			for ( Iterator<ObjectWithDistance> it2 = res2.iterator(); iRes2<kRes2; iRes2++) {
 				ObjectWithDistance currRes2 = it2.next();
-				if ( ((IHasID) currObj1).getID().equals(((IHasID) currRes2.getObj()).getID()) ) {
+				if ( currRes1.getID().equals(currRes2.getID())) {
 					count++;
 					break;
 				}

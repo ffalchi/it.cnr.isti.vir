@@ -32,6 +32,12 @@ public class Statistic {
 		return ret;
 	}
 
+	public static double getValueAtPercentile(double[] values, double value) {
+		double[] ord = values.clone();
+		Arrays.sort(ord);
+		return ord[(int) Math.ceil(value*ord.length)-1];
+	}
+	
 	/**
 	 * @param value
 	 * @return percentile
@@ -40,7 +46,7 @@ public class Statistic {
 		double[] ord = values.clone();
 		Arrays.sort(ord);
 		int i=0;
-		for ( i=0; i<ord.length; ) {
+		for ( i=0; i<ord.length; i++) {
 			if ( ord[i] >= value ) return i/(double) values.length;
 		}
 		return 1.0;
@@ -132,11 +138,16 @@ public class Statistic {
 	
 	public static final double getIntrinsicDimensionality(double[] values) {
 		double mean = getMean(values);
-		return (getVariance(values,mean));
+		return getIntrinsicDimensionality(mean,getVariance(values,mean));
 	}
 	
 	public static final double getIntrinsicDimensionality(double mean, double variance) {
 		return mean*mean/variance/2.0;
+	}
+	
+	
+	public static final double getVariance(double[] values) {
+		return getVariance(values, getMean(values));
 	}
 	
 	public static final double getVariance(double[] values, double mean) {
@@ -148,6 +159,15 @@ public class Statistic {
 		return sum/values.length;
 	}
 	
+	public static final double getMode(double[] values) {
+		double[] temp = values.clone();
+		
+		Arrays.sort(temp);
+		
+		return temp[temp.length/2];
+	}
+	
+		
 	public static final double getMean(double[] values) {
 		double sum = 0;
 		
@@ -157,7 +177,39 @@ public class Statistic {
 		return sum/values.length;
 	}
 
+	public static class MinMax {
+		public double min;
+		public int iMin;
+		public double max;
+		public int iMax;
 
+		public MinMax(double min, int iMin, double max, int iMax) {
+			this.min = min;
+			this.iMin = iMin;
+			this.max = max;
+			this.iMax = iMax;
+		}
+		
+		public String toString() {
+			return min + ":" + max;
+		}
+	}
+
+	public static MinMax getMinMax(double[] values) {
+		MinMax res = new MinMax(values[0], 0, values[0], 0);
+		for (int i = 1; i < values.length; i++) {
+			if (res.min > values[i]) {
+				res.min = values[i];
+				res.iMin = i;
+			}
+			if (res.max < values[i]) {
+				res.max = values[i];
+				res.iMax = i;
+			}
+		}
+
+		return res;
+	}
 	
 	
 	

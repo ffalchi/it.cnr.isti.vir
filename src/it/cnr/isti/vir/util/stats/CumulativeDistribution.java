@@ -22,7 +22,7 @@ public class CumulativeDistribution {
 	public void add(double value) {
 		count++;
 		
-		int index = (int) Math.floor(( value - min ) / step) +1;
+		int index = (int) Math.ceil(( value - min ) / step);
 		for (int i=index; i<occ.length; i++ ) {
 			occ[i]++;
 		}
@@ -64,14 +64,35 @@ public class CumulativeDistribution {
 	}
 	
 	public String toString() {
+		return toString("\t");
+	}
+	
+	public String toString(String sep) {
 		String tStr = "";
 		for (int i=0; i<occ.length; i++ ) {
 			if ( occ[i] > 0 && occ[i] < count )
-				tStr +=  (step*i+min) + "\t" + ( occ[i]/(double) count) + "\n";
+				tStr +=  (step*i+min) + sep + ( occ[i]/(double) count) + "\n";
 		}
 		return tStr;
 	}
 
+	public String toString_all(String sep) {
+		String tStr = "";
+		for (int i=0; i<occ.length; i++ ) {
+			tStr +=  (step*i+min) + sep + ( occ[i]/(double) count) + "\n";
+		}
+		return tStr;
+	}
+	
+	public String toString_Folded(String sep) {
+		String tStr = "";
+		tStr +=  min + sep + ( occ[0]/(double) count) + "\n";
+		for (int i=1; i<occ.length; i++ ) {
+			tStr +=  (step*i+min) + sep + ( (occ[i]-occ[i-1])/(double) count) + "\n";
+		}
+		return tStr;
+	}
+	
 	public long getCount() {
 		return count;
 	}

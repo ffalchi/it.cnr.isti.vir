@@ -72,10 +72,21 @@ public class FeaturesCollectorsArchive_Buffered {
 	}
 	
 	public static  FeaturesCollectorsArchive_Buffered create(
+			String fileName,
+			Class<? extends AbstractID> idclass,
+			Class<? extends AbstractFeaturesCollector> fcClass ) throws Exception {
+		return new FeaturesCollectorsArchive_Buffered(new File(fileName), idclass, fcClass );
+	}
+	
+	public static  FeaturesCollectorsArchive_Buffered create(
 			File file,
 			Class<? extends AbstractID> idclass,
 			Class<? extends AbstractFeaturesCollector> fcClass ) throws Exception {
 		return new FeaturesCollectorsArchive_Buffered(file, idclass, fcClass );
+	}
+	
+	public static  FeaturesCollectorsArchive_Buffered createAs(String newFile, FeaturesCollectorsArchive archive ) throws Exception {
+		return createAs( new File(newFile), archive);
 	}
 	
 	public static  FeaturesCollectorsArchive_Buffered createAs(String newFile, String origFile ) throws Exception {

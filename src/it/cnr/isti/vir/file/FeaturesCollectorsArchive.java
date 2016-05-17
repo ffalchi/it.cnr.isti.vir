@@ -321,11 +321,18 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return arr;
 	}
 
+	public static final AbstractFeaturesCollector[] getAllArray(String fileName) throws Exception {
+		return getAllArray(new File(fileName));
+	}
 	
-	public static final ArrayList<AbstractFeaturesCollector> getAll(File file) throws Exception {
-		FeaturesCollectorsArchive fca = new FeaturesCollectorsArchive(file);
-		
-		return fca.getAll();
+	public static final AbstractFeaturesCollector[] getAllArray(File file) throws Exception {
+		FeaturesCollectorsArchive fca = new FeaturesCollectorsArchive(file, false);
+		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[fca.size()];	 
+		int i=0;
+		for ( AbstractFeaturesCollector f : fca ) {
+			res[i++] = f;
+		} 
+		return res;
 	}
 /*
 	public static final ArrayList<AbstractFeaturesCollector> getAll(File file)
@@ -404,6 +411,10 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return new FeaturesCollectorsArchive(file );
 	}
 
+	public static int getSize(File file) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException {
+		FeaturesCollectorsArchive fca = new FeaturesCollectorsArchive(file, false);
+		return fca.size();
+	}
 	
 	public FeaturesCollectorsArchive(File file, boolean readIDs) throws IOException,
 			SecurityException, NoSuchMethodException, IllegalArgumentException,
@@ -905,33 +916,23 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 
-		SimPQueueDMax[] kNNQueue = new SimPQueueDMax[qObj.length];
-		for (int i = 0; i < kNNQueue.length; i++) {
-			kNNQueue[i] = new SimPQueueDMax(k);
+		SimPQueueDMax[] queue = new SimPQueueDMax[qObj.length];
+		for (int i = 0; i < queue.length; i++) {
+			queue[i] = new SimPQueueDMax(k);
 		}
 
-		Log.info_verbose("... searching in archive " + this.getfile());
-		FeaturesCollectorsArchiveSearch search = new FeaturesCollectorsArchiveSearch(this);
-		search.search(qObj, kNNQueue, sim, onlyID);
-
-		SimilarityResults[] res = new SimilarityResults[kNNQueue.length];
-		for (int i = 0; i < kNNQueue.length; i++) {
-			res[i] = kNNQueue[i].getResults();
-			res[i].setQuery(qObj[i]);
-		}
-
-		return res;
+		return getResults(qObj, queue, sim, onlyID);
 	}
 	
 	
 	public synchronized SimilarityResults[] getRange(Collection<AbstractFeaturesCollector> qObj,
-			int k, final ISimilarity sim, final boolean onlyID)
+			double range, final ISimilarity sim, final boolean onlyID)
 			throws IOException, SecurityException, NoSuchMethodException,
 			IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 		AbstractFeaturesCollector[] tArr = new AbstractFeaturesCollector[qObj.size()];
 		qObj.toArray(tArr);
-		return getRange(tArr, k, sim, onlyID);
+		return getRange(tArr, range, sim, onlyID);
 	}
 	
 	public synchronized SimilarityResults[] getRange(AbstractFeaturesCollector[] qObj,
@@ -940,12 +941,50 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, InterruptedException {
 
-		SimPQueueDMax[] kNNQueue = new SimPQueueDMax[qObj.length];
-		for (int i = 0; i < kNNQueue.length; i++) {
-			kNNQueue[i] = new SimPQueueDMax(range);
+		SimPQueueDMax[] queue = new SimPQueueDMax[qObj.length];
+		for (int i = 0; i < queue.length; i++) {
+			queue[i] = new SimPQueueDMax(range);
 		}
 
-		Log.info_verbose("... searching in archive " + this.getfile());
+
+		return getResults(qObj, queue, sim, onlyID);
+	}
+	
+	public synchronized SimilarityResults[] getOrdered(
+			Collection<AbstractFeaturesCollector> qObj,
+			final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, InterruptedException {
+		AbstractFeaturesCollector[] tArr = new AbstractFeaturesCollector[qObj.size()];
+		qObj.toArray(tArr);
+		return getOrdered(tArr, sim, onlyID);
+	}
+	
+	public synchronized SimilarityResults[] getOrdered(
+			AbstractFeaturesCollector[] qObj,
+			final ISimilarity sim, final boolean onlyID)
+			throws IOException, SecurityException, NoSuchMethodException,
+			IllegalArgumentException, InstantiationException,
+			IllegalAccessException, InvocationTargetException, InterruptedException {
+
+		SimPQueueDMax[] queue = new SimPQueueDMax[qObj.length];
+		for (int i = 0; i < queue.length; i++) {
+			queue[i] = new SimPQueueDMax();
+		}
+
+		return getResults(qObj, queue, sim, onlyID);
+	}
+	
+	public synchronized SimilarityResults[] getResults(
+			AbstractFeaturesCollector[] qObj,
+			SimPQueueDMax[] kNNQueue,
+			final ISimilarity sim,
+			final boolean onlyID) throws SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException, InterruptedException
+	{
+
+
+		//Log.info_verbose("... searching in archive " + this.getfile());
 		FeaturesCollectorsArchiveSearch search = new FeaturesCollectorsArchiveSearch(this);
 		search.search(qObj, kNNQueue, sim, onlyID);
 
@@ -957,6 +996,7 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 
 		return res;
 	}
+	
 	
 	public FeaturesCollectorsArchive shuffle(File outFile) throws Exception {
 		

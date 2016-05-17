@@ -34,8 +34,28 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 		initSize = given;
 	}
 	
+	public SimPQueueDMax(double range, int k) {
+		this.range = range;
+		excDistance =  range + Double.MIN_VALUE;
+		this.k = k;
+		pQueue = new PriorityQueue<ObjectWithDistance<O>>(initSize, comp);
+	}
+	
+	public SimPQueueDMax(double range) {
+		this.range = range;
+		excDistance =  range + Double.MIN_VALUE;
+		this.k = -1;
+		pQueue = new PriorityQueue<ObjectWithDistance<O>>(initSize, comp);
+	}
+	
+	public SimPQueueDMax(int k) {
+		this.k = k;
+		this.range = -1;
+		pQueue = new PriorityQueue<ObjectWithDistance<O>>(k, comp);
+	}
+	
 	public SimPQueueDMax() {
-		k=-Integer.MAX_VALUE;
+		k=-1;
 		range=-Double.MAX_VALUE;
 		pQueue = new PriorityQueue<ObjectWithDistance<O>>(initSize, new DecreasingComparator());
 	}
@@ -56,18 +76,7 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 		pQueue.poll();
 	}
 	
-	public SimPQueueDMax(double range) {
-		this.range = range;
-		excDistance =  range + Double.MIN_VALUE;
-		this.k = -1;
-		pQueue = new PriorityQueue<ObjectWithDistance<O>>(initSize, comp);
-	}
-	
-	public SimPQueueDMax(int k) {
-		this.k = k;
-		this.range = -1;
-		pQueue = new PriorityQueue<ObjectWithDistance<O>>(k, comp);
-	}
+
 
 	@Override
 	public final Integer getK() {
@@ -78,30 +87,13 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 	public final Double getRange() {
 		return range;
 	}
-	
-	
-//	private final void setExcDistance() {
-//		
-//		if (pQueue.size()<k) {
-//			excDistance = Double.MAX_VALUE;
-//		}
-//		double excK = Double.MAX_VALUE;
-//		double excRange = Double.MAX_VALUE;
-//		
-//		if ( k>0 && pQueue.size()>=k ) {
-//			excK = pQueue.peek().dist;
-//		}
-//				
-//		if ( range >=0 ) excRange = range;
-//		
-//		excDistance =  Math.min(excK, excRange);
-//	}
+
 
 	@Override
 	public final synchronized void offer(O object, double distance) {
 		
 		// excDistance takes also into account range!!!
-		if ( distance >= excDistance) return ;
+		if ( distance > excDistance) return ;
 		
 		if ( k<0 ) {
 			// RANGE QUERY
@@ -110,55 +102,18 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 				// kNN and pQueue not full
 				pQueue.offer(new ObjectWithDistance<O>(object, distance));
 				if ( pQueue.size() == k ) {
-					if (range <0 ) excDistance = pQueue.peek().dist;
+					//if (range<0 ) excDistance = pQueue.peek().dist;
+					excDistance = pQueue.peek().dist;
 				}
 		} else {
 			// kNN pQueue.size()==k
 			ObjectWithDistance<O> temp = pQueue.poll();
 			temp.reset(object, distance);
 			pQueue.offer(temp);
-			if ( range<0 ) excDistance = pQueue.peek().dist;
+			excDistance = pQueue.peek().dist;
 		}
 		
 	}
-		
-//		// excDistance also consider range!!!
-//		if ( distance >= excDistance) return ;
-//		
-//		if ( pQueue.size() == k && k>=0 ) {
-//			// we can safely poll because distance<pQueue.peek().dist
-//			ObjectWithDistance temp = pQueue.poll();
-//			temp.reset(object, distance);
-//			pQueue.offer(temp);
-//			if ( range < 0 ) excDistance = pQueue.peek().dist;
-//			return;
-//		}
-//	
-//		// distance < excDistnace < range
-//		pQueue.offer(new ObjectWithDistance(object, distance));
-		
-		
-		
-		
-		//if ( pQueue.size()== k && range < 0) excDistance = pQueue.peek().dist;
-		
-//		if ( (range <0 || distance<= range) // filtering for range
-//			 &&
-//			 (k <0 || pQueue.size()<k || distance<pQueue.peek().dist) // filtering for k
-//			) {
-//			
-//			if ( k>=0 && pQueue.size() > k ) {
-//				// we can safely poll because distance<pQueue.peek().dist
-//				ObjectWithDistance old = pQueue.poll();
-//				old.reset(object, distance);
-//				pQueue.offer(old);
-//			} else {
-//				pQueue.offer(new ObjectWithDistance(object, distance));
-//			}
-//			
-//			return true;
-//		}
-//		return false;
 
 	
 	public ObjectWithDistance<O>[] getSortedArray() {
@@ -206,18 +161,6 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 		return res;
 	}
 
-//	@Override
-//	public ObjectWithDistance<ObjectClass> peek() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public ObjectWithDistance<ObjectClass> poll() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
 	@Override
 	public final int size() {
 		if ( k>0 && pQueue.size()>=k ) return k;
@@ -247,21 +190,5 @@ public class SimPQueueDMax<O> extends AbstractSimPQueue<O>{
 		}
 		return best.obj;
 	}
-
-//	@Override
-//	public SimilarityPQueue<O> getExcluding(HashSet<ID> excHashSet) {
-//		SimPQueueDMax res = new SimPQueueDMax();
-//		
-//		ObjectWithDistance<O>[] arr = getSortedArray(); 
-//		
-//		for ( int i=0; i<arr.length; i++) {
-//			if ( excHashSet.contains( ((HasID) arr[i]).getID())) {
-//					continue;
-//			}
-//			res.pQueue.offer(arr[i]);
-//		}		
-//		
-//		return res;
-//	}
 
 }

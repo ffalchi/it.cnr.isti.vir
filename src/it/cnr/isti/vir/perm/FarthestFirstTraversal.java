@@ -130,7 +130,7 @@ public class FarthestFirstTraversal {
 		}
 		
 		// first is randomly selected
-		res[0] = archives.get(RandomOperations.getInt(0, archives.size()-1));
+		res[0] = archives.get(RandomOperations.getInt(archives.size()));
 		Log.info(1 + "\t" + ((IHasID) res[0]).getID());
 		
 		for(int iRes=1; iRes<res.length; iRes++) {

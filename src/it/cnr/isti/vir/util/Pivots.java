@@ -272,7 +272,7 @@ public class Pivots {
 			
 			for ( int iT=0; iT<nTries; iT++) {
 				//System.out.print(".");
-				AbstractFeaturesCollector curr = candidatePivots.get(RandomOperations.getInt(0, candidatePivots.size()));
+				AbstractFeaturesCollector curr = candidatePivots.get(RandomOperations.getInt(candidatePivots.size()));
 				double currSumGain = 0;
 				
 				// evaluating distances between all test objects and curr Pivots

@@ -257,7 +257,7 @@ public abstract class ALocalFeaturesGroup<LF extends ALocalFeature> extends Abst
 				// if last and curr are not equals for ordering n is updated
 				n = i;
 			}
-			last = curr;
+			last = curr;	
 		}
 		//n represents the max number of features (n<max) with complete lf per scale
 		

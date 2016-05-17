@@ -50,6 +50,7 @@ public class TimeManager {
 	public long getTime_sec() {
 		return getTime() / 1000;
 	}
+
 	
 	public int getTime_min() {
 		return (int) (getTime_sec() / 60);

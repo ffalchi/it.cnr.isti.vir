@@ -56,7 +56,7 @@ public class SimPQueue1NN<O> extends AbstractSimPQueue<O>  {
 
 	@Override
 	public final void offer(O obj, double dist) {
-		if ( dist < excDistance ) {
+		if ( dist <= excDistance ) {
 			object = obj;
 			excDistance = dist;
 		}

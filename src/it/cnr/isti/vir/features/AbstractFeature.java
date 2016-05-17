@@ -24,7 +24,7 @@ public abstract class AbstractFeature {
 		linkedFC = featuresCollector;
 	}
 	
-	public AbstractFeaturesCollector getLinkedFC(FeaturesCollectorArr featuresCollectorArr) {
+	public AbstractFeaturesCollector getLinkedFC() {
 		return linkedFC;
 	}
 

@@ -20,6 +20,7 @@ import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
+import it.cnr.isti.vir.util.TimeManager;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -39,6 +40,8 @@ public class Permutation extends AbstractFeature {
 	int[] ordRO = null;
 	int nRO;
 	
+	int ordLength;
+	
 	// each element report the position of the given RO ID
 	int[] roPosition = null;
 	
@@ -46,6 +49,9 @@ public class Permutation extends AbstractFeature {
 		return nRO;
 	}
 
+	public int getOrdLength(){
+		return ordLength;
+	}
 	
 	public Permutation(AbstractFeaturesCollector obj, AbstractFeaturesCollector[] ro, ISimilarity sim  ) {
 		this(obj, ro, sim, ro.length, true);
@@ -76,9 +82,14 @@ public class Permutation extends AbstractFeature {
 		
 	}
 	
+	public Permutation(double[] distances, boolean roPosition) {
+		this(distances, distances.length, roPosition);
+	}
+	
 	public Permutation(double[] distances, int pLength, boolean roPosition) {
+		nRO = distances.length;
 		ordRO = getOrdRO(distances, pLength);
-		
+		ordLength= ordRO.length;
 		if ( roPosition) this.convertToPositions();
 	}
 	
@@ -91,15 +102,18 @@ public class Permutation extends AbstractFeature {
 		SimPQueueDMax<Integer> pQueue = new SimPQueueDMax<Integer>(pLength);
 		
 		for ( int i=0; i<dist.length; i++) {
-			pQueue.offer(i,dist[i]);
+			if ( dist[i] != Double.MAX_VALUE )
+				pQueue.offer(i,dist[i]);
 		}
 		
 		SimilarityResults res = pQueue.getResults();
-		int[] ordRO = new int[pLength];
-		int i=0; 
-		for ( Iterator<ObjectWithDistance<Integer>> it =  res.iterator(); it.hasNext(); ) {
+		int[] ordRO = new int[res.size()];
+		
+		Iterator<ObjectWithDistance<Integer>> it =  res.iterator();
+		
+		for ( int i=0; i<ordRO.length; i++ ) {
 			ObjectWithDistance<Integer> curr = it.next();
-			ordRO[i++] = curr.getObj();
+			ordRO[i] = curr.getObj();
 		}
 		
 		return ordRO;	
@@ -109,10 +123,9 @@ public class Permutation extends AbstractFeature {
     public Permutation(ByteBuffer in) throws IOException  {
     	byte inVersion = in.get(); // version
     	byte type = in.get();
-    	int size = in.getInt();
     	if ( type == 0) {
+    		ordRO = new int[in.getInt()];
     		if ( inVersion >= 2 ) nRO = in.getInt();
-			ordRO = new int[size];
 			if ( nRO < Short.MAX_VALUE && inVersion >= 2 ) {
 				for ( int i=0; i<ordRO.length; i++) {
 					ordRO[i] = in.getShort();
@@ -122,18 +135,25 @@ public class Permutation extends AbstractFeature {
 					ordRO[i] = in.getInt();
 				}
 			}
+			ordLength = ordRO.length;
     	} else if (type != 0) {
-    		nRO = size;
+    		nRO = in.getInt();
     		roPosition = new int[nRO];
+    		ordLength = 0;
     		if ( nRO < Short.MAX_VALUE && inVersion >= 2 ) {
     			for ( int i=0; i<nRO; i++) {
     				roPosition[i] = in.getShort();
+    				if ( roPosition[i] < 0 ) roPosition[i]=Integer.MAX_VALUE;
+    				else ordLength++;
     			}
     		} else {
     			for ( int i=0; i<nRO; i++) {
     				roPosition[i] = in.getInt();
+    				if ( roPosition[i] < 0 ) roPosition[i]=Integer.MAX_VALUE;
+    				else ordLength++;
     			}
     		}
+    		setNullPositions();
     	} else {
     		throw new IOException("Not recognized type in Permutation reading");
     	}
@@ -143,10 +163,10 @@ public class Permutation extends AbstractFeature {
 	public Permutation(DataInput in ) throws IOException {
 		byte inVersion = in.readByte(); // version
 		byte type = in.readByte();
-		int size = in.readInt();
 		if ( type == 0) {
+			ordRO = new int[in.readInt()];
 			if ( inVersion >= 2 ) nRO = in.readInt();
-			ordRO = new int[size];
+			
 			if ( nRO < Short.MAX_VALUE && inVersion >= 2 ) {
 				byte[] arr = new byte[nRO*2];
     			in.readFully(arr);
@@ -163,14 +183,17 @@ public class Permutation extends AbstractFeature {
     			}
 			}
     	} else if (type != 0 ) {
-    		nRO = size;
+    		nRO = in.readInt();
     		roPosition = new int[nRO];
+    		ordLength = 0;
     		if ( nRO < Short.MAX_VALUE && inVersion >= 2 ) {
     			byte[] arr = new byte[nRO*2];
     			in.readFully(arr);
     			ByteBuffer buffer = ByteBuffer.wrap(arr);
     			for ( int i=0; i<nRO; i++) {
     				roPosition[i] = buffer.getShort();
+    				if ( roPosition[i] < 0 ) roPosition[i]=Integer.MAX_VALUE;
+    				else ordLength++;
     			}
     		} else {
     			byte[] arr = new byte[nRO*4];
@@ -178,14 +201,23 @@ public class Permutation extends AbstractFeature {
     			ByteBuffer buffer = ByteBuffer.wrap(arr);
     			for ( int i=0; i<nRO; i++) {
     				roPosition[i] = buffer.getInt();
+    				if ( roPosition[i] < 0 ) roPosition[i]=Integer.MAX_VALUE;
+    				else ordLength++;
     			}
     		}
+    		setNullPositions();
     	} else {
     		throw new IOException("Not recognized type in Permutation reading");
     	}
+		
 	}
 
-	
+	private final void setNullPositions() {
+		for ( int i=0; i<roPosition.length; i++ ) {
+			if ( roPosition[i] == Integer.MAX_VALUE ) 
+				roPosition[i] = ordLength;
+		}
+	}
 	
 	@Override
 	public void writeData(DataOutput out) throws IOException {
@@ -208,11 +240,13 @@ public class Permutation extends AbstractFeature {
 			out.writeInt(roPosition.length);
 			if ( roPosition.length < Short.MAX_VALUE ) {
 				for ( int pos : roPosition ) {
-					out.writeShort(pos);
+					if ( pos >= ordLength ) out.writeShort((short) -1);
+					else out.writeShort(pos);
 				}
 			} else {
 				for ( int pos : roPosition ) {
-					out.writeInt(pos);
+					if ( pos >= ordLength ) out.writeInt(-1);
+					else out.writeInt(pos);
 				}
 			}
 		}
@@ -232,6 +266,7 @@ public class Permutation extends AbstractFeature {
 		if ( roPosition != null ) return;
 		
 		roPosition = convertToROPositions(ordRO, nRO);
+		ordLength= ordRO.length;
 		ordRO = null;
 	}
 	
@@ -376,7 +411,7 @@ public class Permutation extends AbstractFeature {
 	
 	public static void featuresCollectorsArchiveConvert(File inFile, File outFile, AbstractFeaturesCollector[] ro, ISimilarity sim) throws Exception {
 		FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive(inFile, false);
-		Log.info("FeaturesCollectorsArchiveConvert is creating new FCArchive: " + outFile.getAbsolutePath());
+		Log.info("FeaturesCollectorsArchiveConvert is creating FCArchive: " + outFile.getAbsolutePath());
 		FeaturesCollectorsArchive_Buffered outArchive = new FeaturesCollectorsArchive_Buffered(outFile, inArchive.getIDClass(), FeatureCollector.class);
 		
 		int batchSize = 10000;
@@ -384,6 +419,7 @@ public class Permutation extends AbstractFeature {
 		AbstractFeaturesCollector[] tResults = new AbstractFeaturesCollector[batchSize] ;
 		Iterator<AbstractFeaturesCollector> it = inArchive.iterator();
 		int count =0;
+		TimeManager tm = new TimeManager(inArchive.size());
 		while( it.hasNext() ) {
 			
 			// reading objects in batch
@@ -422,7 +458,8 @@ public class Permutation extends AbstractFeature {
 				outArchive.add(tResults[i]);
 				count++;
 			}
-			Log.info(count + "/" + inArchive.size());
+			
+			tm.reportProgress(objs.length);
 		}	
 		outArchive.close();
 	}

@@ -99,6 +99,12 @@ public class RandomOperations {
 		return arr;
 	}
 	
+	/**
+	 * @param size
+	 * @param min inclusive
+	 * @param max inclusive
+	 * @return
+	 */
 	public static int[] getInts(int size, int min, int max) {
 		int[] arr = new int[size];
 		for ( int i=0; i<arr.length; i++) {

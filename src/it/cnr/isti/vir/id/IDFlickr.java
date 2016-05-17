@@ -18,6 +18,7 @@ public class IDFlickr extends AbstractID  {
 		
 		private static boolean fullToString = true;
 		
+		public final static char MMC = '0';
 		
 		public IDFlickr(
 				long id,
@@ -128,6 +129,10 @@ public class IDFlickr extends AbstractID  {
 		    		  "_" + opt +".jpg";
 		}
 		
+		public String getURL(char opt) {
+			if ( opt==MMC ) return getURL_mmc();
+			else return getFlickrURL(opt);
+		}
 
 		/**
 		 * @return Flickr large square image
@@ -193,4 +198,6 @@ public class IDFlickr extends AbstractID  {
 			if ( id > given ) return 1;
 			return -1;
 		}
+		
+		
 }

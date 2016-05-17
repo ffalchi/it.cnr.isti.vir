@@ -80,7 +80,7 @@ public class SimPQueueArr<O> extends AbstractSimPQueue<O> {
 				Arrays.sort(arr);
 				excDistance = arr[size-1].getDist();
 			}
-		} else if ( distance<arr[size-1].getDist() ) {
+		} else if ( distance<=arr[size-1].getDist() ) {
 			arr[arr.length-1].reset(obj,distance);
 			Arrays.sort(arr);
 			excDistance = arr[size-1].getDist();

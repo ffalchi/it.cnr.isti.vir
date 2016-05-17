@@ -26,9 +26,14 @@ import it.cnr.isti.vir.id.IDInteger;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.id.IID2URL;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -243,6 +248,26 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		
 	}
 	
+	public static void writeIDData_arr(SimilarityResults[] res,
+			String fileName) throws IOException {
+		DataOutputStream out = new DataOutputStream(
+				new BufferedOutputStream (
+					new FileOutputStream(fileName)));
+		
+		writeIDData_arr(res, out);
+		
+		out.close();
+	}
+	
+	public static void writeIDData_arr(
+			SimilarityResults[] res,
+			DataOutputStream out) throws IOException {
+		
+		for ( SimilarityResults r : res )
+			r.writeIDData(out);
+
+	}
+	
 	public SimilarityResults(DataInputStream in ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		
 		Constructor<? extends AbstractID> idc = IDClasses.readClass_Int(in).getConstructor(DataInput.class);
@@ -257,22 +282,27 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		}
 	}
 	
+	public static SimilarityResults[] readArray( String fileName) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+		return readArray(
+				new DataInputStream(
+				new BufferedInputStream (
+				new FileInputStream(fileName))));
+	}
+	
+	
 	public static SimilarityResults[] readArray(DataInputStream in ) throws IOException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		LinkedList<SimilarityResults> list = new LinkedList<SimilarityResults>();
 		while (  in.available() > 0) {
 			try {
 				list.add( new SimilarityResults(in) );
-			} catch ( Exception e ) {
-				e.printStackTrace();
+			} catch ( EOFException  e ) {
+				//e.printStackTrace();
 				break;
 			}
 		} 
 		
 		SimilarityResults[] arr = new SimilarityResults[list.size()];
-		int i=0;
-		for ( Iterator<SimilarityResults> it = list.iterator(); it.hasNext(); i++ ) {
-			arr[i]=it.next();
-		}
+		list.toArray(arr);
 		return arr;
 	}
 
@@ -457,5 +487,15 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		coll.removeIf(hasDistGEq(d));
 	}
 
+	public void removeQuery() {
+		AbstractID qID = ((IHasID) query).getID();
+		for ( ObjectWithDistance<E> objdist : coll ) {
+			if ( objdist.getID().equals(qID) ) {
+				coll.remove(objdist);
+				break;
+			}
+		}
+		
+	}
 	
 }
