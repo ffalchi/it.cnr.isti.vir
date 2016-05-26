@@ -7,7 +7,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 
 public class IDFace extends AbstractID {
-	
+
+
 	public final String id;
 	public final float minX;
 	public final float minY;
@@ -129,5 +130,30 @@ public class IDFace extends AbstractID {
 		int temp = id.compareTo(((IDString) o).id);
 		if ( temp == 0 ) return Integer.compare(this.inImageID,((IDFace)o).inImageID);
 		else return temp;
+	}
+	
+	
+	public String getId() {
+		return id;
+	}
+
+	public float getMinX() {
+		return minX;
+	}
+
+	public float getMinY() {
+		return minY;
+	}
+
+	public float getMaxX() {
+		return maxX;
+	}
+
+	public float getMaxY() {
+		return maxY;
+	}
+
+	public int getInImageID() {
+		return inImageID;
 	}
 }
