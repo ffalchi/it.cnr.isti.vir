@@ -25,9 +25,10 @@ public class IDClasses  {
 		IDLONG(IDLong.class, (byte) 1),
 		IDSTRING(IDString.class, (byte) 2),
 		IDFLICKRLEGACY(IDFlickr_Legacy.class, (byte) 3),
-		IDFLICKR(IDFlickr.class, (byte) 4);
+		IDFLICKR(IDFlickr.class, (byte) 4),
+		IDFACE(IDFace.class, (byte) 5);
 		
-		private static final byte idMax = 4;
+		private static final byte idMax = 5;
 		
 		private Class<? extends AbstractID> c;
 		private byte id;
@@ -151,6 +152,9 @@ public class IDClasses  {
 		}
 		if ( idClass.equals(IDFlickr.class) ) {
 			return IDFlickr.readArray(in, n);
+		}
+		if ( idClass.equals(IDFace.class) ) {
+			return IDFace.readArray(in, n);
 		}
 		throw new IOException("idClass not found");
 	}
