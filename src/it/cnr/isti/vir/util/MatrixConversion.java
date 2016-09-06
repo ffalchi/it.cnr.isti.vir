@@ -1,14 +1,3 @@
-/*******************************************************************************
- * Copyright (c) 2013, Fabrizio Falchi and Lucia Vadicamo (NeMIS Lab., ISTI-CNR, Italy)
- * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
- * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- ******************************************************************************/
 package it.cnr.isti.vir.util;
 
 import it.cnr.isti.vir.features.IArrayValues;
@@ -17,6 +6,7 @@ import it.cnr.isti.vir.features.IDoubleValues;
 import it.cnr.isti.vir.features.IFloatByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.ILongBinaryValues;
 import it.cnr.isti.vir.features.IUByteValues;
 import it.cnr.isti.vir.util.math.VectorMath;
 
@@ -52,8 +42,23 @@ public class MatrixConversion {
 		if ( firstObj instanceof IFloatByteValues)
 			return getDoubles_fromFloatBytes( (Collection<IFloatByteValues>) coll );
 		
+		if ( firstObj instanceof ILongBinaryValues)
+			return getDoubles_fromLongBytes( (Collection<ILongBinaryValues>) coll );
+		
 		throw new Exception("Collection objet type was unknown");
 				
+	}
+	
+	/*lucia*/
+	private static final double[][] getDoubles_fromLongBytes(Collection<ILongBinaryValues> coll) {
+		double[][] matrix = new double[coll.size()][];
+		int i=0;
+
+		for ( ILongBinaryValues curr : coll ) {
+			matrix[i] = VectorMath.getDoubles_ILongBinary(curr);//
+			i++;
+		}
+		return matrix;
 	}
 		
 	private static final double[][] getDoubles_fromFloats(Collection<IFloatValues> coll) {
