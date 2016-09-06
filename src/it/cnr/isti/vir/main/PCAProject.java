@@ -12,6 +12,7 @@ import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
+import it.cnr.isti.vir.file.FeaturesCollectorsArchive_Buffered;
 import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.pca.PrincipalComponents;
@@ -54,7 +55,7 @@ public class PCAProject {
 	
 	static  class Project implements Runnable {
 		private final Iterator<AbstractFeaturesCollector> it;
-		private final FeaturesCollectorsArchive out;
+		private final FeaturesCollectorsArchive_Buffered out;
 		private final PrincipalComponents pc;
 		private final Class c;
 		private final TimeManager tm;
@@ -66,7 +67,7 @@ public class PCAProject {
 		
 		public Project(
 				Iterator<AbstractFeaturesCollector> it,
-				FeaturesCollectorsArchive out,
+				FeaturesCollectorsArchive_Buffered out,
 				PrincipalComponents pc,
 				Class c,
 				TimeManager tm,
@@ -101,7 +102,7 @@ public class PCAProject {
 					if ( it.hasNext() ) fc = it.next();
 					else break;
 				}
-				Log.info_verbose_progress(tm, out.size());
+				
 				
 				AbstractFeature currf = fc.getFeature(c);
 				float[] temp = pc.project_float( (IArrayValues) currf);
@@ -124,6 +125,7 @@ public class PCAProject {
 				}
 				try {
 					out.add(newFC);
+					Log.info_verbose_progress(tm, out.size());
 				} catch (ArchiveException | IOException e) {
 					e.printStackTrace();
 				}
@@ -134,7 +136,7 @@ public class PCAProject {
 	
 	static  class Project_LF implements Runnable {
 		private final Iterator<AbstractFeaturesCollector> it;
-		private final FeaturesCollectorsArchive out;
+		private final FeaturesCollectorsArchive_Buffered out;
 		private final PrincipalComponents pc;
 		private final Class<ALocalFeaturesGroup> lfGroupClass;
 		private final TimeManager tm;
@@ -142,7 +144,7 @@ public class PCAProject {
 		
 		public Project_LF(
 				Iterator<AbstractFeaturesCollector> it,
-				FeaturesCollectorsArchive out,
+				FeaturesCollectorsArchive_Buffered out,
 				PrincipalComponents pc,
 				Class<ALocalFeaturesGroup> lfGroupClass,
 				TimeManager tm,
@@ -203,8 +205,8 @@ public class PCAProject {
 		boolean bytes_flag = PropertiesUtils.getBoolean(prop, "PCAProject.Bytes", false);
 		
 		FeaturesCollectorsArchive in = new FeaturesCollectorsArchive(inFile);
-		FeaturesCollectorsArchive out = in.getSameType(outFile);
-		
+		FeaturesCollectorsArchive_Buffered out = FeaturesCollectorsArchive_Buffered.createAs(outFile, in);
+
 		PrincipalComponents pc = PrincipalComponents.read(pcFile);
 		
 		Log.info(pc.toString());
@@ -239,25 +241,8 @@ public class PCAProject {
 		        
 	        ParallelOptions.free(nThread-1);
 			
-//			for ( AbstractFeaturesCollector fc : in ) {
-//				count++;
-//				Log.info_verbose_progress(tm, count, in.size());
-//				
-//				ALocalFeaturesGroup currGroup = fc.getFeature(lfGroupClass);
-//				ALocalFeature[] currLFs = currGroup.lfArr;
-//				FloatsLF[] projected = new FloatsLF[currGroup.size()];
-//				for ( int i=0; i<currLFs.length; i++ ) {
-//					projected[i] = new FloatsLF(pc.project_float( (IArrayValues) currLFs[i])); 
-//				}
-//				FloatsLFGroup projectedGroup = new FloatsLFGroup(projected);
-//				AbstractFeaturesCollector newFC = fc.createWithSameInfo(projectedGroup);
-//				projectedGroup.setLinkedFC(newFC);
-//				
-//				out.add(newFC);
-//			}
 		} else {
 			int nThread = ParallelOptions.reserveNFreeProcessors() +1 ;
-			
 			Thread[] thread = new Thread[nThread];
 			Iterator<AbstractFeaturesCollector> it = in.iterator();
 			for ( int ti=0; ti<nThread; ti++ ) {
@@ -276,18 +261,6 @@ public class PCAProject {
 		        
 	        ParallelOptions.free(nThread-1);
 			
-//			for ( AbstractFeaturesCollector fc : in ) {
-//				count++;
-//				if ( tm.hasToOutput() )
-//					Log.info_verbose(tm.getProgressString(count, in.size()));
-//				
-//				AbstractFeature currf = fc.getFeature(c);
-//				Floats projected = new Floats(pc.project_float( (IArrayValues) currf));
-//				
-//				AbstractFeaturesCollector newFC = fc.createWithSameInfo(projected);
-//
-//				out.add(newFC);
-//			}
 		}
 		
 		in.close();
