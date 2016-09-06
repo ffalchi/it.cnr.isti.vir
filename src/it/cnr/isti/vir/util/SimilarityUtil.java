@@ -11,14 +11,29 @@
  ******************************************************************************/
 package it.cnr.isti.vir.util;
 
+import it.cnr.isti.vir.features.AbstractFeature;
+import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.similarity.ISimilarity;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
-import it.cnr.isti.vir.features.AbstractFeature;
-import it.cnr.isti.vir.similarity.ISimilarity;
-
 public class SimilarityUtil {
 
+	public static double getMinInterDistance(AbstractFeaturesCollector[] fc, ISimilarity sim) {
+		double minInterDist = Double.MAX_VALUE;
+		for(int i1=0; i1<fc.length;i1++) {
+			for(int i2=0; i2<fc.length;i2++) {
+				if ( i1==i2 ) continue;
+				double dist = sim.distance(fc[i1], fc[i2], minInterDist);
+				if ( dist>=0 && dist<minInterDist) {
+					minInterDist = dist;
+				}
+			}
+		}
+		return minInterDist;
+	}
+	
 	public static double getMinInterDistance(AbstractFeature[] fc, ISimilarity sim) {
 		double minInterDist = Double.MAX_VALUE;
 		for(int i1=0; i1<fc.length;i1++) {
@@ -31,6 +46,16 @@ public class SimilarityUtil {
 			}
 		}
 		return minInterDist;
+	}
+	
+	public static double getAvgInterDistance(AbstractFeaturesCollector[] fc, ISimilarity sim) {
+		double sumInterDist = 0.0;
+		for(int i1=0; i1<fc.length;i1++) {
+			for(int i2=0; i2<fc.length;i2++) {
+				sumInterDist += sim.distance(fc[i1], fc[i2]);
+			}
+		}
+		return sumInterDist / (fc.length*fc.length);
 	}
 	
 	public static double getAvgInterDistance(AbstractFeature[] fc, ISimilarity sim) {

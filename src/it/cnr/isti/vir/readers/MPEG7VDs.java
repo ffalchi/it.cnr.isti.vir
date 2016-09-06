@@ -24,6 +24,7 @@ import it.cnr.isti.vir.features.mpeg7.vd.HomogeneousTexture;
 import it.cnr.isti.vir.features.mpeg7.vd.MPEG7VDFormatException;
 import it.cnr.isti.vir.features.mpeg7.vd.RegionShape;
 import it.cnr.isti.vir.features.mpeg7.vd.ScalableColor;
+import it.cnr.isti.vir.id.IDString;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -46,31 +47,31 @@ public class MPEG7VDs {
 																					EdgeHistogram.class,
 																					HomogeneousTexture.class );	
 	
-	public static AbstractFeaturesCollector getFeaturesCollection(File file) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
+	public static FeaturesCollectorArr getFeaturesCollection(File file) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
 		BufferedReader br = new BufferedReader( new FileReader(file) );
 		return getFeaturesCollection( XMLInputFactory.newInstance().createXMLStreamReader(br));
 	}
 
 	
-	public static AbstractFeaturesCollector getFeaturesCollection(File file, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses  ) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
+	public static FeaturesCollectorArr getFeaturesCollection(File file, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses  ) throws XMLStreamException, MPEG7VDFormatException, FactoryConfigurationError, FileNotFoundException, FeaturesCollectorException {
 		BufferedReader br = new BufferedReader( new FileReader(file) );
 		return getFeaturesCollection( XMLInputFactory.newInstance().createXMLStreamReader(br), fClasses, regionFClasses);
 	}
 	
 	
-	public static AbstractFeaturesCollector getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
+	public static FeaturesCollectorArr getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
 		return  getFeaturesCollection( 	XMLInputFactory.newInstance().createXMLStreamReader( new ByteArrayInputStream( sb.toString().getBytes() )),
 										fClasses,
 										regionFClasses );
 	}
 	
-	public static AbstractFeaturesCollector getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
+	public static FeaturesCollectorArr getFeaturesCollection( StringBuffer sb, FeatureClassCollector fClasses )  throws XMLStreamException, FactoryConfigurationError, MPEG7VDFormatException, FeaturesCollectorException {
 		return  getFeaturesCollection( 	XMLInputFactory.newInstance().createXMLStreamReader( new ByteArrayInputStream( sb.toString().getBytes() )),
 										fClasses,
 										null );
 	}
 	
-	public static AbstractFeaturesCollector getFeaturesCollection( XMLStreamReader xmlr  ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
+	public static FeaturesCollectorArr getFeaturesCollection( XMLStreamReader xmlr  ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
 		return getFeaturesCollection( xmlr, null, null );
 	}
 	
@@ -92,7 +93,7 @@ public class MPEG7VDs {
 		return  fClasses == null || fClasses.contains(c);
 	}
 	
-	protected static AbstractFeaturesCollector getFeaturesCollection( XMLStreamReader xmlr, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
+	protected static FeaturesCollectorArr getFeaturesCollection( XMLStreamReader xmlr, FeatureClassCollector fClasses, FeatureClassCollector regionFClasses ) throws XMLStreamException, MPEG7VDFormatException, FeaturesCollectorException {
 		
 		FeaturesCollectorArr mainFC = new FeaturesCollectorArr();
 		FeaturesCollectorArr currFC = mainFC; 
@@ -144,6 +145,9 @@ public class MPEG7VDs {
 	        			//We are inside a SubRegion
 	        			subRegion = true;
 	        			currFC = new FeaturesCollectorArr();
+	        		} else if (xmlr.getLocalName().equals("MediaUri") ) { 
+	        			String string = xmlr.getElementText();
+	        			currFC.setID(new IDString(string.substring(string.lastIndexOf('\\') + 1)));
 	        		}
 	            	break;
 	            case XMLStreamConstants.END_ELEMENT:

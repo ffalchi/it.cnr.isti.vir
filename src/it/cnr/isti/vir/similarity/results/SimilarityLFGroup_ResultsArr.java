@@ -17,6 +17,7 @@ import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeaturesGroup;
 import it.cnr.isti.vir.features.localfeatures.ALocalFeature;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
+import it.cnr.isti.vir.id.AbstractID;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -173,6 +174,12 @@ public class SimilarityLFGroup_ResultsArr implements ISimilarityResults<ALocalFe
 
 	@Override
 	public ALocalFeaturesGroup getQuery() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AbstractID getQuery_ID() {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -180,6 +180,7 @@ public class SimilarityResults<E> implements ISimilarityResults<E>, Iterable<Obj
 		
 	@Override
 	public Iterator<ObjectWithDistance<E>> iterator() {
+		if ( coll == null ) return null;
 		if ( excludedGroup == null ) return coll.iterator();
 		//System.out.println("Results Size " + coll.size());
 		return new SimilarityResultsIterator(coll.iterator());

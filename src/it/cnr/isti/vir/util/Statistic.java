@@ -159,7 +159,7 @@ public class Statistic {
 		return sum/values.length;
 	}
 	
-	public static final double getMode(double[] values) {
+	public static final double getMedian(double[] values) {
 		double[] temp = values.clone();
 		
 		Arrays.sort(temp);

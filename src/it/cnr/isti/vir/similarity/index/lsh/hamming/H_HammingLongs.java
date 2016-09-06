@@ -26,43 +26,50 @@ import java.io.IOException;
  * @author Amato
  */
 
-public class H_HammingInts  {
+public class H_HammingLongs  {
     
 	int b;
+	
 	int resBit;
 	
-    int long_pos;
-    long mask;
+	int long_pos;
+    long long_mask;
         
-    public H_HammingInts(int b, int res){
-        long_pos=(b/64);
-        int bit_pos=(b%64);
-        
-        mask=1L<<bit_pos;
-
+    int byte_pos;
+    byte byte_mask;
+    
+    public H_HammingLongs(int b, int res){
+        this.b = b;
         this.resBit= res;
+        
+        setMasks();
     }
     
-    public H_HammingInts(DataInputStream in) throws IOException {
-    	long_pos = in.readInt();
-		mask = in.readLong();
+    private void setMasks() {
+        long_pos=(b/64);        
+        long_mask=1L<<(64-b%64);
+        
+        byte_pos=(b/8);        
+        byte_mask=(byte) (1<<(8-b%8));
+    }
+    
+    public H_HammingLongs(DataInputStream in) throws IOException {
 		resBit = in.readInt();
 		b = in.readInt();
+		setMasks();
 	}
     
 	public void write(DataOutputStream out) throws IOException {
-		out.writeInt(long_pos);
-		out.writeLong(mask);
 		out.writeInt(resBit);
 		out.writeInt(b);	
 	}
 
 	public final int eval(long[] data) {
-    	return ((data[long_pos]&mask) == 0L ? 0 : resBit);
+    	return ((data[long_pos]&long_mask) == 0L ? 0 : resBit);
     }
     
     public final int eval(long[] data, int offset) {
-    	return (data[offset+long_pos]&mask) == 0L ? 0 : resBit;
+    	return (data[offset+long_pos]&long_mask) == 0L ? 0 : resBit;
     }
     
     public final int getBit() {

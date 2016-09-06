@@ -37,11 +37,8 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class FeaturesCollectorsArchive_Buffered {
 
-	//private final TLongArrayList positions;
-	//private final ArrayList<AbstractID> ids;
-
 	private final DataOutputStream out;
-	//private final RandomAccessFile rndFile;
+	
 	private final File f;
 	private final Constructor fcClassConstructor;
 
@@ -57,7 +54,6 @@ public class FeaturesCollectorsArchive_Buffered {
 	
 	public final int size() {
 		return size;
-		//return ids.size();
 	}
 	
 	public static  FeaturesCollectorsArchive_Buffered create(File file ) throws Exception {
@@ -125,7 +121,7 @@ public class FeaturesCollectorsArchive_Buffered {
 		out = new DataOutputStream( 
 				new BufferedOutputStream(new FileOutputStream(file))
 				);
-		//rndFile = new RandomAccessFile(file, "rw");
+
 		this.f = file;
 		this.idClass = idClass;
 		this.fcClass = fcClass;
@@ -133,12 +129,8 @@ public class FeaturesCollectorsArchive_Buffered {
 
 		FeaturesCollectorsArchive.writeIntro(out, idClass,	fcClass);
 		
-		//positions = new TLongArrayList();
-//		if ( saveIDs) ids = new ArrayList();
-//		else ids = null; 
-		
-		offsetFile = new File(FeaturesCollectorsArchive.getIDFileName(file));
-		idFile = new File(FeaturesCollectorsArchive.getOffsetFileName(file));
+		idFile = new File(FeaturesCollectorsArchive.getIDFileName(file));
+		offsetFile = new File(FeaturesCollectorsArchive.getOffsetFileName(file));
 
 	}
 	
@@ -147,18 +139,6 @@ public class FeaturesCollectorsArchive_Buffered {
 	}	
 
 	public synchronized void add(AbstractFeaturesCollector fc) throws ArchiveException, IOException {
-
-		//int currPos = positions.size();
-		//positions.add(out.size());
-		
-//		if (idClass != null && ids != null ) {
-//			AbstractID id = ((IHasID) fc).getID();
-//			if (!idClass.isInstance(id)) {
-//				throw new ArchiveException("Objecct has a wrong ID class: "
-//						+ idClass + " requested, " + id.getClass() + " found.");
-//			}
-//			ids.add(id);			
-//		}
 
 		if (fcClass == null) {
 			FeaturesCollectors.writeData(out, fc);
@@ -180,7 +160,6 @@ public class FeaturesCollectorsArchive_Buffered {
 		if ( closed ) return;
 		out.close();
 		
-		//FeaturesCollectorsArchive.createIndexFiles(offsetFile, idFile, positions, ids);
 		closed = true;
 	}
 	

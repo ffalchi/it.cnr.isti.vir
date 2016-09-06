@@ -19,36 +19,60 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 
-public class G_HammingInts {
+public class G_HammingLongs {
 
 	
     /**
      * Single bit hashing
      */
-	final H_HammingInts[] hs;
+	final H_HammingLongs[] hs;
     
     /**
      * Number of bits used for hashing
      */
     final int h;
 
-    public G_HammingInts(int h_p, int nBits){
+	int[] long_pos;
+    long[] long_mask;
+    
+	int[] byte_pos;
+    byte[] byte_mask;
+    
+    private void fillArrays() {
+    	long_pos = new int[hs.length];
+    	long_mask = new long[hs.length];
+    	
+    	byte_pos = new int[hs.length];
+    	byte_mask = new byte[hs.length];
+    	
+    	for(int i=0;i<h;i++) {
+    		long_pos[i] = hs[i].long_pos;
+    		long_mask[i] = hs[i].long_mask;
+    		
+    		byte_pos[i] = hs[i].byte_pos;
+    		byte_mask[i] = hs[i].byte_mask;
+    	}
+    }
+    
+    public G_HammingLongs(int h_p, int nBits){
         h=h_p;
-        hs=new H_HammingInts[h];
+        hs=new H_HammingLongs[h];
 
         
         int[] b = RandomOperations.getDistinctInts(h, nBits);
         for(int i=0;i<h;i++){
-            hs[i]=new H_HammingInts(b[i], 1<<i);
+            hs[i]=new H_HammingLongs(b[i], 1<<i);
         }
+        fillArrays();
     }
     
-    public G_HammingInts(DataInputStream in) throws IOException {
+    public G_HammingLongs(DataInputStream in) throws IOException {
 		h = in.readInt();
-		hs=new H_HammingInts[h];
+		hs=new H_HammingLongs[h];
 		for(int i=0;i<h;i++){
-	        hs[i] = new H_HammingInts(in);
+	        hs[i] = new H_HammingLongs(in);
 		}
+		fillArrays();
 	}
 
 	public void write(DataOutputStream out) throws IOException {
@@ -57,11 +81,25 @@ public class G_HammingInts {
 	        hs[i].write(out);
 		}
 	}
+	
+//	public final int eval(LongBuffer lb) {
+//		long[] temp = new long[lb.capacity()];
+//		lb.get(temp);
+//		return eval(temp);
+//	}
     
 	public final int eval(long[] data) {
     	int res = 0;
-    	for(int i=0;i<h;i++){
-    		res=res|hs[i].eval(data);
+    	for(int i=0;i<h;i++){    		
+    		res=res|((data[long_pos[i]]&long_mask[i]) == 0L ? 0 : 1<<i);
+    	}
+    	return res;
+    }
+	
+	public final int eval(byte[] data) {
+    	int res = 0;
+    	for(int i=0;i<h;i++){    		
+    		res=res|((data[byte_pos[i]]&byte_mask[i]) == 0L ? 0 : 1<<i);
     	}
     	return res;
     }
@@ -69,7 +107,7 @@ public class G_HammingInts {
     public final int eval(long[] data, int offset) {
     	int res = 0;
     	for(int i=0;i<h;i++){
-    		res=res|hs[i].eval(data, offset);
+    		res=res|((data[offset+long_pos[i]]&long_mask[i]) == 0L ? 0 : 1<<i);
     	}
     	return res;
     }
@@ -79,7 +117,7 @@ public class G_HammingInts {
     	
     	tStr.append("   " + "h[" + h  + "]: " );
     	for ( int i=0; i<hs.length; i++) {
-    		tStr.append( hs[i].mask + "/" +  hs[i].long_pos + " ");
+    		tStr.append( hs[i].long_mask + "/" +  hs[i].long_pos + " ");
     	}
     	tStr.append("\n");
     	

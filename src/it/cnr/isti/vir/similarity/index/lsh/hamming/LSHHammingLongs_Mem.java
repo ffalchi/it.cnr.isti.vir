@@ -62,7 +62,7 @@ public class LSHHammingLongs_Mem implements IkNNExecuter {
     
     AbstractID[] id;
     
-    G_HammingInts[] gs;
+    G_HammingLongs[] gs;
     
     public int getNumberOfBuckets(int b){
         return tables[b].length;
@@ -100,10 +100,10 @@ public class LSHHammingLongs_Mem implements IkNNExecuter {
     
     	this.l=l;
     	this.h=h;
-    	gs=new G_HammingInts[l];
+    	gs=new G_HammingLongs[l];
     	tables= new TIntArrayList[l][];
     	for( i=0;i<l;i++){
-    		gs[i]=new G_HammingInts(h, nBits);
+    		gs[i]=new G_HammingLongs(h, nBits);
     		tables[i]=new TIntArrayList[1<<h];
     	}
     	buildIndex();

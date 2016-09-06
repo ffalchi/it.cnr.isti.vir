@@ -69,7 +69,7 @@ public class LongByteArrayUtil {
 	 * @param n				desired array length
 	 * @return
 	 */
-	public static final long[] convToLong(byte byteArr[], long[] res, int n) {
+	public static final long[] convToLong(byte byteArr[], long[] res ) {
 		for ( int i=0; i<res.length; i++) {
 			res[i]=get(byteArr, (Long.SIZE/Byte.SIZE)*i);
 		}

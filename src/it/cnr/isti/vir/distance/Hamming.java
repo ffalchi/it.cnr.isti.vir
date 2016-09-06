@@ -11,6 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.distance;
 
+import java.nio.LongBuffer;
+
 
 public class Hamming {
 
@@ -27,6 +29,14 @@ public class Hamming {
 		int acc = 0;
 		for ( int i=0; i<bits1.length; i++) {
 			acc+=Long.bitCount(bits1[i]^bits2[i]);
+		}		
+		return acc;
+	}
+	
+	public static final int distance(long[] bits1, LongBuffer lb ) {
+		int acc = 0;
+		for ( int i=0; i<bits1.length; i++) {
+			acc+=Long.bitCount(bits1[i]^lb.get());
 		}		
 		return acc;
 	}

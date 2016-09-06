@@ -111,6 +111,8 @@ public class TimeManager {
 	}
 	
 	public String getProgressString(int curr, int tot) {
+		if ( totNEle<0 )
+			return curr + " " + Time.getString_sec(getTotalTime()) ;
 		return curr + "/" + tot + " " + Percentage.getString(curr, tot) + " " + "ETC " + getExtimatedTimeToComplete_STR(curr, tot);
 	}
 	

@@ -56,17 +56,27 @@ public abstract class AbstractBitsObject {
 		return res;
 	}
 	
-	public final long[] perturbateRandom(long[] orig, int nBits) {
-		long[] res = orig.clone();
-		for(int i=0; i<nBits; i++) {
-			int currRandom = RandomOperations.getInt(LSHHammingLongs.nBits);
-			int int_pos = currRandom/64;
-			long mask = 1L<<currRandom%64;
+//	public final long[] perturbateRandom(long[] orig, int nBits) {
+//		long[] res = orig.clone();
+//		for(int i=0; i<nBits; i++) {
+//			int currRandom = RandomOperations.getInt(LSHHammingLongs.nBits);
+//			int int_pos = currRandom/64;
+//			long mask = 1L<<currRandom/64;
+//			res[int_pos]=res[int_pos]^mask;
+//		}
+//		return res;
+//	}
+
+	public final int[] perturbateRandomExactly(int[] orig, int nBits) {
+		int[] res = orig.clone();
+		int[] pert = RandomOperations.getDistinctInts(nBits, LSHHammingLongs.nBits);
+		
+		for(int bit : pert) {
+			int int_pos = bit/64;
+			int mask = 1<<bit/64;
 			res[int_pos]=res[int_pos]^mask;
 		}
 		return res;
 	}
-
-
 	
 }

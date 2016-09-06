@@ -14,6 +14,7 @@ package it.cnr.isti.vir.similarity.results;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector_Labeled_HasID;
 import it.cnr.isti.vir.file.ArchiveException;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
+import it.cnr.isti.vir.id.AbstractID;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -30,10 +31,12 @@ public interface ISimilarityResults<E> extends Iterable<ObjectWithDistance<E>> {
 	
 	public E getQuery();
 	
+	public AbstractID getQuery_ID();
+	
 	public boolean equalResults(ISimilarityResults<E> that);
 
 	public void writeIDData(DataOutputStream out) throws IOException;
-
+	
 	public ISimilarityResults<E> getResultsIDs();
 	
 	public ObjectWithDistance<E> getFirst();

@@ -32,4 +32,12 @@ public abstract class AbstractFeature {
 		linkedFC = null;
 		return this;
 	}	
+	
+	public static AbstractFeature[] getFeatures(AbstractFeaturesCollector[] fc, Class<? extends AbstractFeature> fClass) {
+		AbstractFeature[] res = new AbstractFeature[fc.length];
+		for (int i=0; i<res.length; i++ ) {
+			res[i] = fc[i].getFeature(fClass);
+		}
+		return res;
+	}
 }

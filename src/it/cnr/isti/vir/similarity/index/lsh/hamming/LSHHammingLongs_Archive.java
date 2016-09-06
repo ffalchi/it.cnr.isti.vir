@@ -13,7 +13,7 @@
 package it.cnr.isti.vir.similarity.index.lsh.hamming;
 
 import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.iterator.TLongIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import it.cnr.isti.vir.distance.Hamming;
 import it.cnr.isti.vir.features.AbstractFeature;
@@ -29,6 +29,8 @@ import it.cnr.isti.vir.similarity.pqueues.AbstractSimPQueue;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueue_kNN;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueue_r;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
+import it.cnr.isti.vir.similarity.results.ObjectWithDistance;
+import it.cnr.isti.vir.similarity.results.SimilarityResults;
 import it.cnr.isti.vir.util.TimeManager;
 
 import java.io.BufferedInputStream;
@@ -39,10 +41,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+
+import org.hamcrest.internal.ArrayIterator;
 
 
 
@@ -53,195 +59,148 @@ import java.util.NoSuchElementException;
  *
  */
 public class LSHHammingLongs_Archive implements IkNNExecuter {
-
-	//private File path;
-
-	public static int nLongs = 64;;
-	public static int nBits = nLongs * 64;
-	public static int nBytes = nLongs * 8;
 	
-	int l;
+	
+	L_HammingLongs[] ls;
     int h;
-    TIntArrayList[][] tables;
-    G_HammingInts[] gs;
-    
+        
     Class<? extends AbstractFeature> fClass;
     
     FeaturesCollectorsArchive fca;    
+    FileChannel fileChannel;
     
-    boolean parallel = true;
+    public int maxBucketSize_SEARCH = Integer.MAX_VALUE;
+    
+    static boolean parallel = true;
+//    public final long getFileChannelPosition(int internalID ) {
+//    	return nBytes*internalID;
+//    }
 
-    
-    public int getNumberOfBuckets(int b){
-        return tables[b].length;
-    }
-    
-//    public final File getDataFile() {
-//    	File res =  new File( path.getAbsolutePath() + File.separator + "Data.dat" );
-//    	res.getParentFile().mkdirs();
-//    	return res;
-//    }
-    
-    public final long getFileChannelPosition(int internalID ) {
-    	return nBytes*internalID;
-    }
-    
-//    public LSHHammingLongs( String path, int h, int l) throws ArchiveException, IOException {
-//    	
-//    	this.path = new File(path);
-//    	
-//    	data_raf = new RandomAccessFile(getDataFile(), "rw");
-//    	
-//    	buildIndex();
-//    	
-//    	
-//    }
-    
-    
-    public LSHHammingLongs_Archive( String fcaName, Class<? extends AbstractFeature> fClass,  int h, int l) throws ArchiveException, IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
-    	
-    	fca = new FeaturesCollectorsArchive(fcaName, false);
-    	
-    	this.l=l;
-    	this.h=h;
-    	
-    	this.fca = fca;
-    	this.fClass = fClass;
-    	
-    	buildIndex();
-    	    	
-    }
-    	
 
+    public String getLongsFileName() {
+    	return fca.getfile().getAbsolutePath() + ".longs";
+    }
     
-    /**
-     * @param database
-     * @param h		number of bits used for hashing
-     * @param l		number of G
-     * @throws IOException 
-     */
-//    public LSHHammingInt(BitsObjectWithStringDatabaseMem database,int h, int l) {
-//    	
-//    	System.out.println("Creating LSHHammingInt " + h + "," + l);
-//    	this.database=database;
-//    	this.data=database.getRawData();
-//    	this.l=l;
-//        this.h=h;
-//        gs=new G_HammingInts[l];
-//        tables= new int[l][][];
-//        for(int i=0;i<l;i++){
-//            gs[i]=new G_HammingInts(h);
-//            tables[i]=new int[1<<h][];
-//        }
-//        buildIndex();
-//    }
-    
-    private void buildIndex() throws IOException{
+    public void createLongsFile() throws Exception {
     	
+    	Log.info("LSH is creating Longs file " + getLongsFileName());
+		DataOutputStream out = 
+				new DataOutputStream(
+						new BufferedOutputStream(
+							new FileOutputStream(
+									getLongsFileName() )	) );
     	
-    	Log.info("Building index");
-    	Log.info("Database size: " + fca.size()) ;
-    	
-    	this.l=l;
-    	this.h=h;
-    	gs=new G_HammingInts[l];
-    	tables= new TIntArrayList[l][];
-    	for( int i=0;i<l;i++){
-    		gs[i]=new G_HammingInts(h, nBits);
-    		tables[i]=new TIntArrayList[1<<h];
+		TimeManager tm = new TimeManager(fca.size());
+    	for ( AbstractFeaturesCollector fc : fca ) {
+    		ILongBinaryValues b =  ((ILongBinaryValues) fc.getFeature(fClass));
+    		
+    		long[] values = b.getValues();
+    		
+    		for ( long l : values ) {
+    			out.writeLong(l);
+    		}
+    		tm.reportProgress();
     	}
     	
-    	
-    	TimeManager tm = new TimeManager(fca.size());
-    	int i=0;
-        for( AbstractFeaturesCollector fc : fca ){
-        	long[] values = ((ILongBinaryValues) fc.getFeature(fClass)).getValues();
-            insert(values, i);
-            tm.reportProgress();
-            i++;
-        }
-        
-        Log.info("Building index done");
+    	out.close();
     }
     
+    public LSHHammingLongs_Archive( String fcaName, Class<? extends AbstractFeature> fClass,  int h, int l) throws Exception  {
+
+    	this.fClass = fClass;
+
+    	this.h=h;
+    	
+    	
+
+    	fca = new FeaturesCollectorsArchive(fcaName, false);
+    	
+    	if ( !(new File( getLongsFileName() )).exists() ) {
+    		createLongsFile();
+    	}
+    	
+    	//rndAccess = new RandomAccessFile(getLongsFileName(), "r");
+    	fileChannel = new RandomAccessFile(getLongsFileName(), "r").getChannel();
+    	
+    	ls = new L_HammingLongs[l];
+    	
+    	buildIndex();
+    	
+    	    	
+    }
+
+    
+    private void buildIndex() throws Exception {
+    	
+    	for( int i=0;i<ls.length;i++){
+    		ls[i] = new L_HammingLongs(new File(getLongsFileName()), getLSHLFile(i), h);
+    	}
+    	
+    }    
+    
+    public File getLSHFile() {
+    	return new File(
+    			fca.getfile().getAbsolutePath() + ".lsh" );
+    }
+    
+    public File getLSHLFile(int i) {
+    	return new File(
+    			fca.getfile().getAbsolutePath() + ".l" + i );
+    }
     
 	public void save() throws IOException {
 
 		Log.info("Saving LSH for " + fca.getfile().getAbsolutePath());
-		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(
-				new FileOutputStream(new File(fca.getfile().getAbsolutePath()
-						+ ".lsh"))));
+		DataOutputStream out = new DataOutputStream(
+				new BufferedOutputStream(
+						new FileOutputStream( getLSHFile() 
+								)));
 
 		out.writeInt(FeatureClasses.getClassID(fClass));
 		
-		out.writeInt(l);
+		out.writeInt(ls.length);
 		out.writeInt(h);
-		for (int i = 0; i < l; i++) {
-			gs[i].write(out);
-			for (int i2 = 0; i2 < tables[i].length; i2++) {
-				if (tables[i][i2] == null) {
-					out.writeInt(0);
-				} else {
-					out.writeInt(tables[i][i2].size());
-					for (int i3 = 0; i3 < tables[i][i2].size(); i3++) {
-						out.writeInt(tables[i][i2].get(i3));
-					}
-				}
-			}
-		}
+//		for (int i = 0; i < ls.length; i++) {
+//			ls[i].save(
+//					getLSHLFile(i) );
+//		}
 		out.close();
 
 		Log.info("Saving completed");
 	}
+	
+//	public long[] getValues(int i) throws Exception {
+//		
+//		byte[] bytes = new byte[nBytes];
+//		rndAccess.readFully(bytes);
+//		return LongByteArrayUtil.getArr(bytes, 0, nLongs);
+//	}
     
-	public LSHHammingLongs_Archive(String fcaName ) throws IOException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
+	public LSHHammingLongs_Archive(String fcaName ) throws Exception {
 		
 		fca = new FeaturesCollectorsArchive(fcaName, false);
 
 		DataInputStream in = new DataInputStream(new BufferedInputStream(
 				new FileInputStream(new File(fca.getfile().getAbsolutePath() + ".lsh"))));
 
+    	//rndAccess = new RandomAccessFile(getLongsFileName(), "r");
+		fileChannel = new RandomAccessFile(getLongsFileName(), "r").getChannel();
 		
 		fClass = FeatureClasses.getClass(in.readInt());
 		
-		l = in.readInt();
+		int l = in.readInt();
 		h = in.readInt();
-		gs = new G_HammingInts[l];
-		tables = new TIntArrayList[l][];
+		ls = new L_HammingLongs[l];
 		for (int i = 0; i < l; i++) {
-			gs[i] = new G_HammingInts(in);
-			tables[i] = new TIntArrayList[1 << h];
-			for (int i2 = 0; i2 < tables[i].length; i2++) {
-				int curr = in.readInt();
-				if (curr != 0) {
-					tables[i][i2] = new TIntArrayList( curr );
-					for (int i3 = 0; i3 < curr; i3++) {
-						tables[i][i2].add( in.readInt() );
-					}
-				}
-			}
+			ls[i] = new L_HammingLongs(getLSHLFile(i));			
 		}
+		in.close();
 	}
     
     
     private synchronized final long[] readData(int id ) throws IOException, ArchiveException {
     	AbstractFeaturesCollector fc = fca.get(id);
     	return ((ILongBinaryValues) fc.getFeature(fClass)).getValues();
-    }
-    
-    private final void insert(long[] data, int id) throws IOException{
-        //long[] data = new long[nLongs];
-    	for(int i=0;i<l;i++){
-        	//readData(id, data);
-            int key= gs[i].eval(data);
-            
-            TIntArrayList curr = tables[i][key];
-            if (curr==null){
-            	curr= new TIntArrayList();
-            	tables[i][key]=curr;
-            }
-            curr.add(id);
-        }
     }
 	
     static TIntHashSetPool hashSetPool = new TIntHashSetPool(8,30);
@@ -257,67 +216,106 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
 		return search(qObj, new SimPQueue_kNN(k));
 	}
     
-    public ISimilarityResults rangeSearch(AbstractFeaturesCollector fc, double r) throws IOException, InterruptedException  {
+    public ISimilarityResults rangeSearch(AbstractFeaturesCollector fc, double r) throws Exception  {
     	return search(fc, new SimPQueue_r(r));
     }
     
-    public final ISimilarityResults search(AbstractFeaturesCollector fc, AbstractSimPQueue pQueue) throws IOException, InterruptedException  {
+    public final ISimilarityResults search(AbstractFeaturesCollector fc, AbstractSimPQueue pQueue) throws Exception  {
 		
     	return search( (ILongBinaryValues) fc.getFeature(fClass), pQueue);
     }
     
-    public final ISimilarityResults search(AbstractFeature f, AbstractSimPQueue pQueue) throws IOException, InterruptedException  {
+    public final ISimilarityResults search(AbstractFeature f, AbstractSimPQueue pQueue) throws Exception  {
 		
     	return search( (ILongBinaryValues) f, pQueue);
     }
    
-    public final ISimilarityResults search(ILongBinaryValues f, AbstractSimPQueue pQueue) throws IOException, InterruptedException {
+    public final ISimilarityResults search(ILongBinaryValues f, AbstractSimPQueue pQueue) throws Exception {
     		
     	return search(f.getValues(), pQueue);
-    }
-    
-    
+    }    
     
 	class Search implements Runnable {
 
-		private final TIntArrayList result;
+		private final TIntHashSet results;
 		private final long[] query;
-		private final Iterator<Integer> ls;
+		private final ArrayIterator ls;
 	    
-		Search(long[] query, Iterator<Integer> ls, TIntArrayList[][] tables, G_HammingInts[] gs, TIntArrayList result ) {
+		Search(long[] query, ArrayIterator ls, TIntHashSet results ) {
             this.ls = ls;
-			this.result = result;
+			this.results = results;
             this.query=  query;
         }
         
         @Override
         public void run() {
         	
-        	Integer l;
+        	L_HammingLongs l;
         	
         	while (true) {
             	try {
-            		l = ls.next();
-            	} catch (NoSuchElementException e) {
+            		l = (L_HammingLongs) ls.next();
+            	} catch (ArrayIndexOutOfBoundsException e) {
             		break;
             	}
             	if ( l == null ) break;
         	
-	            int key=gs[l].eval(query);
-	            
-	            TIntArrayList bucket = tables[l][key];
-	            if ( bucket!= null) {
-	
-	            	for(int iE=0; iE<bucket.size(); iE++ ){
-	                    int o=bucket.get(iE);
-	                    result.add(o);
-		            }
-	            }
+		        try {
+		        	IntBuffer ib = l.getInBucket(query);
+		        	if ( ib != null ) {
+		        		if ( ib.capacity() > maxBucketSize_SEARCH ) continue;
+			        	synchronized ( results ) {
+			        		while ( ib.hasRemaining() )
+			        			results.add(ib.get());
+			        	}
+		        	}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
         	}
 
         }                
     }
     
+//	class Evaluate implements Runnable {
+//
+//		private final TIntIterator it;
+//		private final long[] query;
+//		private final AbstractSimPQueue pQueue;
+//	    
+//		Evaluate(long[] query, TIntIterator it, AbstractSimPQueue pQueue ) {
+//            this.it = it;
+//            this.pQueue = pQueue;
+//            this.query=  query;
+//        }
+//        
+//        @Override
+//        public void run() {
+//        	byte[] bytes = new byte[L_HammingLongs.nBytes];
+//        	long[] v = new long[L_HammingLongs.nLongs];
+//            while (true) {
+//           		int oID;
+//           		synchronized(it) {
+//           			if ( it.hasNext() == false ) break;
+//           			oID =it.next();
+//                    try {
+//                    	rndAccess.seek(oID*(long) L_HammingLongs.nBytes);
+//                    	rndAccess.readFully(bytes);
+//						LongByteArrayUtil.convToLong(bytes, v);
+//    				} catch ( Exception e) {
+//    					// TODO Auto-generated catch block
+//    					e.printStackTrace();
+//    				}
+//           		}
+//
+//                int dist=Hamming.distance(query, v  );
+//                pQueue.offer(oID, dist);
+//            }
+//
+//        }                
+//    }
+	
 	class Evaluate implements Runnable {
 
 		private final TIntIterator it;
@@ -333,7 +331,9 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
         @Override
         public void run() {
         	
-        	AbstractFeaturesCollector fc = null;
+    		ByteBuffer bb = ByteBuffer.allocateDirect(L_HammingLongs.nBytes);
+        	LongBuffer lb = bb.asLongBuffer();;
+        	FileChannel fc = LSHHammingLongs_Archive.this.fileChannel;
             while (true) {
            		int oID;
            		synchronized(it) {
@@ -341,97 +341,108 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
            			oID =it.next();
            		}
                 try {
-                	fc = fca.get(oID);
-				} catch ( ArchiveException e) {
+                	fc.read(bb, oID*(long) L_HammingLongs.nBytes);
+				} catch ( Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					break;
 				}
-                int dist=Hamming.distance(query, ((ILongBinaryValues) fc.getFeature(fClass)).getValues()  );
-                pQueue.offer(fc, dist);
+           		
+			    bb.flip();   
+				int dist=Hamming.distance(query, lb  );
+				if ( dist < pQueue.excDistance )
+					pQueue.offer(oID, dist);
+			    lb.clear();
             }
 
         }                
     }
 	
-    public final ISimilarityResults search(long[] query, AbstractSimPQueue pQueue) throws IOException, InterruptedException{
+    public final ISimilarityResults search(long[] query, AbstractSimPQueue pQueue) throws Exception{
     	int iHashSet = hashSetPool.acquireTIntHashSet();
     	TIntHashSet objects = hashSetPool.getHashSet(iHashSet);
-
-    	ArrayList<Integer> ls = new ArrayList(gs.length);
-    	for ( int i=0; i<gs.length; i++) {
-    		ls.add(i);
-    	}
     	
-
-    	// Parallel
     	if ( parallel ) {
+    		ArrayIterator it  = new ArrayIterator(ls);
 			int nThread = ParallelOptions.reserveNFreeProcessors()+1;
 			Thread[] thread = new Thread[nThread];
-			TIntArrayList[] results = new TIntArrayList[nThread];
+			
 			for ( int ti=0; ti<thread.length; ti++ ) {
-				results[ti] = new TIntArrayList();
-				thread[ti] = new Thread( new Search(query, ls.iterator(), tables, gs, results[ti]) ) ;
+				thread[ti] = new Thread( new Search(query, it, objects) ) ;
 	        	thread[ti].start();
 			}
 			
-	        for ( int ti=0; ti<thread.length; ti++  ) {
-	        	thread[ti].join();
-	        	objects.addAll(results[ti]);
+	        for ( Thread t : thread ) {
+	        	t.join();
 	        }
+			
 	        ParallelOptions.free(nThread-1);
     	} else {
-	    	
-	        for(int i=0;i<l;i++){
-	        	
-	            int key=gs[i].eval(query);
-	            
-	            TIntArrayList bucket = tables[i][key];
-	            if ( bucket!= null) {
-	
-	            	for(int iE=0; iE<bucket.size(); iE++ ){
-	                    int o=bucket.get(iE);
-		                objects.add(o);
-		            }
-	            }
-	        }
+    		for(L_HammingLongs l: ls){
+    			IntBuffer ib = l.getInBucket(query);
+    			if ( ib == null || ib.capacity() > maxBucketSize_SEARCH ) continue;
+        		while ( ib.hasRemaining() )
+        			objects.add(ib.get());
+   			}
     	}
     	
-//    	if ( parallel ) {
-//	        // Parallel
-//	        TIntIterator it = objects.iterator();
-//			int nThread = ParallelOptions.reserveNFreeProcessors()+1;
-//			Thread[] thread = new Thread[nThread];
-//			for ( int ti=0; ti<thread.length; ti++ ) {
-//				thread[ti] = new Thread( new Evaluate(query, it, pQueue) ) ;
-//	        	thread[ti].start();
-//			}
-//			
-//	        for ( Thread t : thread ) {
-//	        	t.join();
-//	        }
-//	        ParallelOptions.free(nThread-1);
-//    	} else {
-    	Log.info_verbose("Candidate set size: " + objects.size());
-    	long[] data = new long[nLongs];
-    	for(TIntIterator it = objects.iterator(); it.hasNext(); ){
-	        int oID=it.next();
-		    AbstractFeaturesCollector fc = null;
-		
-		    try {
-				fc = fca.get(oID);
-			} catch (ArchiveException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+    	System.out.print(objects.size() + "\t");
+    	if ( parallel ) {
+	        TIntIterator it = objects.iterator();
+			int nThread = ParallelOptions.reserveNFreeProcessors()+1;
+			Thread[] thread = new Thread[nThread];
+			for ( int ti=0; ti<thread.length; ti++ ) {
+				thread[ti] = new Thread( new Evaluate(query, it, pQueue) ) ;
+	        	thread[ti].start();
 			}
+			
+	        for ( Thread t : thread ) {
+	        	t.join();
+	        }
+	        ParallelOptions.free(nThread-1);
 	        
-		    int dist=Hamming.distance(query, ((ILongBinaryValues) fc.getFeature(fClass)).getValues()  );
-	        pQueue.offer(fc, dist);
+	        
+    	} else {
+	    	
+//	    	byte[] bytes = new byte[L_HammingLongs.nBytes];
+//        	long[] v = new long[L_HammingLongs.nLongs];
+    		
+    		ByteBuffer bb = ByteBuffer.allocateDirect(L_HammingLongs.nBytes);
+        	LongBuffer lb = bb.asLongBuffer();
+        	FileChannel fc = LSHHammingLongs_Archive.this.fileChannel;
+	    	
+	    	for(TIntIterator it = objects.iterator(); it.hasNext(); ){
+		        int oID=it.next();
+
+			    try {
+                	fc.read(bb, oID*(long) L_HammingLongs.nBytes);
+				} catch (Exception e) {
+					e.printStackTrace();
+					break;
+				}
+			    bb.flip();   
+				int dist=Hamming.distance(query, lb  );
+			    pQueue.offer(oID, dist);
+			    lb.clear();
+			    
+		    }
+	    	
     	}
-//   	}
+    	hashSetPool.releaseTIntHashSet(iHashSet);
     	
-        hashSetPool.releaseTIntHashSet(iHashSet);
+    	ISimilarityResults res = pQueue.getResults();
+    	ObjectWithDistance[] od = new ObjectWithDistance[res.size()];
+    	int i=0;
+   		for ( Iterator<ObjectWithDistance> it=res.iterator(); it != null && it.hasNext(); ) {
+   			ObjectWithDistance c = it.next();
+   			od[i++] = new ObjectWithDistance(
+   						fca.get((int) c.obj).getID(), 
+   						c.dist
+ 					);
+   	  	}
+      
         
-        return pQueue.getResults();
+        return new SimilarityResults(od);
     }
     
 //    private static int current=0;
@@ -456,12 +467,8 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
     
     public final int getNOfNotNullBuckets() {
     	int res = 0;
-    	for ( int i1=0; i1<tables.length; i1++ ) {
-        	for ( int i2=0; i2<tables[i1].length; i2++ ) {
-        		if ( tables[i1][i2] != null ) {
-        			res += 1;
-        		}
-        	}
+    	for ( int i=0; i<ls.length; i++ ) {
+        	res += ls[i].getNOfNotNullBuckets();
     	}
     	return res;
     }
@@ -559,14 +566,46 @@ public class LSHHammingLongs_Archive implements IkNNExecuter {
 //    	}
     	
     	tStr.append( "- nBuckets:\t" );
-    	for ( int i=0; i<tables.length; i++ ) {
+    	for ( int i=0; i<ls.length; i++ ) {
     		if ( i>0 ) tStr.append(", ");
-    		tStr.append( this.getNumberOfBuckets(i) );
+    		tStr.append( ls[i].getNumberOfBuckets() );
     	}
     	tStr.append("\n");
-    	tStr.append("- notNullBucks\t" + this.getNOfNotNullBuckets() + "\n");
     	
-//    	try {
+    	long nNotNulls = 0;
+    	int maxN = -1;
+    	int maxID1 = -1;
+    	long maxID2 = -1;
+    	long sum =0;
+    	for ( int i1=0; i1<ls.length; i1++ ) {
+        	//for ( int i2=0; i2<ls[i1].nh; i2++ ) {
+        	for ( TLongIntIterator it = ls[i1].bSize.iterator(); it.hasNext();  ) {	
+        		it.advance();
+        		int csize = it.value();
+        		if ( csize > 0 ) {
+        			nNotNulls += 1;
+            		int size = csize;
+            		sum += size;
+            		if ( size > maxN ) {
+            			maxN=size;
+            			maxID1=i1;
+            			maxID2=it.key();
+            		}
+        		}
+
+        	}
+    	}
+    	
+    	
+    	tStr.append("- nObjs\t" + (sum / (double) ls.length) + "\n");
+    	
+    	tStr.append("- notNullBuckets\t" + nNotNulls + "\n");
+    	
+    	tStr.append("- avgNotNullBucketSize\t" + sum/(double) nNotNulls + "\n");
+    	
+    	tStr.append("- biggestBucket\t" + maxN + "\t" + "(" + maxID1 + "," + maxID2 +")");
+    
+    	//    	try {
 //			tStr.append("- sizeInBytes\t" + this.getDataSizeInBytes() + "\n");
 //			tStr.append("- nObjects\t" + this.getNObjs() + "\n");
 //		} catch (IOException e) {

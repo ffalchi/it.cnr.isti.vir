@@ -18,9 +18,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -47,7 +47,7 @@ public final class DominantColor extends AbstractFeature {
 	 * Should be readed using 
 	 * (int) byte[i]
 	 */
-	List<Value> values;	
+	ArrayList<Value> values;	
 	
 	private class Value {
 		
@@ -114,7 +114,7 @@ public final class DominantColor extends AbstractFeature {
 				str.writeByte( colorVariance[i] );
 			}			
 			
-			str.writeInt(index.length);
+			str.writeByte(index.length);
 			for ( int i=0; i<index.length; i++) {
 				str.writeByte( index[i] );
 			}		
@@ -134,7 +134,7 @@ public final class DominantColor extends AbstractFeature {
 		public String toString() {
 			String temp = "";
 			
-			temp += "  Values:";
+			temp += "  index:";
 			if ( index != null ) 
 				for (int i=0; i<index.length; i++) temp += " " + getIndex(i);
 			if ( colorVariance != null ) {
@@ -142,7 +142,7 @@ public final class DominantColor extends AbstractFeature {
 				for (int i=0; i<colorVariance.length; i++) temp += " " +colorVariance[i];
 			}
 			temp += "\t Percentage: " + percentage;
-			temp += "\n";		
+	
 			
 			return temp;
 		}
@@ -220,7 +220,7 @@ public final class DominantColor extends AbstractFeature {
 		super();
 		this.spatialCoherency = (byte) spatialCoherency;
 		colorVarianceUsed = true;
-		values = new LinkedList<Value>();
+		values = new ArrayList<Value>();
 		values.add( new Value(r,g,b) );
 	}
 	
@@ -234,7 +234,7 @@ public final class DominantColor extends AbstractFeature {
 	}
 
 	public void parse(XMLStreamReader xmlr) throws XMLStreamException, MPEG7VDFormatException {
-		values = new LinkedList<Value>();
+		values = new ArrayList<Value>();
 		for (int event = xmlr.next();  
 	    	event != XMLStreamConstants.END_DOCUMENT;
 	    	event = xmlr.next()) {
@@ -719,7 +719,7 @@ public final class DominantColor extends AbstractFeature {
 	public DominantColor(DataInput str) throws IOException {
 		str.readByte();
 		spatialCoherency = str.readByte();
-		LinkedList<Value> values = new LinkedList<Value>();
+		values = new ArrayList<Value>();
 		int valueSize = str.readShort();
 		
 		for ( int i=0; i<valueSize; i++ ) {
@@ -730,7 +730,7 @@ public final class DominantColor extends AbstractFeature {
 	public DominantColor(ByteBuffer in) throws IOException {
 		in.get();
 		spatialCoherency = in.get();
-		LinkedList<Value> values = new LinkedList<Value>();
+		values = new ArrayList<Value>();
 		int valueSize = in.getShort();
 		
 		for ( int i=0; i<valueSize; i++ ) {

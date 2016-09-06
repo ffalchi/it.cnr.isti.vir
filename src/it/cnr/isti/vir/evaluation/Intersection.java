@@ -110,12 +110,14 @@ public class Intersection {
 		int count = 0;
 		int iRes1 = 0;
 		
-		for ( Iterator<ObjectWithDistance> it = res1.iterator(); iRes1<kRes1; iRes1++) {
+		if ( res1.size() == 0 || res2.size() == 0 ) return 0;
+		
+		for ( Iterator<ObjectWithDistance> it = res1.iterator(); iRes1<kRes1 && it.hasNext(); iRes1++) {
 			ObjectWithDistance currRes1 = it.next();
 
 			// searching same results in gt
 			int iRes2 = 0;
-			for ( Iterator<ObjectWithDistance> it2 = res2.iterator(); iRes2<kRes2; iRes2++) {
+			for ( Iterator<ObjectWithDistance> it2 = res2.iterator(); iRes2<kRes2 && it2.hasNext(); iRes2++) {
 				ObjectWithDistance currRes2 = it2.next();
 				if ( currRes1.getID().equals(currRes2.getID())) {
 					count++;

@@ -74,5 +74,18 @@ public class IntByteArrayUtil {
 	    encodedValue[index++] = (byte) value;
 	    return index;
 	}
+	
+	/**
+	 * @param byteArr		source bytes
+	 * @param byteOffset	source bytes offset
+	 * @param n				desired array length
+	 * @return
+	 */
+	public static final int[] convToInt(byte byteArr[], int[] res ) {
+		for ( int i=0; i<res.length; i++) {
+			res[i]=get(byteArr, (Integer.SIZE/Byte.SIZE)*i);
+		}
+		return res;
+	}
 
 }

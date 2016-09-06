@@ -73,6 +73,10 @@ public class LFWords<F extends AbstractFeature> {
 //	protected Integer miFile_kis = null;
 	protected int size = -1;
 	
+	public ILFSimilarity<F> getSimilarity() {
+		return sim;
+	}
+	
 	public F[] getFeatures() {
 		return fArr;
 	}

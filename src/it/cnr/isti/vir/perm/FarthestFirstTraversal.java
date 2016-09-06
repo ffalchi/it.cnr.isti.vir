@@ -14,15 +14,17 @@ package it.cnr.isti.vir.perm;
 import it.cnr.isti.vir.clustering.Centroids;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
 import it.cnr.isti.vir.file.ArchiveException;
+import it.cnr.isti.vir.file.FeaturesCollectorsArchive_Buffered;
 import it.cnr.isti.vir.file.FeaturesCollectorsArchives;
 import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.global.ParallelOptions;
 import it.cnr.isti.vir.id.IHasID;
 import it.cnr.isti.vir.similarity.ISimilarity;
-import it.cnr.isti.vir.similarity.metric.SAPIRMetric;
+import it.cnr.isti.vir.similarity.metric.FloatsL2Metric_L2Norm;
 import it.cnr.isti.vir.util.RandomOperations;
 import it.cnr.isti.vir.util.SimilarityUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -36,34 +38,41 @@ public class FarthestFirstTraversal {
 		
 		RandomOperations.setRandomSeed();
 		
+
+		
 		// 1M Exp
 //		String archivesFileName = "X:/CoPhIR/1MExp/dataset";
 //		int nTries = 100000;
 //		int nMaxObj = 100;
 //		int nCandidatesCycles = 10;
 //		String outFileName = "X:/CoPhIR/1MExp/ro/fft/fft-1M-"+nMaxObj+"-"+nTries+"t";
-		
+//		SAPIRMetric sim = new SAPIRMetric();		
 		// Full
-		String archivesFileName = "X:/CoPhIR/1MExp/dataset";
-		//String archivesFileName = "X:/CoPhIR/dat/";
-		int nTries = 100000;
-		int nMaxObj = 10000;
-		int nCandidatesCycles = 100;
-		String outFileName = "X:/CoPhIR/RO/fft/fft-106M-"+nMaxObj+"-"+nTries+"t";
-		
+//		String archivesFileName = "X:/CoPhIR/1MExp/dataset";
+//		//String archivesFileName = "X:/CoPhIR/dat/";
+//		int nTries = 100000;
+//		int nMaxObj = 10000;
+//		int nCandidatesCycles = 100;
+//		String outFileName = "X:/CoPhIR/RO/fft/fft-106M-"+nMaxObj+"-"+nTries+"t";
+//		SAPIRMetric sim = new SAPIRMetric();
 
-		
-		
+		String archivesFileName = "S:/yfcc100m_indexing/1M/hybridCNN_gmean_fc6_raw_0_ReLul2Norm.dat";
+		FloatsL2Metric_L2Norm sim = new FloatsL2Metric_L2Norm();
+		int nTries = 8192;
+		int nMaxObj = 4096;
+		int nCandidatesCycles = 32;
+		String outFileName = "S:/yfcc100m_indexing/1M/hybridCNN_gmean_fc6_raw_0_ReLul2Norm_FFT_"+nMaxObj+"-"+nTries+"t";		
+				
 		
 		FeaturesCollectorsArchives archives = new FeaturesCollectorsArchives(archivesFileName, false);
-		SAPIRMetric sim = new SAPIRMetric(); 
+		 
 		Log.info(archives.size() + " archives were found.");
 		AbstractFeaturesCollector[] res = select(sim, archives, nMaxObj, nTries, nCandidatesCycles);
 		
 		double minInterDist = SimilarityUtil.getMinInterDistance(res, sim);
 
 		Log.info("minInterDist: " + minInterDist);
-		
+			
 		Centroids centroids = new Centroids(res);
 		centroids.writeData(outFileName+"_"+minInterDist);
 	}
@@ -112,8 +121,6 @@ public class FarthestFirstTraversal {
 	public static AbstractFeaturesCollector[] select(ISimilarity sim, FeaturesCollectorsArchives archives, int nMaxObj, int maxNTries, int nCandidatesCycles) throws ArchiveException, SecurityException, NoSuchMethodException, IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException, IOException, InterruptedException {
 		AbstractFeaturesCollector[] res = new AbstractFeaturesCollector[nMaxObj];
 		
-		
-		
 		int nObjPerCycle = Math.min(maxNTries, archives.size());
 		int bookedNThreads = ParallelOptions.reserveNFreeProcessors();
 		final int nObjsPerThread = (int) Math.ceil((double) nObjPerCycle / (bookedNThreads+1) );
@@ -138,12 +145,12 @@ public class FarthestFirstTraversal {
 			if ( nObjPerCycle != archives.size() && (iRes-1) % nCandidatesCycles == 0) {
 				// at each cycle we randomly select nObjPerCycle objects from the dataset
 				int[] rIDs = RandomOperations.getDistinctInts(nObjPerCycle, 0, archives.size()-1);
-				Arrays.sort(rIDs);
+				//Arrays.sort(rIDs);
 				for ( int i=0; i<rIDs.length; i++) {
 					candidates[i] = archives.get(rIDs[i]);
 				}
 			}
-			RandomOperations.shuffle(candidates);
+			//RandomOperations.shuffle(candidates);
 			
 			double maxMinDist = Double.MIN_VALUE;
 			int bestCandidate=-1;

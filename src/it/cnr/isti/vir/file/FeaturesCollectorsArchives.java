@@ -20,6 +20,7 @@ import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch;
 import it.cnr.isti.vir.similarity.index.FeaturesCollectorsArchiveSearch_multiSim;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.results.SimilarityResults;
+import it.cnr.isti.vir.util.RandomOperations;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -165,6 +166,10 @@ public class FeaturesCollectorsArchives {
 	public final AbstractID getID(int index) throws ArchiveException {
 		int temp = getArchiveIndex(index);
 		return archive[temp].getID(index-archiveStartIndex[temp]);
+	}
+	
+	public final AbstractFeaturesCollector getRandom() throws ArchiveException {
+		return get(RandomOperations.getInt(this.size));
 	}
 
 	public final AbstractFeaturesCollector get(int index) throws ArchiveException {

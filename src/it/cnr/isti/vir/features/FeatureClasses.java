@@ -153,6 +153,7 @@ public class FeatureClasses {
 			return (AbstractFeature) constructors[id].newInstance(in);
 		} catch (InstantiationException | IllegalAccessException
 				| IllegalArgumentException | InvocationTargetException e) {
+			System.err.println("Error trying to read " + constructors[id].toString());
 			throw new IOException(e);
 		}
 	}

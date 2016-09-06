@@ -13,6 +13,7 @@ package it.cnr.isti.vir.similarity.index;
 
 import it.cnr.isti.vir.features.AbstractFeature;
 import it.cnr.isti.vir.features.AbstractFeaturesCollector;
+import it.cnr.isti.vir.file.FeaturesCollectorsArchive;
 import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.similarity.knn.IkNNExecuter;
 import it.cnr.isti.vir.similarity.knn.KNNPQueue;
@@ -20,24 +21,40 @@ import it.cnr.isti.vir.similarity.pqueues.SimPQueueDMax;
 import it.cnr.isti.vir.similarity.pqueues.SimPQueue_r;
 import it.cnr.isti.vir.similarity.results.ISimilarityResults;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 
 public class SimilarityCollection implements IkNNExecuter {
 
 	protected ISimilarity sim;
-	protected Collection coll = null;
+	protected ArrayList<AbstractFeature> coll = null;
+	
+	
+	public SimilarityCollection(ISimilarity sim, String fca ) throws Exception {
+		this( sim, new File(fca));
+	}
+	
+	public SimilarityCollection(ISimilarity sim, File fca ) throws Exception {
+		this(	
+				sim,
+				Arrays.asList( FeaturesCollectorsArchive.getAllArray(fca) )
+				);
+	}
 	
 	public SimilarityCollection(ISimilarity sim) {
 		this.sim = sim;
-		coll = new LinkedList();
+		coll = new ArrayList();
 	}
 	
+	public AbstractFeature get(int i) {
+		return coll.get(i);
+	}
 	
 	public SimilarityCollection(ISimilarity sim, Collection objCollection) {
 		this.sim = sim;
-		coll = objCollection;	
+		coll = new ArrayList(objCollection);	
 	}
 	
 	public void add(AbstractFeaturesCollector obj) {

@@ -22,6 +22,7 @@ import it.cnr.isti.vir.features.IUByteValues;
 import it.cnr.isti.vir.features.bof.LFWords;
 import it.cnr.isti.vir.global.Log;
 import it.cnr.isti.vir.pca.PrincipalComponents;
+import it.cnr.isti.vir.similarity.ISimilarity;
 import it.cnr.isti.vir.util.WorkingPath;
 import it.cnr.isti.vir.util.bytes.FloatByteArrayUtil;
 import it.cnr.isti.vir.util.math.Normalize;
@@ -32,6 +33,7 @@ import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class VLAD extends AbstractFeature implements IFloatValues {
@@ -184,10 +186,38 @@ public class VLAD extends AbstractFeature implements IFloatValues {
     }
 	
     public static final  VLAD getVLAD(
-    		ALocalFeature[] lf, LFWords fWords,
+    		AbstractFeature[] lf, LFWords fWords) throws Exception {
+    	return getVLAD(lf, fWords, 0.2, false, false);
+    }
+    
+    public static final  VLAD getVLAD(
+    		AbstractFeature[] data, AbstractFeature[]  refs, ISimilarity sim) throws Exception {
+    	return getVLAD(data, refs, sim, 0.2, false, false);
+    }
+    
+    public static final  VLAD getVLAD(
+    		AbstractFeature[] lf, LFWords fWords,
     		Double a, boolean intranorm, boolean residualNormalization) throws Exception {
-    	        
-    	ALocalFeature[] refs = (ALocalFeature[]) fWords.getFeatures();
+    	return getVLAD(lf, (AbstractFeature[]) fWords.getFeatures(), fWords.getSimilarity(), 0.2, false, false);
+    }
+    
+	private static final int getNNIndex(AbstractFeature[] ref, AbstractFeature feature, ISimilarity sim ) {
+		double nnDist = sim.distance(feature, ref[0]);
+		int nnIndex = 0;
+		for (int i = 1; i < ref.length; i++) {
+			double temp = sim.distance(feature, ref[i], nnDist);
+			if (temp >= 0 && temp < nnDist) {
+				nnIndex = i;
+				nnDist = temp;
+			}
+		}
+		return nnIndex;
+	}
+    
+    public static final  VLAD getVLAD(
+    		AbstractFeature[] lf, AbstractFeature[] refs, ISimilarity sim,
+    		Double a, boolean intranorm, boolean residualNormalization) throws Exception {
+   
     	
     	
         if ( ! (refs[0] instanceof IArrayValues) ) {
@@ -211,7 +241,7 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 			for (int iLF = 0; iLF < lf.length; iLF++) {
 
 				float[] curr = ((IFloatValues) lf[iLF]).getValues();
-				int iW = fWords.getNNIndex(lf[iLF]);
+				int iW = getNNIndex(refs, lf[iLF], sim);
 				int start = iW * d;
 				int end = start + d;
 				float[] ref = ((IFloatValues) refs[iW]).getValues();
@@ -248,7 +278,7 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 			for (int iLF = 0; iLF < lf.length; iLF++) {
 				byte[] curr = ((IByteValues) lf[iLF]).getValues();
 				
-				int iW = fWords.getNNIndex(lf[iLF]);
+				int iW = getNNIndex(refs, lf[iLF], sim);
 				int start = iW * d;
 				int end = start + d;
 				
@@ -289,7 +319,7 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 			for (int iLF = 0; iLF < lf.length; iLF++) {
 				int[] curr = ((IIntValues) lf[iLF]).getValues();
 				
-				int iW = fWords.getNNIndex(lf[iLF]);
+				int iW = getNNIndex(refs, lf[iLF], sim);
 				int start = iW * d;
 				int end = start + d;
 				
@@ -331,7 +361,7 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 
 				byte[] curr = ((IUByteValues) lf[iLF]).getValues();
 
-				int iW = fWords.getNNIndex(lf[iLF]);
+				int iW = getNNIndex(refs, lf[iLF], sim );
 				int start = iW * d;
 				int end = start + d;
 
@@ -455,6 +485,8 @@ public class VLAD extends AbstractFeature implements IFloatValues {
 	}
 
 
-
+	public 	String toString() {
+		return Arrays.toString(values);
+	}
 
 }

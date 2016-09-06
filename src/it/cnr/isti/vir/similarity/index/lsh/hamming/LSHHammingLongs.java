@@ -64,7 +64,7 @@ public class LSHHammingLongs implements IkNNExecuter {
 	int l;
     int h;
     TIntArrayList[][] tables;
-    G_HammingInts[] gs;
+    G_HammingLongs[] gs;
     
     Class<? extends AbstractFeature> fClass;
     
@@ -180,10 +180,10 @@ public class LSHHammingLongs implements IkNNExecuter {
     	
     	this.l=l;
     	this.h=h;
-    	gs=new G_HammingInts[l];
+    	gs=new G_HammingLongs[l];
     	tables= new TIntArrayList[l][];
     	for( int i=0;i<l;i++){
-    		gs[i]=new G_HammingInts(h, nBits);
+    		gs[i]=new G_HammingLongs(h, nBits);
     		tables[i]=new TIntArrayList[1<<h];
     	}
     	
@@ -201,7 +201,7 @@ public class LSHHammingLongs implements IkNNExecuter {
     	data_raf.seek(getFileChannelPosition(id));
     	data_raf.read(readArr_Byte);
     	
-    	LongByteArrayUtil.convToLong(readArr_Byte, data, nLongs);
+    	LongByteArrayUtil.convToLong(readArr_Byte, data );
     }
     
     private final void insert(int id) throws IOException{
@@ -259,7 +259,7 @@ public class LSHHammingLongs implements IkNNExecuter {
 		private final long[] query;
 		private final Iterator<Integer> ls;
 	    
-		Search(long[] query, Iterator<Integer> ls, TIntArrayList[][] tables, G_HammingInts[] gs, TIntHashSet objects) {
+		Search(long[] query, Iterator<Integer> ls, TIntArrayList[][] tables, G_HammingLongs[] gs, TIntHashSet objects) {
             this.ls = ls;
 			this.objects = objects;
             this.query=  query;
