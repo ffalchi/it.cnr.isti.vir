@@ -6,6 +6,7 @@ import it.cnr.isti.vir.features.IDoubleValues;
 import it.cnr.isti.vir.features.IFloatByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.ILongBinaryValues;
 import it.cnr.isti.vir.features.IUByteValues;
 import it.cnr.isti.vir.util.math.VectorMath;
 
@@ -41,8 +42,23 @@ public class MatrixConversion {
 		if ( firstObj instanceof IFloatByteValues)
 			return getDoubles_fromFloatBytes( (Collection<IFloatByteValues>) coll );
 		
+		if ( firstObj instanceof ILongBinaryValues)
+			return getDoubles_fromLongBytes( (Collection<ILongBinaryValues>) coll );
+		
 		throw new Exception("Collection objet type was unknown");
 				
+	}
+	
+	/*lucia*/
+	private static final double[][] getDoubles_fromLongBytes(Collection<ILongBinaryValues> coll) {
+		double[][] matrix = new double[coll.size()][];
+		int i=0;
+
+		for ( ILongBinaryValues curr : coll ) {
+			matrix[i] = VectorMath.getDoubles_ILongBinary(curr);//
+			i++;
+		}
+		return matrix;
 	}
 		
 	private static final double[][] getDoubles_fromFloats(Collection<IFloatValues> coll) {

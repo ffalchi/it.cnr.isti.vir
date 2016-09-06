@@ -12,6 +12,8 @@
 package it.cnr.isti.vir.features;
 
 import it.cnr.isti.vir.features.bof.BoF;
+import it.cnr.isti.vir.features.localfeatures.AKAZE;
+import it.cnr.isti.vir.features.localfeatures.AKAZEGroup;
 import it.cnr.isti.vir.features.localfeatures.BRISK;
 import it.cnr.isti.vir.features.localfeatures.BRISKGroup;
 import it.cnr.isti.vir.features.localfeatures.BoFLFGroup;
@@ -19,6 +21,8 @@ import it.cnr.isti.vir.features.localfeatures.FREAK;
 import it.cnr.isti.vir.features.localfeatures.FREAKGroup;
 import it.cnr.isti.vir.features.localfeatures.FloatsLF;
 import it.cnr.isti.vir.features.localfeatures.FloatsLFGroup;
+import it.cnr.isti.vir.features.localfeatures.LATCH;
+import it.cnr.isti.vir.features.localfeatures.LATCHGroup;
 import it.cnr.isti.vir.features.localfeatures.ORB;
 import it.cnr.isti.vir.features.localfeatures.ORBGroup;
 import it.cnr.isti.vir.features.localfeatures.RootSIFT;
@@ -107,7 +111,11 @@ public class FeatureClasses {
 		FloatsL2Norm_UBytes.class,
 		CNNFloats.class,
 		FloatsL2Norm_Bytes.class,
-		BinaryLongs.class
+		BinaryLongs.class,
+		LATCH.class,
+		LATCHGroup.class,
+		AKAZE.class,
+		AKAZEGroup.class,
 	};
 	
 	static final Hashtable<Class<?>, Integer> featuresIDsHT = ClassIDs.getClassIDsHT(idsFeatures);

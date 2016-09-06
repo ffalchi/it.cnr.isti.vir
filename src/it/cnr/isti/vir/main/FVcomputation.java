@@ -89,6 +89,10 @@ public class FVcomputation {
 		public static void createFVusingGMM(Gmm gmm,Properties prop) throws Exception {
 			File lfArchive_file = PropertiesUtils.getFile( prop, className+".lfArchive");
 			File fvArchive_file = PropertiesUtils.getFile(prop, className+".fvArchive");
+			File folder=fvArchive_file.getParentFile();
+			 if (!folder.exists()) {
+				 folder.mkdirs();
+	 			}
 			boolean compute_w_part= PropertiesUtils.getIfExistsDefFalse(prop,className+".wPart" );
 			boolean compute_mu_part= PropertiesUtils.getIfExistsDefTrue(prop, className+".muPart");
 			boolean compute_sigma_part= PropertiesUtils.getIfExistsDefFalse(prop,className+".sigmaPart" );

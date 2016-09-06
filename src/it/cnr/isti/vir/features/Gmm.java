@@ -341,8 +341,7 @@ public final class Gmm {
 	 * Compute
 	 * <p>
 	 * <img src=
-	 * "http://latex.codecogs.com/gif.latex?{-\frac{d}{2}\log(2\pi)}+{\log(w_i)}-{\frac{1}{2}\sum_{j=1}^d\left[\dfrac{(\mu_i^j)^2}{\sigma_i^j}+\log(\sigm
-	 * a _ i ^ j ) \ r i g h t ] } " border="0"/>
+	 * "http://latex.codecogs.com/gif.latex?{-\frac{d}{2}\log(2\pi)}+{\log(w_i)}-{\frac{1}{2}\sum_{j=1}^d\left[\dfrac{(\mu_i^j)^2}{\sigma_i^j}+\log(\sigma_i^j)\right] } " border="0"/>
 	 */
 	public void setTmp_p() {
 		// compute part of log(wi*pi(xt))

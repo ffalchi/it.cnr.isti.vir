@@ -33,5 +33,23 @@ public class PearsonDistance {
 		}
 		return 1.0 - acc/Math.sqrt(accn1*accn2); 
 	}
+	public static double get(double[] f1, double[] f2) {
+		double acc = 0;
+		double accn1 = 0;
+		double accn2 = 0;
+		
+		double mean1 = VectorMath.mean(f1);
+		double mean2 = VectorMath.mean(f2);
+		
+		for ( int j=0; j<f1.length; j++) {
+			double t1 = f1[j] - mean1;
+			double t2 = f2[j] - mean2;
+
+			acc += t1 * t2;
+			accn1 += t1 * t1;
+			accn2 += t2 * t2;
+		}
+		return 1.0 - acc/Math.sqrt(accn1*accn2); 
+	}
 	
 }

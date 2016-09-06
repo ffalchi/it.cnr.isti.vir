@@ -15,7 +15,9 @@ import it.cnr.isti.vir.features.IArrayValues;
 import it.cnr.isti.vir.features.IByteValues;
 import it.cnr.isti.vir.features.IFloatValues;
 import it.cnr.isti.vir.features.IIntValues;
+import it.cnr.isti.vir.features.ILongBinaryValues;
 import it.cnr.isti.vir.features.IUByteValues;
+import it.cnr.isti.vir.util.bytes.LongByteArrayUtil;
 
 public class VectorMath {
 
@@ -178,6 +180,22 @@ public class VectorMath {
 		for ( int i=0; i<values.length; i++) {
 			res[i] = (values[i] + 128);
 		}
+		return res;		
+	}
+	
+	/*lucia*/
+	public static final double[] getDoubles_ILongBinary( ILongBinaryValues longVal ) {
+		double[] res = new double[longVal.getNBits()];
+		long[] values=longVal.getValues();
+		byte [] byteArr= new byte[longVal.getNBits()/Byte.SIZE];
+        int index=0;
+        int n_idx=LongByteArrayUtil.convToBytes(values, byteArr, 0);
+        for(int i1=0;i1<n_idx; i1++){
+             byte val=byteArr[i1];
+             for(int i2=Byte.SIZE-1; i2>=0;i2-- ){
+            	 res[index++] = ((val& (1 << i2)) != 0)? 1.0F : 0.0F;
+             }
+         }
 		return res;		
 	}
 	

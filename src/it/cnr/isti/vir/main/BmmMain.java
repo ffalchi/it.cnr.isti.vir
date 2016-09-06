@@ -41,6 +41,10 @@ public class BmmMain {
 		//number of Bernoulli
 		String outAbsolutePath = PropertiesUtils.getAbsolutePath(prop, className+".outFileName");
 		//centroids file name
+		File folder=(new File(outAbsolutePath)).getParentFile();
+		 if (!folder.exists()) {
+			 folder.mkdirs();
+ 			}
 		
 		int k = PropertiesUtils.getInt(prop, className+".k");
 
