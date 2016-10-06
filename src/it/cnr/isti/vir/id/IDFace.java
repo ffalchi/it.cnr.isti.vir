@@ -139,7 +139,7 @@ public class IDFace extends AbstractID {
 		if ( !o.getClass().equals(IDFace.class) )
 			return	IDClasses.getClassID(this.getClass()) - IDClasses.getClassID(o.getClass());
 		
-		int temp = id.compareTo(((IDString) o).id);
+		int temp = id.compareTo(((IDFace) o).id);
 		if ( temp == 0 ) return Integer.compare(this.inImageID,((IDFace)o).inImageID);
 		else return temp;
 	}
