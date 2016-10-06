@@ -129,7 +129,7 @@ public class IDFace extends AbstractID {
 	}
 	
 	public String toString() {
-		if (inImageID < 0) return ""+ inImageID;
+		if (inImageID < 0) return "" + id;
 		else return id + "_" + inImageID;
 	}
 		
