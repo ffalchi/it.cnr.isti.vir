@@ -57,6 +57,12 @@ public class PropertiesUtils {
 		return WorkingPath.getFile(str);
 	}
 	
+	public static String getString_orDefault(Properties prop, String propertyName, String def) {
+		String str = prop.getProperty(propertyName);
+		if ( str == null ) return def;
+		Log.info_verbose(propertyName + "=" + str);
+		return str;
+	}
 	public static int getInt_maxIfNotExists(Properties prop, String propertyName) {
 		String str = prop.getProperty(propertyName);
 		if ( str == null ) return Integer.MAX_VALUE;

@@ -50,7 +50,8 @@ public class KMeansMain {
 		System.out.println("- [kMeans.distRedThr=<" + distRedThr_def + " default>]");
 		System.out.println("- [kMeans.nIterations=< 1 default>");
 		System.out.println("- [kMeans.maxMinPerIteration=<minutes>]");
-		System.out.println("- [kMeans.minDistortionOutFileName=<File Name>]");
+		System.out.println("- [kMeans.minDistortionOutFileName=<File Name>]");	
+		System.out.println("- [kMeans.learningPointOutFileName=<File Name>]");
 		System.exit(0);
 	}
 	
@@ -84,7 +85,8 @@ public class KMeansMain {
 		}
 		Log.info("Requested features group: " + fGroupClass);
 		
-		File minDistortionOutFile  = PropertiesUtils.getFile_orNull(prop, "kMeans.minDistortionOutFileName");
+		File minDistortionOutFile  = PropertiesUtils.getFile_orNull(prop,"kMeans.minDistortionOutFileName");
+		File learningPointOutFile  = PropertiesUtils.getFile_orNull(prop,"kMeans.learningPointOutFileName");
 		
 		FeaturesCollectorsArchive archive = new FeaturesCollectorsArchive( dataFile );
 		
@@ -92,9 +94,16 @@ public class KMeansMain {
 		
 		ArrayList<AbstractFeature> list;
 		if ( fGroupClass != null ) {
+			if(learningPointOutFile!=null)
+				list = (ArrayList) archive.getRandomLocalFeatures(fGroupClass, maxNObjs, true,learningPointOutFile);
+			else
 			list = (ArrayList) archive.getRandomLocalFeatures(fGroupClass, maxNObjs, true);
 		} else {
-			list = archive.getRandomFeatures(fClass, maxNObjs);
+			if(learningPointOutFile!=null)
+				list = archive.getRandomFeatures(fClass, maxNObjs,learningPointOutFile);
+			else
+				list = archive.getRandomFeatures(fClass, maxNObjs);
+		
 		}
 		
 		double minDistortion = Double.MAX_VALUE;

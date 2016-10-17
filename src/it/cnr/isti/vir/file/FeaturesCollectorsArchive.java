@@ -1202,6 +1202,52 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return getRandomLocalFeatures(lfGroupClass, prob, removeKeyPoint);
 	}
 	
+	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, int maxNObjs, boolean removeKeyPoint , File out) throws Exception {
+		if ( maxNObjs < 0 ) return getRandomLocalFeatures(lfGroupClass, 1.0, removeKeyPoint,out);
+		int nLF_archive = getNumberOfLocalFeatures(lfGroupClass);
+		double prob = maxNObjs / (double) nLF_archive;
+		if ( prob > 1.0  ) prob = 1.0;
+		return getRandomLocalFeatures(lfGroupClass, prob, removeKeyPoint,out);
+	}
+	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, double prob, boolean removeKeyPoint, File out) throws Exception {
+		Log.info_verbose("Getting random elements of " + lfGroupClass + " with probability " + prob);
+		FeaturesCollectorsArchive learningPoint = FeaturesCollectorsArchive.create(out);
+		int i=0;
+		
+		ArrayList<ALocalFeature> res = new ArrayList<ALocalFeature>();
+		TimeManager tm = new TimeManager();
+		for ( AbstractFeaturesCollector currFC : this ) {
+			i++;
+			ALocalFeaturesGroup currGroup = currFC.getFeature(lfGroupClass);
+			if ( currGroup == null ) continue;
+			ArrayList<ALocalFeature> selectedPoint = new ArrayList<ALocalFeature>();// lucia
+			AbstractID id = ((IHasID) currFC).getID();
+			for ( ALocalFeature currLF : currGroup.lfArr ) {
+				if ( RandomOperations.trueORfalse(prob)) {
+					selectedPoint.add(currLF.getUnlinked());//
+					
+					if ( removeKeyPoint ) res.add(currLF.unlinkLFGroup().removeKP());
+					else res.add(currLF.unlinkLFGroup());
+				}				
+			}
+			if (!selectedPoint.isEmpty()) {// lucia
+
+				ALocalFeature[] lfarr = selectedPoint.toArray(new ALocalFeature[1]);
+				currGroup.lfArr = lfarr;
+				FeaturesCollectorArr fcSelectedPoints = new FeaturesCollectorArr(currGroup, id);
+
+				learningPoint.add(fcSelectedPoints);// lucia
+			}
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose(" - " + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
+			}
+		}
+		
+		Log.info_verbose( res.size() + " local features were randomly selected");
+		learningPoint.close();
+		return res;
+	}
+
 	public ArrayList<ALocalFeature> getRandomLocalFeatures(Class<? extends ALocalFeaturesGroup> lfGroupClass, double prob, boolean removeKeyPoint) {
 		Log.info_verbose("Getting random elements of " + lfGroupClass + " with probability " + prob);
 		
@@ -1236,6 +1282,12 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 		return getRandomFeatures(featureClass, prob);
 	}
 
+	
+	public ArrayList<AbstractFeature> getRandomFeatures(Class<? extends AbstractFeature> featureClass, int maxNObjs, File out ) throws Exception {
+		double prob = maxNObjs / (double) size();
+		if ( prob > 1.0 ) prob = 1.0;
+		return getRandomFeatures(featureClass, prob, out);
+	}
 	
 	public ArrayList<AbstractFeaturesCollector> getRandom(double prob) {
 		Log.info_verbose("Getting random elements  with probability " + prob);
@@ -1303,5 +1355,40 @@ public class FeaturesCollectorsArchive implements Iterable<AbstractFeaturesColle
 			e.printStackTrace();
 		}
 	}
+
+	public ArrayList<AbstractFeature> getRandomFeatures(Class<? extends AbstractFeature> featureClass, double prob, File out) throws Exception {
+		Log.info_verbose("Getting random elements of " + featureClass + " with probability " + prob);
+				int i=0;
+		FeaturesCollectorsArchive learningPoints = FeaturesCollectorsArchive.create(out);
+		ArrayList<AbstractFeature> res = new ArrayList<AbstractFeature>();
+		TimeManager tm = new TimeManager();
+		for ( AbstractFeaturesCollector currFC : this ) {
+			i++;
+			AbstractFeature currF = currFC.getFeature(featureClass);
+			
+			if ( currF == null ) {
+				if ( currFC instanceof IHasID) {
+					Log.info_indent( "fc " + i + "[id: " + ((IHasID)currFC).getID() + "] does not contain requested feature");
+				} else {
+					Log.info_indent( "fc " + i +" does not contain requeste feature");
+				}
+			
+			}
+			
+			if ( RandomOperations.trueORfalse(prob)) {
+				res.add(currF.unlinkFC());
+				learningPoints.add(currFC);// 
+			}				
+			
+			if ( tm.hasToOutput() ) {
+				Log.info_verbose(" - " + res.size() + "\tlfs " + tm.getProgressString(i, this.size()));
+			}
+		}
+		
+		Log.info_verbose( res.size() + " features were randomly selected");
+		learningPoints.close();
+		return res;
+	}
+
 	
 }

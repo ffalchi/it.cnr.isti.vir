@@ -116,4 +116,68 @@ public class FeaturesSelection {
 		outArchive.close();
 		inArchive.close();
 	}
+
+	
+	public static void selection(String inArchiveFileName,
+			String outArchiveFileName,String featureClass,int maxNFeatures) throws Exception {
+		 Class c=Class.forName(featureClass);
+		// Input Archive
+				File inFile  = new File(inArchiveFileName);
+				FeaturesCollectorsArchive inArchive = new FeaturesCollectorsArchive( inFile );
+			
+				// Output Archive
+				File outFile  = new File(outArchiveFileName);
+				FeaturesCollectorsArchive outArchive = inArchive.getSameType(outFile);
+		// Getting probability 
+				if ( ALocalFeature.class.isAssignableFrom(c)  ) {
+					Class<? extends ALocalFeaturesGroup> cGroup = ALocalFeaturesGroup.getGroupClass( c );
+					Log.info("Group class has been set to: " + cGroup);
+					int nLF_archive = inArchive.getNumberOfLocalFeatures(cGroup);
+					Log.info( inFile.getAbsolutePath() + " contains " + nLF_archive + " " + c +"\n");
+					double prob = maxNFeatures / (double) nLF_archive;
+					if ( prob > 1.0 || prob < 0) prob = 1.0;
+					
+					int counter = 0;
+					TimeManager tm = new TimeManager();
+					for ( AbstractFeaturesCollector fc : inArchive ) {
+						ALocalFeaturesGroup lfGroup = fc.getFeature(cGroup);
+						if ( lfGroup == null || lfGroup.size() == 0 ) continue;
+						ALocalFeature[] lfArr = lfGroup.lfArr;
+						ArrayList<ALocalFeature> arrList = null;
+						
+						ALocalFeaturesGroup mewLFGroup = lfGroup.getReducedRandom(prob);
+						
+						if ( mewLFGroup.size() != 0 ) {
+							counter += mewLFGroup.size();				
+						
+							outArchive.add(fc.createWithSameInfo(mewLFGroup));
+						}
+						
+						Log.info_verbose_progress(tm, counter, inArchive.size());
+						
+					}
+					
+					
+				} else {
+					double prob = maxNFeatures / (double) inArchive.size();
+					if ( prob > 1.0 || prob < 0) prob = 1.0;
+					
+					int counter = 0;
+					TimeManager tm = new TimeManager();
+					for ( AbstractFeaturesCollector fc : inArchive ) {
+						AbstractFeature af = fc.getFeature(c);
+						if ( af == null ) continue;
+						
+						counter++;
+						Log.info_verbose_progress(tm, counter, inArchive.size());
+						if ( RandomOperations.trueORfalse(prob) ) {
+							outArchive.add(fc.createWithSameInfo(af));
+						}
+					}
+					Log.info(outArchive.size() + " " + c.getName() + " were selected" );
+				}
+				outArchive.close();
+				inArchive.close();
+	}
+	
 }
