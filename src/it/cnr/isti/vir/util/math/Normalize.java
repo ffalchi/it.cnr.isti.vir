@@ -1,8 +1,53 @@
 package it.cnr.isti.vir.util.math;
 
+import java.util.Arrays;
+
 public class Normalize {
 
-	
+	 /**
+	  *  @param values
+	 * l1 norm
+	 * In case the sum of the values is 0.0, 
+	 * values[] is substitute with a constant vector if flag nozeronorm is true
+	 * values[] is left unchanged if nozeronorm is false
+	 */
+	public static final void l1( double[] values, boolean nozeronorm ) {
+		double norm = Norm.l1(values);
+		if ( norm > 0.0) {
+			if(norm != 1.0) {
+				for (int i=0; i<values.length; i++) {
+					values[i] = values[i] / norm;	        	
+				}        
+			}
+		}
+		else {
+			if(nozeronorm) {
+				Arrays.fill(values, 1/(double) values.length);
+			}
+		}
+	}
+	 /**
+	  *  @param values
+	 * l1 norm
+	 * In case the sum of the values is 0.0, 
+	 * values[] is substitute with a constant vector if flag nozeronorm is true
+	 * values[] is left unchanged if nozeronorm is false
+	 */
+	public static final void l1( float[] values, boolean nozeronorm ) {
+		double norm = Norm.l1(values);
+		if ( norm > 0.0) {
+			if(norm != 1.0) {
+				for (int i=0; i<values.length; i++) {
+					values[i] =values[i] / (float) norm;	        	
+				}        
+			}
+		}
+		else {
+			if(nozeronorm) {
+				Arrays.fill(values, 1/(float) values.length);
+			}
+		}
+	}
 	
 	/**
 	 * @param values
@@ -151,6 +196,7 @@ public class Normalize {
         		values[i] = - (float) Math.pow(-values[i], a);
         }
 	}
+	
 	
 	
 }

@@ -11,6 +11,8 @@
  ******************************************************************************/
 package it.cnr.isti.vir.distance;
 
+import it.cnr.isti.vir.util.math.Normalize;
+
 
 /**
  * @author Lucia Vadicamo
@@ -20,7 +22,7 @@ package it.cnr.isti.vir.distance;
  */
 
 public class JensenShannonDistance {
-
+	private static final double LOG_2 = Math.log(2);
 
 	/**
 	 * compute the square-root of the J-S Divergence (logs are taken to base two so that the outcome is bounded in [0,1])
@@ -29,14 +31,18 @@ public class JensenShannonDistance {
 	 * @return
 	 */
 	public static final double get(float[]f1, float[]f2) {
+		Normalize.l1(f1, true);
+		Normalize.l1(f2, true);
 				return Math.sqrt(getSquared(f1,f2)); 
 	}
 	public static final double get(float[]f1, float[]f2,double maxDist) {
+		Normalize.l1(f1, true);
+		Normalize.l1(f2, true);
 		double dist=Math.sqrt(getSquared(f1,f2));
 		if (dist>maxDist)
-			return  dist;
-		else 
 			return -dist;
+		else 
+			return dist;
 				
 }
 
@@ -47,8 +53,21 @@ public class JensenShannonDistance {
 	 * @return
 	 */
 	public static double get(double[] f1, double[] f2) {
+		Normalize.l1(f1, true);
+		Normalize.l1(f2, true);
 		return Math.sqrt(getSquared(f1,f2));  
 	}
+	
+	public static final double get(double[]f1, double[]f2,double maxDist) {
+		Normalize.l1(f1, true);
+		Normalize.l1(f2, true);
+		double dist=Math.sqrt(getSquared(f1,f2));
+		if (dist>maxDist)
+			return -dist;
+		else 
+			return dist;
+				
+}
 	
 	/**
 	 * compute the J-S Divergence (logs are taken to base two so that the outcome is bounded in [0,1])
@@ -72,7 +91,8 @@ public class JensenShannonDistance {
 				}
 			}
 		}
-		return 1 - dist/(2* Math.log(2));
+		dist= dist/(2* LOG_2);
+		return 1 - dist;
 	}
 
 	/**
@@ -97,7 +117,8 @@ public class JensenShannonDistance {
 				}
 			}
 		}
-		return 1 - dist/(2* Math.log(2));
+		return 1 - dist/(2* LOG_2);
 	}
+
 
 }
